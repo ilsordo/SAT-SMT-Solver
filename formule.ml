@@ -43,14 +43,19 @@ object
       (fun 
           | 0 -> assert false
           | x -> 
-              letif x>0 then vpos <- VarSet.add (new variable x) vpos
-  
+              let v = new variable x in
+              if x>0 then 
+                vpos <- VarSet.add v vpos
+              else  
+                vneg <- VarSet.add v vneg)
+      clause_init
+      
 (* une même variable peut être dans vpos et vneg == tautologie *)
-
+(*
   method add_vpos v = vpos <- VarSet.add v vpos
  
   method add_vneg v = vneg <- VarSet.add v vneg
-
+*)
   method remove_var v = 
     vpos <- VarSet.remove v vpos;
     vneg <- VarSet.remove v vneg
@@ -103,7 +108,7 @@ module ClauseSet = Set.Make(OrderedClause)
 
 (*******)
 
-class formule n =
+class formule n clauses_init =
 object (self)
   val mutable nb_var : int = n
   val mutable occurences_pos = Array.make (n+1) ClauseSet.empty (* variables apparaissant positivement dans la formule *)
