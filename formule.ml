@@ -1,32 +1,6 @@
 
 type variable = int
 
-(*
-class variable n =
-object
-<<<<<<< HEAD
-  val nom : int = n
-  (*  val mutable visible = true
-  *)
-  method get_nom = nom
-(*
-  method is_visible = visible
-  
-  method show = visible <- true
-
-  method hide = visible <- false
-*)
-
-    
-=======
-  val nom = abs n
-
-  method get_nom = nom
-   
->>>>>>> 1a137cf94fb5e7b289f96d1133ad7782a8995f14
-end
-*)
-
 (*******)
 
 module OrderedVar = struct
@@ -59,18 +33,6 @@ object
                 vneg <- VarSet.add (abs x) vneg)
       clause_init
       
-<<<<<<< HEAD
-  (* une même variable peut être dans vpos et vneg == tautologie *)
-  (*
-    method add_vpos v = vpos <- VarSet.add v vpos
-    
-    method add_vneg v = vneg <- VarSet.add v vneg
-  *)
-  method remove_var v = 
-    vpos <- VarSet.remove v vpos;
-    vneg <- VarSet.remove v vneg
-      
-=======
 (* une même variable peut être dans vpos et vneg == tautologie *)
 
 (*
@@ -84,7 +46,6 @@ object
     vpos_hidden <- VarSet.remove v vpos_hidden;
     vneg_hidden <- VarSet.remove v vneg_hidden
 	
->>>>>>> 1a137cf94fb5e7b289f96d1133ad7782a8995f14
   method get_vpos = vpos
     
   method get_vneg = vneg
@@ -92,10 +53,6 @@ object
   method is_tauto = not (VarSet.is_empty (VarSet.inter vpos vneg))
     
   method is_empty = (VarSet.is_empty vpos) && (VarSet.is_empty vneg)
-<<<<<<< HEAD
-    
-  method get_var_max = 
-=======
   
   method hide_var_pos x = (* déplace x vers vpos_hidden ssi elle est déjà dans vpos *)     
     if (VarSet.mem x vpos)
@@ -118,7 +75,6 @@ object
   method mem_neg v = VarSet.mem v vneg
 
   method get_var_max = (* retourne couple (o,b) où o=None si rien trouvé, Some v si v est la var max. b : booléen indiquant positivité de v*)
->>>>>>> 1a137cf94fb5e7b289f96d1133ad7782a8995f14
     let v1 = 
       try Some (VarSet.max_elt vpos) 
       with Not_found -> None in		
@@ -134,13 +90,6 @@ object
           else
             Some (x,true)
       | (None,None) -> None
-<<<<<<< HEAD
-          
-(* renvoie la plus grande variable de la clause, et 1 si elle apparait positivement, -1 sinon *)  
-          
-=======
-    
->>>>>>> 1a137cf94fb5e7b289f96d1133ad7782a8995f14
 end
 
 (*******)
@@ -193,15 +142,9 @@ object (self)
 
   method add_clause c = 
     clauses <- ClauseSet.add c clauses;
-<<<<<<< HEAD
-    ClauseSet.iter (fun v -> ClauseSet.add c occurences_pos.(v#get_nom)) c#get_vpos;
-    ClauseSet.iter (fun v -> ClauseSet.add c occurences_neg.(v#get_nom)) c#get_vneg
-      
-=======
     ClauseSet.iter (fun v -> ClauseSet.add c occurences_pos.(v)) c#get_vpos;
     ClauseSet.iter (fun v -> ClauseSet.add c occurences_neg.(v)) c#get_vneg
-    
->>>>>>> 1a137cf94fb5e7b289f96d1133ad7782a8995f14
+
   method get_clauses = clauses
 
   method set_val_pos x = 
@@ -218,23 +161,6 @@ object (self)
 
   method remove_clause c = 
     clauses <- ClauseSet.remove c clauses;
-<<<<<<< HEAD
-    ClauseSet.iter (fun v -> ClauseSet.remove c occurences_pos.(v#get_nom)) c#get_vpos;
-    ClauseSet.iter (fun v -> ClauseSet.remove c occurences_neg.(v#get_nom)) c#get_vneg
-  (*   
-       method fusion_clauses (c1:clause) (c2:clause) (vv : variable) = 
-       let c = new clause in (* c est la fusion des clauses c1 et c2 suivant la variable vv *)
-       clauses <- ClauseSet.add c clauses;
-       VarSet.iter (fun v -> c#add_vpos v) c1#get_vpos ;
-       VarSet.iter (fun v -> c#add_vneg v) c1#get_vneg ;
-       VarSet.iter (fun v -> c#add_vpos v) c2#get_vpos ;
-       VarSet.iter (fun v -> c#add_vneg v) c2#get_vneg ;		
-       c#remove_var vv; (* on supprime vv de c, car la fusion s'est effectuée selon vv *)						
-       c	(* on renvoie c *)
-  *) 
-  method eval_clause c = (VarSet.exists (fun v -> ((self#get_val v#get_nom) = 1) )  c#get_vpos) || 
-    (VarSet.exists (fun v -> ((self#get_val v#get_nom) = 0) )  c#get_vneg)  (* indique si la clause c est vraie avec les valeurs actuelles *)
-=======
     ClauseSet.iter (fun v -> ClauseSet.remove c occurences_pos.(v)) c#get_vpos;
     ClauseSet.iter (fun v -> ClauseSet.remove c occurences_neg.(v)) c#get_vneg
 
@@ -249,7 +175,6 @@ object (self)
     c#remove_var vv; (* on supprime vv de c, car la fusion s'est effectuée selon vv *)						
     c	(* on renvoie c *)
    *) 
->>>>>>> 1a137cf94fb5e7b289f96d1133ad7782a8995f14
 
  (* method eval_clause c = (* indique si la clause c est vraie avec les valeurs actuelles *)
     (VarSet.exists 
