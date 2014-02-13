@@ -1,0 +1,3 @@
+class HideSet data =
+object
+  val mutable content = data

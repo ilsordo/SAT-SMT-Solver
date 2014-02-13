@@ -3,12 +3,12 @@
 class variable n =
 object
   val nom : int = n
-(*  val mutable visible = true
-*)
+  (*  val mutable visible = true
+  *)
   method get_nom = nom
 (*
   method is_visible = visible
-   
+  
   method show = visible <- true
 
   method hide = visible <- false
@@ -50,24 +50,24 @@ object
                 vneg <- VarSet.add v vneg)
       clause_init
       
-(* une même variable peut être dans vpos et vneg == tautologie *)
-(*
-  method add_vpos v = vpos <- VarSet.add v vpos
- 
-  method add_vneg v = vneg <- VarSet.add v vneg
-*)
+  (* une même variable peut être dans vpos et vneg == tautologie *)
+  (*
+    method add_vpos v = vpos <- VarSet.add v vpos
+    
+    method add_vneg v = vneg <- VarSet.add v vneg
+  *)
   method remove_var v = 
     vpos <- VarSet.remove v vpos;
     vneg <- VarSet.remove v vneg
-	
+      
   method get_vpos = vpos
-  
+    
   method get_vneg = vneg
-	
+    
   method is_tauto = not (VarSet.is_empty (VarSet.inter vpos vneg))
-  
+    
   method is_empty = (VarSet.is_empty vpos) && (VarSet.is_empty vneg)
-  
+    
   method get_var_max = 
     let v1 = 
       try Some (VarSet.max_elt vpos) 
@@ -84,9 +84,9 @@ object
           else
             Some (x,true)
       | (None,None) -> None
-    
+          
 (* renvoie la plus grande variable de la clause, et 1 si elle apparait positivement, -1 sinon *)  
-  
+          
 end
 
 (*******)
@@ -126,7 +126,7 @@ object (self)
     clauses <- ClauseSet.add c clauses;
     ClauseSet.iter (fun v -> ClauseSet.add c occurences_pos.(v#get_nom)) c#get_vpos;
     ClauseSet.iter (fun v -> ClauseSet.add c occurences_neg.(v#get_nom)) c#get_vneg
-    
+      
   method get_clauses = clauses
     
   method set_val k b = valeur.(k) <- Some b
@@ -139,17 +139,17 @@ object (self)
     clauses <- ClauseSet.remove c clauses;
     ClauseSet.iter (fun v -> ClauseSet.remove c occurences_pos.(v#get_nom)) c#get_vpos;
     ClauseSet.iter (fun v -> ClauseSet.remove c occurences_neg.(v#get_nom)) c#get_vneg
-   (*   
-  method fusion_clauses (c1:clause) (c2:clause) (vv : variable) = 
-    let c = new clause in (* c est la fusion des clauses c1 et c2 suivant la variable vv *)
-    clauses <- ClauseSet.add c clauses;
-    VarSet.iter (fun v -> c#add_vpos v) c1#get_vpos ;
-    VarSet.iter (fun v -> c#add_vneg v) c1#get_vneg ;
-    VarSet.iter (fun v -> c#add_vpos v) c2#get_vpos ;
-    VarSet.iter (fun v -> c#add_vneg v) c2#get_vneg ;		
-    c#remove_var vv; (* on supprime vv de c, car la fusion s'est effectuée selon vv *)						
-    c	(* on renvoie c *)
-   *) 
+  (*   
+       method fusion_clauses (c1:clause) (c2:clause) (vv : variable) = 
+       let c = new clause in (* c est la fusion des clauses c1 et c2 suivant la variable vv *)
+       clauses <- ClauseSet.add c clauses;
+       VarSet.iter (fun v -> c#add_vpos v) c1#get_vpos ;
+       VarSet.iter (fun v -> c#add_vneg v) c1#get_vneg ;
+       VarSet.iter (fun v -> c#add_vpos v) c2#get_vpos ;
+       VarSet.iter (fun v -> c#add_vneg v) c2#get_vneg ;		
+       c#remove_var vv; (* on supprime vv de c, car la fusion s'est effectuée selon vv *)						
+       c	(* on renvoie c *)
+  *) 
   method eval_clause c = (VarSet.exists (fun v -> ((self#get_val v#get_nom) = 1) )  c#get_vpos) || 
     (VarSet.exists (fun v -> ((self#get_val v#get_nom) = 0) )  c#get_vneg)  (* indique si la clause c est vraie avec les valeurs actuelles *)
 

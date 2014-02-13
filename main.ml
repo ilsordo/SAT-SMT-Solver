@@ -1,61 +1,91 @@
+open Clause
+open Dp
+open Lexing
 open Printf
-open Seaux
-open Formule
+
+(* Gestion des arguments *)
+
+type input = Stdin | File of string | Test1 of int | Test2 of (int*int*int)
+
+let usage () =
+  eprintf "Usage : resol [fichier|-test1 n|-test2 n_vars l_clause n_clause]\nb%!";
+  exit 1
+
+let parse_args () =
+  match Array.length Sys.argv with
+    | 1 -> Stdin
+    | 2 -> File (Sys.argv.(1))
+    | 3 when Sys.argv.(1)="-test1" ->
+        begin
+          try
+            Test1(int_of_string Sys.argv.(2))
+          with
+            | Failure _ -> usage()
+        end
+    | 5 when Sys.argv.(1)="-test2" ->
+        begin
+          try
+            Test2(int_of_string Sys.argv.(2),int_of_string Sys.argv.(3),int_of_string Sys.argv.(4))
+          with
+            | Failure _ -> usage()
+        end
+    | _ -> usage() 
+
+(* 
+let parse_head lexbuf = Parser.head Lexer.head lexbuf
+
+let parse_clauses lexbuf = Parser.main Lexer.token lexbuf
+
+let parse input =
+  try
+    let lex = Lexing.from_channel input in
+    let n = parse_head lex in
+    let cnf = parse_clauses lex in
+    (n,cnf)
+  with
+    | Lexer.Error c ->
+        eprintf "Symbole illégal : %c\n" c;
+        exit 1
+    | _ -> 
+        eprintf "Input error\n%!";
+        exit 1
+
+let rec init_cnf =  function
+  | Stdin -> parse stdin
+  | File f -> 
+      begin
+        try 
+          parse (open_in f) 
+        with 
+          | Sys_error s -> 
+              eprintf "Error reading f : %s" s;
+              exit 1
+      end
+  | Test1 n -> 
+      init_cnf(Test2(n,3,10*n))
+  | Test2 (v,c_size,c_num) when v<c_size -> 
+      eprintf "Not enough variables";
+      exit 1 
+  | Test2 (v,c_size,c_num) -> 
+      printf "p cnf %d %d\n%a\n%!" v c_num print_cnf (Test.test_random v c_size c_num);
+      exit 0
+
+let main () =
+  let (n,cnf) = init_cnf (parse_args()) in
+  (*Printf.printf "c %d variables\nc cnf :\n%a\n" n print_cnf cnf;*)
+  print_solution (solve cnf n);
+  exit 0
+
+let _ = main()
 
 
-(**************************************)
-(*  Fonction d'affichage de la sortie *)
-(**************************************)
-
-let print_affectation f=	(* affiche l'affectation courante contenue dans la formule f*)
-	printf "s SATISFIABLE\n";
-	let k=f#get_nb_var in
-	for i=1 to k do
-		printf "v ";
-		if (f#get_val i)=1
-		then print_int i
-		else print_int (-i);
-		print_newline()
-	done
-
-(*******************************************)
-(*  Fonctions permettant de transformer le *)
-(*  résultat du parser en une formule      *)
-(*******************************************)
-
-let rec list_to_clause l c f=match l with (*ajoute à la clause c les variable de la formule f dont les noms (=int) figurent dans la liste l*)
-	| [] -> ()
-	| t::q -> if t>0 then ((c#add_vpos (f#get_var t)) ; list_to_clause q c f)
-					 else ((c#add_vneg (f#get_var (-t)));list_to_clause q c f)
-
-let rec listlist_to_clause l f=match l with (* ajoute à la formule f les clauses construites à partir de la liste de clauses l (l est de type (int list) list) *)
-	| [] -> ()
-	| t::q -> (let c=new clause in (f#add_clau c ; list_to_clause t c f)) ; listlist_to_clause q f
 
 
-(*******************************************************)
-(* Application des algorithmes, production du résultat *)
-(*******************************************************)
-
-let clauses_file = open_in Sys.argv.(1)
-let lexbuf = Lexing.from_channel clauses_file
-let parse () = Parser.main Lexer.token lexbuf
 
 
-let _ =
-      let (a,b,l) = parse () in (* a = nb de variables, b = nb de clauses, l (de type (int list) list) = les clauses *)
-		let f = new formule a in 
-			for i=1 to a do
-				f#add_var (new variable i) i (* on ajoute a variables à f*)
-			done;
-			listlist_to_clause l f ; (* on ajoute les clauses à f*)
-			try 
-				affecter f;  (* une affectation des variables est construite *)
-				print_affectation f  
-			with 
-				| Failure "unsatis" -> printf "s UNSATISFIABLE\n"; (*aucune affectation ne met la formule à vraie *)
-		print_newline();
-		flush stdout
+
+
+
 
 
 
