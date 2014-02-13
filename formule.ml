@@ -19,7 +19,7 @@ object
   val mutable vpos = VarSet.empty (* variable apparaissant positivement dans la clause *)
   val mutable vneg = VarSet.empty (* variable apparaissant négativement dans la clause *)
 
-  val mutable vpos_hidden = VarSet.empty (* variables cachées, forcèment absentes de vpos *)
+  val mutable vpos_hidden = VarSet.empty (* variables cachées, forcément absentes de vpos *)
   val mutable vneg_hidden = VarSet.empty
 
   initializer
@@ -33,13 +33,6 @@ object
                 vneg <- VarSet.add (abs x) vneg)
       clause_init
       
-(* une même variable peut être dans vpos et vneg == tautologie *)
-
-(*
-  method add_vpos v = vpos <- VarSet.add v vpos
- 
-  method add_vneg v = vneg <- VarSet.add v vneg
-*)
   method remove_var v = (* supprime aussi v des variables cachées *)
     vpos <- VarSet.remove v vpos;
     vneg <- VarSet.remove v vneg;
@@ -115,9 +108,11 @@ class formule n clauses_init =
 object (self)
   val mutable nb_var : int = n
   val mutable occurences_pos = Array.make (n+1) ClauseSet.empty (* clauses dans lesquelles chaque var apparait positivement *)
+  val mutable occurences_pos_hidden = Array.make
   val mutable occurences_neg = Array.make (n+1) ClauseSet.empty (* clauses dans lesquelles chaque var apparait négativement *)
   (*val mutable valeur : bool option array = Array.make (n+1) None  (* affectation des variables *)*)
   val mutable clauses = ClauseSet.empty		(* ensemble des clauses de la formule *)
+  val mutable clauses_hidden = ClauseSet.empty
 
   initializer
     List.iter 
@@ -127,11 +122,11 @@ object (self)
       clause_init;
     ClauseSet.iter 
       (fun c -> (VarSet.iter 
-                  (fun v ->  occurences_pos.(v) <- ClauseSet.add c occurences_pos.(v) ) 
-                  c#get_vpos);
-                 VarSet.iter 
-                  (fun v ->  occurences_neg.(v) <- ClauseSet.add c occurences_neg.(v) ) 
-                  c#get_vneg)) 
+                   (fun v ->  occurences_pos.(v) <- ClauseSet.add c occurences_pos.(v) ) 
+                   c#get_vpos);
+        VarSet.iter 
+          (fun v ->  occurences_neg.(v) <- ClauseSet.add c occurences_neg.(v) ) 
+          c#get_vneg)) 
       clauses
 
   method get_nb_var = n
@@ -149,9 +144,18 @@ object (self)
 
   method set_val_pos x = 
     ClauseSet.iter
-      (fun c -> c#hide_var_pos x) 
-      occurences_pos.(x);
+      (fun c -> x#hide_var_neg x)
+      occurences_neg.(x);
+    clauses <- ClauseSet.diff clauses occurences_pos.(x)
+    clauses_hidden <- ClauseSet.union clauses_hidden occurences_pos.(x)
   
+  method reset x =
+    ClauseSet.iter
+      (fun c -> x#hide_var_neg x)
+      occurences_neg.(x);
+    clauses <- ClauseSet.diff clauses occurences_pos.(x);
+    clauses_hidden <- ClauseSet.union clauses_hidden occurences_pos.(x)
+      
     
   (*method set_val k b = valeur.(k) <- Some b
 
