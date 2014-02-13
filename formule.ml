@@ -1,27 +1,21 @@
 
+type variable = int
 
+(*
 class variable n =
 object
-  val nom : int = n
-(*  val mutable visible = true
-*)
+  val nom = abs n
+
   method get_nom = nom
-(*
-  method is_visible = visible
    
-  method show = visible <- true
-
-  method hide = visible <- false
-*)
-
-    
 end
+*)
 
 (*******)
 
 module OrderedVar = struct
   type t = variable
-  let compare (v1 : variable) v2 = v1#get_nom - v2#get_nom
+  let compare = compare
 end
 
 module VarSet = Set.Make(OrderedVar)
@@ -35,7 +29,7 @@ object
   val mutable vpos = VarSet.empty (* variable apparaissant positivement dans la clause *)
   val mutable vneg = VarSet.empty (* variable apparaissant négativement dans la clause *)
 
-  val mutable vpos_hidden = VarSet.empty
+  val mutable vpos_hidden = VarSet.empty (* variables cachées, forcèment absentes de vpos *)
   val mutable vneg_hidden = VarSet.empty
 
   initializer
@@ -43,22 +37,24 @@ object
       (fun 
           | 0 -> assert false
           | x -> 
-              let v = new variable x in
               if x>0 then 
-                vpos <- VarSet.add v vpos
+                vpos <- VarSet.add x vpos
               else  
-                vneg <- VarSet.add v vneg)
+                vneg <- VarSet.add (abs x) vneg)
       clause_init
       
 (* une même variable peut être dans vpos et vneg == tautologie *)
+
 (*
   method add_vpos v = vpos <- VarSet.add v vpos
  
   method add_vneg v = vneg <- VarSet.add v vneg
 *)
-  method remove_var v = 
+  method remove_var v = (* supprime aussi v des variables cachées *)
     vpos <- VarSet.remove v vpos;
-    vneg <- VarSet.remove v vneg
+    vneg <- VarSet.remove v vneg;
+    vpos_hidden <- VarSet.remove v vpos_hidden;
+    vneg_hidden <- VarSet.remove v vneg_hidden
 	
   method get_vpos = vpos
   
@@ -68,10 +64,30 @@ object
   
   method is_empty = (VarSet.is_empty vpos) && (VarSet.is_empty vneg)
   
-  method get_var_max = 
+  method hide_var_pos x = (* déplace x vers vpos_hidden ssi elle est déjà dans vpos *)     
+    if (VarSet.mem x vpos)
+    then (vpos_hidden <- VarSet.add v vpos_hidden; vpos <- VarSet.remove v vpos)
+
+  method hide_var_neg x =     
+    if (VarSet.mem x vneg)
+    then (vneg_hidden <- VarSet.add v vneg_hidden; vneg <- VarSet.remove v vneg)
+
+  method show_var_pos x = (* déplace x vers vpos ssi elle est déjà dans vpos_hidden *)     
+    if (VarSet.mem x vpos_hidden)
+    then (vpos_hidden <- VarSet.remove v vpos_hidden; vpos <- VarSet.add v vpos)
+
+  method show_var_neg x = 
+    if (VarSet.mem x vneg_hidden)
+    then (vneg_hidden <- VarSet.remove v vneg_hidden; vneg <- VarSet.add v vneg)
+
+  method mem_pos v = VarSet.mem v vpos
+
+  method mem_neg v = VarSet.mem v vneg
+
+  method get_var_max = (* retourne couple (o,b) où o=None si rien trouvé, Some v si v est la var max. b : booléen indiquant positivité de v*)
     let v1 = 
       try Some (VarSet.max_elt vpos) 
-      with Not_found -> None in		(* s'assurer avant qu'au moins vpos ou vneg est non nul *)
+      with Not_found -> None in		
     let v2 = 
       try Some (VarSet.max_elt vneg) 
       with Not_found -> None in
@@ -79,14 +95,12 @@ object
       | (None,Some x) -> Some (x,false)
       | (Some x,None) -> Some (x,true)
       | (Some x,Some y) -> 
-          if x#get_nom < y#get_nom then
+          if x < y then
             Some (y,false)
           else
             Some (x,true)
       | (None,None) -> None
     
-(* renvoie la plus grande variable de la clause, et 1 si elle apparait positivement, -1 sinon *)  
-  
 end
 
 (*******)
@@ -111,34 +125,56 @@ module ClauseSet = Set.Make(OrderedClause)
 class formule n clauses_init =
 object (self)
   val mutable nb_var : int = n
-  val mutable occurences_pos = Array.make (n+1) ClauseSet.empty (* variables apparaissant positivement dans la formule *)
-  val mutable occurences_neg = Array.make (n+1) ClauseSet.empty (* variables apparaissant négativement dans la formule *)
-  val mutable valeur : bool option array = Array.make (n+1) None  (* affectation des variables *)
-  val mutable clauses = ClauseSet.empty		(* clauses qui constituent la formule *)
+  val mutable occurences_pos = Array.make (n+1) ClauseSet.empty (* clauses dans lesquelles chaque var apparait positivement *)
+  val mutable occurences_neg = Array.make (n+1) ClauseSet.empty (* clauses dans lesquelles chaque var apparait négativement *)
+  (*val mutable valeur : bool option array = Array.make (n+1) None  (* affectation des variables *)*)
+  val mutable clauses = ClauseSet.empty		(* ensemble des clauses de la formule *)
+
+  initializer
+    List.iter 
+      (fun 
+          | [] -> ()
+          | t::q -> let v = new clause t in clauses <- ClauseSet.add v clauses)
+      clause_init;
+    ClauseSet.iter 
+      (fun c -> (VarSet.iter 
+                  (fun v ->  occurences_pos.(v) <- ClauseSet.add c occurences_pos.(v) ) 
+                  c#get_vpos);
+                 VarSet.iter 
+                  (fun v ->  occurences_neg.(v) <- ClauseSet.add c occurences_neg.(v) ) 
+                  c#get_vneg)) 
+      clauses
 
   method get_nb_var = n
 
   method get_occurences_pos i = occurences_pos.(i)
 
   method get_occurences_neg i = occurences_neg.(i)
-    
+
   method add_clause c = 
     clauses <- ClauseSet.add c clauses;
-    ClauseSet.iter (fun v -> ClauseSet.add c occurences_pos.(v#get_nom)) c#get_vpos;
-    ClauseSet.iter (fun v -> ClauseSet.add c occurences_neg.(v#get_nom)) c#get_vneg
+    ClauseSet.iter (fun v -> ClauseSet.add c occurences_pos.(v)) c#get_vpos;
+    ClauseSet.iter (fun v -> ClauseSet.add c occurences_neg.(v)) c#get_vneg
     
   method get_clauses = clauses
+
+  method set_val_pos x = 
+    ClauseSet.iter
+      (fun c -> c#hide_var_pos x) 
+      occurences_pos.(x);
+  
     
-  method set_val k b = valeur.(k) <- Some b
+  (*method set_val k b = valeur.(k) <- Some b
 
   method unset k = valeur.(k) <- None
     
-  method get_val k = valeur.(k)
+  method get_val k = valeur.(k)*)
 
   method remove_clause c = 
     clauses <- ClauseSet.remove c clauses;
-    ClauseSet.iter (fun v -> ClauseSet.remove c occurences_pos.(v#get_nom)) c#get_vpos;
-    ClauseSet.iter (fun v -> ClauseSet.remove c occurences_neg.(v#get_nom)) c#get_vneg
+    ClauseSet.iter (fun v -> ClauseSet.remove c occurences_pos.(v)) c#get_vpos;
+    ClauseSet.iter (fun v -> ClauseSet.remove c occurences_neg.(v)) c#get_vneg
+
    (*   
   method fusion_clauses (c1:clause) (c2:clause) (vv : variable) = 
     let c = new clause in (* c est la fusion des clauses c1 et c2 suivant la variable vv *)
@@ -150,9 +186,18 @@ object (self)
     c#remove_var vv; (* on supprime vv de c, car la fusion s'est effectuée selon vv *)						
     c	(* on renvoie c *)
    *) 
-  method eval_clause c = (VarSet.exists (fun v -> ((self#get_val v#get_nom) = 1) )  c#get_vpos) || 
-    (VarSet.exists (fun v -> ((self#get_val v#get_nom) = 0) )  c#get_vneg)  (* indique si la clause c est vraie avec les valeurs actuelles *)
 
-  method set_clause_faux cs = ClauseSet.exists (fun c -> not (self#clause_vraie c)) cs	(* vrai si l'ensemble de clause cs contient une clause fausse avec les valeurs actuelles, faux sinon *)
+ (* method eval_clause c = (* indique si la clause c est vraie avec les valeurs actuelles *)
+    (VarSet.exists 
+      (fun v -> match (self#get_val v) with 
+                  | Some b -> b 
+                  | None -> false )  
+       c#get_vpos) || 
+    (VarSet.exists 
+      (fun v -> match (self#get_val v) with 
+                  | Some b -> not b 
+                  | None -> false ) 
+      c#get_vneg)  *)
+
 
 end
