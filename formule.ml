@@ -108,11 +108,13 @@ class formule n clauses_init =
 object (self)
   val mutable nb_var : int = n
   val mutable occurences_pos = Array.make (n+1) ClauseSet.empty (* clauses dans lesquelles chaque var apparait positivement *)
-  val mutable occurences_pos_hidden = Array.make
+  val mutable occurences_pos_hidden = Array.make ClauseSet.empty
   val mutable occurences_neg = Array.make (n+1) ClauseSet.empty (* clauses dans lesquelles chaque var apparait négativement *)
-  (*val mutable valeur : bool option array = Array.make (n+1) None  (* affectation des variables *)*)
+  val mutable occurences_neg_hidden = Array.make (n+1) ClauseSet.empty
   val mutable clauses = ClauseSet.empty		(* ensemble des clauses de la formule *)
   val mutable clauses_hidden = ClauseSet.empty
+
+  (*val mutable valeur : bool option array = Array.make (n+1) None  (* affectation des variables *)*)
 
   initializer
     List.iter 
