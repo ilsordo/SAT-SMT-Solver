@@ -10,17 +10,54 @@ end
 
 module VarSet = Set.Make(OrderedVar)
 
+class varset =
+object
+  val mutable vis = VarSet.empty
+  val mutable hid = VarSet.empty
+    
+  method get_vis = vis
 
+  method hide x =
+    if (VarSet.mem x vis) then 
+      begin
+        vis <- VarSet.remove x vis;
+        hid <- VarSet.add x hid
+      end 
+      
+  method show x =
+    if (VarSet.mem x hid) then
+      begin
+        hid <- VarSet.remove x hid;
+        vis <- VarSet.add x vis
+      end
+        
+  method add x = pos <- VarSet.add x pos
+        
+  method mem x = VarSet.mem x pos
+
+  method intersects v2 = VarSet.is_empty (VarSet.inter vis v2#get_vis)
+
+  method is_empty = VarSet.is_empty vis
+
+  method singleton =
+    (* Moche *)
+    try
+      let x = VarSet.max_elt pos in
+      if (x = VarSet.min_elt pos) then
+        Some x (* Un seul élément x*)
+      else
+        None (* Au moins 2 éléments *)
+    with
+      | Not_found -> None (* Vide *)
+end
+      
 (*******)
 
 
 class clause clause_init =
 object
-  val mutable vpos = VarSet.empty (* variable apparaissant positivement dans la clause *)
-  val mutable vneg = VarSet.empty (* variable apparaissant négativement dans la clause *)
-
-  val mutable vpos_hidden = VarSet.empty (* variables cachées, forcément absentes de vpos *)
-  val mutable vneg_hidden = VarSet.empty
+  val vpos = new varset
+  val vneg = new varset
 
   initializer
     List.iter 
@@ -28,44 +65,35 @@ object
           | 0 -> assert false
           | x -> 
               if x>0 then 
-                vpos <- VarSet.add x vpos
+                vpos#add x
               else  
-                vneg <- VarSet.add (abs x) vneg)
+                vneg#add (-x))
       clause_init
-      
-  method remove_var v = (* supprime aussi v des variables cachées *)
-    vpos <- VarSet.remove v vpos;
-    vneg <- VarSet.remove v vneg;
-    vpos_hidden <- VarSet.remove v vpos_hidden;
-    vneg_hidden <- VarSet.remove v vneg_hidden
-	
+      	
   method get_vpos = vpos
     
   method get_vneg = vneg
     
-  method is_tauto = not (VarSet.is_empty (VarSet.inter vpos vneg))
+  method is_tauto = vpos#intersects vneg
     
-  method is_empty = (VarSet.is_empty vpos) && (VarSet.is_empty vneg)
+  method is_empty = vpos#is_empty && vneg#is_empty
   
-  method hide_var_pos x = (* déplace x vers vpos_hidden ssi elle est déjà dans vpos *)     
-    if (VarSet.mem x vpos)
-    then (vpos_hidden <- VarSet.add v vpos_hidden; vpos <- VarSet.remove v vpos)
+  method hide_var b x = 
+    if b then
+      vpos#hide x
+    else 
+      vneg#hide x
 
-  method hide_var_neg x =     
-    if (VarSet.mem x vneg)
-    then (vneg_hidden <- VarSet.add v vneg_hidden; vneg <- VarSet.remove v vneg)
+  method show_var b x = 
+    if b then
+      vpos#show x
+    else 
+      vneg#show x
 
-  method show_var_pos x = (* déplace x vers vpos ssi elle est déjà dans vpos_hidden *)     
-    if (VarSet.mem x vpos_hidden)
-    then (vpos_hidden <- VarSet.remove v vpos_hidden; vpos <- VarSet.add v vpos)
 
-  method show_var_neg x = 
-    if (VarSet.mem x vneg_hidden)
-    then (vneg_hidden <- VarSet.remove v vneg_hidden; vneg <- VarSet.add v vneg)
+  method mem_pos x = vpos#mem x
 
-  method mem_pos v = VarSet.mem v vpos
-
-  method mem_neg v = VarSet.mem v vneg
+  method mem_neg x = vneg#mem x
 
   method get_var_max = (* retourne couple (o,b) où o=None si rien trouvé, Some v si v est la var max. b : booléen indiquant positivité de v*)
     let v1 = 
