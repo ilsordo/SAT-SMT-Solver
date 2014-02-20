@@ -3,12 +3,12 @@ type variable = int
 type c_repr
 
 class varset :
-object
+object ('a)
   method repr : c_repr
   method add : variable -> unit
   method hide : variable -> unit
-  method intersects : varset -> bool
-  method union : varset -> varset
+  method intersects : 'a -> bool
+  method union : 'a -> 'a
   method is_empty : bool
   method mem : variable -> bool
   method show : variable -> unit
@@ -27,12 +27,13 @@ object
   method hide_var : bool -> variable -> unit
   method is_empty : bool
   method is_tauto : bool
+  method vars : varset
   method mem_neg : variable -> bool
   method mem_pos : variable -> bool
   method show_var : bool -> variable -> unit
 end
 
-module OrderedClause = sig
+module OrderedClause : sig
   type t = clause
   val compare : clause -> clause -> int
 end

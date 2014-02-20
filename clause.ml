@@ -12,7 +12,7 @@ module VarSet = Set.Make(OrderedVar)
 type c_repr = VarSet.t
 
 class varset =
-object
+object (self : 'varset)
   val mutable vis = VarSet.empty
   val mutable hid = VarSet.empty
     
@@ -36,9 +36,9 @@ object
      
   method mem x = VarSet.mem x vis
 
-  method intersects v = VarSet.is_empty (VarSet.inter vis v#repr)
+  method intersects (v : 'varset) = VarSet.is_empty (VarSet.inter vis v#repr)
 
-  method union v = {< vis = VarSet.union vis v#repr, hid = VarSet.empty >}
+  method union (v : 'varset) = {< vis = VarSet.union vis v#repr; hid = VarSet.empty >}
 
   method is_empty = VarSet.is_empty vis
 

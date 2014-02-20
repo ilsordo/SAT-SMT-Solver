@@ -8,8 +8,6 @@ class clauseset =
 object
   val mutable vis = ClauseSet.empty
   val mutable hid = ClauseSet.empty
-    
-  method repr = vis
 
   method hide c =
     if (ClauseSet.mem c vis) then 
@@ -32,7 +30,6 @@ object
   method is_empty = ClauseSet.is_empty vis
 
   method iter f = ClauseSet.iter f vis
-
 end
 
 (*******)
@@ -40,7 +37,7 @@ end
 (* Pour stocker occurences, valeurs, n'importe quoi en rapport avec les variables *)
 class ['a] vartable n =
 object
-  val data : (variable*'a) Hashtbl.t = Hashtbl.create n
+  val data : (variable,'a) Hashtbl.t = Hashtbl.create n
     
   method size = Hashtbl.length data
 
@@ -57,11 +54,12 @@ end
 class formule n clauses_init =
 object (self)
   val clauses = new clauseset
-  val occurences_pos = new [clauseset] vartable n
-  val occurences_neg = new [clauseset] vartable n
+  val occurences_pos = new vartable n
+  val occurences_neg = new vartable n
+  val paris = new vartable n
 
   initializer
-    List.iter (fun c -> clause#add (new clause c)) clauses_init;
+    List.iter (fun c -> clauses#add (new clause c)) clauses_init;
     clauses#iter self#register_clause
 
   method private add_occurence b c v =
@@ -77,12 +75,8 @@ object (self)
   method private register_clause c =
     c#get_vpos#iter (self#add_occurence true c);
     c#get_vneg#iter (self#add_occurence false c)
-
-  method get_occurences b v =
-    if b then
-      occurences_pos#mem v
-    else
-      occurences_neg#mem v
+      
+  (**********)
 
   method add_clause c =
     clauses#add c;
@@ -90,65 +84,64 @@ object (self)
 
   method get_clauses = clauses
 
+  (* Accède à l'une des listes d'occurences en supposant qu'elle a été initialisée *)
+  method private get_occurences occ v =
+    match occ#mem v with
+      | None -> assert false (* Cette variable aurait du être iniatilisée ... *)
+      | Some occurences -> occurences
+
+  (* Cache une clause des listes d'occurences de toutes les variables sauf v_ref *)
+  method private hide_occurences v_ref c = (* Tordu non? C'est peut être faux *)
+    c#get_vpos#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_pos v)#hide c);
+    c#get_vneg#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_neg v)#hide c)      
+      
   method set_val b v = 
+    let _ = match paris#mem v with
+      | None -> paris#set v b
+      | Some _ -> assert false in (* Pas de double paris *) 
     let (valider,supprimer) =
       if b then
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
-    begin
-      match supprimer#get v with
-        | None -> ()
-        | Some occurences -> occurences#iter (fun c -> c#hide_var (not b) v)
-    end;
-    begin
-      match valider#get v with
-        | None -> ()
-        | Some occurences -> occurences#iter (fun  c -> clauses#hide c) 
-    end
+    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v); (* On supprime les occurences du littéral *)
+    (self#get_occurences valider v)#iter (fun c -> clauses#hide c; self#hide_occurences v c) 
+  (* On supprime les clauses où apparait la négation du littéral, elles ne sont plus pointées que par la liste des occurences de v*)
 
-  method reset x =
-    ClauseSet.iter
-      (fun c -> x#hide_var_neg x)
-      occurences_neg.(x);
-    clauses <- ClauseSet.diff clauses occurences_pos.(x);
-    clauses_hidden <- ClauseSet.union clauses_hidden occurences_pos.(x)
-      
-      
-(*method set_val k b = valeur.(k) <- Some b
+  (* Replace une clause dans les listes d'occurences de ses variables *)
+  method private show_occurences v_ref c = (* Tordu non? C'est peut être faux *)
+    c#get_vpos#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_pos v)#show c);
+    c#get_vneg#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_neg v)#show c)
 
-  method unset k = valeur.(k) <- None
-  
-  method get_val k = valeur.(k)*)
 
-  method remove_clause c = 
-    clauses <- ClauseSet.remove c clauses;
-    ClauseSet.iter (fun v -> ClauseSet.remove c occurences_pos.(v)) c#get_vpos;
-    ClauseSet.iter (fun v -> ClauseSet.remove c occurences_neg.(v)) c#get_vneg
-
-(*   
-     method fusion_clauses (c1:clause) (c2:clause) (vv : variable) = 
-     let c = new clause in (* c est la fusion des clauses c1 et c2 suivant la variable vv *)
-     clauses <- ClauseSet.add c clauses;
-     VarSet.iter (fun v -> c#add_vpos v) c1#get_vpos ;
-     VarSet.iter (fun v -> c#add_vneg v) c1#get_vneg ;
-     VarSet.iter (fun v -> c#add_vpos v) c2#get_vpos ;
-     VarSet.iter (fun v -> c#add_vneg v) c2#get_vneg ;		
-     c#remove_var vv; (* on supprime vv de c, car la fusion s'est effectuée selon vv *)						
-     c	(* on renvoie c *)
-*) 
-
-(* method eval_clause c = (* indique si la clause c est vraie avec les valeurs actuelles *)
-   (VarSet.exists 
-   (fun v -> match (self#get_val v) with 
-   | Some b -> b 
-   | None -> false )  
-   c#get_vpos) || 
-   (VarSet.exists 
-   (fun v -> match (self#get_val v) with 
-   | Some b -> not b 
-   | None -> false ) 
-   c#get_vneg)  *)
-
+  method reset_val v =
+    let b = match paris#mem v with
+      | None -> assert false (* On ne revient pas sur un pari pas fait *)
+      | Some b -> b in
+    let (annuler,restaurer) =
+      if b then
+        (occurences_pos,occurences_neg)
+      else
+        (occurences_neg,occurences_pos) in
+    (self#get_occurences annuler v)#iter (fun c -> c#show_var (not b) v); (* On replace les occurences du littéral *)
+    (self#get_occurences restaurer v)#iter (fun c -> clauses#show c; self#show_occurences v c) 
+(* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
