@@ -8,3 +8,5 @@
 *.cmxs
 *.cmxa
 *~
+resol
+_build/*
