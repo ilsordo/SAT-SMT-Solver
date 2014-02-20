@@ -1,0 +1,47 @@
+type variable = int
+
+type c_repr
+
+class varset :
+object
+  method repr : c_repr
+  method add : variable -> unit
+  method hide : variable -> unit
+  method intersects : varset -> bool
+  method union : varset -> varset
+  method is_empty : bool
+  method mem : variable -> bool
+  method show : variable -> unit
+  method singleton : variable option
+  method iter : (variable -> unit) -> unit
+end
+
+class clause :
+  variable list ->
+object
+  val vneg : varset
+  val vpos : varset
+  method get_vneg : varset
+  method get_vpos : varset
+  method get_vars : varset
+  method hide_var : bool -> variable -> unit
+  method is_empty : bool
+  method is_tauto : bool
+  method mem_neg : variable -> bool
+  method mem_pos : variable -> bool
+  method show_var : bool -> variable -> unit
+end
+
+module OrderedClause = sig
+  type t = clause
+  val compare : clause -> clause -> int
+end
+
+
+
+
+
+
+
+
+
