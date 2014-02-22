@@ -1,6 +1,6 @@
 
 
-class mem n =
+class mem n = (* commentaire *)
 object
   val valeurs : bool option array = Array.make (n+1) None
   
