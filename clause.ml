@@ -12,9 +12,9 @@ module VarSet = Set.Make(OrderedVar)
 type c_repr = VarSet.t
 
 class varset =
-object (self : 'varset)
-  val mutable vis = VarSet.empty
-  val mutable hid = VarSet.empty
+object (self : 'varset) (* pourquoi 'varset ? *)
+  val mutable vis = VarSet.empty (* variables visibles du varset *)
+  val mutable hid = VarSet.empty (* variables cachées du varset *)
     
   method repr = vis
 
@@ -25,24 +25,24 @@ object (self : 'varset)
         hid <- VarSet.add x hid
       end 
       
-  method show x =
+  method show x = 
     if (VarSet.mem x hid) then
       begin
         hid <- VarSet.remove x hid;
         vis <- VarSet.add x vis
       end
         
-  method add x = vis <- VarSet.add x vis
+  method add x = vis <- VarSet.add x vis (* et si x est dans hid ? *)
      
-  method mem x = VarSet.mem x vis
+  method mem x = VarSet.mem x vis  (* indique si la variable x est dans vis  *)
 
-  method intersects (v : 'varset) = VarSet.is_empty (VarSet.inter vis v#repr)
+  method intersects (v : 'varset) = VarSet.is_empty (VarSet.inter vis v#repr) (* indique si l'intersection entre vis et v est vide ou non *)
 
-  method union (v : 'varset) = {< vis = VarSet.union vis v#repr; hid = VarSet.empty >}
+  method union (v : 'varset) = {< vis = VarSet.union vis v#repr; hid = VarSet.empty >} (* on renvoie une nouveau varset *)
 
   method is_empty = VarSet.is_empty vis
 
-  method singleton =
+  method singleton = (* indique si vis est un singleton *)
     try
       let x = VarSet.max_elt vis in
       if (x = VarSet.min_elt vis) then
@@ -61,7 +61,7 @@ end
 
 class clause clause_init =
 object
-  val vpos = new varset
+  val vpos = new varset (* grâce au varset, on va pouvoir cacher ou non des variables dans vpos, ou vneg *)
   val vneg = new varset
 
   initializer
@@ -79,15 +79,15 @@ object
     
   method get_vneg = vneg
 
-  method get_vars = vneg#union vpos
+  method get_vars = vneg#union vpos (* renvoie un varset union de toutes les var visibles *)
     
   method is_tauto = vpos#intersects vneg
     
   method is_empty = vpos#is_empty && vneg#is_empty
 
-  method vars = vpos#union vneg
+  method vars = vpos#union vneg (* c'est pas identique à get_vars ? *)
   
-  method hide_var b x = 
+  method hide_var b x = (* b = true si x est une litteral positif, false si négatif *)
     if b then
       vpos#hide x
     else 
@@ -103,6 +103,13 @@ object
   method mem_pos x = vpos#mem x
 
   method mem_neg x = vneg#mem x
+
+  method singleton = 
+    match vpos#singleton with
+      | None -> vneg#singleton
+      | Some v -> if (vneg#singleton = None) 
+                  then Some v
+                  else None
 
 (*
   method get_var_max = (* retourne couple (o,b) où o=None si rien trouvé, Some v si v est la var max. b : booléen indiquant positivité de v*)
@@ -128,5 +135,5 @@ end
 module OrderedClause = 
 struct
   type t = clause
-  let compare  = compare
+  let compare  = compare (** est-ce une bonne fonction de comparaison ? *)
 end

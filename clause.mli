@@ -30,6 +30,7 @@ object
   method vars : varset
   method mem_neg : variable -> bool
   method mem_pos : variable -> bool
+  method singleton : variable option
   method show_var : bool -> variable -> unit
 end
 
