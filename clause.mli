@@ -10,6 +10,7 @@ object ('a)
   method intersects : 'a -> bool
   method union : 'a -> 'a
   method is_empty : bool
+  method size : int
   method mem : variable -> bool
   method show : variable -> unit
   method singleton : variable option
@@ -27,10 +28,8 @@ object
   method hide_var : bool -> variable -> unit
   method is_empty : bool
   method is_tauto : bool
-  method vars : varset
-  method mem_neg : variable -> bool
-  method mem_pos : variable -> bool
-  method singleton : variable option
+  method mem : bool -> variable -> bool
+  method singleton : (variable*bool) option
   method show_var : bool -> variable -> unit
 end
 

@@ -60,32 +60,28 @@ end
 
 class formule n clauses_init =
 object (self)
-  val nb_vars = n
+  val vars = new varset
   val clauses = new clauseset
   val occurences_pos = new vartable n
   val occurences_neg = new vartable n
   val paris = new vartable n
 
   initializer
-    for i=1 to n do
+    (*for i=1 to n do
       occurences_pos#set i (new clauseset);
       occurences_neg#set i (new clauseset)
-    done;
+    done;*) (* C'est déjà fait par la 2eme ligne, si les occurences ne sont pas initialisées add_occurence le fait *)
     List.iter (fun c -> clauses#add (new clause c)) clauses_init;
     clauses#iter self#register_clause
 
 (***)
 
-  method get_nb_vars = nb_vars
+  method get_vars = vars
 
-  method set_pari v b = paris#set v b
+  (*method set_pari v b = paris#set v b*) (*J'appelle pari les variables auquelles on a touché par set_val, je ne crois pas qu'on ait besoin de changer cette table depuis l'extérieur *)
 
-  method is_pari v = paris#mem v (* indique si un pari a été fait sur v ou non *)
-
-  method get_pari v = (* indique le paris fait sur v. On s'assure avant qu'il y a bien eu pari *)
-    match paris#find v with
-      | None -> assert false 
-      | Some b -> b
+  method get_pari v = (* indique si v a subi une affectation, et si oui laquelle *)
+    paris#find v
 
 (***)
 
@@ -99,9 +95,10 @@ object (self)
       | Some set -> set in
     set#add c
 
-  method private register_clause c = (* remplie occurences_pos et occurences_neg avec c *)
+  method private register_clause c = (* Met c dans les listes d'occurences de ses variables, enregistre ses variables *)
     c#get_vpos#iter (self#add_occurence true c);
-    c#get_vneg#iter (self#add_occurence false c)
+    c#get_vneg#iter (self#add_occurence false c);
+    c#get_vars#iter vars#add
       
 (***)
 
@@ -114,12 +111,17 @@ object (self)
   (* Accède à l'une des listes d'occurences en supposant qu'elle a été initialisée *)
   method private get_occurences occ v =
     match occ#find v with
-      | None -> assert false (* Cette variable aurait du être initialisée ... *) (** mais à priori ça peut ne pas être initialisé ?, c'est initialisé qd ? *)
+      | None -> assert false 
+      (* Cette variable aurait du être initialisée ... *) 
+      (** mais à priori ça peut ne pas être initialisé ?, c'est initialisé qd ? *) 
+      (*** register_clause qui est appelé par initializer sur chaque clause puis a chaque ajout *)
       | Some occurences -> occurences
 
   (* Cache une clause des listes d'occurences de toutes les variables sauf v_ref *)
   method private hide_occurences v_ref c = (* Tordu non? C'est peut être faux *)
-    c#get_vpos#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_pos v)#hide c); (* on n'a pas un pb si après on show une var de vpos_hide ? *)
+    c#get_vpos#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_pos v)#hide c);
+    (* on n'a pas un pb si après on show une var de vpos_hide ? *)
+    (** c n'est plus accessible que par les occurences de v_ref et le seul moyen d'y accéder est de faire un reset_val *)
     c#get_vneg#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_neg v)#hide c)      
       
   method set_val b v = (* on souhaite assigner la variable v à b (true ou false), et faire évoluer les clauses en conséquences *)
@@ -131,9 +133,11 @@ object (self)
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
-    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then failwith "clause_empty"); (* On supprime les occurences du littéral *) (*** c'est ici qu'on fait apparaitre des clauses vides *)
+    (* On supprime les occurences du littéral *) (*** c'est ici qu'on fait apparaitre des clauses vides *)
+    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then failwith "clause_empty"); 
+    (* On supprime les clauses où apparait la négation du littéral, elles ne sont plus pointées que par la liste des occurences de v*)
     (self#get_occurences valider v)#iter (fun c -> clauses#hide c; self#hide_occurences v c) 
-  (* On supprime les clauses où apparait la négation du littéral, elles ne sont plus pointées que par la liste des occurences de v*)
+
 
   (* Replace une clause dans les listes d'occurences de ses variables *)
   method private show_occurences v_ref c = (* Tordu non? C'est peut être faux *)
@@ -151,14 +155,14 @@ object (self)
         (occurences_neg,occurences_pos) in
     (self#get_occurences annuler v)#iter (fun c -> c#show_var (not b) v); (* On replace les occurences du littéral *)
     (self#get_occurences restaurer v)#iter (fun c -> clauses#show c; self#show_occurences v c) 
-(* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
+  (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
 
 (******)
 
   method find_singleton = (* on cherche la liste des var sans pari qui forment une clause singleton *)
     let l = clauses#filter (fun c -> match c#singleton with 
                                       | None -> false
-                                      | Some v -> not (self#is_pari v)) in
+                                      | Some v -> not (paris#mem v)  in
     let rec cl_to_var liste res = match liste with
       | [] -> res
       | c::q -> match c#singleton with
@@ -171,7 +175,7 @@ object (self)
     let rec parcours_polar m n = 
       if m>n 
       then None 
-      else  if not (self#is_pari m) 
+      else  if not (paris#mem v) 
             then if (self#get_occurences occurences_pos m)#is_empty
                  then Some (m,true)
                  else if (self#get_occurences occurences_neg m)#is_empty

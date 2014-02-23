@@ -1,5 +1,5 @@
 open Clause
-open Dp
+open Dpll
 open Lexing
 open Printf
 
@@ -31,7 +31,6 @@ let parse_args () =
         end
     | _ -> usage() 
 
-(* 
 let parse_head lexbuf = Parser.head Lexer.head lexbuf
 
 let parse_clauses lexbuf = Parser.main Lexer.token lexbuf

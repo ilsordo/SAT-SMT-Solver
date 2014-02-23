@@ -1,7 +1,6 @@
 
 type mem = (variable*(variable list)) list
 
-
 let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié (et on a donc une affectation gagnante) *)
   let n=formule#get_nb_vars in
   let rec parcours_paris m = 

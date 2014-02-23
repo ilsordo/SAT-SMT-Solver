@@ -12,7 +12,7 @@ module VarSet = Set.Make(OrderedVar)
 type c_repr = VarSet.t
 
 class varset =
-object (self : 'varset) (* pourquoi 'varset ? *)
+object (self : 'varset) (* pourquoi 'varset ? *) (* Parce que Ocaml ... *)
   val mutable vis = VarSet.empty (* variables visibles du varset *)
   val mutable hid = VarSet.empty (* variables cachées du varset *)
     
@@ -32,7 +32,8 @@ object (self : 'varset) (* pourquoi 'varset ? *)
         vis <- VarSet.add x vis
       end
         
-  method add x = vis <- VarSet.add x vis (* et si x est dans hid ? *)
+  method add x = vis <- VarSet.add x vis (* et si x est dans hid ? *) 
+  (* C'est pas très grave, si on le cache/montre il ne sera plus qu'à un endroit *)
      
   method mem x = VarSet.mem x vis  (* indique si la variable x est dans vis  *)
 
@@ -41,6 +42,8 @@ object (self : 'varset) (* pourquoi 'varset ? *)
   method union (v : 'varset) = {< vis = VarSet.union vis v#repr; hid = VarSet.empty >} (* on renvoie une nouveau varset *)
 
   method is_empty = VarSet.is_empty vis
+
+  method size = VarSet.size vis
 
   method singleton = (* indique si vis est un singleton *)
     try
@@ -84,8 +87,6 @@ object
   method is_tauto = vpos#intersects vneg
     
   method is_empty = vpos#is_empty && vneg#is_empty
-
-  method vars = vpos#union vneg (* c'est pas identique à get_vars ? *)
   
   method hide_var b x = (* b = true si x est une litteral positif, false si négatif *)
     if b then
@@ -100,34 +101,19 @@ object
       vneg#show x
 
 
-  method mem_pos x = vpos#mem x
-
-  method mem_neg x = vneg#mem x
+  method mem b x = (* Pour garder le même type d'interface *)
+    if b then
+      vpos#mem x
+    else
+      vneg#mem x
 
   method singleton = 
-    match vpos#singleton with
-      | None -> vneg#singleton
-      | Some v -> if (vneg#singleton = None) 
-                  then Some v
-                  else None
+    match (vpos#singleton, vneg#singleton) with
+      | (None, None)
+      | (Some _, Some _) -> None
+      | (Some v, None) -> Some (v,true)
+      | (None, Some v) -> Some (v,false)
 
-(*
-  method get_var_max = (* retourne couple (o,b) où o=None si rien trouvé, Some v si v est la var max. b : booléen indiquant positivité de v*)
-    let v1 = 
-      try Some (VarSet.max_elt vpos) 
-      with Not_found -> None in		
-    let v2 = 
-      try Some (VarSet.max_elt vneg) 
-      with Not_found -> None in
-    match (v1,v2) with
-      | (None,Some x) -> Some (x,false)
-      | (Some x,None) -> Some (x,true)
-      | (Some x,Some y) -> 
-          if x < y then
-            Some (y,false)
-          else
-            Some (x,true)
-      | (None,None) -> None *)
 end
 
 (*******)
