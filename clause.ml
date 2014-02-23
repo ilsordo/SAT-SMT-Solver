@@ -12,7 +12,7 @@ module VarSet = Set.Make(OrderedVar)
 type c_repr = VarSet.t
 
 class varset =
-object (self : 'varset) (* pourquoi 'varset ? *) (* Parce que Ocaml ... *)
+object (self : 'varset)
   val mutable vis = VarSet.empty (* variables visibles du varset *)
   val mutable hid = VarSet.empty (* variables cachées du varset *)
     
@@ -32,8 +32,7 @@ object (self : 'varset) (* pourquoi 'varset ? *) (* Parce que Ocaml ... *)
         vis <- VarSet.add x vis
       end
         
-  method add x = vis <- VarSet.add x vis (* et si x est dans hid ? *) 
-  (* C'est pas très grave, si on le cache/montre il ne sera plus qu'à un endroit *)
+  method add x = vis <- VarSet.add x vis (* si x est déjà dans hid : si on le cache/montre il ne sera plus qu'à un endroit *)
      
   method mem x = VarSet.mem x vis  (* indique si la variable x est dans vis  *)
 
@@ -43,7 +42,7 @@ object (self : 'varset) (* pourquoi 'varset ? *) (* Parce que Ocaml ... *)
 
   method is_empty = VarSet.is_empty vis
 
-  method size = VarSet.size vis
+  method size = VarSet.cardinal vis
 
   method singleton = (* indique si vis est un singleton *)
     try
@@ -100,14 +99,13 @@ object
     else 
       vneg#show x
 
-
-  method mem b x = (* Pour garder le même type d'interface *)
+  method mem b x = 
     if b then
       vpos#mem x
     else
       vneg#mem x
 
-  method singleton = 
+  method singleton = (* renvoie Some (x,b) si la clause est un singleton ne contenant que x avec la positivité b *)
     match (vpos#singleton, vneg#singleton) with
       | (None, None)
       | (Some _, Some _) -> None

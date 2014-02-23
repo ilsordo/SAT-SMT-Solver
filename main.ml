@@ -1,10 +1,9 @@
-open Clause
 open Dpll
 open Lexing
 open Printf
 
 (* Gestion des arguments *)
-
+(*
 type input = Stdin | File of string | Test1 of int | Test2 of (int*int*int)
 
 let usage () =
@@ -90,4 +89,4 @@ let _ = main()
 
 
 
-
+*)

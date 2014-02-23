@@ -125,6 +125,7 @@ object (self)
     c#get_vneg#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_neg v)#hide c)      
       
   method set_val b v = (* on souhaite assigner la variable v à b (true ou false), et faire évoluer les clauses en conséquences *)
+    let clause_vide = ref true in
     let _ = match paris#find v with
       | None -> paris#set v b
       | Some _ -> assert false in (* Pas de double paris *) 
@@ -134,9 +135,10 @@ object (self)
       else
         (occurences_neg,occurences_pos) in
     (* On supprime les occurences du littéral *) (*** c'est ici qu'on fait apparaitre des clauses vides *)
-    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then failwith "clause_empty"); 
+    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then clause_vide := false); 
     (* On supprime les clauses où apparait la négation du littéral, elles ne sont plus pointées que par la liste des occurences de v*)
-    (self#get_occurences valider v)#iter (fun c -> clauses#hide c; self#hide_occurences v c) 
+    (self#get_occurences valider v)#iter (fun c -> clauses#hide c; self#hide_occurences v c);
+    !clause_vide
 
 
   (* Replace une clause dans les listes d'occurences de ses variables *)
@@ -160,14 +162,12 @@ object (self)
 (******)
 
   method find_singleton = (* on cherche la liste des var sans pari qui forment une clause singleton *)
-    let l = clauses#filter (fun c -> match c#singleton with 
-                                      | None -> false
-                                      | Some v -> not (paris#mem v)  in
+    let l = clauses#filter (fun c -> not (c#singleton = None))  in
     let rec cl_to_var liste res = match liste with
       | [] -> res
       | c::q -> match c#singleton with
                   | None -> assert false
-                  | Some v -> cl_to_var q (v::res) in
+                  | Some x -> cl_to_var q (x::res) in
     cl_to_var l []
     
 
@@ -175,14 +175,14 @@ object (self)
     let rec parcours_polar m n = 
       if m>n 
       then None 
-      else  if not (paris#mem v) 
+      else  if not (paris#mem m) 
             then if (self#get_occurences occurences_pos m)#is_empty
                  then Some (m,true)
                  else if (self#get_occurences occurences_neg m)#is_empty
                       then Some (m,false)
                       else parcours_polar (m+1) n
             else parcours_polar (m+1) n
-    in parcours_polar 1 self#get_nb_vars
+    in parcours_polar 1 vars#size (* on ne peut pas stocker le nb de variable directement dans la formule ? *)
 
 end
 
