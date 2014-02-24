@@ -6,32 +6,32 @@ type f_repr = ClauseSet.t
 
 class clauseset =
 object
-  val mutable vis = ClauseSet.empty
-  val mutable hid = ClauseSet.empty
+  val mutable vis = ClauseSet.empty (* clauses visibles*)
+  val mutable hid = ClauseSet.empty (* clauses cachées *)
 
-  method hide c =
+  method hide c = (* cacher la clause c si elle est déjà visible *)
     if (ClauseSet.mem c vis) then 
       begin
         vis <- ClauseSet.remove c vis;
         hid <- ClauseSet.add c hid
       end 
       
-  method show c =
+  method show c = (* montrer la clause c, si elle est déjà cachée *)
     if (ClauseSet.mem c hid) then
       begin
         hid <- ClauseSet.remove c hid;
         vis <- ClauseSet.add c vis
       end
         
-  method add c = vis <- ClauseSet.add c vis
+  method add c = vis <- ClauseSet.add c vis (* ajouter la clause c aux clauses visibles *)
      
-  method mem c = ClauseSet.mem c vis
+  method mem c = ClauseSet.mem c vis (* indique si c est une clause visible *)
 
-  method is_empty = ClauseSet.is_empty vis
+  method is_empty = ClauseSet.is_empty vis (* indique s'il n'y a aucune clause visible *)
 
   method iter f = ClauseSet.iter f vis
 
-  method filter f = ClauseSet.elements (ClauseSet.filter f vis) (* liste des élemnts de vis satisfaisant le prédicat f*)
+  method filter f = ClauseSet.elements (ClauseSet.filter f vis) (* renvoie la liste des élements de vis satisfaisant le prédicat f*)
 end
 
 (*******)
@@ -43,7 +43,7 @@ object (self)
     
   method size = Hashtbl.length data
 
-  method set v x = Hashtbl.replace data v x (* peut être utilisé comme fonction d'ajout ou de remplacement *)
+  method set v x = Hashtbl.replace data v x (* peut être utilisé comme fonction d'ajout ou de remplacement : on associe la valeur x à la variable v *)
 
   method find v = try Some (Hashtbl.find data v) with Not_found -> None
 
@@ -60,17 +60,18 @@ end
 
 class formule n clauses_init =
 object (self)
-  val vars = new varset
-  val clauses = new clauseset
-  val occurences_pos = new vartable n
+  val vars = new varset (* quelle utilité ? *)
+  val clauses = new clauseset (* ensemble des clauses de la formule, peut contenir des clauses cachées/visibles *)
+  val occurences_pos = new vartable n (* associe à chaque variable les clauses auxquelles elle appartient (clauses pouvant être cachées ou non) *)
   val occurences_neg = new vartable n
-  val paris = new vartable n
+  val paris = new vartable n (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
 
   initializer
     (*for i=1 to n do
       occurences_pos#set i (new clauseset);
       occurences_neg#set i (new clauseset)
     done;*) (* C'est déjà fait par la 2eme ligne, si les occurences ne sont pas initialisées add_occurence le fait *)
+    (** et si une variable n'apparait dans aucune clause ? *)
     List.iter (fun c -> clauses#add (new clause c)) clauses_init;
     clauses#iter self#register_clause
 
@@ -80,7 +81,7 @@ object (self)
 
   (*method set_pari v b = paris#set v b*) (*J'appelle pari les variables auquelles on a touché par set_val, je ne crois pas qu'on ait besoin de changer cette table depuis l'extérieur *)
 
-  method get_pari v = (* indique si v a subi une affectation, et si oui laquelle *)
+  method get_pari v = (* indique si v a subi un pari, et si oui lequel *)
     paris#find v
 
 (***)
@@ -98,7 +99,7 @@ object (self)
   method private register_clause c = (* Met c dans les listes d'occurences de ses variables, enregistre ses variables *)
     c#get_vpos#iter (self#add_occurence true c);
     c#get_vneg#iter (self#add_occurence false c);
-    c#get_vars#iter vars#add
+    c#get_vars#iter vars#add (** pourquoi remplir vars ici et ne pas le faire au début (on sait qu'il y a n variables), là c'est assez redondant de fusionner à chaque fois (via get_vars) puis d'ajouter à vars ? est-ce que vars sert à savoir quelles sont les variables effectivement présentent dans une clause ? *)
       
 (***)
 
@@ -118,7 +119,7 @@ object (self)
       | Some occurences -> occurences
 
   (* Cache une clause des listes d'occurences de toutes les variables sauf v_ref *)
-  method private hide_occurences v_ref c = (* Tordu non? C'est peut être faux *)
+  method private hide_occurences v_ref c = (* Tordu non? C'est peut être faux *) (** est-ce pertinent de ne pas cacher les occurences de v_ref ? *)
     c#get_vpos#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_pos v)#hide c);
     (* on n'a pas un pb si après on show une var de vpos_hide ? *)
     (** c n'est plus accessible que par les occurences de v_ref et le seul moyen d'y accéder est de faire un reset_val *)
@@ -134,8 +135,8 @@ object (self)
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
-    (* On supprime les occurences du littéral *) (*** c'est ici qu'on fait apparaitre des clauses vides *)
-    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then clause_vide := false); 
+    (* On supprime les occurences du littéral *) 
+    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then clause_vide := false); (*** c'est ici qu'on fait apparaitre des clauses vides *)
     (* On supprime les clauses où apparait la négation du littéral, elles ne sont plus pointées que par la liste des occurences de v*)
     (self#get_occurences valider v)#iter (fun c -> clauses#hide c; self#hide_occurences v c);
     !clause_vide
@@ -182,7 +183,7 @@ object (self)
                       then Some (m,false)
                       else parcours_polar (m+1) n
             else parcours_polar (m+1) n
-    in parcours_polar 1 vars#size (* on ne peut pas stocker le nb de variable directement dans la formule ? *)
+    in parcours_polar 1 vars#size (** on ne peut pas stocker le nb de variable directement dans la formule ? vars permet ici de ne pas trouver des variables n'apparaissant dans aucune clause. vars peut être de taille < n *)
 
 end
 

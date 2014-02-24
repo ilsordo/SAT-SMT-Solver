@@ -5,7 +5,7 @@ type mem = (variable*(variable list)) list
 *)
 
 let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié (et on a donc une affectation gagnante) *)
-  let n=formule#get_nb_vars in
+  let n=formule#get_nb_vars in (** pas de fonction get_nb_vars *)
   let rec parcours_paris m = 
     if m > n
     then None
@@ -52,7 +52,7 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
                                                          then 
                                                            begin
                                                              var_add := vv::(!var_add);
-                                                             if not (formule#set_val bb v)
+                                                             if not (formule#set_val bb vv)
                                                              then stop:=2
                                                            end)
                             l
@@ -60,12 +60,12 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
           if not (!stop = 2)
             then match formule#find_single_polarite with
               | None -> ()
-                | Some (vv,bb) -> begin
-                                    stop:=0;
-                                    var_add := vv::(!var_add);
-                                    if not (formule#set_val bb vv)
-                                    then stop:=2
-                                  end
+              | Some (vv,bb) -> begin
+                                  stop:=0;
+                                  var_add := vv::(!var_add);
+                                  if not (formule#set_val bb vv)
+                                  then stop:=2
+                                end
         done;
         if (!stop = 1)
         then (!var_add,true)
@@ -78,7 +78,7 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
 
 
 
-let dpll formule = (* renvoie true si une affectation a été trouvée, stockée dans paris, false sinon / ou failwith ? *)
+let dpll formule = (* renvoie true si une affectation a été trouvée, stockée dans paris, false sinon *)
   let rec aux v b = (* faire le pari b sur v *) (*renvoie true si on peut prolonger les paris actuels, plus (v,b), en qqchose de satisfiable *)
     match constraint_propagation v b formule with
       | (var_add,false) -> List.iter (fun vv -> formule#reset_val vv) var_add; (* on annule les paris faits *)
@@ -99,16 +99,11 @@ let dpll formule = (* renvoie true si une affectation a été trouvée, stockée
 
 
 (* Réflexions : *)
-(* dans set_val : enlever failwith en false *)
-(* tjrs commencer par une propa de contraintes *)
-(* traiter la variable parié avant propag *)
-(* on va revenir en arriere, il faut trouver la variable sur laquelle on change de pari et peut être remonter encore plus loin*)
 (* si b est false, on va fusionner des listes *)
 (* on met le pari en tête de mem *)
-(* ce n'est pas rec terminal *)
+(** ce n'est pas rec terminal *)
 (* tous les paris ont été enlevés ? *)
-
-
+(** détection des tautologies / inclusions *)
   
 
 
