@@ -35,17 +35,17 @@ end
 
 
 
-let constraint_propagation v b formule = (* on affecte v et on propage, on renvoie les variables affectées + false si une clause vide a été générée, true sinon*)
-  let var_add=ref [v] in
-  let stop=ref 0 in
+let constraint_propagation v b formule = (* on affecte v et on propage, on renvoie la liste des variables affectées + false si une clause vide a été générée, true sinon*)
+  let var_add=ref [v] in (* var_add va contenir la liste des variables ayant été affectées *)
+  let stop=ref 0 in (* stop = 0 : il y a encore à propager, stop = 1 : on a finit de propoage, stop = 2 : on a généré une clause vide *)
    if formule#set_val b v
    then
      begin 
         while (!stop = 0) do
-          let l=formule#find_singleton in
+          let l=formule#find_singleton in (* toute les variables qui forment des clauses singletons *)
             begin
              if (l=[])
-             then stop:=1
+             then stop:=1 (* on se donne une chance de finir la propagation *)
              else List.iter (fun x -> match x with
                                         | None -> assert false
                                         | Some(vv,bb) -> if not (!stop = 2)
@@ -59,9 +59,9 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
             end;
           if not (!stop = 2)
             then match formule#find_single_polarite with
-              | None -> ()
+              | None -> () (* si stop était égale à 1, la propagation s'arrète ici *)
               | Some (vv,bb) -> begin
-                                  stop:=0;
+                                  stop:=0; (* la propagation doit refaire un tour... *)
                                   var_add := vv::(!var_add);
                                   if not (formule#set_val bb vv)
                                   then stop:=2
@@ -69,7 +69,7 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
         done;
         if (!stop = 1)
         then (!var_add,true)
-        else (!var_add,false)
+        else (!var_add,false) (* stop = 2 : clause vide créée *)
      end
    else (!var_add,false)
 
@@ -79,32 +79,25 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
 
 
 let dpll formule = (* renvoie true si une affectation a été trouvée, stockée dans paris, false sinon *)
-  let rec aux v b = (* faire le pari b sur v *) (*renvoie true si on peut prolonger les paris actuels, plus (v,b), en qqchose de satisfiable *)
+  let rec aux v b = (* renvoie true si en pariant b, ou plus, sur v on peut prolonger les paris actuels en qqchose de satisfiable *)(* "b ou plus" = true et false si b=true, juste false sinon *)
     match constraint_propagation v b formule with
       | (var_add,false) -> List.iter (fun vv -> formule#reset_val vv) var_add; (* on annule les paris faits *)
-                           if b then aux v false
-                                else false
+                           if b then aux v false (* si on avait parié true, on retente avec false *)
+                                else false (* sinon c'est finit, on va devoir revenir en arrière *)
       | (var_add,true) -> match next_pari formule with
-                            | None -> true
-                            | Some vv -> if aux vv true
-                                         then true
+                            | None -> true (* plus aucun pari à faire, c'est gagner *)
+                            | Some vv -> if aux vv true (* si on réussit à parier sur vv, puis à prolonger *)
+                                         then true (* alors c'est gagné *)
                                          else 
                                           begin
-                                              List.iter (fun vv -> formule#reset_val vv) var_add;
-                                              if b 
-                                              then aux v false
-                                              else false
+                                              List.iter (fun vvv -> formule#reset_val vvv) var_add; (* sinon on annule les paris *)
+                                              if b then aux v false (* si on avait parié true, on retente avec false *)
+                                                   else false (* sinon on va doit revenir en arrière *)
                                           end
   in aux 1 true
 
 
-(* Réflexions : *)
-(* si b est false, on va fusionner des listes *)
-(* on met le pari en tête de mem *)
-(** ce n'est pas rec terminal *)
-(* tous les paris ont été enlevés ? *)
-(** détection des tautologies / inclusions *)
-  
+
 
 
 

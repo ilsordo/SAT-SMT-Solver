@@ -6,7 +6,7 @@ type f_repr = ClauseSet.t
 
 class clauseset =
 object
-  val mutable vis = ClauseSet.empty (* clauses visibles*)
+  val mutable vis = ClauseSet.empty (* clauses visibles *)
   val mutable hid = ClauseSet.empty (* clauses cachées *)
 
   method hide c = (* cacher la clause c si elle est déjà visible *)
@@ -31,7 +31,7 @@ object
 
   method iter f = ClauseSet.iter f vis
 
-  method filter f = ClauseSet.elements (ClauseSet.filter f vis) (* renvoie la liste des élements de vis satisfaisant le prédicat f*)
+  method filter f = ClauseSet.elements (ClauseSet.filter f vis) (* renvoie la liste des élements de vis satisfaisant le prédicat f *)
 end
 
 (*******)
@@ -78,8 +78,6 @@ object (self)
 (***)
 
   method get_vars = vars
-
-  (*method set_pari v b = paris#set v b*) (*J'appelle pari les variables auquelles on a touché par set_val, je ne crois pas qu'on ait besoin de changer cette table depuis l'extérieur *)
 
   method get_pari v = (* indique si v a subi un pari, et si oui lequel *)
     paris#find v
@@ -162,7 +160,7 @@ object (self)
 
 (******)
 
-  method find_singleton = (* on cherche la liste des var sans pari qui forment une clause singleton *)
+  method find_singleton = (* renvoie la liste des var sans pari qui forment une clause singleton *)
     let l = clauses#filter (fun c -> not (c#singleton = None))  in
     let rec cl_to_var liste res = match liste with
       | [] -> res
@@ -177,13 +175,13 @@ object (self)
       if m>n 
       then None 
       else  if not (paris#mem m) 
-            then if (self#get_occurences occurences_pos m)#is_empty
-                 then Some (m,true)
+            then if (self#get_occurences occurences_pos m)#is_empty 
+                 then Some (m,true) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
                  else if (self#get_occurences occurences_neg m)#is_empty
                       then Some (m,false)
                       else parcours_polar (m+1) n
             else parcours_polar (m+1) n
-    in parcours_polar 1 vars#size (** on ne peut pas stocker le nb de variable directement dans la formule ? vars permet ici de ne pas trouver des variables n'apparaissant dans aucune clause. vars peut être de taille < n *)
+    in parcours_polar 1 nb_vars (** on ne peut pas stocker le nb de variable directement dans la formule ? vars permet ici de ne pas trouver des variables n'apparaissant dans aucune clause. vars peut être de taille < n *)
 
 end
 

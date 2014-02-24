@@ -18,33 +18,33 @@ object (self : 'varset)
     
   method repr = vis
 
-  method hide x = (* déplacer la variable x des variables visibles aux variables cachées (ssi elle est déjà visible) *)
+  method hide x = (* déplace la variable x des variables visibles aux variables cachées (ssi elle est déjà visible) *)
     if (VarSet.mem x vis) then 
       begin
         vis <- VarSet.remove x vis;
         hid <- VarSet.add x hid
       end 
       
-  method show x = (* déplacer la variable x des variables cachées aux variables visibles (ssi elle est déjà cachée) *) 
+  method show x = (* déplace la variable x des variables cachées aux variables visibles (ssi elle est déjà cachée) *) 
     if (VarSet.mem x hid) then
       begin
         hid <- VarSet.remove x hid;
         vis <- VarSet.add x vis
       end
         
-  method add x = vis <- VarSet.add x vis (* si x est déjà dans hid : après, si on le cache/montre, il ne sera plus qu'à un endroit *)
+  method add x = vis <- VarSet.add x vis (* ajoute x aux vars visibles // si x était déjà dans hid : après, si on le cache/montre, il ne sera plus que ds 1 endroit *)
      
   method mem x = VarSet.mem x vis  (* indique si la variable x est dans vis  *)
 
   method intersects (v : 'varset) = VarSet.is_empty (VarSet.inter vis v#repr) (* indique si l'intersection entre vis et v est vide ou non *)
 
-  method union (v : 'varset) = {< vis = VarSet.union vis v#repr; hid = VarSet.empty >} (* on renvoie une nouveau varset, union de vis et v *)
+  method union (v : 'varset) = {< vis = VarSet.union vis v#repr; hid = VarSet.empty >} (* renvoie une nouveau varset, union de vis et v *)
 
   method is_empty = VarSet.is_empty vis
 
   method size = VarSet.cardinal vis (* nombre de variables visibles *)
 
-  method singleton = (* indique si vis est un singleton *)
+  method singleton = (* indique si vis est un singleton, et renvoie Some v si v est l'unique variable de vis, None sinon *)
     try
       let x = VarSet.max_elt vis in
       if (x = VarSet.min_elt vis) then
@@ -81,7 +81,7 @@ object
     
   method get_vneg = vneg
 
-  method get_vars = vneg#union vpos (* renvoie un varset union de toutes les var visibles *)
+  method get_vars = vneg#union vpos (* renvoie un varset union de toutes les vars visibles *)
     
   method is_tauto = vpos#intersects vneg (* indique si la clause est une tautologie *)
     
