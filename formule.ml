@@ -82,7 +82,7 @@ object (self)
   method get_pari v = (* indique si v a subi un pari, et si oui lequel *)
     paris#find v
 
-  method get_paris = paris (** nécessaire pour renvoyer dans dpll Solvable ... ? *)
+  method get_paris = paris (** nécessaire pour renvoyer dans dpll : Solvable ... ? *)
 
 (***)
 
@@ -116,10 +116,8 @@ object (self)
       | Some occurences -> occurences
 
   (* Cache une clause des listes d'occurences de toutes les variables sauf v_ref *)
-  method private hide_occurences v_ref c = (* Tordu non? C'est peut être faux *) (** est-ce pertinent de ne pas cacher les occurences de v_ref ? *)
+  method private hide_occurences v_ref c =
     c#get_vpos#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_pos v)#hide c);
-    (* on n'a pas un pb si après on show une var de vpos_hide ? *)
-    (** c n'est plus accessible que par les occurences de v_ref et le seul moyen d'y accéder est de faire un reset_val *)
     c#get_vneg#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_neg v)#hide c)      
       
   method set_val b v = (* on souhaite assigner la variable v à b (true ou false), et faire évoluer les clauses en conséquences *)
@@ -140,7 +138,7 @@ object (self)
 
 
   (* Replace une clause dans les listes d'occurences de ses variables *)
-  method private show_occurences v_ref c = (* Tordu non? C'est peut être faux *)
+  method private show_occurences v_ref c =
     c#get_vpos#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_pos v)#show c);
     c#get_vneg#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_neg v)#show c)
 
@@ -159,7 +157,7 @@ object (self)
 
 (******)
 
-  method find_singleton = (* renvoie la liste des var sans pari qui forment une clause singleton *)
+  method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
     clauses#fold (fun c acc -> match c#singleton with Some x -> x::acc | None -> acc) []
     
 
@@ -175,6 +173,12 @@ object (self)
                       else parcours_polar (m+1) n
             else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars
+
+
+
+
+
+
 end
 
 
