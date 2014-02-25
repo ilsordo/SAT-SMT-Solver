@@ -33,7 +33,6 @@ let get_input () =
      
 let main () =
   let (n,cnf) = parse (get_input ()) in
-  (*print_answer ( cnf n);*)
   print_answer stdout (dpll (new formule n cnf)); (***)
   exit 0
 

@@ -48,7 +48,7 @@ end
 let constraint_propagation v b formule = (* on affecte v et on propage, on renvoie la liste des variables affectées + false si une clause vide a été générée, true sinon*)
   let var_add=ref [v] in (* var_add va contenir la liste des variables ayant été affectées *)
   let stop=ref 0 in (* stop = 0 : il y a encore à propager, stop = 1 : on a finit de propoage, stop = 2 : on a généré une clause vide *)
-   if formule#set_val b v
+   if not (formule#set_val b v)
    then
      begin 
         while (!stop = 0) do
@@ -60,7 +60,7 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
                                             then 
                                               begin
                                                 var_add := vv::(!var_add);
-                                                if not (formule#set_val bb vv)
+                                                if (formule#set_val bb vv)
                                                 then stop:=2
                                               end)
                l
@@ -72,7 +72,7 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
               | Some (vv,bb) -> begin
                                   stop:=0; (* la propagation doit refaire un tour... *)
                                   var_add := vv::(!var_add);
-                                  if not (formule#set_val bb vv)
+                                  if (formule#set_val bb vv)
                                   then stop:=2
                                 end
         done;
