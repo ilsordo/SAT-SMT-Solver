@@ -32,7 +32,6 @@ let get_input () =
      
 let main () =
   let (n,cnf) = parse (get_input ()) in
-  print_answer ( cnf n);
   exit 0
 
 let _ = main()

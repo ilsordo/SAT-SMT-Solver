@@ -31,6 +31,8 @@ object
 
   method iter f = ClauseSet.iter f vis
 
+  method fold f a = ClauseSet.fold f vis a
+
   method filter f = ClauseSet.elements (ClauseSet.filter f vis) (* renvoie la liste des élements de vis satisfaisant le prédicat f *)
 end
 
@@ -156,14 +158,7 @@ object (self)
 (******)
 
   method find_singleton = (* renvoie la liste des var sans pari qui forment une clause singleton *)
-    (* Pourquoi une liste? Si on passe un varset on évite de payer la conversion *)
-    let l = clauses#filter (fun c -> not (c#singleton = None))  in
-    let rec cl_to_var liste res = match liste with
-      | [] -> res
-      | c::q -> match c#singleton with
-                  | None -> assert false
-                  | Some x -> cl_to_var q (x::res) in
-    cl_to_var l []
+    clauses#fold (fun c acc -> match c#singleton with Some x -> x::acc | None -> acc) []
     
 
   method find_single_polarite = (* on cherche une var sans pari qui n'apparaitrait qu'avec une seule polarité *)
@@ -178,6 +173,11 @@ object (self)
                       else parcours_polar (m+1) n
             else parcours_polar (m+1) n
     in parcours_polar 1 n
+
+
+  
+    
+
 end
 
 
