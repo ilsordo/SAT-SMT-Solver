@@ -31,7 +31,7 @@ class formule :
     method get_paris : bool vartable
     method add_clause : clause -> unit
     method get_clauses : clauseset
-    method set_val : bool -> variable -> bool
+    method set_val : bool -> variable -> unit
     method reset_val : variable -> unit
     method find_singleton : (variable*bool) list
     method find_single_polarite : (variable*bool) option

@@ -134,7 +134,7 @@ object (self)
     (* On supprime les clauses où apparait le littéral, elles ne sont plus pointées que par la liste des occurences de v*)
     (self#get_occurences valider v)#iter (fun c -> clauses#hide c; self#hide_occurences v c);
     (* On supprime la négation du littéral des clauses où elle apparait, si on créé un conflit on le dit *)
-    (self#get_occurences supprimer v)#iter (fun c vide -> c#hide_var (not b) v ; if c#is_empty then raise Clause_vide)
+    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then raise Clause_vide)
 
 
   (* Replace une clause dans les listes d'occurences de ses variables *)

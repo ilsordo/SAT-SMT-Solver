@@ -1,4 +1,5 @@
 open Formule
+open Clause
 
 type answer = Unsolvable | Solvable of bool vartable
 
@@ -14,7 +15,11 @@ let print_answer p = function
       Printf.fprintf p "s SATISFIABLE\n";
       valeurs#iter (print_valeur p)
 
+
+
 (*************)
+
+
 
 let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié (et on a donc une affectation gagnante) *)
   let n=formule#get_nb_vars in
@@ -64,22 +69,23 @@ let dpll formule =
       | Conflict var_prop -> 
           List.iter (fun var -> formule#reset_val var) var_prop; (* on annule les paris faits *)
           if b then 
-            aux v false (* si on avait parié true, on retente avec false *)
+            aux v_pari false (* si on avait parié true, on retente avec false *)
           else 
             false (* sinon c'est finit, on va devoir revenir en arrière *)
       |  Fine var_prop -> 
           match next_pari formule with
             | None -> true (* plus aucun pari à faire, c'est gagné *)
             | Some var -> 
-                if aux var true then(* si on réussit à parier sur vv, puis à prolonger *)
+                if aux var true then(* si on réussit à parier sur vv (true ou plus), puis à prolonger *)
                   true (* alors c'est gagné *)
                 else 
                   begin
-                    List.iter (fun var -> formule#reset_val var) var_prop; (* sinon on annule les paris *) (** Il ne faut pas les garder? j'aurais juste fait formule#reset_val var_pari *)
+                    List.iter (fun var -> formule#reset_val var) var_prop; (* sinon on annule les paris *) (** Il ne faut pas les garder? j'aurais juste fait formule#reset_val var_pari << NON : en fait il faut bien voir que aux v b renvoie true ssi on peut prolonger les paris actuels en pariant sur v : true ou false (si b=true) ou juste false (si b=false). Comme ici on a fait aux var true, si on obtient false c'est que qq soit le pari sur var (true ou false), on perd ; donc il faut bien tout annuler *)
                     if b then 
-                      aux v false (* si on avait parié true, on retente avec false *)
+                      aux v_pari false (* si on avait parié true, on retente avec false *)
                     else 
                       false (* sinon on va doit revenir en arrière *)
+
                   end
   in 
   if aux 1 true then 
