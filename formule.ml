@@ -121,7 +121,7 @@ object (self)
     c#get_vneg#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_neg v)#hide c)      
       
   method set_val b v = (* on souhaite assigner la variable v à b (true ou false), et faire évoluer les clauses en conséquences *)
-    let clause_vide = ref true in
+    (*let clause_vide = ref true in*)
     let _ = match paris#find v with
       | None -> paris#set v b
       | Some _ -> assert false in (* Pas de double paris *) 
