@@ -50,7 +50,7 @@ let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None 
 
 let constraint_propagation v b formule = (* on affecte v et on propage, on renvoie la liste des variables affectées + Conflict si une clause vide a été générée, Fine sinon*)
   let var_add=ref [v] in (* var_add va contenir la liste des variables ayant été affectées *)
-  let stop=ref false in (* stop = 0 : il y a encore à propager, stop = 1 : on a finit de propoage, stop = 2 : on a généré une clause vide *)
+  let stop=ref false in (* stop = false : il y a encore à propager, stop = true : on a fini de propager *)
   try
     formule#set_val b v;
     while not (!stop) do
@@ -75,30 +75,34 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
       Clause_vide -> Conflict (!var_add)
 
 
-
-
-
-
-
-let dpll formule = (* renvoie true si une affectation a été trouvée, stockée dans paris, false sinon *)
-  let rec aux v b = (* renvoie true si en pariant b, ou plus, sur v on peut prolonger les paris actuels en qqchose de satisfiable *)(* "b ou plus" = true et false si b=true, juste false sinon *)
-    match constraint_propagation v b formule with
-      | (var_add,false) -> List.iter (fun vv -> formule#reset_val vv) var_add; (* on annule les paris faits *)
-          if b then aux v false (* si on avait parié true, on retente avec false *)
-          else false (* sinon c'est finit, on va devoir revenir en arrière *)
-      | (var_add,true) -> match next_pari formule with
-          | None -> true (* plus aucun pari à faire, c'est gagner *)
-          | Some vv -> if aux vv true (* si on réussit à parier sur vv, puis à prolonger *)
-            then true (* alors c'est gagné *)
-            else 
-              begin
-                List.iter (fun vvv -> formule#reset_val vvv) var_add; (* sinon on annule les paris *)
-                if b then aux v false (* si on avait parié true, on retente avec false *)
-                else false (* sinon on va doit revenir en arrière *)
-              end
-  in if aux 1 true 
-     then Solvable formule#get_paris
-     else Unsolvable
+let dpll formule =
+  let rec aux v_pari b = (* renvoie true si en pariant b, ou plus, sur v on peut prolonger les paris actuels en qqchose de satisfiable *)(* "b ou plus" = true et false si b=true, juste false sinon *)
+    match constraint_propagation v_pari b formule with
+      | Conflict var_prop -> 
+          List.iter (fun var -> formule#reset_val var) var_prop; (* on annule les paris faits *)
+          if b then 
+            aux v false (* si on avait parié true, on retente avec false *)
+          else 
+            false (* sinon c'est finit, on va devoir revenir en arrière *)
+      |  Fine var_prop -> 
+          match next_pari formule with
+            | None -> true (* plus aucun pari à faire, c'est gagné *)
+            | Some var -> 
+                if aux var true then(* si on réussit à parier sur vv, puis à prolonger *)
+                  true (* alors c'est gagné *)
+                else 
+                  begin
+                    List.iter (fun var -> formule#reset_val var) var_prop; (* sinon on annule les paris *) (** Il ne faut pas les garder? j'aurais juste fait formule#reset_val var_pari *)
+                    if b then 
+                      aux v false (* si on avait parié true, on retente avec false *)
+                    else 
+                      false (* sinon on va doit revenir en arrière *)
+                  end
+  in 
+  if aux 1 true then 
+    Solvable formule#get_paris
+  else 
+    Unsolvable
 
 
 
