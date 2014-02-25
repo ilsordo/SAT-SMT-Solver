@@ -15,11 +15,11 @@ let print_answer p = function
 (*************)
 
 let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié (et on a donc une affectation gagnante) *)
-  let n=formule#get_nb_vars in (** pas de fonction get_nb_vars *)
+  let n=formule#get_nb_vars in
   let rec parcours_paris m = 
     if m > n
     then None
-    else if formule#is_pari m 
+    else if (formule#get_pari m != None) 
          then parcours_paris (m+1) 
          else Some m
   in parcours_paris 1
@@ -56,15 +56,13 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
             begin
              if (l=[])
              then stop:=1 (* on se donne une chance de finir la propagation *)
-             else List.iter (fun x -> match x with
-                                        | None -> assert false
-                                        | Some(vv,bb) -> if not (!stop = 2)
-                                                         then 
-                                                           begin
-                                                             var_add := vv::(!var_add);
-                                                             if not (formule#set_val bb vv)
-                                                             then stop:=2
-                                                           end)
+             else List.iter (fun (vv,bb) -> if not (!stop = 2)
+                                            then 
+                                              begin
+                                                var_add := vv::(!var_add);
+                                                if not (formule#set_val bb vv)
+                                                then stop:=2
+                                              end)
                l
                             
             end;
@@ -105,7 +103,9 @@ let dpll formule = (* renvoie true si une affectation a été trouvée, stockée
                 if b then aux v false (* si on avait parié true, on retente avec false *)
                 else false (* sinon on va doit revenir en arrière *)
               end
-  in aux 1 true
+  in if aux 1 true 
+     then Solvable formule#get_paris
+     else Unsolvable
 
 
 

@@ -28,6 +28,7 @@ class formule :
   object
     method get_nb_vars : int
     method get_pari : variable -> bool option
+    method get_paris : bool vartable
     method add_clause : clause -> unit
     method get_clauses : clauseset
     method set_val : bool -> variable -> bool

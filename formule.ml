@@ -80,6 +80,8 @@ object (self)
   method get_pari v = (* indique si v a subi un pari, et si oui lequel *)
     paris#find v
 
+  method get_paris = paris (** nécessaire pour renvoyer dans dpll Solvable ... ? *)
+
 (***)
 
   method private add_occurence b c v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
@@ -177,7 +179,7 @@ object (self)
                       then Some (m,false)
                       else parcours_polar (m+1) n
             else parcours_polar (m+1) n
-    in parcours_polar 1 n
+    in parcours_polar 1 self#get_nb_vars
 end
 
 
