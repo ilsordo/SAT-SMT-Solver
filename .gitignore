@@ -10,3 +10,5 @@
 *~
 resol
 _build/*
+*.native
+*.byte
