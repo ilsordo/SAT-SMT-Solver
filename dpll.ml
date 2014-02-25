@@ -61,6 +61,7 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
                                             then 
                                               begin
                                                 var_add := vv::(!var_add);
+                                                (*if (formule#get_pari vv != None) then failwith "ee";*)
                                                 if (formule#set_val bb vv)
                                                 then stop:=2
                                               end)

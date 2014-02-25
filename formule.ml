@@ -33,7 +33,6 @@ object
 
   method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> ClauseSet.fold f vis a
 
-  method filter f = ClauseSet.elements (ClauseSet.filter f vis) (* renvoie la liste des élements de vis satisfaisant le prédicat f *)
 end
 
 (*******)
@@ -153,13 +152,14 @@ object (self)
       else
         (occurences_neg,occurences_pos) in
     (self#get_occurences annuler v)#iter (fun c -> c#show_var (not b) v); (* On replace les occurences du littéral *)
-    (self#get_occurences restaurer v)#iter (fun c -> clauses#show c; self#show_occurences v c) 
+    (self#get_occurences restaurer v)#iter (fun c -> clauses#show c; self#show_occurences v c);
+    paris#remove v
   (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
 
 (******)
 
   method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
-    clauses#fold (fun c acc -> match c#singleton with Some x -> x::acc | None -> acc) []
+    clauses#fold (fun c acc -> match c#singleton with Some x -> if not (List.mem x acc) then x::acc else acc | None -> acc) []
     
 
   method find_single_polarite = (* on cherche une var sans pari qui n'apparaitrait qu'avec une seule polarité *)
