@@ -1,7 +1,7 @@
 open Dpll
 open Lexing
 open Printf
-open Formule (** prq si j'enlève ça, ça complie pas ? *)
+open Formule (** prq si j'enlève ça, ça complie pas ? *)(* le constructeur new formule je pense *)
 
 let usage () =
   eprintf "Usage:\n resol [fichier]\n%!";
