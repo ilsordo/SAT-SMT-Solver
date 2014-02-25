@@ -26,12 +26,12 @@ class formule :
   int ->
   variable list list ->
   object
-    method get_vars : varset
+    method get_nb_vars : int
     method get_pari : variable -> bool option
     method add_clause : clause -> unit
     method get_clauses : clauseset
-    method reset_val : variable -> unit
     method set_val : bool -> variable -> bool
+    method reset_val : variable -> unit
     method find_singleton : (variable*bool) list
     method find_single_polarite : (variable*bool) option
   end

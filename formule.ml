@@ -60,24 +60,22 @@ end
 
 class formule n clauses_init =
 object (self)
-  val vars = new varset (* quelle utilité ? *)
   val clauses = new clauseset (* ensemble des clauses de la formule, peut contenir des clauses cachées/visibles *)
-  val occurences_pos = new vartable n (* associe à chaque variable les clauses auxquelles elle appartient (clauses pouvant être cachées ou non) *)
-  val occurences_neg = new vartable n
-  val paris = new vartable n (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
+  val occurences_pos : clauseset vartable = new vartable n (* associe à chaque variable les clauses auxquelles elle appartient (clauses pouvant être cachées ou non) *)
+  val occurences_neg : clauseset vartable = new vartable n
+  val paris : bool vartable = new vartable n (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
 
   initializer
-    (*for i=1 to n do
+    for i=1 to n do
       occurences_pos#set i (new clauseset);
       occurences_neg#set i (new clauseset)
-    done;*) (* C'est déjà fait par la 2eme ligne, si les occurences ne sont pas initialisées add_occurence le fait *)
-    (** et si une variable n'apparait dans aucune clause ? *)
+    done;
     List.iter (fun c -> clauses#add (new clause c)) clauses_init;
     clauses#iter self#register_clause
 
 (***)
 
-  method get_vars = vars
+  method get_nb_vars = n
 
   method get_pari v = (* indique si v a subi un pari, et si oui lequel *)
     paris#find v
@@ -94,10 +92,9 @@ object (self)
       | Some set -> set in
     set#add c
 
-  method private register_clause c = (* Met c dans les listes d'occurences de ses variables, enregistre ses variables *)
+  method private register_clause c = (* Met c dans les listes d'occurences de ses variables *)
     c#get_vpos#iter (self#add_occurence true c);
-    c#get_vneg#iter (self#add_occurence false c);
-    c#get_vars#iter vars#add (** pourquoi remplir vars ici et ne pas le faire au début (on sait qu'il y a n variables), là c'est assez redondant de fusionner à chaque fois (via get_vars) puis d'ajouter à vars ? est-ce que vars sert à savoir quelles sont les variables effectivement présentent dans une clause ? *)
+    c#get_vneg#iter (self#add_occurence false c)
       
 (***)
 
@@ -111,9 +108,7 @@ object (self)
   method private get_occurences occ v =
     match occ#find v with
       | None -> assert false 
-      (* Cette variable aurait du être initialisée ... *) 
-      (** mais à priori ça peut ne pas être initialisé ?, c'est initialisé qd ? *) 
-      (*** register_clause qui est appelé par initializer sur chaque clause puis a chaque ajout *)
+      (* Cette variable aurait du être initialisée à l'ajout de la clause *) 
       | Some occurences -> occurences
 
   (* Cache une clause des listes d'occurences de toutes les variables sauf v_ref *)
@@ -134,7 +129,7 @@ object (self)
       else
         (occurences_neg,occurences_pos) in
     (* On supprime les occurences du littéral *) 
-    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then clause_vide := false); (*** c'est ici qu'on fait apparaitre des clauses vides *)
+    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then clause_vide := false); (*** c'est ici qu'on fait apparaitre des clauses vides *)(* Des références? Horreur et damnation! *)
     (* On supprime les clauses où apparait la négation du littéral, elles ne sont plus pointées que par la liste des occurences de v*)
     (self#get_occurences valider v)#iter (fun c -> clauses#hide c; self#hide_occurences v c);
     !clause_vide
@@ -161,6 +156,7 @@ object (self)
 (******)
 
   method find_singleton = (* renvoie la liste des var sans pari qui forment une clause singleton *)
+    (* Pourquoi une liste? Si on passe un varset on évite de payer la conversion *)
     let l = clauses#filter (fun c -> not (c#singleton = None))  in
     let rec cl_to_var liste res = match liste with
       | [] -> res
@@ -181,8 +177,7 @@ object (self)
                       then Some (m,false)
                       else parcours_polar (m+1) n
             else parcours_polar (m+1) n
-    in parcours_polar 1 nb_vars (** on ne peut pas stocker le nb de variable directement dans la formule ? vars permet ici de ne pas trouver des variables n'apparaissant dans aucune clause. vars peut être de taille < n *)
-
+    in parcours_polar 1 n
 end
 
 

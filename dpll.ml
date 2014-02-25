@@ -1,8 +1,18 @@
 open Formule
 
-(*
-type mem = (variable*(variable list)) list
-*)
+type answer = Unsolvable | Solvable of bool vartable
+
+let print_valeur p v = function
+  | true -> Printf.fprintf p "v %d\n" v
+  | false -> Printf.fprintf p "v -%d\n" v
+
+let print_answer p = function
+  | Unsolvable -> Printf.fprintf p "s UNSATISFIABLE\n"
+  | Solvable valeurs -> 
+      Printf.fprintf p "s SATISFIABLE\n";
+      valeurs#iter (print_valeur p)
+
+(*************)
 
 let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié (et on a donc une affectation gagnante) *)
   let n=formule#get_nb_vars in (** pas de fonction get_nb_vars *)
@@ -55,7 +65,8 @@ let constraint_propagation v b formule = (* on affecte v et on propage, on renvo
                                                              if not (formule#set_val bb vv)
                                                              then stop:=2
                                                            end)
-                            l
+               l
+                            
             end;
           if not (!stop = 2)
             then match formule#find_single_polarite with
@@ -82,18 +93,18 @@ let dpll formule = (* renvoie true si une affectation a été trouvée, stockée
   let rec aux v b = (* renvoie true si en pariant b, ou plus, sur v on peut prolonger les paris actuels en qqchose de satisfiable *)(* "b ou plus" = true et false si b=true, juste false sinon *)
     match constraint_propagation v b formule with
       | (var_add,false) -> List.iter (fun vv -> formule#reset_val vv) var_add; (* on annule les paris faits *)
-                           if b then aux v false (* si on avait parié true, on retente avec false *)
-                                else false (* sinon c'est finit, on va devoir revenir en arrière *)
+          if b then aux v false (* si on avait parié true, on retente avec false *)
+          else false (* sinon c'est finit, on va devoir revenir en arrière *)
       | (var_add,true) -> match next_pari formule with
-                            | None -> true (* plus aucun pari à faire, c'est gagner *)
-                            | Some vv -> if aux vv true (* si on réussit à parier sur vv, puis à prolonger *)
-                                         then true (* alors c'est gagné *)
-                                         else 
-                                          begin
-                                              List.iter (fun vvv -> formule#reset_val vvv) var_add; (* sinon on annule les paris *)
-                                              if b then aux v false (* si on avait parié true, on retente avec false *)
-                                                   else false (* sinon on va doit revenir en arrière *)
-                                          end
+          | None -> true (* plus aucun pari à faire, c'est gagner *)
+          | Some vv -> if aux vv true (* si on réussit à parier sur vv, puis à prolonger *)
+            then true (* alors c'est gagné *)
+            else 
+              begin
+                List.iter (fun vvv -> formule#reset_val vvv) var_add; (* sinon on annule les paris *)
+                if b then aux v false (* si on avait parié true, on retente avec false *)
+                else false (* sinon on va doit revenir en arrière *)
+              end
   in aux 1 true
 
 
