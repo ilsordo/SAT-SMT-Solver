@@ -7,6 +7,7 @@ class clauseset :
     method is_empty : bool
     method iter : (clause -> unit) -> unit
     method filter : (clause -> bool) -> clause list
+    method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a 
     method mem : clause -> bool
     method show : clause -> unit
   end

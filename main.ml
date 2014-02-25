@@ -1,5 +1,4 @@
 open Dpll
-open Formule
 open Lexing
 open Printf
 
