@@ -4,6 +4,8 @@ module ClauseSet = Set.Make(OrderedClause)
 
 type f_repr = ClauseSet.t
 
+exception Clause_vide
+
 class clauseset =
 object
   val mutable vis = ClauseSet.empty (* clauses visibles *)
@@ -129,12 +131,10 @@ object (self)
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
-    (* On supprime les occurences du littéral *) 
-    (*(self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then clause_vide := false); (*** c'est ici qu'on fait apparaitre des clauses vides *)(* Des références? Horreur et damnation! *)*)
-    (* On supprime les clauses où apparait la négation du littéral, elles ne sont plus pointées que par la liste des occurences de v*)
+    (* On supprime les clauses où apparait le littéral, elles ne sont plus pointées que par la liste des occurences de v*)
     (self#get_occurences valider v)#iter (fun c -> clauses#hide c; self#hide_occurences v c);
-    (self#get_occurences supprimer v)#fold (fun c vide -> c#hide_var (not b) v ; if c#is_empty then true else vide) false (* on renverra true ssi une clause vide est créée *)(**vérifier si ok*)
-    (*!clause_vide*)
+    (* On supprime la négation du littéral des clauses où elle apparait, si on créé un conflit on le dit *)
+    (self#get_occurences supprimer v)#iter (fun c vide -> c#hide_var (not b) v ; if c#is_empty then raise Clause_vide)
 
 
   (* Replace une clause dans les listes d'occurences de ses variables *)
