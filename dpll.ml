@@ -1,3 +1,4 @@
+open Clause
 open Formule
 open Clause
 
@@ -36,31 +37,29 @@ let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None 
 
 
 
-let constraint_propagation v b formule = (* on affecte v et on propage, on renvoie la liste des variables affectées + Conflict si une clause vide a été générée, Fine sinon*)
-  let var_add=ref [v] in (* var_add va contenir la liste des variables ayant été affectées *)
-  let stop=ref false in (* stop = false : il y a encore à propager, stop = true : on a fini de propager *)
+let constraint_propagation v_cons b_cons formule = (* on affecte v et on propage, on renvoie la liste des variables affectées + Conflict si une clause vide a été générée, Fine sinon*)
+  let var_add = ref [] in (* var_add va contenir la liste des variables ayant été affectées *)
+  let stop = ref false in (* stop = false : il y a encore à propager, stop = true : on a fini de propager *)
+  let affect v b =
+    var_add := v::(!var_add);
+    formule#set_val b v in (* Peut lever une exception qui est attrapée plus loin *)
   try
-    formule#set_val b v;
+    affect v_cons b_cons;
     while not (!stop) do
-      let l=formule#find_singleton in (* toute les variables qui forment des clauses singletons *)
-      if (l=[]) then 
+      let singletons = formule#find_singleton in (* toute les variables qui forment des clauses singletons *)
+      if singletons#is_empty then 
         stop:=true (* on se donne une chance de finir la propagation *)
-      else
-        List.iter 
-          (fun (vv,bb) ->
-            var_add := vv::(!var_add);
-            formule#set_val bb vv) (* Peut lever une exception qui est attrapée plus loin *)
-          l;
+      else   
+        singletons#iter affect;        
       match formule#find_single_polarite with
-        | None -> () (* si stop était égale à 1, la propagation s'arrète ici *)
-        | Some (vv,bb) -> 
+        | None -> () (* si stop était à true, la propagation s'arrète ici *)
+        | Some (v,b) ->
             stop:=false; (* la propagation doit refaire un tour... *)
-            var_add := vv::(!var_add);
-            formule#set_val bb vv (* Peut lever une exception qui est attrapée plus loin *)
+            affect v b
     done; 
     Fine (!var_add)
   with 
-      Clause_vide -> Conflict (!var_add)
+    | Clause_vide -> Conflict (!var_add)
 
 
 let dpll formule =

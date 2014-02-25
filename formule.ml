@@ -46,6 +46,8 @@ object (self)
     
   method size = Hashtbl.length data
 
+  method is_empty = Hashtbl.length data = 0
+
   method set v x = Hashtbl.replace data v x (* peut être utilisé comme fonction d'ajout ou de remplacement : on associe la valeur x à la variable v *)
 
   method find v = try Some (Hashtbl.find data v) with Not_found -> None
@@ -159,7 +161,10 @@ object (self)
 (******)
 
   method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
-    clauses#fold (fun c acc -> match c#singleton with Some x -> if not (List.mem x acc) then x::acc else acc | None -> acc) []
+    let singletons = new vartable n in
+    clauses#iter (fun c -> match c#singleton with Some (v,b) -> singletons#set v b | None -> ());
+    singletons
+    
     
 
   method find_single_polarite = (* on cherche une var sans pari qui n'apparaitrait qu'avec une seule polarité *)
