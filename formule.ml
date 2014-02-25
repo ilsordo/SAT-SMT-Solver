@@ -31,7 +31,7 @@ object
 
   method iter f = ClauseSet.iter f vis
 
-  method fold f a = ClauseSet.fold f vis a
+  method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> ClauseSet.fold f vis a
 
   method filter f = ClauseSet.elements (ClauseSet.filter f vis) (* renvoie la liste des élements de vis satisfaisant le prédicat f *)
 end
