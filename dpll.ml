@@ -16,13 +16,14 @@ let print_answer p = function
 
 let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié (et on a donc une affectation gagnante) *)
   let n=formule#get_nb_vars in
-  let rec parcours_paris m = 
-    if m > n
-    then None
-    else if (formule#get_pari m != None) 
-         then parcours_paris (m+1) 
-         else Some m
-  in parcours_paris 1
+  let rec parcours_paris = function
+    | 0 -> None
+    | m -> 
+        if (formule#get_pari m != None) then 
+          parcours_paris (m-1) 
+        else 
+          Some m in
+  parcours_paris n
 
 
 (*

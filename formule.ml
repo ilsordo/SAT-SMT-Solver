@@ -63,7 +63,7 @@ end
 class formule n clauses_init =
 object (self)
   val clauses = new clauseset (* ensemble des clauses de la formule, peut contenir des clauses cachées/visibles *)
-  val occurences_pos : clauseset vartable = new vartable n (* associe à chaque variable les clauses auxquelles elle appartient (clauses pouvant être cachées ou non) *)
+  val occurences_pos : clauseset vartable = new vartable n (* associe à chaque variable les clauses auxquelles elle appartient *)
   val occurences_neg : clauseset vartable = new vartable n
   val paris : bool vartable = new vartable n (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
 
