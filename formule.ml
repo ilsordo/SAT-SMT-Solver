@@ -173,21 +173,24 @@ object (self)
       (fun v -> 
         if v<>v_ref then 
           begin
-            (self#get_occurences occurences_pos v)#show c ;
-            Printf.eprintf "Clause_pos %d show for var %d\n" c#get_id v
+            (self#get_occurences occurences_pos v)#show c (*;
+            Printf.eprintf "Clause_pos %d show for var %d\n" c#get_id v*)
           end);
     c#get_vneg#iter 
       (fun v -> 
         if v<>v_ref then 
           begin
-            (self#get_occurences occurences_neg v)#show c ;
-            Printf.eprintf "Clause_neg %d show for var %d\n" c#get_id v
+            (self#get_occurences occurences_neg v)#show c (*;
+            Printf.eprintf "Clause_neg %d show for var %d\n" c#get_id v*)
           end)
 
   method reset_val v =
     let b = match paris#find v with
       | None -> assert false (* On ne revient pas sur un pari pas fait *)
-      | Some b -> paris#remove v ; b in
+      | Some b -> 
+          Printf.eprintf "Unsetting %b on %d \n" b v;
+          paris#remove v ; 
+          b in
     let (invalider,restaurer) =
       if b then
         (occurences_pos,occurences_neg)
@@ -210,7 +213,7 @@ object (self)
 
   method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
     try 
-      clauses#iter (fun c -> match c#singleton with Some x -> raise (Found x) | None -> ());
+      clauses#iter (fun c -> match c#singleton with Some x -> (Printf.eprintf "Clause : %d -> " c#get_id; raise (Found x)) | None -> ());
       None
     with 
       | Found x -> Some x
