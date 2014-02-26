@@ -159,7 +159,9 @@ object (self)
     (* On supprime la négation du littéral des clauses où elle apparait, si on créé un conflit on le dit *)
     (self#get_occurences supprimer v)#iter 
       (fun c -> 
+        Printf.eprintf "Var %d hidden in Clause : %a \n" v c#print();
         c#hide_var (not b) v ;
+        Printf.eprintf "Var %d has been hidden in Clause : %a \n" v c#print();
         if c#is_empty then 
           (Printf.eprintf "Empty clause %d \n" c#get_id;
            raise Clause_vide))
@@ -187,13 +189,15 @@ object (self)
       | None -> assert false (* On ne revient pas sur un pari pas fait *)
       | Some b -> paris#remove v ; b in
     let (annuler,restaurer) =
-      if b then
+      if (not b) then
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
     (self#get_occurences annuler v)#iter 
       (fun c -> 
-        c#show_var (not b) v); (* On replace les occurences du littéral *)
+        Printf.eprintf "Var %d shown in Clause : %a \n" v c#print();
+        c#show_var (not b) v;
+        Printf.eprintf "Var %d has been shown in Clause : %a \n" v c#print();); (* On replace les occurences du littéral *)
     (self#get_occurences restaurer v)#iter 
       (fun c -> 
         clauses#show c;
