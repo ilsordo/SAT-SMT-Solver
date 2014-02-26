@@ -112,7 +112,7 @@ object
       | (Empty, Singleton v) -> Some (v,false)
       | _ -> None
 
-  method print p = 
+  method print p () = 
     Printf.fprintf p "Clause %d : " id;
     vpos#iter (fun v -> Printf.fprintf p "%d " v);
     vneg#iter (fun v -> Printf.fprintf p "-%d " v)
