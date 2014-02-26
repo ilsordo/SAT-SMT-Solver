@@ -98,6 +98,7 @@ let dpll formule =
                       true
                     else
                       begin
+                        List.iter (fun v -> formule#reset_val v) var_prop;
                         formule#reset_val var;
                         false
                       end

@@ -173,21 +173,21 @@ object (self)
       (fun v -> 
         if v<>v_ref then 
           begin
-            (self#get_occurences occurences_pos v)#show c ;
-            Printf.eprintf "Clause_pos %d show for var %d\n" c#get_id v
+            (self#get_occurences occurences_pos v)#show c (*;
+            Printf.eprintf "Clause_pos %d show for var %d\n" c#get_id v*)
           end);
     c#get_vneg#iter 
       (fun v -> 
         if v<>v_ref then 
           begin
-            (self#get_occurences occurences_neg v)#show c ;
-            Printf.eprintf "Clause_neg %d show for var %d\n" c#get_id v
+            (self#get_occurences occurences_neg v)#show c (*;
+            Printf.eprintf "Clause_neg %d show for var %d\n" c#get_id v*)
           end)
 
   method reset_val v =
     let b = match paris#find v with
       | None -> assert false (* On ne revient pas sur un pari pas fait *)
-      | Some b -> paris#remove v ; b in
+      | Some b -> (Printf.eprintf "Unsetting %b on %d \n" b v ; paris#remove v ; b) in
     let (annuler,restaurer) =
       if (not b) then
         (occurences_pos,occurences_neg)
@@ -195,21 +195,21 @@ object (self)
         (occurences_neg,occurences_pos) in
     (self#get_occurences annuler v)#iter 
       (fun c -> 
-        Printf.eprintf "Var %d shown in Clause : %a \n" v c#print();
-        c#show_var (not b) v;
-        Printf.eprintf "Var %d has been shown in Clause : %a \n" v c#print();); (* On replace les occurences du littéral *)
+        (*Printf.eprintf "Var %d shown in Clause : %a \n" v c#print();*)
+        c#show_var (not b) v(*;
+        Printf.eprintf "Var %d has been shown in Clause : %a \n" v c#print()*)); (* On replace les occurences du littéral *)
     (self#get_occurences restaurer v)#iter 
       (fun c -> 
         clauses#show c;
-        self#show_occurences v c ;
-        Printf.eprintf "Clause show : %d \n" c#get_id ); (** on risque de show des clauses cachées par d'autres var ??? *)
+        self#show_occurences v c (*;
+        Printf.eprintf "Clause show : %d \n" c#get_id*) ); (** on risque de show des clauses cachées par d'autres var ??? *)
   (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
 
   (******)
 
   method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
     try 
-      clauses#iter (fun c -> match c#singleton with Some x -> raise (Found x) | None -> ());
+      clauses#iter (fun c -> match c#singleton with Some x -> (Printf.eprintf "Clause : %d -> " c#get_id; raise (Found x)) | None -> ());
       None
     with 
       | Found x -> Some x
