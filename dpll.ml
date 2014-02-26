@@ -4,7 +4,7 @@ open Clause
 
 type answer = Unsolvable | Solvable of bool vartable
 
-type propagation_result = Fine of variable list | Conflict of variable list (* C'est juste pour la lisibilité du code, si tu aimes pas on peut le virer *)
+type propagation_result = Fine of variable list | Conflict (* C'est juste pour la lisibilité du code, si tu aimes pas on peut le virer *)
 
 let print_valeur p v = function
   | true -> Printf.fprintf p "v %d\n" v
@@ -58,41 +58,59 @@ let constraint_propagation formule = (* on affecte v et on propage, on renvoie l
     done; 
     Fine (!var_add)
   with 
-    | Clause_vide -> Conflict (!var_add)
+    Clause_vide -> 
+        List.iter (fun var -> formule#reset_val var) !var_add; 
+        Conflict 
 
 
-let dpll formule =
-  let rec aux v_pari b = (* renvoie true si en pariant b, ou plus, sur v on peut prolonger les paris actuels en qqchose de satisfiable *)(* "b ou plus" = true et false si b=true, juste false sinon *)
+
+let dpll formule = 
+
+  let try_pari var b =
+    try 
+      formule#set_val b var;
+      true
+    with
+      Clause_vide ->
+        formule#reset_val var;
+        false      in
+
+  let rec aux () = (* renvoie true si en pariant b, ou plus, sur v on peut prolonger les paris actuels en qqchose de satisfiable *)(* "b ou plus" = true et false si b=true, juste false sinon *)
       match constraint_propagation formule with
-        | Conflict var_prop -> 
-            List.iter (fun var -> formule#reset_val var) var_prop; (* on annule les paris faits *)
-            if b then 
-              aux v_pari false (* si on avait parié true, on retente avec false *)
-            else 
-            false (* sinon c'est finit, on va devoir revenir en arrière *)
+        | Conflict -> false
         |  Fine var_prop -> 
             match next_pari formule with
               | None -> true (* plus aucun pari à faire, c'est gagné *)
               | Some var -> 
-                  if aux var true then(* si on réussit à parier sur vv (true ou plus), puis à prolonger *)
-                    true (* alors c'est gagné *)
-                  else 
-                    begin
-                      List.iter (fun var -> formule#reset_val var) var_prop; (* sinon on annule les paris *) 
-                      if b then 
-                        aux v_pari false (* si on avait parié true, on retente avec false *)
+                  if try_pari var true then
+                    if aux() then
+                      true
+                    else 
+                      begin
+                        formule#reset_val var;
+                        if try_pari var false then
+                          if aux() then
+                            true
+                          else 
+                            begin
+                              formule#reset_val var;
+                              false
+                            end
+                        else
+                          false
+                      end
+                  else
+                    if try_pari var false then
+                      if aux() then
+                        true
                       else 
-                        false (* sinon on va doit revenir en arrière *)
-                    end
-    try
-      formule#set_val b v_pari
-    with
-      Clause_vide -> if b then
-                        aux v_pari false
-                     else
-                        false
-  in 
-  if aux 1 true then 
+                        begin
+                          formule#reset_val var;
+                          false
+                        end
+                    else
+                      false
+  in if aux () then 
     Solvable formule#get_paris
   else 
     Unsolvable
