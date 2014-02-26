@@ -108,8 +108,8 @@ object
 
   method singleton = (* renvoie Some (x,b) si la clause est un singleton ne contenant que x avec la positivité b, None sinon *)
     match (vpos#singleton, vneg#singleton) with
-      | (Singleton v, Empty) -> Printf.eprintf "In clause %d, pos :" id;Some (v,true)
-      | (Empty, Singleton v) -> Printf.eprintf "In clause %d, neg :" id;Some (v,false)
+      | (Singleton v, Empty) -> Some (v,true)
+      | (Empty, Singleton v) -> Some (v,false)
       | _ -> None
 end
 
