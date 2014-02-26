@@ -144,13 +144,13 @@ object (self)
   method set_val b v = (* on souhaite assigner la variable v à b (true ou false), et faire évoluer les clauses en conséquences *)
     let _ = match paris#find v with
       | None -> paris#set v b
-      | Some _ -> assert false in (* Pas de double paris *) 
+      | Some _ -> assert false in (* Pas de double paris *)
     let (valider,supprimer) =
       if b then
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
-    (* On supprime les clauses où apparait le littéral, elles ne sont plus pointées que par la liste des occurences de v*)
+    (* On supprime (valide) les clauses où apparait le littéral, elles ne sont plus pointées que par la liste des occurences de v*)
     (self#get_occurences valider v)#iter 
       (fun c -> 
         clauses#hide c ; 
@@ -160,7 +160,7 @@ object (self)
     (self#get_occurences supprimer v)#iter 
       (fun c -> 
         Printf.eprintf "Var %d hidden in Clause : %a \n" v c#print();
-        c#hide_var (not b) v ;
+        c#hide_var (not b) v;
         Printf.eprintf "Var %d has been hidden in Clause : %a \n" v c#print();
         if c#is_empty then 
           (Printf.eprintf "Empty clause %d \n" c#get_id;
@@ -188,22 +188,23 @@ object (self)
     let b = match paris#find v with
       | None -> assert false (* On ne revient pas sur un pari pas fait *)
       | Some b -> paris#remove v ; b in
-    let (annuler,restaurer) =
-      if (not b) then
+    let (invalider,restaurer) =
+      if b then
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
-    (self#get_occurences annuler v)#iter 
-      (fun c -> 
-        Printf.eprintf "Var %d shown in Clause : %a \n" v c#print();
-        c#show_var (not b) v;
-        Printf.eprintf "Var %d has been shown in Clause : %a \n" v c#print();); (* On replace les occurences du littéral *)
-    (self#get_occurences restaurer v)#iter 
+    (* On invalide les clauses où apparaissait le littéral *)
+    (self#get_occurences invalider v)#iter 
       (fun c -> 
         clauses#show c;
         self#show_occurences v c ;
-        Printf.eprintf "Clause show : %d \n" c#get_id ); (** on risque de show des clauses cachées par d'autres var ??? *)
-  (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
+        Printf.eprintf "Clause show : %d \n" c#get_id );
+    (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
+    (self#get_occurences restaurer v)#iter 
+      (fun c -> 
+        Printf.eprintf "Var %d shown in Clause : %a \n" v c#print();
+        c#show_var (not b) v;
+        Printf.eprintf "Var %d has been shown in Clause : %a \n" v c#print();) (* On replace les occurences du littéral *)
 
   (******)
 
@@ -221,12 +222,12 @@ object (self)
       if m>n 
       then None 
       else  if not (paris#mem m) 
-            then if (self#get_occurences occurences_pos m)#is_empty 
-                 then Some (m,false) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
-                 else if (self#get_occurences occurences_neg m)#is_empty
-                      then Some (m,true)
-                      else parcours_polar (m+1) n
-            else parcours_polar (m+1) n
+        then if (self#get_occurences occurences_pos m)#is_empty 
+          then Some (m,false) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
+          else if (self#get_occurences occurences_neg m)#is_empty
+          then Some (m,true)
+          else parcours_polar (m+1) n
+          else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars
 
 end
