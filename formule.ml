@@ -188,8 +188,8 @@ object (self)
     let b = match paris#find v with
       | None -> assert false (* On ne revient pas sur un pari pas fait *)
       | Some b -> (Printf.eprintf "Unsetting %b on %d \n" b v ; paris#remove v ; b) in
-    let (annuler,restaurer) =
-      if (not b) then
+    let (restaurer,annuler) =
+      if b then
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
