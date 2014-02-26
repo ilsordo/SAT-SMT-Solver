@@ -1,0 +1,8 @@
+mener plus de tests
+implémenter un vérificateur de résultats
+permettre de générer des tests aléatoires
+mettre en place une fonction d'affichage
+commenter code
+rédiger readme (expliquer endroit où ça rame (singleton ?), choix des sd/implémentation, répartition des tâches, comparaison perf avec/sans watch literal...)
+watched literal
+prétraitement de l'entrée
