@@ -11,6 +11,8 @@ module VarSet = Set.Make(OrderedVar)
 
 type c_repr = VarSet.t
 
+type classif_varset = Empty | Singleton of variable | Bigger
+
 class varset =
 object (self : 'varset)
   val mutable vis = VarSet.empty (* variables visibles du varset *)
@@ -45,10 +47,10 @@ object (self : 'varset)
   method size = VarSet.cardinal vis (* nombre de variables visibles *)
 
   method singleton = (* indique si vis est un singleton, et renvoie Some v si v est l'unique variable de vis, None sinon *)
-    if VarSet.cardinal vis = 1 then
-      Some (VarSet.choose vis)
-    else
-      None
+    match VarSet.cardinal vis with
+      | 0 -> Empty
+      | 1 -> Singleton (VarSet.choose vis)
+      | _ -> Bigger
 
   method iter f = VarSet.iter f vis 
 
@@ -66,16 +68,16 @@ object
   initializer (* construction d'une clause à partir d'une liste d'entier *)
     List.iter 
       (function 
-          | 0 -> assert false
-          | x -> 
-              if x>0 then 
-                vpos#add x
-              else  
-                vneg#add (-x))
+        | 0 -> assert false
+        | x -> 
+            if x>0 then 
+              vpos#add x
+            else  
+              vneg#add (-x))
       clause_init
 
   method get_id = id
-      	
+    
   method get_vpos = vpos
     
   method get_vneg = vneg
@@ -85,7 +87,7 @@ object
   method is_tauto = vpos#intersects vneg (* indique si la clause est une tautologie *)
     
   method is_empty = vpos#is_empty && vneg#is_empty
-  
+    
   method hide_var b x = (* b = true si x est une litteral positif, false si négatif *)
     if b then
       vpos#hide x
@@ -106,11 +108,9 @@ object
 
   method singleton = (* renvoie Some (x,b) si la clause est un singleton ne contenant que x avec la positivité b, None sinon *)
     match (vpos#singleton, vneg#singleton) with
-      | (None, None)
-      | (Some _, Some _) -> None
-      | (Some v, None) -> Some (v,true)
-      | (None, Some v) -> Some (v,false)
-
+      | (Singleton v, Empty) -> Printf.eprintf "In clause %d, pos :" id;Some (v,true)
+      | (Empty, Singleton v) -> Printf.eprintf "In clause %d, neg :" id;Some (v,false)
+      | _ -> None
 end
 
 (*******)

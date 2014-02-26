@@ -2,6 +2,8 @@ type variable = int
 
 type c_repr
 
+type classif_varset = Empty | Singleton of variable | Bigger
+
 class varset :
 object ('a)
   method repr : c_repr
@@ -13,7 +15,7 @@ object ('a)
   method size : int
   method mem : variable -> bool
   method show : variable -> unit
-  method singleton : variable option
+  method singleton : classif_varset
   method iter : (variable -> unit) -> unit
 end
 
