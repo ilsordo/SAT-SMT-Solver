@@ -45,14 +45,10 @@ object (self : 'varset)
   method size = VarSet.cardinal vis (* nombre de variables visibles *)
 
   method singleton = (* indique si vis est un singleton, et renvoie Some v si v est l'unique variable de vis, None sinon *)
-    try
-      let x = VarSet.max_elt vis in
-      if (x = VarSet.min_elt vis) then
-        Some x (* Un seul élément x*)
-      else
-        None (* Au moins 2 éléments *)
-    with
-      | Not_found -> None (* Vide *)
+    if VarSet.cardinal vis = 1 then
+      Some (VarSet.choose vis)
+    else
+      None
 
   method iter f = VarSet.iter f vis 
 

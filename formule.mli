@@ -36,9 +36,17 @@ class formule :
     method get_clauses : clauseset
     method set_val : bool -> variable -> unit
     method reset_val : variable -> unit
-    method find_singleton : bool vartable
+    method find_singleton : (variable*bool) option
     method find_single_polarite : (variable*bool) option
   end
+
+
+
+
+
+
+
+
 
 
 

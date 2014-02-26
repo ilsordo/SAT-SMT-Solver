@@ -40,13 +40,15 @@ let constraint_propagation formule = (* on affecte v et on propage, on renvoie l
     formule#set_val b v in (* Peut lever une exception qui est attrapée plus loin *)
   try
     while not (!stop) do
-      let singletons = formule#find_singleton in (* toute les variables qui forment des clauses singletons *)
-      if singletons#is_empty then
-        (Printf.eprintf "Pas de singleton\n";
-         stop:=true) (* on se donne une chance de finir la propagation *)
-      else
-        (Printf.eprintf "Singletons trouvés\n";
-         singletons#iter affect);        
+      begin
+        match formule#find_singleton with (* toute les variables qui forment des clauses singletons *)
+          | None ->
+              Printf.eprintf "Pas de singleton\n";
+              stop:=true (* on se donne une chance de finir la propagation *)
+          | Some (v,b) ->
+              Printf.eprintf "Singleton trouvés\n";
+              affect v b
+      end; 
       match formule#find_single_polarite with
         | None -> 
             Printf.eprintf "Pas de polarité unique\n";

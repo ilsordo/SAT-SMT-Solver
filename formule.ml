@@ -6,6 +6,8 @@ type f_repr = ClauseSet.t
 
 exception Clause_vide
 
+exception Found of (variable*bool)
+
 class clauseset =
 object
   val mutable vis = ClauseSet.empty (* clauses visibles *)
@@ -161,9 +163,11 @@ object (self)
 (******)
 
   method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
-    let singletons = new vartable n in
-    clauses#iter (fun c -> match c#singleton with Some (v,b) -> singletons#set v b | None -> ());
-    singletons
+    try 
+      clauses#iter (fun c -> match c#singleton with Some x -> raise (Found x) | None -> ());
+      None
+    with 
+      | Found x -> Some x
     
     
 
