@@ -185,7 +185,7 @@ object (self)
   method reset_val v =
     let b = match paris#find v with
       | None -> assert false (* On ne revient pas sur un pari pas fait *)
-      | Some b -> paris#remove b in
+      | Some b -> paris#remove v ; b in
     let (annuler,restaurer) =
       if b then
         (occurences_pos,occurences_neg)
