@@ -71,11 +71,11 @@ let dpll formule =
       formule#set_val b var
     with
         Clause_vide ->
-          assert false
+          assert false in
 
   let rec aux () = (* renvoie true si en pariant b, ou plus, sur v on peut prolonger les paris actuels en qqchose de satisfiable *)(* "b ou plus" = true et false si b=true, juste false sinon *)
     match constraint_propagation formule with
-      | Conflict -> () false
+      | Conflict -> false
       |  Fine var_prop -> 
           match next_pari formule with
             | None -> true (* plus aucun pari à faire, c'est gagné *)
