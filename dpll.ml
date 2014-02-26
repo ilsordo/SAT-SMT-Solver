@@ -70,13 +70,13 @@ let dpll formule =
 
   let try_pari var b =
     try
-      Printf.eprintf "Betting %d is %b" var b;
+      Printf.eprintf "Betting %d is %b\n" var b;
       formule#set_val b var
     with
-        Clause_vide ->
+        Clause_vide -> Printf.eprintf "Fail betting %b on %d " b var;
           assert false in
 
-  let rec aux () = (* renvoie true si en pariant b, ou plus, sur v on peut prolonger les paris actuels en qqchose de satisfiable *)(* "b ou plus" = true et false si b=true, juste false sinon *)
+  let rec aux () = 
     match constraint_propagation formule with
       | Conflict -> 
           Printf.eprintf "Conflit!\n";

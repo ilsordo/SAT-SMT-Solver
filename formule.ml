@@ -37,6 +37,8 @@ object
 
   method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> ClauseSet.fold f vis a
 
+  method remove c = vis <- ClauseSet.remove c vis (***)
+
 end
 
 (*******)
@@ -79,6 +81,7 @@ object (self)
     done;
     let x = ref 0 in
     List.iter (fun c -> clauses#add (new clause x c)) clauses_init;
+    clauses#iter (fun c -> if not (c#get_vpos#intersects c#get_vneg) then clauses#remove c); (***)
     clauses#iter self#register_clause
 
   (***)
@@ -123,8 +126,8 @@ object (self)
 
   (* Cache une clause des listes d'occurences de toutes les variables sauf v_ref *)
   method private hide_occurences v_ref c =
-    c#get_vpos#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_pos v)#hide c);
-    c#get_vneg#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_neg v)#hide c)      
+    c#get_vpos#iter (fun v -> if v<>v_ref then ((self#get_occurences occurences_pos v)#hide c); Printf.eprintf "Clause_pos %d hidden for var %d\n" c#get_id v);     
+    c#get_vneg#iter (fun v -> if v<>v_ref then ((self#get_occurences occurences_neg v)#hide c); Printf.eprintf "Clause_neg %d hidden for var %d\n" c#get_id v)     
       
   method set_val b v = (* on souhaite assigner la variable v à b (true ou false), et faire évoluer les clauses en conséquences *)
     let _ = match paris#find v with
@@ -136,15 +139,15 @@ object (self)
       else
         (occurences_neg,occurences_pos) in
     (* On supprime les clauses où apparait le littéral, elles ne sont plus pointées que par la liste des occurences de v*)
-    (self#get_occurences valider v)#iter (fun c -> clauses#hide c; self#hide_occurences v c);
+    (self#get_occurences valider v)#iter (fun c -> clauses#hide c ; (Printf.eprintf "Clause hidden : %d \n" c#get_id;self#hide_occurences v c));
     (* On supprime la négation du littéral des clauses où elle apparait, si on créé un conflit on le dit *)
-    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then raise Clause_vide)
+    (self#get_occurences supprimer v)#iter (fun c -> c#hide_var (not b) v ; if c#is_empty then (Printf.eprintf "Empty clause %d \n" c#get_id;raise Clause_vide))
 
 
   (* Replace une clause dans les listes d'occurences de ses variables *)
   method private show_occurences v_ref c =
-    c#get_vpos#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_pos v)#show c);
-    c#get_vneg#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_neg v)#show c)
+    c#get_vpos#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_pos v)#show c ;Printf.eprintf "Clause_neg %d show for var %d\n" c#get_id v); (** v<>v_ref : nécessaire ? correct ?*)
+    c#get_vneg#iter (fun v -> if v<>v_ref then ((self#get_occurences occurences_neg v)#show c ;Printf.eprintf "Clause_neg %d show for var %d\n" c#get_id v))
 
   method reset_val v =
     let b = match paris#find v with
@@ -156,7 +159,7 @@ object (self)
       else
         (occurences_neg,occurences_pos) in
     (self#get_occurences annuler v)#iter (fun c -> c#show_var (not b) v); (* On replace les occurences du littéral *)
-    (self#get_occurences restaurer v)#iter (fun c -> clauses#show c; self#show_occurences v c);
+    (self#get_occurences restaurer v)#iter (fun c -> clauses#show c; self#show_occurences v c ; Printf.eprintf "Clause show : %d \n" c#get_id ); (** on risque de show des clauses cachées par d'autres var ??? *)
     paris#remove v
   (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
 

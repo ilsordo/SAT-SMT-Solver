@@ -11,6 +11,7 @@ class clauseset :
     method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a 
     method mem : clause -> bool
     method show : clause -> unit
+    method remove : clause -> unit (***)
   end
 
 class ['a] vartable :
