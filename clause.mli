@@ -18,10 +18,11 @@ object ('a)
 end
 
 class clause :
-  variable list ->
+  int ref -> variable list ->
 object
   val vneg : varset
   val vpos : varset
+  method get_id : int
   method get_vneg : varset
   method get_vpos : varset
   method get_vars : varset

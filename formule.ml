@@ -77,7 +77,8 @@ object (self)
       occurences_pos#set i (new clauseset);
       occurences_neg#set i (new clauseset)
     done;
-    List.iter (fun c -> clauses#add (new clause c)) clauses_init;
+    let x = ref 0 in
+    List.iter (fun c -> clauses#add (new clause x c)) clauses_init;
     clauses#iter self#register_clause
 
 (***)

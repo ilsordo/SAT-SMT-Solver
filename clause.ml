@@ -57,10 +57,11 @@ end
 (*******)
 
 
-class clause clause_init =
+class clause x clause_init =
 object
   val vpos = new varset (* grâce au varset, on va pouvoir cacher ou non des variables dans vpos. De même dans vneg *)
   val vneg = new varset
+  val id = incr x; !x
 
   initializer (* construction d'une clause à partir d'une liste d'entier *)
     List.iter 
@@ -72,6 +73,8 @@ object
               else  
                 vneg#add (-x))
       clause_init
+
+  method get_id = id
       	
   method get_vpos = vpos
     
@@ -115,7 +118,7 @@ end
 module OrderedClause = 
 struct
   type t = clause
-  let compare (c1 : t) c2 = if (VarSet.equal c1#get_vpos#repr c2#get_vpos#repr) then
+  let compare (c1 : t) c2 = compare c1#get_id c2#get_id (*if (VarSet.equal c1#get_vpos#repr c2#get_vpos#repr) then
                               if (VarSet.equal c1#get_vneg#repr c2#get_vneg#repr) then
                                 0
                               else
@@ -127,7 +130,7 @@ struct
                               if (c1#get_vpos#repr < c2#get_vpos#repr) then
                                 -1
                               else
-                                1
+                                1*)
                               
  (** est-ce une bonne fonction de comparaison ? ne faut-il pas la redéfinir avec des Set.equal ? *)
 end
