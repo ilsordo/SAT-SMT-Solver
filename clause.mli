@@ -34,7 +34,7 @@ object
   method mem : bool -> variable -> bool
   method singleton : (variable*bool) option
   method show_var : bool -> variable -> unit
-  method print : out_channel -> unit
+  method print : out_channel -> unit -> unit
 end
 
 module OrderedClause : sig
