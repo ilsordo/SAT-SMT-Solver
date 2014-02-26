@@ -46,7 +46,7 @@ let constraint_propagation formule = (* on affecte v et on propage, on renvoie l
               Printf.eprintf "Pas de singleton\n";
               stop:=true (* on se donne une chance de finir la propagation *)
           | Some (v,b) ->
-              Printf.eprintf "Singleton trouvés\n";
+              Printf.eprintf "Singleton trouvé : %d %b\n" v b;
               affect v b
       end; 
       match formule#find_single_polarite with

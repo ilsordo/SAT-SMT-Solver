@@ -80,7 +80,7 @@ object (self)
     List.iter (fun c -> clauses#add (new clause c)) clauses_init;
     clauses#iter self#register_clause
 
-(***)
+  (***)
 
   method get_nb_vars = n
 
@@ -89,7 +89,7 @@ object (self)
 
   method get_paris = paris 
 
-(***)
+  (***)
 
   method private add_occurence b c v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
     let dest = if b then occurences_pos else occurences_neg in
@@ -105,7 +105,7 @@ object (self)
     c#get_vpos#iter (self#add_occurence true c);
     c#get_vneg#iter (self#add_occurence false c)
       
-(***)
+  (***)
 
   method add_clause c = (* ajoute la clause c, dans les clauses et les occurences *)
     clauses#add c;
@@ -126,7 +126,6 @@ object (self)
     c#get_vneg#iter (fun v -> if v<>v_ref then (self#get_occurences occurences_neg v)#hide c)      
       
   method set_val b v = (* on souhaite assigner la variable v à b (true ou false), et faire évoluer les clauses en conséquences *)
-    (*let clause_vide = ref true in*)
     let _ = match paris#find v with
       | None -> paris#set v b
       | Some _ -> assert false in (* Pas de double paris *) 
@@ -160,7 +159,7 @@ object (self)
     paris#remove v
   (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
 
-(******)
+  (******)
 
   method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
     try 
@@ -168,20 +167,20 @@ object (self)
       None
     with 
       | Found x -> Some x
-    
-    
+          
+          
 
   method find_single_polarite = (* on cherche une var sans pari qui n'apparaitrait qu'avec une seule polarité *)
     let rec parcours_polar m n = 
       if m>n 
       then None 
       else  if not (paris#mem m) 
-            then if (self#get_occurences occurences_pos m)#is_empty 
-                 then Some (m,true) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
-                 else if (self#get_occurences occurences_neg m)#is_empty
-                      then Some (m,false)
-                      else parcours_polar (m+1) n
-            else parcours_polar (m+1) n
+        then if (self#get_occurences occurences_pos m)#is_empty 
+          then Some (m,true) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
+          else if (self#get_occurences occurences_neg m)#is_empty
+          then Some (m,false)
+          else parcours_polar (m+1) n
+          else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars
 
 end
