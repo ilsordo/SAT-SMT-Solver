@@ -87,7 +87,7 @@ object (self)
   method get_pari v = (* indique si v a subi un pari, et si oui lequel *)
     paris#find v
 
-  method get_paris = paris (** nécessaire pour renvoyer dans dpll : Solvable ... ? *)
+  method get_paris = paris 
 
 (***)
 
@@ -95,7 +95,7 @@ object (self)
     let dest = if b then occurences_pos else occurences_neg in
     let set = match dest#find v with
       | None -> 
-          let set = new clauseset in
+          let set = new clauseset in (***)
           dest#set v set;
           set
       | Some set -> set in
