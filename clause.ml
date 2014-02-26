@@ -113,9 +113,9 @@ object
       | _ -> None
 
   method print p = 
-    Printf.fprintf p "Clause %d : ";
-    vpos#iter (fun v -> Printf.fprintf "%d " v);
-    vneg#iter (fun v -> Printf.fprintf "-%d " v)
+    Printf.fprintf p "Clause %d : " id;
+    vpos#iter (fun v -> Printf.fprintf p "%d " v);
+    vneg#iter (fun v -> Printf.fprintf p "-%d " v)
 end
 
 (*******)
