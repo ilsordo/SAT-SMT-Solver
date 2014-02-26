@@ -68,52 +68,37 @@ let dpll formule =
 
   let try_pari var b =
     try 
-      formule#set_val b var;
-      true
+      formule#set_val b var
     with
-      Clause_vide ->
-        formule#reset_val var;
-        false      in
+        Clause_vide ->
+          assert false
 
   let rec aux () = (* renvoie true si en pariant b, ou plus, sur v on peut prolonger les paris actuels en qqchose de satisfiable *)(* "b ou plus" = true et false si b=true, juste false sinon *)
-      match constraint_propagation formule with
-        | Conflict -> false
-        |  Fine var_prop -> 
-            match next_pari formule with
-              | None -> true (* plus aucun pari à faire, c'est gagné *)
-              | Some var -> 
-                  if try_pari var true then
+    match constraint_propagation formule with
+      | Conflict -> () false
+      |  Fine var_prop -> 
+          match next_pari formule with
+            | None -> true (* plus aucun pari à faire, c'est gagné *)
+            | Some var -> 
+                try_pari var true;
+                if aux () then
+                  true
+                else
+                  begin
+                    formule#reset_val var;
+                    try_pari var false;
                     if aux() then
                       true
-                    else 
+                    else
                       begin
                         formule#reset_val var;
-                        if try_pari var false then
-                          if aux() then
-                            true
-                          else 
-                            begin
-                              formule#reset_val var;
-                              false
-                            end
-                        else
-                          false
+                        false
                       end
-                  else
-                    if try_pari var false then
-                      if aux() then
-                        true
-                      else 
-                        begin
-                          formule#reset_val var;
-                          false
-                        end
-                    else
-                      false
+                  end
   in if aux () then 
-    Solvable formule#get_paris
-  else 
-    Unsolvable
+      Solvable formule#get_paris
+    else 
+      Unsolvable
 
 
 
