@@ -175,12 +175,12 @@ object (self)
       if m>n 
       then None 
       else  if not (paris#mem m) 
-        then if (self#get_occurences occurences_pos m)#is_empty 
-          then Some (m,true) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
-          else if (self#get_occurences occurences_neg m)#is_empty
-          then Some (m,false)
-          else parcours_polar (m+1) n
-          else parcours_polar (m+1) n
+            then if (self#get_occurences occurences_pos m)#is_empty 
+                 then Some (m,false) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
+                 else if (self#get_occurences occurences_neg m)#is_empty
+                      then Some (m,true)
+                      else parcours_polar (m+1) n
+            else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars
 
 end
