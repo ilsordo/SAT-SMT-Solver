@@ -123,19 +123,5 @@ end
 module OrderedClause = 
 struct
   type t = clause
-  let compare (c1 : t) c2 = compare c1#get_id c2#get_id (*if (VarSet.equal c1#get_vpos#repr c2#get_vpos#repr) then
-                              if (VarSet.equal c1#get_vneg#repr c2#get_vneg#repr) then
-                                0
-                              else
-                                if (c1#get_vneg#repr < c2#get_vneg#repr) then
-                                  -1
-                                else
-                                  1
-                            else 
-                              if (c1#get_vpos#repr < c2#get_vpos#repr) then
-                                -1
-                              else
-                                1*)
-                              
- (** est-ce une bonne fonction de comparaison ? ne faut-il pas la redéfinir avec des Set.equal ? *)
+  let compare (c1 : t) c2 = compare c1#get_id c2#get_id
 end

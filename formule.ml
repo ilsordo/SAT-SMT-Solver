@@ -129,17 +129,11 @@ object (self)
     c#get_vpos#iter 
       (fun v -> 
         if v<>v_ref then 
-          begin
-            (self#get_occurences occurences_pos v)#hide c;
-            Printf.eprintf "Clause_pos %d hidden for var %d\n" c#get_id v
-          end);     
+          (self#get_occurences occurences_pos v)#hide c);     
     c#get_vneg#iter 
       (fun v -> 
         if v<>v_ref then 
-          begin
-            (self#get_occurences occurences_neg v)#hide c;
-            Printf.eprintf "Clause_neg %d hidden for var %d\n" c#get_id v
-          end)     
+          (self#get_occurences occurences_neg v)#hide c)    
       
   method set_val b v = (* on souhaite assigner la variable v à b (true ou false), et faire évoluer les clauses en conséquences *)
     let _ = match paris#find v with
@@ -154,17 +148,13 @@ object (self)
     (self#get_occurences valider v)#iter 
       (fun c -> 
         clauses#hide c ; 
-        Printf.eprintf "Clause hidden : %a \n" c#print();
         self#hide_occurences v c);
     (* On supprime la négation du littéral des clauses où elle apparait, si on créé un conflit on le dit *)
     (self#get_occurences supprimer v)#iter 
       (fun c -> 
-        Printf.eprintf "Var %d hidden in Clause : %a \n" v c#print();
         c#hide_var (not b) v;
-        Printf.eprintf "Var %d has been hidden in Clause : %a \n" v c#print();
         if c#is_empty then 
-          (Printf.eprintf "Empty clause %d \n" c#get_id;
-           raise Clause_vide))
+          raise Clause_vide)
 
 
   (* Replace une clause dans les listes d'occurences de ses variables *)
@@ -172,23 +162,16 @@ object (self)
     c#get_vpos#iter 
       (fun v -> 
         if v<>v_ref then 
-          begin
-            (self#get_occurences occurences_pos v)#show c (*;
-            Printf.eprintf "Clause_pos %d show for var %d\n" c#get_id v*)
-          end);
+          (self#get_occurences occurences_pos v)#show c);
     c#get_vneg#iter 
       (fun v -> 
         if v<>v_ref then 
-          begin
-            (self#get_occurences occurences_neg v)#show c (*;
-            Printf.eprintf "Clause_neg %d show for var %d\n" c#get_id v*)
-          end)
+          (self#get_occurences occurences_neg v)#show c) 
 
   method reset_val v =
     let b = match paris#find v with
       | None -> assert false (* On ne revient pas sur un pari pas fait *)
       | Some b -> 
-          Printf.eprintf "Unsetting %b on %d \n" b v;
           paris#remove v ; 
           b in
     let (invalider,restaurer) =
@@ -200,20 +183,21 @@ object (self)
     (self#get_occurences invalider v)#iter 
       (fun c -> 
         clauses#show c;
-        self#show_occurences v c ;
-        Printf.eprintf "Clause show : %d \n" c#get_id );
-    (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
+        self#show_occurences v c);
+      (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
     (self#get_occurences restaurer v)#iter 
       (fun c -> 
-        Printf.eprintf "Var %d shown in Clause : %a \n" v c#print();
-        c#show_var (not b) v;
-        Printf.eprintf "Var %d has been shown in Clause : %a \n" v c#print();) (* On replace les occurences du littéral *)
+        c#show_var (not b) v) (* On replace les occurences du littéral *)
 
   (******)
 
   method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
     try 
-      clauses#iter (fun c -> match c#singleton with Some x -> (Printf.eprintf "Clause : %d -> " c#get_id; raise (Found x)) | None -> ());
+      clauses#iter (fun c -> 
+        match c#singleton with  
+          | Some x -> 
+              raise (Found x) 
+          | None -> ());
       None
     with 
       | Found x -> Some x
