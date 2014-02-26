@@ -54,7 +54,7 @@ let constraint_propagation formule = (* on affecte v et on propage, on renvoie l
             Printf.eprintf "Pas de polarité unique\n";
             () (* si stop était à true, la propagation s'arrète ici *)
         | Some (v,b) ->
-            Printf.eprintf "Polarité unique\n";
+            Printf.eprintf "Polarité unique : %d %b\n" v b;
             stop:=false; (* la propagation doit refaire un tour... *)
             affect v b
     done; 
