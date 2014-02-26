@@ -37,14 +37,13 @@ let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None 
 
 
 
-let constraint_propagation v_cons b_cons formule = (* on affecte v et on propage, on renvoie la liste des variables affectées + Conflict si une clause vide a été générée, Fine sinon*)
+let constraint_propagation formule = (* on affecte v et on propage, on renvoie la liste des variables affectées + Conflict si une clause vide a été générée, Fine sinon*)
   let var_add = ref [] in (* var_add va contenir la liste des variables ayant été affectées *)
   let stop = ref false in (* stop = false : il y a encore à propager, stop = true : on a fini de propager *)
   let affect v b =
     var_add := v::(!var_add);
     formule#set_val b v in (* Peut lever une exception qui est attrapée plus loin *)
   try
-    affect v_cons b_cons;
     while not (!stop) do
       let singletons = formule#find_singleton in (* toute les variables qui forment des clauses singletons *)
       if singletons#is_empty then 
@@ -64,28 +63,34 @@ let constraint_propagation v_cons b_cons formule = (* on affecte v et on propage
 
 let dpll formule =
   let rec aux v_pari b = (* renvoie true si en pariant b, ou plus, sur v on peut prolonger les paris actuels en qqchose de satisfiable *)(* "b ou plus" = true et false si b=true, juste false sinon *)
-    match constraint_propagation v_pari b formule with
-      | Conflict var_prop -> 
-          List.iter (fun var -> formule#reset_val var) var_prop; (* on annule les paris faits *)
-          if b then 
-            aux v_pari false (* si on avait parié true, on retente avec false *)
-          else 
+      match constraint_propagation formule with
+        | Conflict var_prop -> 
+            List.iter (fun var -> formule#reset_val var) var_prop; (* on annule les paris faits *)
+            if b then 
+              aux v_pari false (* si on avait parié true, on retente avec false *)
+            else 
             false (* sinon c'est finit, on va devoir revenir en arrière *)
-      |  Fine var_prop -> 
-          match next_pari formule with
-            | None -> true (* plus aucun pari à faire, c'est gagné *)
-            | Some var -> 
-                if aux var true then(* si on réussit à parier sur vv (true ou plus), puis à prolonger *)
-                  true (* alors c'est gagné *)
-                else 
-                  begin
-                    List.iter (fun var -> formule#reset_val var) var_prop; (* sinon on annule les paris *) (** Il ne faut pas les garder? j'aurais juste fait formule#reset_val var_pari << NON : en fait il faut bien voir que aux v b renvoie true ssi on peut prolonger les paris actuels en pariant sur v : true ou false (si b=true) ou juste false (si b=false). Comme ici on a fait aux var true, si on obtient false c'est que qq soit le pari sur var (true ou false), on perd ; donc il faut bien tout annuler *)
-                    if b then 
-                      aux v_pari false (* si on avait parié true, on retente avec false *)
-                    else 
-                      false (* sinon on va doit revenir en arrière *)
-
-                  end
+        |  Fine var_prop -> 
+            match next_pari formule with
+              | None -> true (* plus aucun pari à faire, c'est gagné *)
+              | Some var -> 
+                  if aux var true then(* si on réussit à parier sur vv (true ou plus), puis à prolonger *)
+                    true (* alors c'est gagné *)
+                  else 
+                    begin
+                      List.iter (fun var -> formule#reset_val var) var_prop; (* sinon on annule les paris *) 
+                      if b then 
+                        aux v_pari false (* si on avait parié true, on retente avec false *)
+                      else 
+                        false (* sinon on va doit revenir en arrière *)
+                    end
+    try
+      formule#set_val b v_pari
+    with
+      Clause_vide -> if b then
+                        aux v_pari false
+                     else
+                        false
   in 
   if aux 1 true then 
     Solvable formule#get_paris
