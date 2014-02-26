@@ -111,6 +111,11 @@ object
       | (Singleton v, Empty) -> Some (v,true)
       | (Empty, Singleton v) -> Some (v,false)
       | _ -> None
+
+  method print p = 
+    Printf.fprintf p "Clause %d : ";
+    vpos#iter (fun v -> Printf.fprintf "%d " v);
+    vneg#iter (fun v -> Printf.fprintf "-%d " v)
 end
 
 (*******)
