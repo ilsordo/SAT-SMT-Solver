@@ -1,4 +1,5 @@
 open Clause
+open Debug
 
 module ClauseSet = Set.Make(OrderedClause)
 
@@ -69,6 +70,7 @@ end
 
 class formule n clauses_init =
 object (self)
+  val x = ref 0 (* compteur de clause *)
   val clauses = new clauseset (* ensemble des clauses de la formule, peut contenir des clauses cachées/visibles *)
   val occurences_pos : clauseset vartable = new vartable n (* associe à chaque variable les clauses auxquelles elle appartient *)
   val occurences_neg : clauseset vartable = new vartable n
@@ -79,7 +81,6 @@ object (self)
       occurences_pos#set i (new clauseset);
       occurences_neg#set i (new clauseset)
     done;
-    let x = ref 0 in
     List.iter (fun c -> clauses#add (new clause x c)) clauses_init;
     clauses#iter (fun c -> if not (c#get_vpos#intersects c#get_vneg) then clauses#remove c); (***)
     clauses#iter self#register_clause
@@ -91,7 +92,7 @@ object (self)
   method get_pari v = (* indique si v a subi un pari, et si oui lequel *)
     paris#find v
 
-  method get_paris = paris 
+  method get_paris = paris
 
   (***)
 
@@ -201,8 +202,7 @@ object (self)
       None
     with 
       | Found x -> Some x
-          
-          
+
 
   method find_single_polarite = (* on cherche une var sans pari qui n'apparaitrait qu'avec une seule polarité *)
     let rec parcours_polar m n = 
@@ -218,20 +218,3 @@ object (self)
     in parcours_polar 1 self#get_nb_vars
 
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
