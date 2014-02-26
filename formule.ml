@@ -180,12 +180,6 @@ object (self)
             else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars
 
-
-
-
-
-
-
 end
 
 
