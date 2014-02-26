@@ -154,7 +154,7 @@ object (self)
     (self#get_occurences valider v)#iter 
       (fun c -> 
         clauses#hide c ; 
-        Printf.eprintf "Clause hidden : %a \n" c#print;
+        Printf.eprintf "Clause hidden : %a \n" c#print();
         self#hide_occurences v c);
     (* On supprime la négation du littéral des clauses où elle apparait, si on créé un conflit on le dit *)
     (self#get_occurences supprimer v)#iter 
