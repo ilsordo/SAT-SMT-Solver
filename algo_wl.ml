@@ -1,8 +1,7 @@
 open Formule_wl
 open Clause
 open Debug
-
-type answer = Unsolvable | Solvable of bool vartable
+open Answer
 
 
 
@@ -21,36 +20,48 @@ let print_answer p = function
 
 (***************************************************)
 
+let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié *)
+  let n=formule#get_nb_vars in
+  let rec parcours_paris = function
+    | 0 -> None
+    | m -> 
+        if (formule#get_pari m != None) then 
+          parcours_paris (m-1) 
+        else 
+          Some m in
+  parcours_paris n
+
+
 (* constraint_propagation reçoie un ordre d'assignation
       la fonction doit faire cette assignation et toutes celles qui en découlent, ssi pas de conflits créées
       si conflits, aucune assignation ne doit être faite
       si réussit : renvoie la liste des assignations effectuées
 *)
 (* l : liste des assignations effectuées depuis le dernier pari, inclu *)
-let constraint_propagation formule var b l =
+let rec constraint_propagation formule var b l =
 
   if ((formule#get_paris#find var) = Some (not b)) then (* double paris contradictoire (y a-t-il un pb si double paris non contradictoire ?)  *)
     begin
-      List.iter (fun var -> formule#get_paris#remove var) !l; (* on annule toutes les assignations depuis le dernier pari *)
+      List.iter (fun v -> formule#get_paris#remove v) !l; (* on annule toutes les assignations depuis le dernier pari *)
       raise Wl_fail (***)
     end
   else
     begin
-      l := (v::(!l)); (* se rappeler que v subit une assignation (et si v était déjà assigné et subit pari non contradictoire ? impossible ? *)
+      l := (var::(!l)); (* se rappeler que v subit une assignation (et si v était déjà assigné et subit pari non contradictoire ? impossible ? *)
       formule#get_paris#set var b (* on fait l'assignation sans risque *)
     end;
 
   let deplacer = (*il faut deplacer des jumelles *)
     if b then
-      get_wl_neg var 
+      formule#get_wl_neg var 
     else
-      get_wl_pos var in
-    deplacer#iter (fun c -> match update_clause c (not b,var) with
+      formule#get_wl_pos var in
+    deplacer#iter (fun c -> match formule#update_clause c (not b,var) with
                               | WL_Conflit ->     
                                   List.iter (fun var -> formule#get_paris#remove var) !l; (* on annule toutes les assignations depuis le dernier pari *)
                                   raise Wl_fail
                               | WL_New -> ()
-                              | WL_Assign (v,b) -> let ll = constraint_propagation formule v b l in () (*** suspect *)
+                              | WL_Assign (b,v) -> let _ = constraint_propagation formule v b l in () (*** suspect *)
                               | WL_Nothing -> ()  )
     !l (* on renvoie toutes les assignations effectuées *)
 
@@ -58,8 +69,8 @@ let constraint_propagation formule var b l =
 
 
 let wl n cnf =
-  let formule = new formule_wl n cnf in
-  formule#init n clauses_init; (* on a prétraité, peut être des clauses vides créées et à détecter au plus tôt *)
+  let formule = new formule_wl in
+  formule#init n cnf; (* on a prétraité, peut être des clauses vides créées et à détecter au plus tôt *)
 
   let rec aux()=
     match next_pari formule with
@@ -77,7 +88,7 @@ let wl n cnf =
                                 true (* c'est gagné *)
                               else
                                begin
-                                 List.iter (fun var -> formule#get_paris#remove var) l;
+                                 List.iter (fun var -> formule#get_paris#remove var) ll;
                                  false
                                end   
                             with
@@ -91,7 +102,7 @@ let wl n cnf =
                                true (* c'est gagné *)
                              else
                               begin
-                                List.iter (fun var -> formule#get_paris#remove var) l;
+                                List.iter (fun var -> formule#get_paris#remove var) ll;
                                 false
                               end   
                            with
