@@ -27,6 +27,19 @@ object(self)
       | None -> assert false (* aurait du être initialisé *)
       | Some s -> s
 
+  method get_wl v dest =
+    match dest#find v with
+      | None -> 
+          let set = new clauseset in
+          dest#set v set;
+          set
+      | Some set -> set
+
+  method private register c = function
+    | (true,v) -> (self#get_wl v wl_pos)#add c
+    | (false,v) -> (self#get_wl v wl_neg)#add c
+
+
   method watch c l l_former = (* on veut que le litteral l surveille la clause c, à la place de l_former *) (*** ce code peut contenir des bugs mineurs *)
     let (b,v)=l in
     let (b_former,v_former)=l in
@@ -93,17 +106,6 @@ object(self)
             prepare() in
     prepare() 
 
-  method get_wl v dest =
-    match dest#find v with
-      | None -> 
-          let set = new clauseset in
-          dest#set v set;
-          set
-      | Some set -> set
-
-  method private register c = function
-    | (true,v) -> (self#get_wl v wl_pos)#add c
-    | (false,v) -> (self#get_wl v wl_neg)#add c
 
 (* Initialise les watched literals des clauses, il faut enlever avant les clauses vides *)
   method init_wl =
@@ -124,31 +126,34 @@ object(self)
   method update_clause c wl = (* on veut abandonner la jumelle sur le literal wl*)
     let (wl1,wl2) = c#get_wl in
     (*let (b,v) = wl in*) (* c'est (b,l) qu'on veut abandonner *)
-    let (b0,v0) = if wl=wl1 then wl2 else wl1 in
-    match super#get_paris v0 b0 with
+    let (b0,v0) = if wl=wl1 then wl2 else wl1 in (* le literal qu'on veut conserver *)
+    match super#get_pari v0 with
       | None -> 
-          try
-            c#get_vpos#fold (fun var -> if (var != v0 && super#get_paris != Some false) then raise WL_found (true,var) else ()) ();
-            c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
-            WL_Assign (b0,v0) (* on ne peut pas déplacer la jumelle mais on peut assigner l'autre literal *)
-          with
-            | WL_Found l -> formule#watch c l wl ; WL_New (* on peut déplacer la jumelle *)
-      | Some bb ->
-          if bb=b0 (* alors (b0,v0) est vrai dans c *) then 
+          begin
             try
-              c#get_vpos#fold (fun var -> if (var != v0 && super#get_paris != Some false) then raise WL_found (true,var) else ()) ();
-              c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
+              c#get_vpos#iter (fun var -> if (var != v0 && super#get_pari var != Some false) then raise (WL_found (true,var)) else ()) ;
+              c#get_vneg#iter (fun var -> if (var != v0 && super#get_pari var != Some true) then raise (WL_found (false,var)) else ()) ;
+              WL_Assign (b0,v0) (* on ne peut pas déplacer la jumelle mais on peut assigner l'autre literal *)
+            with
+              | WL_found l -> (self#watch c l wl ; WL_New) (* on peut déplacer la jumelle *) 
+          end
+      | Some b ->
+          begin
+           if (b=b0) (* alors (b0,v0) est vrai dans c *) then 
+            try
+                c#get_vpos#iter (fun var -> if (var != v0 && super#get_pari var != Some false) then raise (WL_found (true,var)) else ());
+                c#get_vneg#iter (fun var -> if (var != v0 && super#get_pari var != Some true) then raise (WL_found (false,var)) else ());
               WL_Nothing (* on ne peut pas déplacer la jumelle mais l'autre literal est déjà vrai *)
             with
-              | WL_Found l -> formule#watch c l wl ; WL_New (* on peut déplacer la jumelle *)
-          else (* (b0,v0) est faux dans c *)
-            try
-              c#get_vpos#fold (fun var -> if (var != v0 && super#get_paris != Some false) then raise WL_found (true,var) else ()) ();
-              c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
-              WL_Conflit (* on ne peut pas déplacer la jumelle et l'autre literal est faux*)
-            with
-              | WL_Found l -> formule#watch c l wl ; WL_New (* on peut déplacer la jumelle *)
-
+                | WL_found l -> (self#watch c l wl ; WL_New) (* on peut déplacer la jumelle *)
+            else (* (b0,v0) est faux dans c *)
+              try
+                c#get_vpos#iter (fun var -> if (var != v0 && super#get_pari var != Some false) then raise (WL_found (true,var)) else ());
+                c#get_vneg#iter (fun var -> if (var != v0 && super#get_pari var != Some true) then raise (WL_found (false,var)) else ());
+                WL_Conflit (* on ne peut pas déplacer la jumelle et l'autre literal est faux*)
+              with
+                | WL_found l ->( self#watch c l wl ; WL_New) (* on peut déplacer la jumelle *)
+          end
 
 
 
