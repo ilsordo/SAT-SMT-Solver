@@ -1,5 +1,0 @@
-mener plus de tests
-permettre de générer des tests aléatoires
-commenter code
-rédiger readme (expliquer endroit où ça rame (singleton ?), choix des sd/implémentation, répartition des tâches, comparaison perf avec/sans watch literal...)
-watched literal
