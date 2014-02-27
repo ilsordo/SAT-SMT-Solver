@@ -4,7 +4,9 @@ open Debug
 
 type answer = Unsolvable | Solvable of bool vartable
 
-type propagation_result = Fine of variable list | Conflict (* C'est juste pour la lisibilité du code, si tu aimes pas on peut le virer *)
+
+
+exception Wl_fail
 
 let print_valeur p v = function
   | true -> Printf.fprintf p "v %d\n" v
@@ -17,119 +19,90 @@ let print_answer p = function
       valeurs#iter (print_valeur p)
 
 
-
-(*************)
-
-let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié (et on a donc une affectation gagnante) *)
-  let n=formule#get_nb_vars in
-  let rec parcours_paris = function
-    | 0 -> None
-    | m -> 
-        if (formule#get_pari m != None) then 
-          parcours_paris (m-1) 
-        else 
-          Some m in
-  parcours_paris n
-
-let constraint_propagation formule = (* Renvoie Conflict et annule la propagatiob si une clause vide a été générée, Fine sinon*)
-  let var_add = ref [] in (* variables ayant été affectées *)
-  let stop = ref false in (* stop = false : il y a encore à propager, stop = true : on a fini de propager *)
-  let affect v b =
-    debug 4 "Propagation : setting %d to %B" v b;
-    var_add := v::(!var_add);
-    formule#set_val b v in (* Peut lever une exception qui est attrapée plus loin *)
-  try
-    while not (!stop) do
-      begin
-        match formule#find_singleton with
-          | None ->
-              stop:=true (* on se donne une chance de finir la propagation *)
-          | Some (v,b) ->
-              debug 3 "Propagation : singleton found : %d %B" v b;
-              affect v b
-      end; 
-      match formule#find_single_polarite with
-        | None -> 
-            () (* si stop était à true, la propagation s'arrète ici *)
-        | Some (v,b) ->
-            debug 3 "Propagation : single polarity found : %d %B" v b;
-            stop:=false; (* la propagation doit refaire un tour... *)
-            affect v b
-    done; 
-    Fine (!var_add)
-  with 
-      Clause_vide ->
-        List.iter (fun var -> formule#reset_val var) !var_add; 
-        Conflict 
-
-
-
-let wl n cnf =
-  let formule = new formule_dpll n cnf in
-
-  let try_pari var b =
-    debug 1 "Dpll : trying with %d %B" var b;
-    try
-      formule#set_val b var
-    with
-        Clause_vide ->
-          assert false in
-  
-  let rec aux () =
-    record_stat "Propagation";
-    debug 2 "Dpll : starting propagation";
-    match constraint_propagation formule with
-      | Conflict -> 
-          record_stat "Conflits";
-          debug 2 ~stops:true "Dpll : conflict found";
-          false
-      |  Fine var_prop -> 
-          debug 2 "Dpll : starting constraint propagation";
-          match next_pari formule with
-            | None -> 
-                debug 1 "Done";
-                true (* plus aucun pari à faire, c'est gagné *)
-            | Some var -> 
-                try_pari var true;
-                if aux () then
-                  true
-                else
-                  begin
-                    formule#reset_val var;
-                    try_pari var false;
-                    if aux() then
-                      true
-                    else
-                      begin
-                        debug 1 "Dpll : backtracking on var %d" var;
-                        List.iter (fun v -> formule#reset_val v) var_prop;
-                        formule#reset_val var;
-                        false
-                      end
-                  end in
-  try 
-    formule#check_empty_clause;
-    if aux () then 
-      Solvable formule#get_paris
-    else 
-      Unsolvable
-  with
-    | Clause_vide -> Unsolvable (* Clause vide dès le début *)
-
-
-
 (***************************************************)
 
+(* constraint_propagation reçoie un ordre d'assignation
+      la fonction doit faire cette assignation et toutes celles qui en découlent, ssi pas de conflits créées
+      si conflits, aucune assignation ne doit être faite
+      si réussit : renvoie la liste des assignations effectuées
+*)
+(* l : liste des assignations effectuées depuis le dernier pari, inclu *)
+let constraint_propagation formule var b l =
+
+  if ((formule#get_paris#find var) = Some (not b)) then (* double paris contradictoire (y a-t-il un pb si double paris non contradictoire ?)  *)
+    List.iter (fun var -> formule#get_paris#remove var) !l; (* on annule toutes les assignations depuis le dernier pari *)
+    raise Wl_fail (***)
+  else
+    begin
+      l := v::(!l); (* se rappeler que v subit une assignation (et si v était déjà assigné et subit pari non contradictoire ? impossible ? *)
+      formule#get_paris#set var b (* on fait l'assignation sans risque *)
+    end;
+
+  let deplacer = (*il faut deplacer des jumelles *)
+    if b then
+      get_wl_neg var 
+    else
+      get_wl_pos var in
+    deplacer#iter (fun c -> match update_clause c (not b,var) with
+                              | WL_Conflit ->     
+                                  List.iter (fun var -> formule#get_paris#remove var) !l; (* on annule toutes les assignations depuis le dernier pari *)
+                                  raise Wl_fail
+                              | WL_New -> ()
+                              | WL_Assign (v,b) -> let ll = constraint_propagation formule v b l in () (*** suspect *)
+                              | WL_Nothing -> ()  )
+    !l (* on renvoie toutes les assignations effectuées *)
+
+
+
 
 let wl n cnf =
-  let formule = new formule_dpll n cnf in
-  formule#init n clauses_init;
+  let formule = new formule_wl n cnf in
+  formule#init n clauses_init; (* on a prétraité, peut être des clauses vides créées et à détecter au plus tôt *)
+
+  let rec aux()=
+    match next_pari formule with
+      | None -> true (* plus rien à parier = c'est gagné *)
+      | Some var ->  try 
+                       let l = constraint_propagation formule var true (ref []) in (* première chance en pariant vrai *)
+                        if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
+                          true (* c'est gagné *)
+                        else (* pb plus loin dans le backtracking, il faut tout annuler pour parier sur faux *)
+                          begin
+                            List.iter (fun var -> formule#get_paris#remove var) l; (* on annule les assignations *)
+                            try 
+                              let ll=constraint_propagation formule var false (ref []) in (* on a encore une chance sur le faux *)
+                              if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
+                                true (* c'est gagné *)
+                              else
+                               begin
+                                 List.iter (fun var -> formule#get_paris#remove var) l;
+                                 false
+                               end   
+                            with
+                              | Wl_fail -> false
+                          end
+                     with
+                       | Wl_fail ->   
+                           try 
+                             let ll=constraint_propagation formule var false (ref []) in (* on a encore une chance sur le faux *)
+                             if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
+                               true (* c'est gagné *)
+                             else
+                              begin
+                                List.iter (fun var -> formule#get_paris#remove var) l;
+                                false
+                              end   
+                           with
+                             | Wl_fail -> false
+  in
 
   try
     formule#check_empty_clause;
   (* à partir de maintenant : pas de clauses vides, singleton ou tautologie. De plus, un ensemble de var a été assigné (avec clauses cachées) sans conflits. Ces vars n'apparaissent nul part ailleur dorénavant *) 
-(*** aux *)
-
+    if aux () then 
+      Solvable formule#get_paris
+    else 
+      Unsolvable
   with
     | Clause_vide -> Unsolvable (* Clause vide dès le début *)
 

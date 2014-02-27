@@ -1,10 +1,13 @@
 open Clause
 open Formule
 
-type wl_update = WL_Conflit | WL_New of literal | WL_Assign of literal | WL_Nothing
+type wl_update = WL_Conflit | WL_New| WL_Assign of literal | WL_Nothing
 
 class formule_wl :
 object
+  method watch : clause -> literal -> literal -> unit
+  method get_wl_pos : variable -> clauseset
+  method get_wl_neg : variable -> clauseset
   method init : int -> variable list list -> unit
   method get_nb_vars : int
   method get_pari : variable -> bool option

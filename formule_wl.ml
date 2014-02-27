@@ -4,7 +4,7 @@ open Debug
 
 exception Found of (variable*bool)
 
-type wl_update = WL_Conflit | WL_New of literal | WL_Assign of literal | WL_Nothing
+type wl_update = WL_Conflit | WL_New | WL_Assign of literal | WL_Nothing
 
 exception WLs_found of (literal*literal)
 
@@ -16,6 +16,40 @@ object(self)
 
   val wl_pos : clauseset vartable = new vartable 0
   val wl_neg : clauseset vartable = new vartable 0
+
+  method get_wl_pos var = (* à fusionner avec fonction get_wl plus bas *)
+    match wl_pos#find var with
+      | None -> assert false (* aurait du être initialisé *)
+      | Some s -> s
+
+  method get_wl_neg var = (* à fusionner avec fonction get_wl plus bas *)
+    match wl_neg#find var with
+      | None -> assert false (* aurait du être initialisé *)
+      | Some s -> s
+
+  method watch c l l_former = (* on veut que le litteral l surveille la clause c, à la place de l_former *) (*** ce code peut contenir des bugs mineurs *)
+    let (b,v)=l in
+    let (b_former,v_former)=l in
+    if b then
+      (self#get_wl v wl_pos)#add c (* l sait qu'il surveille c *)
+    else
+      (self#get_wl v wl_neg)#add c; (* l sait qu'il surveille c *)
+    let (wl1,wl2) = c#get_wl in
+      if l_former=wl1 then
+        c#set_wl1 l; (* c sait qu'il est surveillé par l *)
+        if b_former then
+          (self#get_wl v_former wl_pos)#remove c (* l_former sait qu'il ne surveille plus c *)
+        else
+          (self#get_wl v_former wl_neg)#remove c (* l_former sait qu'il ne surveille plus c *)
+      else
+        c#set_wl2 l; (* c sait qu'il est surveillé par l *)
+        if b_former then
+          (self#get_wl v_former wl_pos)#remove c (* l_former sait qu'il ne surveille plus c *)
+        else
+          (self#get_wl v_former wl_neg)#remove c (* l_former sait qu'il ne surveille plus c *)
+
+
+  method unwatch l c = (* on veut que le litteral l ne surveille plus la clause c *)
 
   method init n clauses_init = (* après un appel initial à init, il faudra supprimer les clauses vides *)
     super#init n clauses_init;
@@ -86,7 +120,7 @@ object(self)
               c#set_wl1 l1;
               c#set_wl2 l2)
 
-  method private update_clause c wl = (* on veut abandonner la jumelle sur le literal wl*)
+  method update_clause c wl = (* on veut abandonner la jumelle sur le literal wl*)
     let (wl1,wl2) = c#get_wl in
     (*let (b,v) = wl in*) (* c'est (b,l) qu'on veut abandonner *)
     let (b0,v0) = if wl=wl1 then wl2 else wl1 in
@@ -97,7 +131,7 @@ object(self)
             c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
             WL_Assign (b0,v0) (* on ne peut pas déplacer la jumelle mais on peut assigner l'autre literal *)
           with
-            | WL_Found l -> WL_New l (* on peut déplacer la jumelle *)
+            | WL_Found l -> formule#watch c l wl ; WL_New (* on peut déplacer la jumelle *)
       | Some bb ->
           if bb=b0 (* alors (b0,v0) est vrai dans c *) then 
             try
@@ -105,14 +139,14 @@ object(self)
               c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
               WL_Nothing (* on ne peut pas déplacer la jumelle mais l'autre literal est déjà vrai *)
             with
-              | WL_Found l -> WL_New l (* on peut déplacer la jumelle *)
+              | WL_Found l -> formule#watch c l wl ; WL_New (* on peut déplacer la jumelle *)
           else (* (b0,v0) est faux dans c *)
             try
               c#get_vpos#fold (fun var -> if (var != v0 && super#get_paris != Some false) then raise WL_found (true,var) else ()) ();
               c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
               WL_Conflit (* on ne peut pas déplacer la jumelle et l'autre literal est faux*)
             with
-              | WL_Found l -> WL_New l (* on peut déplacer la jumelle *)
+              | WL_Found l -> formule#watch c l wl ; WL_New (* on peut déplacer la jumelle *)
 
 
 
