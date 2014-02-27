@@ -3,6 +3,7 @@ open Lexing
 open Printf
 open Formule
 open Debug
+open Algo_wl
 
 type config = { mutable input : string option; mutable algo : int -> int list list -> answer; mutable nom_algo : string }
 
