@@ -1,5 +1,6 @@
 open Answer
 open Formule_dpll
+open Formule_wl
 open Algo_dpll
 open Lexing
 open Printf

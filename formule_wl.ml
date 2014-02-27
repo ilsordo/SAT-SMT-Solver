@@ -4,9 +4,11 @@ open Debug
 
 exception Found of (variable*bool)
 
-type wl_update = WL_Conflit 
+type wl_update = WL_Conflit | WL_New of literal_wl | WL_Assign of literal_wl | WL_Nothing
 
 exception WLs_found of literal_wl*literal_wl
+
+exception WL_found of literal
 
 class formule_wl =
 object
@@ -15,7 +17,7 @@ object
   val wl_pos : clauseset vartable = new vartable 0
   val wl_neg : clauseset vartable = new vartable 0
 
-  method init n clauses_init =
+  method init n clauses_init = (* après un appel initial à init, il faudra supprimer les clauses vides *)
     super#init n clauses_init;
     let (occ_pos,occ_neg) = (new vartable n, new vartable n) in
     let add_occurence dest c v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
@@ -54,7 +56,7 @@ object
             (get_occurences supprimer v)#iter 
               (fun c -> c#hide_var (not b) v);
             prepare() in
-    prepare()
+    prepare() 
 
   method get_wl v dest =
     match dest#find v with
@@ -68,7 +70,7 @@ object
     | (true,v) -> (self#get_wl v wl_pos)#add c
     | (false,v) -> (self#get_wl v wl_neg)#add c
 
-(* Initialise les watched literals des clauses, il faut vérifier qu'il n'y a pas de clause vide *)
+(* Initialise les watched literals des clauses, il faut enlever avant les clauses vides *)
   method init_wl =
     let pull b temp v = (* Extrait 2 éléments *)
       match temp with None -> Some (Some b,v) | Some l -> raise WLs_found (l,(Some b, v)) in
@@ -84,7 +86,45 @@ object
               c#set_wl1 l1;
               c#set_wl2 l2)
 
-  method private update_clause c =
-    
+  method private update_clause c wl = (* on veut abandonner la jumelle sur le literal wl*)
+    let (wl1,wl2) = c#get_wl in
+    let (b,v) = wl in (* c'est (b,l) qu'on veut abandonner *)
+    let (b0,v0) = if wl=wl1 then wl2 else wl1 in
+    match super#get_paris v0 b0 with
+      | None -> 
+          try
+            c#get_vpos#fold (fun var -> if (var != v0 && super#get_paris != Some false) then raise WL_found (true,var) else ()) ();
+            c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
+            WL_Assign (b0,v0)
+          with
+            | WL_Found l -> WL_New l
+      | Some bb ->
+          if bb=b0 (* alors (b0,v0) est vrai*) then 
+            try
+              c#get_vpos#fold (fun var -> if (var != v0 && super#get_paris != Some false) then raise WL_found (true,var) else ()) ();
+              c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
+              WL_Nothing
+            with
+              | WL_Found l -> WL_New l
+          else (* (b0,v0) est faux *)
+            try
+              c#get_vpos#fold (fun var -> if (var != v0 && super#get_paris != Some false) then raise WL_found (true,var) else ()) ();
+              c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
+              WL_Conflit
+            with
+              | WL_Found l -> WL_New l
+
+
+
+
+
+
+
+
+
 
 end
+
+
+
+
