@@ -112,7 +112,7 @@ let algo n cnf =
   try
     formule#init n cnf; (* on a prétraité, peut être des clauses vides créées et à détecter au plus tôt *)
     formule#check_empty_clause;
-    formule#init_wl;
+    formule#init_wl; (* Les jumelles sont posées *)
     (* à partir de maintenant : pas de clauses vides, singleton ou tautologie. De plus, un ensemble de var a été assigné (avec clauses cachées) sans conflits. Ces vars n'apparaissent nul part ailleur dorénavant *) 
     if aux () then 
       Solvable formule#get_paris
