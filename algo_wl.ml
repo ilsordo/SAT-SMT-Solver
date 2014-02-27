@@ -1,3 +1,4 @@
+open Formule
 open Formule_wl
 open Clause
 open Debug
@@ -74,52 +75,50 @@ let algo n cnf =
   let rec aux()=
     match next_pari formule with
       | None -> true (* plus rien à parier = c'est gagné *)
-      | Some var -> try 
-                       let l = constraint_propagation formule var true (ref []) in (* première chance en pariant vrai *)
-                        if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
-                          true (* c'est gagné *)
-                        else (* pb plus loin dans le backtracking, il faut tout annuler pour parier sur faux *)
-                          begin
-                            List.iter (fun var -> formule#get_paris#remove var) l; (* on annule les assignations *)
-                            try 
-                              let ll=constraint_propagation formule var false (ref []) in (* on a encore une chance sur le faux *)
-                              if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
-                                true (* c'est gagné *)
-                              else
-                               begin
-                                 List.iter (fun var -> formule#get_paris#remove var) ll;
-                                 false
-                               end   
-                            with
-                              | Wl_fail -> false
-                          end
-                     with
-                       | Wl_fail -> 
-                          begin  
-                           try 
-                             let ll=constraint_propagation formule var false (ref []) in (* on a encore une chance sur le faux *)
-                             if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
-                               true (* c'est gagné *)
-                             else
-                              begin
-                                List.iter (fun var -> formule#get_paris#remove var) ll;
-                                false
-                              end   
-                           with
-                             | Wl_fail -> false
-                           end
-
+      | Some var ->  
+          try 
+            let l = constraint_propagation formule var true (ref []) in (* première chance en pariant vrai *)
+            if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
+              true (* c'est gagné *)
+            else (* pb plus loin dans le backtracking, il faut tout annuler pour parier sur faux *)
+              begin
+                List.iter (fun var -> formule#get_paris#remove var) l; (* on annule les assignations *)
+                try 
+                  let ll=constraint_propagation formule var false (ref []) in (* on a encore une chance sur le faux *)
+                  if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
+                    true (* c'est gagné *)
+                  else
+                    begin
+                      List.iter (fun var -> formule#get_paris#remove var) ll;
+                      false
+                    end   
+                with
+                  | Wl_fail -> false
+              end
+          with
+            | Wl_fail ->   
+                try 
+                  let ll=constraint_propagation formule var false (ref []) in (* on a encore une chance sur le faux *)
+                  if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
+                    true (* c'est gagné *)
+                  else
+                    begin
+                      List.iter (fun var -> formule#get_paris#remove var) ll;
+                      false
+                    end   
+                with
+                  | Wl_fail -> false
   in
 
   try
     formule#check_empty_clause;
-  (* à partir de maintenant : pas de clauses vides, singleton ou tautologie. De plus, un ensemble de var a été assigné (avec clauses cachées) sans conflits. Ces vars n'apparaissent nul part ailleur dorénavant *) 
+    (* à partir de maintenant : pas de clauses vides, singleton ou tautologie. De plus, un ensemble de var a été assigné (avec clauses cachées) sans conflits. Ces vars n'apparaissent nul part ailleur dorénavant *) 
     if aux () then 
       Solvable formule#get_paris
     else 
       Unsolvable
   with
-    | Formule.Clause_vide -> Unsolvable (* Clause vide dès le début *)
+    | Clause_vide -> Unsolvable (* Clause vide dès le début *)
 
 
 

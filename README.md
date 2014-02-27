@@ -141,3 +141,4 @@ Analyse des performances du programme
 =====================================
 
 L'algorithme termine instantanément sur les exemples fournis avec l'énoncé.
+
