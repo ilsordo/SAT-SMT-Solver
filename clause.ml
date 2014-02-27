@@ -38,13 +38,9 @@ object (self : 'varset)
      
   method mem x = VarSet.mem x vis  (* indique si la variable x est dans vis  *)
 
-  method intersects (v : 'varset) = VarSet.is_empty (VarSet.inter vis v#repr) (* indique si l'intersection entre vis et v est vide ou non *)
-
-  method union (v : 'varset) = {< vis = VarSet.union vis v#repr; hid = VarSet.empty >} (* renvoie une nouveau varset, union de vis et v *)
+  method intersects (v : 'varset) = not (VarSet.is_empty (VarSet.inter vis v#repr)) (* indique si l'intersection entre vis et v est vide ou non *)
 
   method is_empty = VarSet.is_empty vis
-
-  method size = VarSet.cardinal vis (* nombre de variables visibles *)
 
   method singleton = (* indique si vis est un singleton, et renvoie Some v si v est l'unique variable de vis, None sinon *)
     match VarSet.cardinal vis with
@@ -81,8 +77,6 @@ object
   method get_vpos = vpos
     
   method get_vneg = vneg
-
-  method get_vars = vneg#union vpos (* renvoie un varset union de toutes les vars visibles *)
     
   method is_tauto = vpos#intersects vneg (* indique si la clause est une tautologie *)
     
