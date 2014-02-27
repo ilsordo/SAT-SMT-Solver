@@ -66,6 +66,10 @@ object(self)
         end
 
   method init n clauses_init = (* après un appel initial à init, il faudra supprimer les clauses vides *)
+    for i=1 to n do (***)
+      wl_pos#set i (new clauseset);
+      wl_neg#set i (new clauseset)
+    done;
     super#init n clauses_init;
     let (occ_pos,occ_neg) = (new vartable n, new vartable n) in
     let add_occurence dest c v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
