@@ -4,11 +4,11 @@ open Formule_dpll
 open Clause
 open Debug
 
-type propagation_result = Fine of variable list | Conflict (* C'est juste pour la lisibilité du code, si tu aimes pas on peut le virer *)
+type propagation_result = Fine of variable list | Conflict 
 
 (*************)
 
-let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié (et on a donc une affectation gagnante) *)
+let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié *)
   let n=formule#get_nb_vars in
   let rec parcours_paris = function
     | 0 -> None
@@ -19,7 +19,7 @@ let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None 
           Some m in
   parcours_paris n
 
-let constraint_propagation formule = (* Renvoie Conflict et annule la propagatiob si une clause vide a été générée, Fine sinon*)
+let constraint_propagation formule = (* Renvoie Conflict et annule la propagation si une clause vide a été générée, Fine sinon*)
   let var_add = ref [] in (* variables ayant été affectées *)
   let stop = ref false in (* stop = false : il y a encore à propager, stop = true : on a fini de propager *)
   let affect v b =
@@ -50,8 +50,7 @@ let constraint_propagation formule = (* Renvoie Conflict et annule la propagatio
         List.iter (fun var -> formule#reset_val var) !var_add; 
         Conflict 
 
-
-
+(* Algo dpll *)
 let algo n cnf = 
   let formule = new formule_dpll in
   formule#init n cnf;
@@ -64,6 +63,7 @@ let algo n cnf =
         Clause_vide ->
           assert false in
   
+  (* Renvoie true si la propagation réussit, false sinon *)
   let rec aux () =
     record_stat "Propagation";
     debug 2 "Dpll : starting propagation";
@@ -97,7 +97,7 @@ let algo n cnf =
                       end
                   end in
   try 
-    formule#check_empty_clause;
+    formule#check_empty_clause; (* Lève Clause_vide si une clause est vide *)
     if aux () then 
       Solvable formule#get_paris
     else 

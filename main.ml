@@ -8,13 +8,13 @@ type config = { mutable input : string option; mutable algo : int -> int list li
 
 let config = { input = None; algo = Algo_dpll.algo; nom_algo = "dpll" }
 
-
+(* Utilise le module Arg pour modifier l'environnement config *)
 let parse_args () =
   let use_msg = "Usage:\n resol [file.cnf] [options]\n" in
   let parse_algo s =
     let algo = match s with
       | "dpll" -> Algo_dpll.algo
-      | "wl" -> Algo_wl.algo 
+      | "wl" -> Algo_dpll.algo 
     | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.algo <- algo;
     config.nom_algo <- s in
@@ -45,11 +45,10 @@ let parse input =
         eprintf "Input error\n%!";
         exit 1
 
-
-     
 let main () =
   parse_args();
   let (n,cnf) = parse (get_input ()) in
+  debug 1 "Using algorithm %s" config.nom_algo;
   let answer = config.algo n cnf in
   printf "%a\n%t%!" print_answer answer print_stats;
   begin
