@@ -53,7 +53,6 @@ let constraint_propagation formule = (* Renvoie Conflict et annule la propagatio
 (* Algo dpll *)
 let algo n cnf = 
   let formule = new formule_dpll in
-  formule#init n cnf;
 
   let try_pari var b =
     debug 2 "Dpll : trying with %d %B" var b;
@@ -97,6 +96,7 @@ let algo n cnf =
                       end
                   end in
   try 
+    formule#init n cnf;
     formule#check_empty_clause; (* Lève Clause_vide si une clause est vide *)
     if aux () then 
       Solvable formule#get_paris
@@ -104,20 +104,3 @@ let algo n cnf =
       Unsolvable
   with
     | Clause_vide -> Unsolvable (* Clause vide dès le début *)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
