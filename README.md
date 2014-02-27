@@ -6,7 +6,6 @@
  #   Maxime Lesourd                                   #
  #   Yassine HAMOUDI                                  #
  #                                                    #
- #   Dépôt Git : https://github.com/nagaaym/projet2   #
  #                                                    #
  ######################################################
  #                                                    #
@@ -24,10 +23,8 @@
  ######################################################
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    0 - Compilation et exécution    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+0 - Compilation et exécution    
+============================
 
 Pour compiler, entrer : 
 
@@ -44,132 +41,70 @@ Le programme affiche le résultat dans la console. Pour enregistrer ce résultat
             ./resol tests/ex1.cnf > res.txt
             
 
+Pour afficher les informations sur le déroulement de l'algorithme :
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    1 - Structures de données    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            ./resol -d n ex.cnf
 
-
-Les structures suivantes sont définies dans le fichier "formule.ml" : 
-
-* Variable : une variable est un objet contenant une unique valeur : son nom (qui est un entier)
-
-* VarSet : le module Set est utilisé pour définir des ensembles de variables
-
-* Clause : une clause est un objet qui contient 2 valeurs : 
-              - vpos : l'ensemble des variables (représenté par un VarSet) apparaissant positivement dans la clause 
-              - vneg : l'ensemble des variables (représenté par un VarSet) apparaissant négativement dans la clause
-           Par exemple, pour la clause {x1 ou x2 ou (non x3)}, on a vpos=(x1,x2) et vneg=(x3)
-
-* ClauseSet : le module Set est utilisé pour définir des ensembles de clauses
-
-* Formule : une formule est un objet qui contient 4 valeurs :
-              - nb_var : le nombre de variables apparaissant dans la formule
-              - var : un tableau de taille nb_var dont la ième case contient la ième variable
-              - valeur : un tableau de taille nb_var dont la ième case permet de stocker une affectation de la ième variable (0 si faux, 1 si vrai)
-              - clau : l'ensemble des clauses de la formule, représenté par un ClauseSet
+où d est un entier positif définissant le niveau de détail de la description 
 
 
-La structure suivante est définie dans le fichier "seaux.ml" : 
+1 - Structures de données
+=========================
 
-* Seaux : un seaux est un objet qui contient 3 valeurs : 
-             - nb_var : le nombre de variable figurant dans la formule associée au seau
-             - cpos : un tableau de taille nb_var dont la ième case contient l'ensemble des clauses où xi apparait positivement et est la plus grande variable
-             - cneg : un tableau de taille nb_var dont la ième case contient l'ensemble des clauses où xi apparait négativement et est la plus grande variable
-            
+Les structures suivantes sont utilisées par l'algorithme :
 
+clause.ml:
+---------
 
+* variable : Les variables sont des entiers
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    2 - Algorithmes et optimisations    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+* varset : objet représentant un ensemble de variables. Permet de cacher temporairement des variables.
 
+* clause : une clause est un objet qui contient 2 varset : 
+              * vpos : l'ensemble des variables apparaissant positivement dans la clause 
+              * vneg : l'ensemble des variables apparaissant négativement dans la clause
+           Par exemple, pour la clause 1 2 -3, on a vpos={1,2} et vneg={3}
 
-Le programme utilise l'algorithme de Davis-Putnam pour répondre au problème. 
+Les assignations de valeurs dans la clause se traduisent en un passage des littéraux faux dans la partie cachée.
 
-Il a été remarqué que lors de la manipulation des seaux, de très nombreuses clauses "inutiles" (au sens où l'information qu'elles portent est redondante) sont engendrées. Si ces clause ne sont pas repérées et supprimées à temps, l'algorithme ne trouve pas de réponse en temps raisonnable au fichier ex1.cnf par exemple. 
-Les 2 pratiques suivantes sont suivies par défaut : 
+Note : l'objet clause contient aussi des champs spécifiques à l'algorithme des watched literals, ils seront expliqués plus loin.
 
-  - un ensemble de clause (ClauseSet) ne peut pas contenir deux clauses identiques (cf la fonction "compare" figurant dans le module "OrderedClause" dans le fichier "formule.ml")
-  - lorsqu'une clause est ajoutée à un seau, on s'assure qu'il ne s'agit pas d'une tautologie ou d'une clause vide (cf "method add_c" figurant dans le fichier "seaux.ml")
+formule.ml:
+-----------
 
-Pour obtenir une réponse en temps raisonnable sur le fichier ex1.cnf par exemple, il est nécessaire d'effectuer en plus l'action suivante : 
+* clauseset : objet représentant un ensemble de clauses. Permet de cacher temporairement des clauses.
+              Note : On compare les clauses en leur assignant un identifiant unique à leur création.
 
-  - les seaux sont "nettoyés" régulièrement : on repère tous les couples de clauses (c1,c2) où c1 contient c2 et on supprime c1 (cf "method nettoie_seaux" figurant dans le fichier "seaux.ml")
+* 'a vartable : table d'association polymorphique sur les variables
 
-Cette dernière technique n'est pas activée par défaut (elle ne figure pas dans l'algorithme de Davis-Putnam). Lors de l'appel du programme sur un fichier ex.cnf, il faut ajouter l'option "-clean" pour l'activer : 
+* formule : une formule est un objet qui contient 4 valeurs :
+              * nb_var : le nombre de variables apparaissant dans la formule
+              * clauses : clauseset contenant les clauses formant la formule
+              * paris : un bool vartable correspondant à une assignation partielle des variables
+              * x : un compteur permettant de numéroter les clauses
 
-            ./resol ex.cnf -clean
+formule_dpll.ml:
+----------------
 
+* occurences : 2 vartable de clauseset permettant de savoir où apparait chaque variable selon sa positivité.
+               Si aucun pari n'est fait sur la variable ils contiennent la liste des clauses visibles où elle apparait.
+               Si un pari a été fait ils contiennent la liste de clauses cachées qu'il faudra restaurer en cas de backtrack.
 
+Les assignations de valeur dans la formule se traduisent en un passage des clauses validées par le littéral dans la partie cachée
+des clauses, une modification des listes d'occurences pour garantir la propriété citée précédemment et une assignation dans les clauses. 
 
+2 - Algorithme DPLL
+===================
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    3 - Réponse à la partie 2    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+L'algorithme DPLL est implémenté comme une alternance de phases de propagation de contraintes et de paris sur des variables libres.
 
+La variable à assigner est choisie comme la première variable non assignée.
 
-Il s'agit d'expliquer, dans le cas où une formule f est satisfiable, comment trouver une affectation des variables en témoignant.
-
-(la démarche à suivre a été implémentée dans la fonction "affecter" figurant dans le fichier "seau.ml")
-
-Considérons une formule f satisfiable, constituée des variables x1...xk.
-On applique l'algorithme de Davis-Putnam à f, de sorte à remplir k seaux S1...Sk.
-On déduit une affectation pour chaque variable de la manière suivante : 
-
-  - si le seau S1 contient des clauses où figure le littéral x1, alors on effectue l'affectation (x1=vrai)
-  - sinon (S1 contient des clauses où figure le littéral non x1, ou S1 est vide), alors on effectue l'affectation (x1=faux)
-
-  - si le seau S2 ne contient pas de clauses où le littéral non x2 apparait, alors on effectue l'affectation (x2=vrai)
-  - si le seau S2 ne contient pas de clauses où le littéral x2 apparait, ou si S2 est vide, alors on effectue l'affectation (x2=faux)
-  - sinon, on parcours les clauses de S2 jusqu'à en trouver une qui ne puisse pas être satisfaite grâce à l'affectation de x1 effectuée précédemment :
-      * si on ne trouve pas de telle clause, alors on effectue l'affectation (x2=faux)
-      * si on trouve une telle clause, où le littéral x2 apparait, alors on effectue l'affectation (x2=vrai)
-      * si on trouve une telle clause, où le littéral non x2 apparait, alors on effectue l'affectation (x2=faux)
-
-  .... on remonte ainsi les seaux
-
-  - si le seau Si (2<=i<=k) ne contient pas de clauses où le littéral non xi apparait, alors on effectue l'affectation (xi=vrai)
-  - si le seau Si ne contient pas de clauses où le littéral xi apparait, ou si Si est vide, alors on effectue l'affectation (xi=faux)
-  - sinon, on parcours les clauses de Si jusqu'à en trouver une qui ne puisse pas être satisfaite grâce aux affectations de x1,x2...x(i-1) effectuées précédemment :
-      * si on ne trouve pas de telle clause, alors on effectue l'affectation (xi=faux)
-      * si on trouve une telle clause, où le littéral xi apparait, alors on effectue l'affectation (xi=vrai)
-      * si on trouve une telle clause, où le littéral non xi apparait, alors on effectue l'affectation (xi=faux)
-
-  ... on poursuit jusqu'au seau Sk
-
-A la fin de cette procédure, on a bien construit une affectation des variables qui rend la formule f vraie.
+La propagation des contraintes est accélérée par la connaissance par la formule des clauses contenant la variable assignée,
+On évite ainsi de parcourir toutes les clauses. 
 
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    4 - Réponse à la partie 4 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-Un générateur de formules aléatoires a été implémenté afin de tester les temps d'exécution du programme sur différentes entrées.
-
-Ce générateur figure dans le dossier tests/generateur. Un fichier README.txt présent dans ce dossier explique comment l'utiliser. 
-Le principe de fonctionnement de ce générateur est décrit ci-dessous : 
-
-Le générateur prend en entrée un entier k :
-  - k variables x1...xk sont créées
-  - 4*k clauses comportant chacune 3 littéraux sont construites. Une clause est définie de la façon suivante :
-      * trois variables sont tirées au hasards (parmis les variables précédemment créées) : y1,y2,y3
-      * pour chaque variable yi, un booléen est tiré au hasard. S'il s'agit de vrai on ajoute le littéral yi à la clause, sinon on ajoute (non yi)
-
-
-### Justification du choix de cet algorithme ###
-
-Il est souhaitable qu'un algorithme générant des formules aléatoires remplisse les deux conditions suivantes : 
-    1/ il est possible de contrôler la taille (nombre de variables, nombre de clauses, nombre de variables par clauses) des formules générées
-     2/ les formules générées ne sont pas majoritairement satisfiable, ou majoritairement insatisfiables
-Dans l'algorithme considéré ici, le point 1/ est respecté (on engendre k variables et 4*k clauses de taille 3 chacune). Le point 2/ est plus difficile à mettre en place. Le choix qui a été fait ici est motivé par les remarques suivantes : 
-    * pour un nombre fixé de variables : plus il y a de clauses, plus la formule a de chances d'être insatisfiable (chaque clause ajoutée est une contrainte en plus).
-    * à l'inverse, moins il y a de clauses, plus la formule a de chance d'être satisfiable et plus il va exister d'affectation en témoignant
-    * de même, plus une clause est grande, plus elle a de chance d'être satisfiable.
-En engendrant 4*k clauses de taille 3 pour k variables, on espère éviter les "déséquilibres" précedemment évoqués. A l'usage, on remarque effectivement que les formules produites sont "intéressantes", c'est-à-dire se répartissent plus ou moins équitablement entre formules satisfiables et formules insatisfiables.
 
 
 ### Analyse des performances du programme ###
