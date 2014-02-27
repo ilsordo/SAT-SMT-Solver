@@ -1,14 +1,39 @@
 open Answer
-open Formule_dpll
-open Algo_dpll
 open Lexing
 open Printf
 open Formule
 open Debug
 
-let usage () =
-  eprintf "Usage:\n resol [fichier]\n%!";
-  exit 1
+type config = { mutable input : string option; mutable algo : int -> int list list -> answer; mutable nom_algo : string }
+
+let config = { input = None; algo = Algo_dpll.algo; nom_algo = "dpll" }
+
+
+let parse_args () =
+  let use_msg = "Usage:\n resol [file.cnf] [options]\n" in
+  let parse_algo s =
+    let algo = match s with
+      | "dpll" -> Algo_dpll.algo
+      | "wl" -> Algo_wl.algo 
+    | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
+    config.algo <- algo;
+    config.nom_algo <- s in
+  let speclist = [
+    ("-algo",Arg.String parse_algo,"dpll or wl");
+    ("-d",Arg.Int set_debug_level,"Debug depth");
+    ("-b",Arg.Int set_blocking_level,"Interaction depth")] in
+  Arg.parse speclist (fun s -> config.input <- Some s) use_msg
+    
+let get_input () =
+  match config.input with
+    | None -> stdin
+    | Some f-> 
+        try
+          open_in f
+        with
+          | Sys_error e -> 
+              eprintf "Impossible de lire %s:%s\n%!" Sys.argv.(1) e;
+              exit 1
 
 let parse input =
   try
@@ -20,25 +45,12 @@ let parse input =
         eprintf "Input error\n%!";
         exit 1
 
-let get_input () =
-  match Array.length Sys.argv with
-    | 1 -> stdin
-    | 2 -> 
-        begin
-          try
-            open_in Sys.argv.(1)
-          with
-            | Sys_error e -> 
-                eprintf "Impossible de lire %s:%s\n%!" Sys.argv.(1) e;
-                exit 1
-        end
-    | _ -> usage()
+
      
 let main () =
-  set_debug_level 3;
-  set_blocking_level 0;
+  parse_args();
   let (n,cnf) = parse (get_input ()) in
-  let answer = algo n cnf in
+  let answer = config.algo n cnf in
   printf "%a\n%t%!" print_answer answer print_stats;
   begin
     match answer with

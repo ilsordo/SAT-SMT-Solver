@@ -1,8 +1,6 @@
 all: 
-	ocamlbuild -yaccflag -v -lib unix main.native; ln -fs main.native resol
+	ocamlbuild -yaccflag -v -lib unix main.native
 debug:
 	ocamlbuild -yaccflag -v main.d.byte
-byte: 
-	ocamlbuild -yaccflag -v main.byte
 clean: 
 	ocamlbuild -clean
