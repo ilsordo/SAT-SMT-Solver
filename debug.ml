@@ -41,7 +41,7 @@ object
     try Hashtbl.find data s with Not_found -> 0
 
   method print p =
-    Hashtbl.iter (fun s n -> fprintf p "%s = %d\n" s n) data
+    Hashtbl.iter (fun s n -> fprintf p "[stats] %s = %d\n" s n) data
 end
   
 let stats = new stat

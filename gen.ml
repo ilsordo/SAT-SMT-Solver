@@ -22,7 +22,7 @@ let gen_formule n l k p =
   for i = 1 to k do
     let tab = (make_tab k) in
     shuffle tab n;
-    fprintf p "%a\n" (print_tab l) tab
+    fprintf p "%a0\n" (print_tab l) tab
   done
 
 let _ =
@@ -31,7 +31,10 @@ let _ =
   try
     if Array.length t = 4 then
       let (n,l,k) = (int_of_string t.(1),int_of_string t.(2),int_of_string t.(3)) in
-      printf "p cnf %d %d\n%t%!" k n gen_formule
+      if (l>=n) then
+        printf "p cnf %d %d\n%t%!" k n (gen_formule n l k)
+      else
+        eprintf "Error : l<n\n%!"
     else raise (Failure "")
   with Failure _ -> eprintf "Usage : gen k l n\n%!"
 
