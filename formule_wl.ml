@@ -127,11 +127,10 @@ object(self)
               c#set_wl1 l1;
               c#set_wl2 l2)
 
-  method update_clause c wl = (* on veut abandonner la jumelle sur le literal wl*)
-    let (wl1,wl2) = c#get_wl in
-    (*let (b,v) = wl in*) (* c'est (b,l) qu'on veut abandonner *)
+  method update_clause c wl = (* on veut abandonner la jumelle sur le literal wl, dans la clause c. A ce stade, un pari sur wl la rendu faux dans c *)
+    let (wl1,wl2) = c#get_wl in (* on récupère les deux litéraux actuellemnt surveillés *)
     let (b0,v0) = if wl=wl1 then wl2 else wl1 in (* le literal qu'on veut conserver *)
-    match super#get_pari v0 with
+    match super#get_pari v0 with (* on regarde si le literal qu'on garde est à vrai,faux ou indéterminé *)
       | None -> 
           begin
             try
@@ -144,12 +143,12 @@ object(self)
       | Some b ->
           begin
            if (b=b0) (* alors (b0,v0) est vrai dans c *) then 
-            try
+            (*try
                 c#get_vpos#iter (fun var -> if (var != v0 && super#get_pari var != Some false) then raise (WL_found (true,var)) else ());
-                c#get_vneg#iter (fun var -> if (var != v0 && super#get_pari var != Some true) then raise (WL_found (false,var)) else ());
+                c#get_vneg#iter (fun var -> if (var != v0 && super#get_pari var != Some true) then raise (WL_found (false,var)) else ());*)
               WL_Nothing (* on ne peut pas déplacer la jumelle mais l'autre literal est déjà vrai *)
-            with
-                | WL_found l -> (self#watch c l wl ; WL_New) (* on peut déplacer la jumelle *)
+            (*with
+                | WL_found l -> (self#watch c l wl ; WL_New) (* on peut déplacer la jumelle *)*)
             else (* (b0,v0) est faux dans c *)
               try
                 c#get_vpos#iter (fun var -> if (var != v0 && super#get_pari var != Some false) then raise (WL_found (true,var)) else ());
