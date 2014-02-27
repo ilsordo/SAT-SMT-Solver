@@ -42,11 +42,13 @@ let rec constraint_propagation formule var b l =
 
   if ((formule#get_paris#find var) = Some (not b)) then (* double paris contradictoire (y a-t-il un pb si double paris non contradictoire ?)  *)
     begin
-      List.iter (fun v -> formule#get_paris#remove v) !l; (* on annule toutes les assignations depuis le dernier pari *)
+      debug 1 "Tentative assignation contradictoire sur variable %d " var ;
+      List.iter (fun v -> debug 1 "Assignation annulé sur variable %d " v ; formule#get_paris#remove v) !l; (* on annule toutes les assignations depuis le dernier pari *)
       raise Wl_fail (***)
     end
   else
     begin
+      debug 1 "Assignation %B sur variable %d " b var ;
       l := (var::(!l)); (* se rappeler que v subit une assignation (et si v était déjà assigné et subit pari non contradictoire ? impossible ? *)
       formule#get_paris#set var b (* on fait l'assignation sans risque *)
     end;
@@ -57,12 +59,12 @@ let rec constraint_propagation formule var b l =
     else
       formule#get_wl_pos var in
   deplacer#iter (fun c -> match formule#update_clause c (not b,var) with
-    | WL_Conflit ->     
-        List.iter (fun var -> formule#get_paris#remove var) !l; (* on annule toutes les assignations depuis le dernier pari *)
+    | WL_Conflit -> debug 1 "Jumelles bloquée sur false (traitement de variable %d assignée a %B) " var b ;
+        List.iter (fun var -> debug 1 "Assignation annulé sur variable %d " var ; formule#get_paris#remove var) !l; (* on annule toutes les assignations depuis le dernier pari *)
         raise Wl_fail
-    | WL_New -> ()
-    | WL_Assign (b,v) -> let _ = constraint_propagation formule v b l in () (*** suspect *)
-    | WL_Nothing -> ()  );
+    | WL_New -> debug 1 "Jumelles déplacées (traitement de variable %d assignée a %B) " var b ;
+    | WL_Assign (bb,v) -> debug 1 "Jumelles demande assignement %B sur variable %d (traitement de variable %d assignée a %B) " bb v var b ;let _ = constraint_propagation formule v bb l in () (*** suspect *)
+    | WL_Nothing -> debug 1 "Jumelles immobiles sans problème (traitement de variable %d assignée a %B) " var b ; ()  );
   !l (* on renvoie toutes les assignations effectuées *)
 
 
@@ -81,14 +83,14 @@ let algo n cnf =
               true (* c'est gagné *)
             else (* pb plus loin dans le backtracking, il faut tout annuler pour parier sur faux *)
               begin
-                List.iter (fun var -> formule#get_paris#remove var) l; (* on annule les assignations *)
+                List.iter (fun var -> debug 1 "Assignation annulé sur variable %d " var ; formule#get_paris#remove var) l; (* on annule les assignations *)
                 try 
                   let ll=constraint_propagation formule var false (ref []) in (* on a encore une chance sur le faux *)
                   if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
                     true (* c'est gagné *)
                   else
                     begin
-                      List.iter (fun var -> formule#get_paris#remove var) ll;
+                      List.iter (fun var -> debug 1 "Assignation annulé sur variable %d " var ; formule#get_paris#remove var) ll;
                       false
                     end   
                 with
@@ -102,7 +104,7 @@ let algo n cnf =
                     true (* c'est gagné *)
                   else
                     begin
-                      List.iter (fun var -> formule#get_paris#remove var) ll;
+                      List.iter (fun var -> debug 1 "Assignation annulé sur variable %d " var ; formule#get_paris#remove var) ll;
                       false
                     end   
                 with
