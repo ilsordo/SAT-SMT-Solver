@@ -4,7 +4,6 @@ open Debug
 open Answer
 
 
-
 exception Wl_fail
 
 let print_valeur p v = function
@@ -62,20 +61,20 @@ let rec constraint_propagation formule var b l =
                                   raise Wl_fail
                               | WL_New -> ()
                               | WL_Assign (b,v) -> let _ = constraint_propagation formule v b l in () (*** suspect *)
-                              | WL_Nothing -> ()  )
+                              | WL_Nothing -> ()  );
     !l (* on renvoie toutes les assignations effectuées *)
 
 
 
 
-let wl n cnf =
+let algo n cnf =
   let formule = new formule_wl in
   formule#init n cnf; (* on a prétraité, peut être des clauses vides créées et à détecter au plus tôt *)
 
   let rec aux()=
     match next_pari formule with
       | None -> true (* plus rien à parier = c'est gagné *)
-      | Some var ->  try 
+      | Some var -> try 
                        let l = constraint_propagation formule var true (ref []) in (* première chance en pariant vrai *)
                         if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
                           true (* c'est gagné *)
@@ -95,7 +94,8 @@ let wl n cnf =
                               | Wl_fail -> false
                           end
                      with
-                       | Wl_fail ->   
+                       | Wl_fail -> 
+                          begin  
                            try 
                              let ll=constraint_propagation formule var false (ref []) in (* on a encore une chance sur le faux *)
                              if aux () then (* si on réussit à poursuivre l'assignation jusqu'au bout *)
@@ -107,6 +107,8 @@ let wl n cnf =
                               end   
                            with
                              | Wl_fail -> false
+                           end
+
   in
 
   try
@@ -117,7 +119,7 @@ let wl n cnf =
     else 
       Unsolvable
   with
-    | Clause_vide -> Unsolvable (* Clause vide dès le début *)
+    | Formule.Clause_vide -> Unsolvable (* Clause vide dès le début *)
 
 
 
