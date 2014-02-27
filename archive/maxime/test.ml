@@ -31,17 +31,3 @@ let test_random vars c_size c_num =
     | i -> random_cnf (random_clause IntSet.empty [] c_size::acc) (i-1) in
   random_cnf [] c_num
    
-
-
-
-
-
-
-
-
-
-
-
-
-
-

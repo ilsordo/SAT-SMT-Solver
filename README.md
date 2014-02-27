@@ -19,37 +19,43 @@
  #   4 - Performances                                 #
  #   4 - Optimisations                                #
  #   5 - Répartition des tâches                       #
- #                                                    #  
+ #                                                    #
  ######################################################
 
 
-0 - Compilation et exécution    
-============================
+Compilation et exécution    
+========================
 
 Pour compiler, entrer : 
 
-            make
-
+    make
 
 Pour exécuter le programme sur un fichier ex.cnf, entrer : 
 
-            ./resol ex.cnf
-
-
-Le programme affiche le résultat dans la console. Pour enregistrer ce résultat dans un fichier res.txt par exemple, entrer : 
-
-            ./resol tests/ex1.cnf > res.txt
-            
+    ./resol ex.cnf 
 
 Pour afficher les informations sur le déroulement de l'algorithme :
 
-            ./resol -d n ex.cnf
+    ./resol -d n ex.cnf
 
-où d est un entier positif définissant le niveau de détail de la description 
+où d est un entier positif définissant le niveau de détail de la description
 
+Pour générer une formule de n clauses de taille l avec k variables dans out.cnf :
 
-1 - Structures de données
-=========================
+    ./gen k l n > out.cnf
+
+Pour le résoudre à la volée :
+
+    ./gen k l n > ./resol 
+
+Pour utiliser l'algorithme watched literals :
+
+    ./resol_wl ex.cnf
+
+Note: resol_wl accepte les mêmes options que resol
+
+Structures de données
+=====================
 
 Les structures suivantes sont utilisées par l'algorithme :
 
@@ -93,8 +99,8 @@ formule_dpll.ml:
 Les assignations de valeur dans la formule se traduisent en un passage des clauses validées par le littéral dans la partie cachée
 des clauses, une modification des listes d'occurences pour garantir la propriété citée précédemment et une assignation dans les clauses. 
 
-2 - Algorithme DPLL
-===================
+Algorithme DPLL
+===============
 
 L'algorithme DPLL est implémenté comme une alternance de phases de propagation de contraintes et de paris sur des variables libres.
 
@@ -103,32 +109,19 @@ La variable à assigner est choisie comme la première variable non assignée.
 La propagation des contraintes est accélérée par la connaissance par la formule des clauses contenant la variable assignée,
 On évite ainsi de parcourir toutes les clauses. 
 
+Algorithme Watched Literals
+===========================
 
 
+Générateur
+==========
+
+Un générateur de clauses est fourni avec le solveur
 
 
-### Analyse des performances du programme ###
+Analyse des performances du programme
+=====================================
 
-Le temps d'exécution du programme a été enregistré sur différentes entrées aléatoires.
-Ci-dessous figurent sur chaque ligne un nombre de variables, puis différents temps d'exécution observés sur plusieurs formules générées avec ce nombre de variables : 
-
-Sans option "-clean" : 
-
-5 : 0.003s, 0.001s
-10 : 0.018s, 0.064s
-15 : 5.518s, 5.286s
-20 : out of memory (après 1min53s), out of memory
-
-Avec option "-clean" :
-
-5 : 0.030s, 0.002s
-10 : 0.004s, 0.005s
-20 : 0.106s, 0.043s, 0.055s
-30 : 2.273s, 0.783s, 10.554s, 0.677s, 5.368s
-35 : 19.595s, 9.843s, 2m49.872s, 1.875s, out of memory (après 4min8s)
-40 : out of memory
-
-L'option "-clean" permet donc de doubler le nombre de variables dans les formules générées.
 
 
 

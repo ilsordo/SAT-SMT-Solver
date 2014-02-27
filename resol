@@ -1,4 +1,4 @@
 #/bin/bash
 
-./main.native -algo dpll $@
+./main -algo dpll $@
 
