@@ -40,7 +40,7 @@ object(self)
     | (false,v) -> (self#get_wl v wl_neg)#add c
 
 
-  method watch c l l_former = (* on veut que le litteral l surveille la clause c, à la place de l_former *) (*** ce code peut contenir des bugs mineurs *)
+  method watch c l l_former = (* on veut que le litteral l surveille la clause c, à la place de l_former *) (*** ce code est sujet peut contenir des bugs mineurs *)
     let (b,v)=l in
     let (b_former,v_former)=l in
     if b then
@@ -127,6 +127,7 @@ object(self)
               c#set_wl1 l1;
               c#set_wl2 l2)
 
+(** le code qui suit est suspect*)
   method update_clause c wl = (* on veut abandonner la jumelle sur le literal wl, dans la clause c. A ce stade, un pari sur wl la rendu faux dans c *)
     let (wl1,wl2) = c#get_wl in (* on récupère les deux litéraux actuellemnt surveillés *)
     let (b0,v0) = if wl=wl1 then wl2 else wl1 in (* le literal qu'on veut conserver *)

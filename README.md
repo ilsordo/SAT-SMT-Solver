@@ -6,20 +6,6 @@
  #   Maxime Lesourd                                   #
  #   Yassine HAMOUDI                                  #
  #                                                    #
- #                                                    #
- ######################################################
- #                                                    #
- #   SOMMAIRE                                         #
- #                                                    #
- #   0 - Compilation et exécution                     #
- #   1 - Structures de données                        #
- #   1 - Prétraitement de l'entrée                    #
- #   2 - Algorithmes                                  #
- #   3 - Réponse à la partie 2                        #      
- #   4 - Performances                                 #
- #   4 - Optimisations                                #
- #   5 - Répartition des tâches                       #
- #                                                    #
  ######################################################
 
 
@@ -50,9 +36,9 @@ Pour le résoudre à la volée :
 
 Pour utiliser l'algorithme watched literals :
 
-    ./resol_wl ex.cnf
+    ./resol-wl ex.cnf
 
-Note: resol_wl accepte les mêmes options que resol
+Note: resol-wl accepte les mêmes options que resol
 
 Structures de données
 =====================
@@ -117,6 +103,18 @@ La première étape de propagation des contraintes n'est jamais annulée (sauf s
 
 Algorithme Watched Literals
 ===========================
+
+L'implémentation actuelle de l'algorithme de Watched Literals n'est pas correcte. Nous n'avons pas pu mener le debuggage à terme dans les temps. Une version utilisable sera envoyée dès que possible.
+
+L'implémentation actuelle : 
+  - compile
+  - peut être lancée sur des fichiers tests (par exemple :  ./resol-wl tests/test1.cnf)
+  - intègre des fonctions d'affichages partielles pour faciliter le debuggage (pour le visualiser, entrer :  ./resol-wl tests/test2.cnf -d 1)
+ 
+De nombreux commentaires figurent dans les fichiers algo_wl.ml et formule_wl.ml. 
+Les remarques suivantes peuvent être ajoutées : 
+  - une phase de prétraitement permet de supprimer les tautologies et d'effectuer tous les assignements entrainés par des clauses singletons. D'éventuels clauses vides sont alors détectées
+  - A tout instant, chaque clause connait les 2 littéraux qui la surveille et chaque littéral connait les clauses qu'il surveille
 
 
 
