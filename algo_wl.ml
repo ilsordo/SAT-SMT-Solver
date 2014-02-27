@@ -56,14 +56,14 @@ let rec constraint_propagation formule var b l =
       formule#get_wl_neg var 
     else
       formule#get_wl_pos var in
-    deplacer#iter (fun c -> match formule#update_clause c (not b,var) with
-                              | WL_Conflit ->     
-                                  List.iter (fun var -> formule#get_paris#remove var) !l; (* on annule toutes les assignations depuis le dernier pari *)
-                                  raise Wl_fail
-                              | WL_New -> ()
-                              | WL_Assign (b,v) -> let _ = constraint_propagation formule v b l in () (*** suspect *)
-                              | WL_Nothing -> ()  );
-    !l (* on renvoie toutes les assignations effectuées *)
+  deplacer#iter (fun c -> match formule#update_clause c (not b,var) with
+    | WL_Conflit ->     
+        List.iter (fun var -> formule#get_paris#remove var) !l; (* on annule toutes les assignations depuis le dernier pari *)
+        raise Wl_fail
+    | WL_New -> ()
+    | WL_Assign (b,v) -> let _ = constraint_propagation formule v b l in () (*** suspect *)
+    | WL_Nothing -> ()  );
+  !l (* on renvoie toutes les assignations effectuées *)
 
 
 

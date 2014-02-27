@@ -104,20 +104,3 @@ let algo n cnf =
       Unsolvable
   with
     | Clause_vide -> Unsolvable (* Clause vide dès le début *)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
