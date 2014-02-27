@@ -25,6 +25,33 @@ let rec indent p k =
  
 (* Usage : remplacer eprintf format arg1 ... argN par debug k format arg1 ... argN *)
 
+class stat =
+object
+  val data : (string,int) Hashtbl.t = Hashtbl.create 10
+  
+  method record s = 
+    try 
+      let n = Hashtbl.find data s in
+      Hashtbl.replace data s (n+1)
+    with
+      | Not_found -> 
+          Hashtbl.add data s 1
+          
+  method get s = 
+    try Hashtbl.find data s with Not_found -> 0
+
+  method print p =
+    Hashtbl.iter (fun s n -> fprintf p "%s = %d\n" s n) data
+end
+  
+let stats = new stat
+  
+let record_stat s = stats#record s
+
+let get_stat s = stats#get s
+
+let print_stats p = stats#print p
+
 let debug k ?(stops=false) =
   assert (k>0);
   if !debug_level >= k then
