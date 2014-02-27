@@ -1,11 +1,9 @@
-open Algo_wl
-
 open Answer
 open Lexing
 open Printf
 open Formule
 open Debug
-
+open Algo_wl
 
 type config = { mutable input : string option; mutable algo : int -> int list list -> answer; mutable nom_algo : string }
 
@@ -17,14 +15,14 @@ let parse_args () =
   let parse_algo s =
     let algo = match s with
       | "dpll" -> Algo_dpll.algo
-      | "wl" -> Algo_wl.algo 
+      | "wl" -> Algo_dpll.algo 
     | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.algo <- algo;
     config.nom_algo <- s in
-  let speclist = [
-    ("-algo",Arg.String parse_algo,"dpll or wl");
-    ("-d",Arg.Int set_debug_level,"Debug depth");
-    ("-b",Arg.Int set_blocking_level,"Interaction depth")] in
+  let speclist = Arg.align [
+    ("-algo",Arg.String parse_algo,"dpll|wl");
+    ("-d",Arg.Int set_debug_level,"k Debug depth k");
+    ("-b",Arg.Int set_blocking_level,"k Interaction depth k")] in
   Arg.parse speclist (fun s -> config.input <- Some s) use_msg
     
 let get_input () =
@@ -53,7 +51,8 @@ let main () =
   let (n,cnf) = parse (get_input ()) in
   debug 1 "Using algorithm %s" config.nom_algo;
   let answer = config.algo n cnf in
-  printf "%a\n%t%!" print_answer answer print_stats;
+  printf "%a\n%!" print_answer answer;
+  debug 1 "Stats :\n%t%!" print_stats;
   begin
     match answer with
       | Unsolvable -> ()
@@ -61,7 +60,7 @@ let main () =
           let f_verif = new formule in
           f_verif#init n cnf;
           valeurs#iter (fun v b -> f_verif#set_val b v);
-          printf "Check : %B\n%!" f_verif#eval
+          debug 1 "Check : %B\n%!" f_verif#eval
   end;
   exit 0
 

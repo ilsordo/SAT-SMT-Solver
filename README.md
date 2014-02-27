@@ -40,13 +40,13 @@ Pour afficher les informations sur le déroulement de l'algorithme :
 
 où d est un entier positif définissant le niveau de détail de la description
 
-Pour générer une formule de n clauses de taille l avec k variables dans out.cnf :
+Pour générer une formule de k clauses de taille l avec n variables dans out.cnf :
 
-    ./gen k l n > out.cnf
+    ./gen n l k > out.cnf
 
 Pour le résoudre à la volée :
 
-    ./gen k l n > ./resol 
+    ./gen k l n | ./resol 
 
 Pour utiliser l'algorithme watched literals :
 
@@ -109,23 +109,34 @@ La variable à assigner est choisie comme la première variable non assignée.
 La propagation des contraintes est accélérée par la connaissance par la formule des clauses contenant la variable assignée,
 On évite ainsi de parcourir toutes les clauses. 
 
+Prétraitement:
+--------------
+
+Le prétraitement effectué se limite à supprimer les clauses trivialement satisfiables : celles contenant x et -x.
+La première étape de propagation des contraintes n'est jamais annulée (sauf si on ne trouve pas d'assignation) et joue donc le rôle du prétraitement.
+
 Algorithme Watched Literals
 ===========================
 
 
+
+Suivi de l'algorithme
+=====================
+
+Un système de suivi de l'algorithme est fourni par le module Debug, il permet d'afficher sélectivement des informations sur le déroulement de l'algorithme en plaçant des appels à 'debug' paramétrés par une profondeur dans le code. Le paramètre -d permet alors d'afficher les informations jusqu'à une certaine profondeur et -b de mettre l'exécution en pause sur certains évènements.
+
+Un système de statistiques permet de compter les appels à certaines parties du code pour détecter les sections les plus utilisées.
+Ces statistiques sont affichées à partir de '-d 1'.
+
+La classe formule permet l'évaluation de la formule en utilisant l'assignation calculée si la formule est satisfiable.
+Le résultat renvoyé par l'exécutable est donc systématiquement vérifié et le résultat de la vérification est affiché à partir de '-d 1'.
+
 Générateur
 ==========
 
-Un générateur de clauses est fourni avec le solveur
+Un générateur de clauses est fourni avec le solveur, il génère des clauses uniformément (on extrait les premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.
 
 
 Analyse des performances du programme
 =====================================
-
-
-
-
-
-
-
 

@@ -56,7 +56,8 @@ let algo n cnf =
   formule#init n cnf;
 
   let try_pari var b =
-    debug 1 "Dpll : trying with %d %B" var b;
+    debug 2 "Dpll : trying with %d %B" var b;
+    record_stat "Paris";
     try
       formule#set_val b var
     with
@@ -73,7 +74,6 @@ let algo n cnf =
           debug 2 ~stops:true "Dpll : conflict found";
           false
       |  Fine var_prop -> 
-          debug 2 "Dpll : starting constraint propagation";
           match next_pari formule with
             | None -> 
                 debug 1 "Done";
@@ -90,7 +90,7 @@ let algo n cnf =
                       true
                     else
                       begin
-                        debug 1 "Dpll : backtracking on var %d" var;
+                        debug 2 "Dpll : backtracking on var %d" var;
                         List.iter (fun v -> formule#reset_val v) var_prop;
                         formule#reset_val var;
                         false
