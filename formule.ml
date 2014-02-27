@@ -72,18 +72,11 @@ class formule n clauses_init =
 object (self)
   val x = ref 0 (* compteur de clause *)
   val clauses = new clauseset (* ensemble des clauses de la formule, peut contenir des clauses cachées/visibles *)
-  val occurences_pos : clauseset vartable = new vartable n (* associe à chaque variable les clauses auxquelles elle appartient *)
-  val occurences_neg : clauseset vartable = new vartable n
   val paris : bool vartable = new vartable n (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
-
+    
   initializer
-    for i=1 to n do
-      occurences_pos#set i (new clauseset);
-      occurences_neg#set i (new clauseset)
-    done;
     List.iter (fun c -> clauses#add (new clause x c)) clauses_init;
-    clauses#iter (fun c -> if c#is_tauto then clauses#remove c); (***)
-    clauses#iter self#register_clause
+    clauses#iter (fun c -> if c#is_tauto then clauses#remove c)
 
   (***)
 
@@ -93,9 +86,73 @@ object (self)
     paris#find v
 
   method get_paris = paris
-
+    
   (***)
 
+  method add_clause c = (* ajoute la clause c, dans les clauses et les occurences *)
+    clauses#add c
+
+  method get_clauses = clauses
+
+  method set_val b v =
+    match paris#find v with
+      | None -> paris#set v b
+      | Some _ -> assert false 
+
+  method reset_val v =
+    match paris#find v with
+      | None -> assert false
+      | Some b -> paris#remove v
+
+  (******)
+
+  method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
+    try 
+      clauses#iter (fun c -> 
+        match c#singleton with  
+          | Some x -> 
+              raise (Found x) 
+          | None -> ());
+      None
+    with 
+      | Found x -> Some x
+
+  method eval =
+    let aux b v =
+      match paris#find v with
+        | Some b' when b=b' -> raise Exit
+        | _ -> () in
+    try clauses#iter 
+          (fun c -> 
+            let b = try 
+              c#get_vpos#iter (aux true);
+              c#get_vneg#iter (aux false);
+              false
+            with Exit -> true in
+            if not b then raise Exit);
+        true
+    with Exit -> false
+
+end
+
+class formule_dpll n clauses_init =
+object(self)
+  inherit formule n clauses_init as super
+    
+  val occurences_pos : clauseset vartable = new vartable n (* associe à chaque variable les clauses auxquelles elle appartient *)
+  val occurences_neg : clauseset vartable = new vartable n
+
+  initializer
+    for i=1 to n do
+      occurences_pos#set i (new clauseset);
+      occurences_neg#set i (new clauseset)
+    done;
+    clauses#iter self#register_clause
+
+  method add_clause c =
+    super#add_clause c;
+    self#register_clause c
+      
   method private add_occurence b c v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
     let dest = if b then occurences_pos else occurences_neg in
     let set = match dest#find v with
@@ -105,18 +162,10 @@ object (self)
           set
       | Some set -> set in
     set#add c
-
+      
   method private register_clause c = (* Met c dans les listes d'occurences de ses variables *)
     c#get_vpos#iter (self#add_occurence true c);
     c#get_vneg#iter (self#add_occurence false c)
-      
-  (***)
-
-  method add_clause c = (* ajoute la clause c, dans les clauses et les occurences *)
-    clauses#add c;
-    self#register_clause c
-
-  method get_clauses = clauses
 
   (* Accède à l'une des listes d'occurences en supposant qu'elle a été initialisée *)
   method private get_occurences occ v =
@@ -135,7 +184,7 @@ object (self)
       (fun v -> 
         if v<>v_ref then 
           (self#get_occurences occurences_neg v)#hide c)    
-      
+
   method set_val b v = (* on souhaite assigner la variable v à b (true ou false), et faire évoluer les clauses en conséquences *)
     let _ = match paris#find v with
       | None -> paris#set v b
@@ -157,8 +206,6 @@ object (self)
         if c#is_empty then 
           raise Clause_vide)
 
-
-  (* Replace une clause dans les listes d'occurences de ses variables *)
   method private show_occurences v_ref c =
     c#get_vpos#iter 
       (fun v -> 
@@ -168,7 +215,8 @@ object (self)
       (fun v -> 
         if v<>v_ref then 
           (self#get_occurences occurences_neg v)#show c) 
-
+      
+  (* Replace une clause dans les listes d'occurences de ses variables *)
   method reset_val v =
     let b = match paris#find v with
       | None -> assert false (* On ne revient pas sur un pari pas fait *)
@@ -185,24 +233,12 @@ object (self)
       (fun c -> 
         clauses#show c;
         self#show_occurences v c);
-      (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
+    (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
     (self#get_occurences restaurer v)#iter 
       (fun c -> 
         c#show_var (not b) v) (* On replace les occurences du littéral *)
 
-  (******)
-
-  method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
-    try 
-      clauses#iter (fun c -> 
-        match c#singleton with  
-          | Some x -> 
-              raise (Found x) 
-          | None -> ());
-      None
-    with 
-      | Found x -> Some x
-
+(***)
 
   method find_single_polarite = (* on cherche une var sans pari qui n'apparaitrait qu'avec une seule polarité *)
     let rec parcours_polar m n = 

@@ -38,9 +38,24 @@ class formule :
     method set_val : bool -> variable -> unit
     method reset_val : variable -> unit
     method find_singleton : (variable*bool) option
-    method find_single_polarite : (variable*bool) option
+    method eval : bool
   end
 
+class formule_dpll :
+  int ->
+  variable list list ->
+  object
+    method get_nb_vars : int
+    method get_pari : variable -> bool option
+    method get_paris : bool vartable
+    method add_clause : clause -> unit
+    method get_clauses : clauseset
+    method set_val : bool -> variable -> unit
+    method reset_val : variable -> unit
+    method find_singleton : (variable*bool) option
+    method find_single_polarite : (variable*bool) option
+    method eval : bool
+  end
 
 
 

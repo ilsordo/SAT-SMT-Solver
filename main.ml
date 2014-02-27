@@ -36,7 +36,17 @@ let main () =
   set_debug_level 3;
   set_blocking_level 0;
   let (n,cnf) = parse (get_input ()) in
-  printf "%a\n%t%!" print_answer (dpll (new formule n cnf)) print_stats;
+  let f = new formule_dpll n cnf in
+  let answer = dpll f in
+  printf "%a\n%t%!" print_answer answer print_stats;
+  begin
+    match answer with
+      | Unsolvable -> ()
+      | Solvable valeurs -> 
+          let f_verif = new formule n cnf in
+          valeurs#iter (fun v b -> f_verif#set_val b v);
+          printf "Check : %B\n%!" f#eval
+  end;
   exit 0
 
 let _ = main()
