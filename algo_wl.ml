@@ -115,3 +115,27 @@ let wl n cnf =
       Unsolvable
   with
     | Clause_vide -> Unsolvable (* Clause vide dès le début *)
+
+
+
+(***************************************************)
+
+
+let wl n cnf =
+  let formule = new formule_dpll n cnf in
+  formule#init n clauses_init;
+
+  try
+    formule#check_empty_clause;
+  (* à partir de maintenant : pas de clauses vides, singleton ou tautologie. De plus, un ensemble de var a été assigné (avec clauses cachées) sans conflits. Ces vars n'apparaissent nul part ailleur dorénavant *) 
+(*** aux *)
+
+  with
+    | Clause_vide -> Unsolvable (* Clause vide dès le début *)
+
+
+
+
+
+
+
