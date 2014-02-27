@@ -4,14 +4,14 @@ open Debug
 
 exception Found of (variable*bool)
 
-type wl_update = WL_Conflit | WL_New of literal_wl | WL_Assign of literal_wl | WL_Nothing
+type wl_update = WL_Conflit | WL_New of literal | WL_Assign of literal | WL_Nothing
 
-exception WLs_found of literal_wl*literal_wl
+exception WLs_found of (literal*literal)
 
 exception WL_found of literal
 
 class formule_wl =
-object
+object(self)
   inherit formule as super
 
   val wl_pos : clauseset vartable = new vartable 0
@@ -73,14 +73,14 @@ object
 (* Initialise les watched literals des clauses, il faut enlever avant les clauses vides *)
   method init_wl =
     let pull b temp v = (* Extrait 2 éléments *)
-      match temp with None -> Some (Some b,v) | Some l -> raise WLs_found (l,(Some b, v)) in
+      match temp with None -> Some (b,v) | Some l -> raise (WLs_found (l,(b,v))) in
     clauses#iter
       (fun c -> 
         try 
           c#get_vpos#fold (pull true) (c#get_vneg#fold (pull false) None);
           assert false 
         with
-          | WL_found (l1,l2) ->
+          | WLs_found (l1,l2) ->
               self#register c l1;
               self#register c l2;
               c#set_wl1 l1;
@@ -88,7 +88,7 @@ object
 
   method private update_clause c wl = (* on veut abandonner la jumelle sur le literal wl*)
     let (wl1,wl2) = c#get_wl in
-    let (b,v) = wl in (* c'est (b,l) qu'on veut abandonner *)
+    (*let (b,v) = wl in*) (* c'est (b,l) qu'on veut abandonner *)
     let (b0,v0) = if wl=wl1 then wl2 else wl1 in
     match super#get_paris v0 b0 with
       | None -> 

@@ -17,6 +17,7 @@ object ('a)
   method show : variable -> unit
   method singleton : classif_varset
   method iter : (variable -> unit) -> unit
+  method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a 
 end
 
 class clause :
