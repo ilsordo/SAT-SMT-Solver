@@ -13,13 +13,12 @@ type c_repr = VarSet.t
 
 type classif_varset = Empty | Singleton of variable | Bigger
 
-type literal_wl = (bool option * variable) option
+type literal = bool * variable
 
 let print_lit_wl p l =
   let s = match l with
     | None -> "None"
-    | Some (Some b,var) -> Printf.sprintf "%d : %B" var b
-    | Some (None, var) -> Printf.sprintf "%d : Free" var in
+    | Some (b,var) -> Printf.sprintf "%d : %B" var b in
   Printf.fprintf p "%s" s
 
 class varset =
@@ -115,13 +114,8 @@ object
       | (Empty, Singleton v) -> Some (v,false)
       | _ -> None
 
-  method print p () = 
-    Printf.fprintf p "Clause %d : " id;
-    vpos#iter (fun v -> Printf.fprintf p "%d " v);
-    vneg#iter (fun v -> Printf.fprintf p "-%d " v)
-
-  val mutable wl1 : literal_wl = None
-  val mutable wl2 : literal_wl = None
+  val mutable wl1 : literal option = None
+  val mutable wl2 : literal option = None
     
   method get_wl = match (wl1,wl2) with
     | (Some l1, Some l2) -> (l1,l2)

@@ -1,23 +1,10 @@
-open Clause
+open Answer
 open Formule
+open Formule_dpll
 open Clause
 open Debug
 
-type answer = Unsolvable | Solvable of bool vartable
-
 type propagation_result = Fine of variable list | Conflict (* C'est juste pour la lisibilité du code, si tu aimes pas on peut le virer *)
-
-let print_valeur p v = function
-  | true -> Printf.fprintf p "v %d\n" v
-  | false -> Printf.fprintf p "v -%d\n" v
-
-let print_answer p = function
-  | Unsolvable -> Printf.fprintf p "s UNSATISFIABLE\n"
-  | Solvable valeurs -> 
-      Printf.fprintf p "s SATISFIABLE\n";
-      valeurs#iter (print_valeur p)
-
-
 
 (*************)
 
@@ -65,7 +52,9 @@ let constraint_propagation formule = (* Renvoie Conflict et annule la propagatio
 
 
 
-let dpll formule = 
+let algo n cnf = 
+  let formule = new formule_dpll in
+  formule#init n cnf;
 
   let try_pari var b =
     debug 1 "Dpll : trying with %d %B" var b;

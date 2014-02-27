@@ -1,4 +1,6 @@
-open Dpll
+open Answer
+open Formule_dpll
+open Algo_dpll
 open Lexing
 open Printf
 open Formule
@@ -36,9 +38,7 @@ let main () =
   set_debug_level 3;
   set_blocking_level 0;
   let (n,cnf) = parse (get_input ()) in
-  let f = new formule_dpll in
-  f#init n cnf;
-  let answer = dpll f in
+  let answer = algo n cnf in
   printf "%a\n%t%!" print_answer answer print_stats;
   begin
     match answer with
@@ -47,7 +47,7 @@ let main () =
           let f_verif = new formule in
           f_verif#init n cnf;
           valeurs#iter (fun v b -> f_verif#set_val b v);
-          printf "Check : %B\n%!" f#eval
+          printf "Check : %B\n%!" f_verif#eval
   end;
   exit 0
 
