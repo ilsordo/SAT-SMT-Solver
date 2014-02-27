@@ -95,24 +95,27 @@ object(self)
           try
             c#get_vpos#fold (fun var -> if (var != v0 && super#get_paris != Some false) then raise WL_found (true,var) else ()) ();
             c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
-            WL_Assign (b0,v0)
+            WL_Assign (b0,v0) (* on ne peut pas déplacer la jumelle mais on peut assigner l'autre literal *)
           with
-            | WL_Found l -> WL_New l
+            | WL_Found l -> WL_New l (* on peut déplacer la jumelle *)
       | Some bb ->
-          if bb=b0 (* alors (b0,v0) est vrai*) then 
+          if bb=b0 (* alors (b0,v0) est vrai dans c *) then 
             try
               c#get_vpos#fold (fun var -> if (var != v0 && super#get_paris != Some false) then raise WL_found (true,var) else ()) ();
               c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
-              WL_Nothing
+              WL_Nothing (* on ne peut pas déplacer la jumelle mais l'autre literal est déjà vrai *)
             with
-              | WL_Found l -> WL_New l
-          else (* (b0,v0) est faux *)
+              | WL_Found l -> WL_New l (* on peut déplacer la jumelle *)
+          else (* (b0,v0) est faux dans c *)
             try
               c#get_vpos#fold (fun var -> if (var != v0 && super#get_paris != Some false) then raise WL_found (true,var) else ()) ();
               c#get_vneg#fold (fun var -> if (var != v0 && super#get_paris != Some true) then raise WL_found (false,var) else ()) ();
-              WL_Conflit
+              WL_Conflit (* on ne peut pas déplacer la jumelle et l'autre literal est faux*)
             with
-              | WL_Found l -> WL_New l
+              | WL_Found l -> WL_New l (* on peut déplacer la jumelle *)
+
+
+
 
 
 
