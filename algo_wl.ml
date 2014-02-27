@@ -1,7 +1,9 @@
+open Formule
 open Formule_wl
 open Clause
 open Debug
 open Answer
+
 
 exception Wl_fail
 
@@ -116,7 +118,7 @@ let algo n cnf =
     else 
       Unsolvable
   with
-    | Formule.Clause_vide -> Unsolvable (* Clause vide dès le début *)
+    | Clause_vide -> Unsolvable (* Clause vide dès le début *)
 
 
 
