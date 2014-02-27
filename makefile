@@ -1,6 +1,6 @@
-all: gen solver
+all: generator solver
 
-gen:
+generator:
 	ocamlbuild gen.native; rm gen.native; cp _build/gen.native gen
 solver:
 	ocamlbuild -yaccflag -v main.native; rm main.native; cp _build/main.native main

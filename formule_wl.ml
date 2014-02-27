@@ -72,12 +72,12 @@ object(self)
 
 (* Initialise les watched literals des clauses, il faut enlever avant les clauses vides *)
   method init_wl =
-    let pull b temp v = (* Extrait 2 éléments *)
+    let pull b v temp = (* Extrait 2 éléments *)
       match temp with None -> Some (b,v) | Some l -> raise (WLs_found (l,(b,v))) in
     clauses#iter
       (fun c -> 
         try 
-          c#get_vpos#fold (pull true) (c#get_vneg#fold (pull false) None);
+          ignore (c#get_vpos#fold (pull true) (c#get_vneg#fold (pull false) None));
           assert false 
         with
           | WLs_found (l1,l2) ->

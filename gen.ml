@@ -1,33 +1,46 @@
-open Clause
+open Sys
+open Printf
 
-module IntSet = Set.Make(
-  struct
-    type t = int
-    let compare = compare
-  end)
+let shuffle tab n =
+  for i = 0 to n-1 do
+      let x = Random.int (Array.length tab - i) + i in
+      let v = tab.(x) in
+      tab.(x) <- tab.(i);
+      tab.(i) <- v
+  done
+    
 
-let test_link n =
-  let rec aux acc = function 
-    | 0 -> acc
-    | i -> aux ([(true,i);(false,i+1)]::acc) (i-1) in
-  aux [] (max 0 (n-1))
+let make_tab k = Array.init k (fun x -> x + 1)
 
-let test_random vars c_size c_num =
+let print_tab l p tab =
+  for i = 0 to l-1 do
+    let s = if Random.bool() then "" else "-" in
+    fprintf p "%s%d " s tab.(i)
+  done
+
+let gen_formule n l k p =
+  for i = 1 to k do
+    let tab = (make_tab k) in
+    shuffle tab n;
+    fprintf p "%a\n" (print_tab l) tab
+  done
+
+let _ =
   Random.self_init();
-  let rec random_lit seen =
-    let x = (Random.int vars) + 1 in
-    if not (IntSet.mem x seen) then
-      (Random.bool(),x)
-    else
-      random_lit seen in
-  let rec random_clause seen acc = function
-    | 0 -> acc
-    | i -> 
-        let (b,x) = random_lit seen in
-        let new_seen = IntSet.add x seen in
-        random_clause new_seen ((b,x)::acc) (i-1) in
-  let rec random_cnf acc = function
-    | 0 -> acc
-    | i -> random_cnf (random_clause IntSet.empty [] c_size::acc) (i-1) in
-  random_cnf [] c_num
-   
+  let t = Sys.argv in
+  try
+    if Array.length t = 4 then
+      let (n,l,k) = (int_of_string t.(1),int_of_string t.(2),int_of_string t.(3)) in
+      printf "p cnf %d %d\n%t%!" k n gen_formule
+    else raise (Failure "")
+  with Failure _ -> eprintf "Usage : gen k l n\n%!"
+
+
+
+
+
+
+
+
+
+
