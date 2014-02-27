@@ -34,7 +34,7 @@ let get_input () =
      
 let main () =
   set_debug_level 3;
-  set_blocking_level 3;
+  set_blocking_level 2;
   let (n,cnf) = parse (get_input ()) in
   printf "%a%!" print_answer (dpll (new formule n cnf)); (***)
   exit 0
