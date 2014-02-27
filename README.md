@@ -140,4 +140,4 @@ Analyse des performances
 
 L'algorithme termine instantanément sur les exemples fournis avec l'énoncé.
 
-L'analyse par le système de statistiques montre que sur les exemples difficiles ( hard.cnf ) on  
+Les exemples difficiles sont hard.cnf et gen2.cnf  
