@@ -38,6 +38,7 @@ class formule :
     method set_val : bool -> variable -> unit
     method reset_val : variable -> unit
     method find_singleton : (variable*bool) option
+    method check_empty_clause : unit
     method eval : bool
   end
 
@@ -54,8 +55,10 @@ class formule_dpll :
     method reset_val : variable -> unit
     method find_singleton : (variable*bool) option
     method find_single_polarite : (variable*bool) option
+    method check_empty_clause : unit
     method eval : bool
   end
+
 
 
 

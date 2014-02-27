@@ -117,6 +117,8 @@ object (self)
     with 
       | Found x -> Some x
 
+  method check_empty_clause = clauses#iter (fun c -> if c#is_empty then raise Clause_vide)
+
   method eval =
     let aux b v =
       match paris#find v with

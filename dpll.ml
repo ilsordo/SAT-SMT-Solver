@@ -107,11 +107,14 @@ let dpll formule =
                         false
                       end
                   end in
-  
-  if aux () then 
+  try 
+    formule#check_empty_clause;
+    if aux () then 
       Solvable formule#get_paris
     else 
       Unsolvable
+  with
+    | Clause_vide -> Unsolvable (* Clause vide dès le début *)
 
 
 

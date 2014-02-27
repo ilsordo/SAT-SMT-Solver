@@ -24,10 +24,6 @@
  ######################################################
 
 
-
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     0 - Compilation et exécution    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -43,21 +39,10 @@ Pour exécuter le programme sur un fichier ex.cnf, entrer :
             ./resol ex.cnf
 
 
-Pour accéler l'exécution du programme en effectuant un "nettoyage des seaux" (cf paragraphe 2), ajouter l'option "-clean" : 
-
-            ./resol ex.cnf -clean
-
-
-Pour exécuter le programme sur un des fichiers contenus dans le dossier tests (ex1.cnf par exemple), entrer :
-
-            ./resol tests/ex1.cnf
-
-
 Le programme affiche le résultat dans la console. Pour enregistrer ce résultat dans un fichier res.txt par exemple, entrer : 
 
             ./resol tests/ex1.cnf > res.txt
-
-
+            
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
