@@ -76,9 +76,11 @@ let dpll formule =
           assert false in
   
   let rec aux () =
+    record_stat "Propagation";
     debug 2 "Dpll : starting propagation";
     match constraint_propagation formule with
       | Conflict -> 
+          record_stat "Conflits";
           debug 2 ~stops:true "Dpll : conflict found";
           false
       |  Fine var_prop -> 
