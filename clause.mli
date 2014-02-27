@@ -4,6 +4,8 @@ type c_repr
 
 type classif_varset = Empty | Singleton of variable | Bigger
 
+type literal_wl = (bool option * variable) option
+
 class varset :
 object ('a)
   method repr : c_repr
@@ -20,8 +22,9 @@ end
 class clause :
   int ref -> variable list ->
 object
-  val vneg : varset
-  val vpos : varset
+  method get_wl : (bool option * variable)*(bool option*variable)
+  method set_wl1 : (bool option*variable) -> unit
+  method set_wl2 : (bool option*variable) -> unit
   method get_id : int
   method get_vneg : varset
   method get_vpos : varset
@@ -33,6 +36,26 @@ object
   method singleton : (variable*bool) option
   method print : out_channel -> unit -> unit
 end
+
+(*
+class clause_wl :
+  int ref -> variable list ->
+object
+  method get_wl : (bool option * variable)*(bool option*variable)
+  method set_wl1 : (bool option*variable) -> unit
+  method set_wl2 : (bool option*variable) -> unit
+  method get_id : int
+  method get_vneg : varset
+  method get_vpos : varset
+  method hide_var : bool -> variable -> unit
+  method show_var : bool -> variable -> unit
+  method is_empty : bool
+  method is_tauto : bool
+  method mem : bool -> variable -> bool
+  method singleton : (variable*bool) option
+  method print : out_channel -> unit -> unit
+end
+*)
 
 module OrderedClause : sig
   type t = clause

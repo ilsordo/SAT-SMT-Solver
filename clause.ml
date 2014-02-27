@@ -13,6 +13,15 @@ type c_repr = VarSet.t
 
 type classif_varset = Empty | Singleton of variable | Bigger
 
+type literal_wl = (bool option * variable) option
+
+let print_lit_wl p l =
+  let s = match l with
+    | None -> "None"
+    | Some (Some b,var) -> Printf.sprintf "%d : %B" var b
+    | Some (None, var) -> Printf.sprintf "%d : Free" var in
+  Printf.fprintf p "%s" s
+
 class varset =
 object (self : 'varset)
   val mutable vis = VarSet.empty (* variables visibles du varset *)
@@ -110,7 +119,39 @@ object
     Printf.fprintf p "Clause %d : " id;
     vpos#iter (fun v -> Printf.fprintf p "%d " v);
     vneg#iter (fun v -> Printf.fprintf p "-%d " v)
+
+  val mutable wl1 : literal_wl = None
+  val mutable wl2 : literal_wl = None
+    
+  method get_wl = match (wl1,wl2) with
+    | (Some l1, Some l2) -> (l1,l2)
+    | _ -> assert false (* Jumelles cassées *)
+
+  method set_wl1 l = (* Si rien ne marche vérifier ici *)
+    wl1 <- Some l
+
+  method set_wl2 l = (* Si rien ne marche vérifier ici *)
+    wl2 <- Some l
+
+  method print p () = 
+    Printf.fprintf p "Clause %d : " id;
+    if (wl1,wl2) <> (None,None) then
+      Printf.fprintf p "Watched : (%a,%a)\n" print_lit_wl wl1 print_lit_wl wl2;
+    vpos#iter (fun v -> Printf.fprintf p "%d " v);
+    vneg#iter (fun v -> Printf.fprintf p "-%d " v)
+
 end
+
+(*
+
+class clause_wl x clause_init =
+object(self)
+  inherit clause x clause_init as super 
+
+  
+    
+end
+*) (* Vestiges *)
 
 (*******)
 
@@ -119,3 +160,10 @@ struct
   type t = clause
   let compare (c1 : t) c2 = compare c1#get_id c2#get_id
 end
+
+
+
+
+
+
+

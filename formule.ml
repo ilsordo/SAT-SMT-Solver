@@ -34,6 +34,10 @@ object
 
   method is_empty = ClauseSet.is_empty vis (* indique s'il n'y a aucune clause visible *)
 
+  method reset = 
+    vis <- ClauseSet.empty;
+    hid <- ClauseSet.empty
+
   method iter f = ClauseSet.iter f vis
 
   method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> ClauseSet.fold f vis a
@@ -53,6 +57,8 @@ object (self)
 
   method is_empty = Hashtbl.length data = 0
 
+  method reset = Hashtbl.clear data
+
   method set v x = Hashtbl.replace data v x (* peut être utilisé comme fonction d'ajout ou de remplacement : on associe la valeur x à la variable v *)
 
   method find v = try Some (Hashtbl.find data v) with Not_found -> None
@@ -68,19 +74,27 @@ end
 (********)
 
 
-class formule n clauses_init =
+class formule =
 object (self)
+  val mutable nb_vars = 0
   val x = ref 0 (* compteur de clause *)
   val clauses = new clauseset (* ensemble des clauses de la formule, peut contenir des clauses cachées/visibles *)
-  val paris : bool vartable = new vartable n (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
+  val paris : bool vartable = new vartable 0 (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
+
+  method private reset n =
+    x := 0;
+    nb_vars <- n;
+    clauses#reset;
+    paris#reset
     
-  initializer
+  method init n clauses_init =
+    self#reset n;
     List.iter (fun c -> clauses#add (new clause x c)) clauses_init;
     clauses#iter (fun c -> if c#is_tauto then clauses#remove c)
 
   (***)
 
-  method get_nb_vars = n
+  method get_nb_vars = nb_vars
 
   method get_pari v = (* indique si v a subi un pari, et si oui lequel *)
     paris#find v
@@ -137,14 +151,15 @@ object (self)
 
 end
 
-class formule_dpll n clauses_init =
+class formule_dpll =
 object(self)
-  inherit formule n clauses_init as super
-    
-  val occurences_pos : clauseset vartable = new vartable n (* associe à chaque variable les clauses auxquelles elle appartient *)
-  val occurences_neg : clauseset vartable = new vartable n
+  inherit formule as super
 
-  initializer
+  val occurences_pos : clauseset vartable = new vartable 0 (* associe à chaque variable les clauses auxquelles elle appartient *)
+  val occurences_neg : clauseset vartable = new vartable 0
+
+  method init n clauses_init =
+    super#init n clauses_init;
     for i=1 to n do
       occurences_pos#set i (new clauseset);
       occurences_neg#set i (new clauseset)
@@ -256,3 +271,70 @@ object(self)
     in parcours_polar 1 self#get_nb_vars
 
 end
+
+class formule_wl =
+object
+  inherit formule as super
+
+  val wl_pos : clauseset vartable = new vartable 0
+  val wl_neg : clauseset vartable = new vartable 0
+
+  method init n clauses_init =
+    super#init n clauses_init;
+    let (occ_pos,occ_neg) = (new vartable n, new vartable n) in
+    let add_occurence dest c v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
+      let set = match dest#find v with
+        | None -> 
+            let set = new clauseset in
+            dest#set v set;
+            set
+        | Some set -> set in
+      set#add c in
+    let register_clause c = (* Met c dans les listes d'occurences de ses variables *)
+      c#get_vpos#iter (add_occurence occ_pos c);
+      c#get_vneg#iter (add_occurence occ_neg c) in
+    clauses#iter register_clause;
+    let get_occurences occ var = 
+      match occ#find var with
+        | None -> new clauseset
+        | Some occurences -> occurences in
+    let rec prepare () =
+      let res = 
+        try 
+          clauses#iter (fun c -> match c#singleton with Some s -> raise (Found s) | None -> ());
+          None
+        with Found s -> Some s in
+      match res with
+        | None -> ()
+        | Some (v,b) ->
+            paris#set v b;
+            let (valider,supprimer) =
+              if b then
+                (occ_pos,occ_neg)
+              else
+                (occ_neg,occ_pos) in
+            (get_occurences valider v)#iter 
+              (fun c -> clauses#remove c);
+            (get_occurences supprimer v)#iter 
+              (fun c -> c#hide_var (not b) v);
+            prepare() in
+    prepare()
+
+    
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
