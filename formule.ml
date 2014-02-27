@@ -90,7 +90,7 @@ object (self)
   method init n clauses_init =
     self#reset n;
     List.iter (fun c -> clauses#add (new clause x c)) clauses_init;
-    clauses#iter (fun c -> if c#is_tauto then clauses#remove c)
+    clauses#iter (fun c -> if c#is_tauto then clauses#remove c) (** on peut pas l'inclure juste au dessus ?*)
 
   (***)
 

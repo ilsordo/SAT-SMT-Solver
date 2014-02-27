@@ -58,6 +58,8 @@ object (self : 'varset)
 
   method iter f = VarSet.iter f vis 
 
+  method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis a
+
 end
       
 (*******)
