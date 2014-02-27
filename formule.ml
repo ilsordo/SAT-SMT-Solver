@@ -82,7 +82,7 @@ object (self)
       occurences_neg#set i (new clauseset)
     done;
     List.iter (fun c -> clauses#add (new clause x c)) clauses_init;
-    clauses#iter (fun c -> if not (c#get_vpos#intersects c#get_vneg) then clauses#remove c); (***)
+    clauses#iter (fun c -> if c#is_tauto then clauses#remove c); (***)
     clauses#iter self#register_clause
 
   (***)
