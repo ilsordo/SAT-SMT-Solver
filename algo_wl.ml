@@ -30,11 +30,13 @@ let print_answer p = function
 let constraint_propagation formule var b l =
 
   if ((formule#get_paris#find var) = Some (not b)) then (* double paris contradictoire (y a-t-il un pb si double paris non contradictoire ?)  *)
-    List.iter (fun var -> formule#get_paris#remove var) !l; (* on annule toutes les assignations depuis le dernier pari *)
-    raise Wl_fail (***)
+    begin
+      List.iter (fun var -> formule#get_paris#remove var) !l; (* on annule toutes les assignations depuis le dernier pari *)
+      raise Wl_fail (***)
+    end
   else
     begin
-      l := v::(!l); (* se rappeler que v subit une assignation (et si v était déjà assigné et subit pari non contradictoire ? impossible ? *)
+      l := (v::(!l)); (* se rappeler que v subit une assignation (et si v était déjà assigné et subit pari non contradictoire ? impossible ? *)
       formule#get_paris#set var b (* on fait l'assignation sans risque *)
     end;
 

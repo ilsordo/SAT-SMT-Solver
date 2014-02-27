@@ -20,12 +20,12 @@ object(self)
   method get_wl_pos var = (* à fusionner avec fonction get_wl plus bas *)
     match wl_pos#find var with
       | None -> assert false (* aurait du être initialisé *)
-      | Some s -> s
+      | Some s -> s
 
   method get_wl_neg var = (* à fusionner avec fonction get_wl plus bas *)
     match wl_neg#find var with
       | None -> assert false (* aurait du être initialisé *)
-      | Some s -> s
+      | Some s -> s
 
   method watch c l l_former = (* on veut que le litteral l surveille la clause c, à la place de l_former *) (*** ce code peut contenir des bugs mineurs *)
     let (b,v)=l in
@@ -36,20 +36,21 @@ object(self)
       (self#get_wl v wl_neg)#add c; (* l sait qu'il surveille c *)
     let (wl1,wl2) = c#get_wl in
       if l_former=wl1 then
-        c#set_wl1 l; (* c sait qu'il est surveillé par l *)
-        if b_former then
-          (self#get_wl v_former wl_pos)#remove c (* l_former sait qu'il ne surveille plus c *)
-        else
-          (self#get_wl v_former wl_neg)#remove c (* l_former sait qu'il ne surveille plus c *)
+        begin
+          c#set_wl1 l; (* c sait qu'il est surveillé par l *)
+          if b_former then
+            (self#get_wl v_former wl_pos)#remove c (* l_former sait qu'il ne surveille plus c *)
+          else
+            (self#get_wl v_former wl_neg)#remove c (* l_former sait qu'il ne surveille plus c *)
+        end
       else
-        c#set_wl2 l; (* c sait qu'il est surveillé par l *)
-        if b_former then
-          (self#get_wl v_former wl_pos)#remove c (* l_former sait qu'il ne surveille plus c *)
-        else
-          (self#get_wl v_former wl_neg)#remove c (* l_former sait qu'il ne surveille plus c *)
-
-
-  method unwatch l c = (* on veut que le litteral l ne surveille plus la clause c *)
+        begin
+          c#set_wl2 l; (* c sait qu'il est surveillé par l *)
+          if b_former then
+            (self#get_wl v_former wl_pos)#remove c (* l_former sait qu'il ne surveille plus c *)
+          else
+            (self#get_wl v_former wl_neg)#remove c (* l_former sait qu'il ne surveille plus c *)
+        end
 
   method init n clauses_init = (* après un appel initial à init, il faudra supprimer les clauses vides *)
     super#init n clauses_init;
