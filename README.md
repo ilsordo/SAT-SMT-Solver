@@ -140,3 +140,4 @@ Un générateur de clauses est fourni avec le solveur, il génère des clauses u
 Analyse des performances du programme
 =====================================
 
+L'algorithme termine instantanément sur les exemples fournis avec l'énoncé.
