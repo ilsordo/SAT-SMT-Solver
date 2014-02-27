@@ -8,7 +8,6 @@
 *.cmxs
 *.cmxa
 *~
-resol
 _build/*
 *.native
 *.byte
