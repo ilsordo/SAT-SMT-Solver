@@ -16,6 +16,10 @@ Utiliser le type literal partout où c'est possible
 Passer les champs occurences_pos/neg dans formule.ml ? (et abandonner la création temporaire de ces ensembles dans formule_wl.ml ?)
 
 Abandonner les ref : 
-  - dans algo_wl
+  - dans algo_wl << done
+  - dans algo_dpll
   - dans ...
+  
+Gestion du dépôt git : j'ai vu la "branche" que tu as crée pour le premier rendu (et j'ai ajouté une branche pour le rendu 1 bis), mais il ne faudrait pas
+plutôt utiliser l'outil "releases" ?
 
