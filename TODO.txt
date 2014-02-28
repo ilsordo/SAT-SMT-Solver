@@ -19,6 +19,3 @@ Abandonner les ref :
   - dans algo_wl
   - dans ...
 
-
-
-dans algo_wl : pb de type réglé par typage formule (Formule_wl.formule_wl
