@@ -5,10 +5,8 @@ type wl_update = WL_Conflit | WL_New| WL_Assign of literal | WL_Nothing
 
 class formule_wl :
 object
+  method get_wl : literal -> clauseset
   method watch : clause -> literal -> literal -> unit
-  method get_wl_pos : variable -> clauseset
-  method get_wl_neg : variable -> clauseset
-  method get_wl : variable -> clauseset vartable -> clauseset
   method init_wl : unit
   method init : int -> variable list list -> unit
   method get_nb_vars : int

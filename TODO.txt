@@ -1,0 +1,24 @@
+Dans DPLL : 
+  - optimiser les tests de singletons (actuellement basés sur le cardinal >> est-ce fait en temps constant ?)
+
+Accélérer la génération de tests aléatoires ?
+
+Construire une batterie de tests intéressants (notamment de petites formules avec des cas pathologiques)
+
+M'expliquer comment s'utilise l'option -b :)
+
+Travailler sur l'outil de stat (en fait c'est une des taches centrales du rendu 2)
+
+Ajouter plus de commentaires ?
+
+Utiliser le type literal partout où c'est possible
+
+Passer les champs occurences_pos/neg dans formule.ml ? (et abandonner la création temporaire de ces ensembles dans formule_wl.ml ?)
+
+Abandonner les ref : 
+  - dans algo_wl
+  - dans ...
+
+
+
+dans algo_wl : pb de type réglé par typage formule (Formule_wl.formule_wl

@@ -28,15 +28,17 @@ object(self)
   val wl_pos : clauseset vartable = new vartable 0 (* pour chaque variable, les clauses où elle apparait positivement et est surveillée *)
   val wl_neg : clauseset vartable = new vartable 0 (* pour chaque variable, les clauses où elle apparait négativement et est surveillée *)
 
-  method get_wl_pos var = (* ensemble des clauses où var apparait positivement et est surveillée *)
-    match wl_pos#find var with
-      | None -> assert false (* aurait du être initialisé avant *)
-      | Some s -> s
+ method get_wl lit = (* obtenir les clauses où le littéral lit est surveillé *)
+    if (fst lit) then
+     match wl_pos#find (snd lit) with
+        | None -> assert false (* aurait du être initialisé avant *)
+        | Some s -> s
+    else
+     match wl_neg#find (snd lit) with
+        | None -> assert false (* aurait du être initialisé avant *)
+        | Some s -> s
 
-  method get_wl_neg var = (* ensemble des clauses où var apparait négativement et est surveillée *)
-    match wl_neg#find var with
-      | None -> assert false (* aurait du être initialisé avant *)
-      | Some s -> s
+
 
 (* init = prétraitement : enlève tautologies + détecte clauses singletons et fait des assignations en conséquence
     ATTENTION : init ne détecte aucune clause vide (mais peut en créer). Il faudra s'assurer de l'abscence de clauses vides par la suite *)
@@ -85,17 +87,6 @@ object(self)
             prepare() in
     prepare() 
 
-  method get_wl v dest =
-    match dest#find v with
-      | None -> 
-          let set = new clauseset in
-          dest#set v set;
-          set
-      | Some set -> set
-
-  method private register c = function
-    | (true,v) -> (self#get_wl v wl_pos)#add c
-    | (false,v) -> (self#get_wl v wl_neg)#add c
 
 (* Initialise les watched literals en en choisissant 2 par clauses. On s'assurera avant qu'aucune clause n'est singleton *)
   method init_wl =
@@ -108,38 +99,27 @@ object(self)
           assert false 
         with
           | WLs_found (l1,l2) ->
-              self#register c l1;
-              self#register c l2;
-              c#set_wl1 l1;
-              c#set_wl2 l2)
+              (self#get_wl l1)#add c; (* l1 sait qu'il surveille c*)
+              (self#get_wl l2)#add c; (* l2 sait qu'il surveille c*)
+              c#set_wl1 l1; (* c sait qu'il est surveillé par l1*)
+              c#set_wl2 l2) (* c sait qu'il est surveillé par l2*)
 
 
 
   (********* Les 2 méthodes le plus utiles au cours de l'algo :   *********)
 
-  method watch c l l_former = (* on veut que le litteral l surveille la clause c, et que l_former stop sa surveillance *)
-    let (b,v)=l in
-    let (b_former,v_former)=l_former in
-    if b then
-      (self#get_wl v wl_pos)#add c (* l sait qu'il surveille c *)
-    else
-      (self#get_wl v wl_neg)#add c; (* l sait qu'il surveille c *)
+  method watch c l l_former = (* on veut que le litteral l surveille la clause c, et que l_former stop sa surveillance sur c *)
+    (self#get_wl l)#add c; (* l sait qu'il surveille c *)
     let (wl1,wl2) = c#get_wl in
       if l_former=wl1 then
         begin
           c#set_wl1 l; (* c sait qu'il est surveillé par l *)
-          if b_former then
-            (self#get_wl v_former wl_pos)#remove c (* l_former sait qu'il ne surveille plus c *)
-          else
-            (self#get_wl v_former wl_neg)#remove c (* l_former sait qu'il ne surveille plus c *)
+          (self#get_wl l_former)#remove c (* l_former sait qu'il ne surveille plus c *)
         end
       else
         begin
           c#set_wl2 l; (* c sait qu'il est surveillé par l *)
-          if b_former then
-            (self#get_wl v_former wl_pos)#remove c (* l_former sait qu'il ne surveille plus c *)
-          else
-            (self#get_wl v_former wl_neg)#remove c (* l_former sait qu'il ne surveille plus c *)
+          (self#get_wl l_former)#remove c (* l_former sait qu'il ne surveille plus c *)
         end
 
 

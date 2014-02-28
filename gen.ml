@@ -3,7 +3,7 @@ open Printf
 
 let shuffle tab n =
   for i = 0 to n-1 do
-      let x = Random.int (Array.length tab - i) + i in
+      let x = Random.int (Array.length tab - i) + i in (* on peut remplacer Array.length tab par n ? j'ai l'impression que ça n'impact pas la rapidité *)
       let v = tab.(x) in
       tab.(x) <- tab.(i);
       tab.(i) <- v
@@ -36,7 +36,7 @@ let _ =
       else
         eprintf "Error : la taille des clauses est supérieure au nombre de variables (l>n)\n%!"
     else raise (Failure "")
-  with Failure _ -> eprintf "Usage : gen n k l \n%!"
+  with Failure _ -> eprintf "Usage : gen n l k\n%!"
 
 
 

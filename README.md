@@ -121,14 +121,14 @@ Une fois la phase de prétraitement terminée (et si elle n'a pas échouée), on
 Déroulement :
 --------------
 
-L'algorithme choisie une variable à assigner puis propage le résultat sur les watch literals : 
+L'algorithme choisie une variable à assigner puis propage le résultat sur les watched literals : 
 Lorsqu'une paire (v1,v2) est surveillée dans une clause c et que l'on vient d'assigner v1 à true, il y a 4 possibilitées (que l'on résume par le type wl_update dans formule_wl.ml) : 
   - conflit : tous les littéraux de la clause sont faux, il faut backtracker et revenir sur le dernier pari
   - v2 est vrai : il n'y a rien à faire
-  - on parvient à trouver un nouveau littéral à surveiller, on déplace alors la surveillance de v1 à v2
+  - on parvient à trouver un nouveau littéral v3 à surveiller, on déplace alors la surveillance de v1 à v3
   - v2 est le seul littéral non faux (et non assigné) de c : on assigne v2 de sorte à satisfaire c, puis on propage
 
-L'étape de backtracking est implémentée en maintenant une liste de toutes les variables instanciées depuis le dernier pari. Lors d'un conflit, on parcourt cette liste pour mettre à "indéfinie" la valeur des variables).
+L'étape de backtracking est implémentée en maintenant une liste de toutes les variables instanciées depuis le dernier pari. Lors d'un conflit, on parcourt cette liste pour remettre à "indéfinie" la valeur des variables.
  
 Les différents opérations menées prennent appuies sur les deux faits suivants : 
   - A tout instant, chaque clause connait les 2 littéraux qui la surveillent (accès en temps constant à cette information)
@@ -161,7 +161,7 @@ Les exemples difficiles sont hard.cnf et gen2.cnf
 Les performances des algorithmes DPLL et WL ont été comparées sur un certain nombre d'entrées. Il est nécessaire de générer des entrées de taille particulièrement grande pour observer une différence dans les temps d'exécutions.
 
 Ci-dessous figurent les temps d'exécutions pour des entrées aléatoires de paramètre n_l_k (n : nombre de variables, l : longueur des clauses, k : nombre de clauses)
-On peut constater que l'algorithme WL est plus performant que DPLL sur nos exemples. Bien que ceci soit compréhensible pour des formules contenant de grandes clauses, il est plus surprenant de l'observer sur des formules 3-SAT. La lenteur de DPLL peut s'expliquer par la nécessité de propager toute assignation sur l'ensemble des clauses (ce qui se traduit cacher/montrer de nombreuses clauses/variables), alors que WL ne propage que sur les littéraux surveillés.
+On peut constater que l'algorithme WL est plus performant que DPLL sur nos exemples. Bien que ceci soit compréhensible pour des formules contenant de grandes clauses, il est plus surprenant de l'observer sur des formules 3-SAT. La lenteur de DPLL peut s'expliquer par la nécessité de propager toute assignation sur l'ensemble des clauses (ce qui se traduit par cacher/montrer de nombreuses clauses/variables), alors que WL ne propage que sur les littéraux surveillés.
 
 
 50000_3000_2000

@@ -138,16 +138,6 @@ object
 
 end
 
-(*
-
-class clause_wl x clause_init =
-object(self)
-  inherit clause x clause_init as super 
-
-  
-    
-end
-*) (* Vestiges *)
 
 (*******)
 
