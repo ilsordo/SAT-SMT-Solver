@@ -154,6 +154,34 @@ Un générateur de clauses est fourni avec le solveur, il génère des clauses u
 Analyse des performances
 ========================
 
-L'algorithme termine instantanément sur les exemples fournis avec l'énoncé.
+Les algorithmes terminent instantanément sur les exemples fournis avec l'énoncé.
 
 Les exemples difficiles sont hard.cnf et gen2.cnf  
+
+Les performances des algorithmes DPLL et WL ont été comparées sur un certain nombre d'entrées. Il est nécessaire de générer des entrées de taille particulièrement grande pour observer une différence dans les temps d'exécutions.
+
+Ci-dessous figurent les temps d'exécutions pour des entrées aléatoires de paramètre n_l_k (n : nombre de variables, l : longueur des clauses, k : nombre de clauses)
+On peut constater que l'algorithme WL est plus performant que DPLL sur nos exemples. Bien que ceci soit compréhensible pour des formules contenant de grandes clauses, il est plus surprenant de l'observer sur des formules 3-SAT. La lenteur de DPLL peut s'expliquer par la nécessité de propager toute assignation sur l'ensemble des clauses (ce qui se traduit cacher/montrer de nombreuses clauses/variables), alors que WL ne propage que sur les littéraux surveillés.
+
+
+50000_3000_2000
+DPLL : 49s
+WL : 22s
+
+10000_6000_400
+DPLL : 18s
+WL : 11s
+
+10000_3_400
+DPLL : 3s
+WL : 2.6s
+
+10000_3_5000
+DPLL : 4.8s
+WL : 2.3s
+
+10000_3_20000
+DPLL : 23s
+WL : 1s
+
+
