@@ -116,7 +116,7 @@ object
       | (Empty, Singleton v) -> Some (v,false)
       | _ -> None
 
-  val mutable wl1 : literal option = None
+  val mutable wl1 : literal option = None (* ces champs ne sont utilisées que pour les watched literals *)
   val mutable wl2 : literal option = None
     
   method get_wl = match (wl1,wl2) with

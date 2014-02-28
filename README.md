@@ -24,7 +24,7 @@ Pour afficher les informations sur le déroulement de l'algorithme :
 
     ./resol -d n ex.cnf
 
-où d est un entier positif définissant le niveau de détail de la description
+où d est un entier positif définissant le niveau de détail de la description (plus d est grand, plus il y aura d'informations)
 
 Pour générer une formule de k clauses de taille l avec n variables dans out.cnf :
 
@@ -32,7 +32,7 @@ Pour générer une formule de k clauses de taille l avec n variables dans out.cn
 
 Pour le résoudre à la volée :
 
-    ./gen k l n | ./resol 
+    ./gen n l k | ./resol 
 
 Pour utiliser l'algorithme watched literals :
 
@@ -56,10 +56,9 @@ clause.ml:
               * vpos : l'ensemble des variables apparaissant positivement dans la clause 
               * vneg : l'ensemble des variables apparaissant négativement dans la clause
            Par exemple, pour la clause 1 2 -3, on a vpos={1,2} et vneg={3}
+              * wl1 et wl2 : indiquent quels sont les 2 littéraux qui surveillent la clause (utilisée uniquement pour les watched literals)
 
 Les assignations de valeurs dans la clause se traduisent en un passage des littéraux faux dans la partie cachée.
-
-Note : l'objet clause contient aussi des champs spécifiques à l'algorithme des watched literals, ils seront expliqués plus loin.
 
 formule.ml:
 -----------
@@ -85,6 +84,11 @@ formule_dpll.ml:
 Les assignations de valeur dans la formule se traduisent en un passage des clauses validées par le littéral dans la partie cachée
 des clauses, une modification des listes d'occurences pour garantir la propriété citée précédemment et une assignation dans les clauses. 
 
+formule_wl.ml:
+----------------
+
+* wl_pos et wl_neg : 2 vartable de clauseset permettant de savoir pour chaque littéral dans quelles clauses il apparait.
+
 Algorithme DPLL
 ===============
 
@@ -104,19 +108,31 @@ La première étape de propagation des contraintes n'est jamais annulée (sauf s
 Algorithme Watched Literals
 ===========================
 
-L'implémentation actuelle de l'algorithme de Watched Literals n'est pas correcte. Nous n'avons pas pu mener le debuggage à terme dans les temps. Une version utilisable sera envoyée dès que possible.
+Prétraitement:
+--------------
 
-L'implémentation actuelle : 
-  - compile
-  - peut être lancée sur des fichiers tests (par exemple :  ./resol-wl tests/test1.cnf)
-  - intègre des fonctions d'affichages partielles pour faciliter le debuggage (pour le visualiser, entrer :  ./resol-wl tests/test2.cnf -d 1)
+Le prétraitement s'effectue en trois étapes : 
+  - suppression des tautologies
+  - détection des clauses singletons et affectations des variables constituant ces clauses (avec propagation)
+  - détection d'éventuelles clauses vides (ce qui entrainerait l'insatisfaisabilité de la formule)
+
+Une fois la phase de prétraitement terminée (et si elle n'a pas échouée), on garantie alors qu'il est possible d'établir la surveillance de 2 littéraux différents par clause.
+
+Déroulement :
+--------------
+
+L'algorithme choisie une variable à assigner puis propage le résultat sur les watch literals : 
+Lorsqu'une paire (v1,v2) est surveillée dans une clause c et que l'on vient d'assigner v1 à true, il y a 4 possibilitées (que l'on résume par le type wl_update dans formule_wl.ml) : 
+  - conflit : tous les littéraux de la clause sont faux, il faut backtracker et revenir sur le dernier pari
+  - v2 est vrai : il n'y a rien à faire
+  - on parvient à trouver un nouveau littéral à surveiller, on déplace alors la surveillance de v1 à v2
+  - v2 est le seul littéral non faux (et non assigné) de c : on assigne v2 de sorte à satisfaire c, puis on propage
+
+L'étape de backtracking est implémentée en maintenant une liste de toutes les variables instanciées depuis le dernier pari. Lors d'un conflit, on parcourt cette liste pour mettre à "indéfinie" la valeur des variables).
  
-De nombreux commentaires figurent dans les fichiers algo_wl.ml et formule_wl.ml. 
-Les remarques suivantes peuvent être ajoutées : 
-  - une phase de prétraitement permet de supprimer les tautologies et d'effectuer tous les assignements entrainés par des clauses singletons. D'éventuels clauses vides sont alors détectées
-  - A tout instant, chaque clause connait les 2 littéraux qui la surveille et chaque littéral connait les clauses qu'il surveille
-
-
+Les différents opérations menées prennent appuies sur les deux faits suivants : 
+  - A tout instant, chaque clause connait les 2 littéraux qui la surveillent (accès en temps constant à cette information)
+  - A tout instant, chaque littéral connait les clauses qu'il surveille
 
 Suivi de l'algorithme
 =====================

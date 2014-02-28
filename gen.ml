@@ -34,9 +34,9 @@ let _ =
       if (l<=n) then
         printf "p cnf %d %d\n%t%!" n k (gen_formule n l k)
       else
-        eprintf "Error : l<n\n%!"
+        eprintf "Error : la taille des clauses est supérieure au nombre de variables (l>n)\n%!"
     else raise (Failure "")
-  with Failure _ -> eprintf "Usage : gen k l n\n%!"
+  with Failure _ -> eprintf "Usage : gen n k l \n%!"
 
 
 
