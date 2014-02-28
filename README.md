@@ -151,8 +151,9 @@ Générateur
 Un générateur de clauses est fourni avec le solveur, il génère des clauses uniformément (on extrait les premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.
 
 
-Analyse des performances du programme
-=====================================
+Analyse des performances
+========================
 
 L'algorithme termine instantanément sur les exemples fournis avec l'énoncé.
 
+Les exemples difficiles sont hard.cnf et gen2.cnf  

@@ -65,7 +65,6 @@ let algo n cnf =
   
   (* Renvoie true si la propagation réussit, false sinon *)
   let rec aux () =
-    record_stat "Propagation";
     debug 2 "Dpll : starting propagation";
     match constraint_propagation formule with
       | Conflict -> 
