@@ -23,3 +23,5 @@ Abandonner les ref :
 Gestion du dépôt git : j'ai vu la "branche" que tu as créée pour le premier rendu (et j'ai ajouté une branche pour le rendu 1 bis), mais il ne faudrait pas
 plutôt utiliser l'outil "releases" ?
 
+On peut aussi mais là c'était juste pour garder une trace facilement accessible à certains points du rendu. Si on finit par battre minisat on pourra faire une vraie release :)
+
