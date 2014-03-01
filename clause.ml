@@ -56,6 +56,16 @@ object (self : 'varset)
       | 1 -> Singleton (VarSet.choose vis)
       | _ -> Bigger
 
+(*method singleton = (* indique si vis est un singleton, et renvoie Some v si v est l'unique variable de vis, None sinon *)
+    try 
+      let v = VarSet.min_elt vis in
+        if (v = VarSet.max_elt vis) then
+          (Singleton v)
+        else
+          Bigger
+    with
+      Not_found -> Empty*)
+      
   method iter f = VarSet.iter f vis 
 
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis a

@@ -1,5 +1,6 @@
 Dans DPLL : 
   - optimiser les tests de singletons (actuellement basés sur le cardinal >> est-ce fait en temps constant ?)
+      >> après tests sur une formule (n,l,k)=(50000,3000,2000), il semble qu'utiliser max_elt et min_elt n'impact pas les perfs
 
 Accélérer la génération de tests aléatoires ?
 
@@ -25,3 +26,4 @@ plutôt utiliser l'outil "releases" ?
 
 On peut aussi mais là c'était juste pour garder une trace facilement accessible à certains points du rendu. Si on finit par battre minisat on pourra faire une vraie release :)
 
+Implémenter l'amélioration de WL (cf diapos)

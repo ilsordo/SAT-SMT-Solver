@@ -19,37 +19,48 @@ let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None 
           Some m in
   parcours_paris n
 
-let constraint_propagation formule = (* Renvoie Conflict et annule la propagation si une clause vide a été générée, Fine sinon*)
-  let var_add = ref [] in (* variables ayant été affectées *)
-  let stop = ref false in (* stop = false : il y a encore à propager, stop = true : on a fini de propager *)
-  let affect v b =
-    debug 4 "Propagation : setting %d to %B" v b;
-    var_add := v::(!var_add);
-    formule#set_val b v in (* Peut lever une exception qui est attrapée plus loin *)
-  try
-    while not (!stop) do
-      begin
-        match formule#find_singleton with
-          | None ->
-              stop:=true (* on se donne une chance de finir la propagation *)
-          | Some (v,b) ->
-              debug 3 "Propagation : singleton found : %d %B" v b;
-              affect v b
-      end; 
-      match formule#find_single_polarite with
-        | None -> 
-            () (* si stop était à true, la propagation s'arrète ici *)
-        | Some (v,b) ->
-            debug 3 "Propagation : single polarity found : %d %B" v b;
-            stop:=false; (* la propagation doit refaire un tour... *)
-            affect v b
-    done; 
-    Fine (!var_add)
-  with 
-      Clause_vide ->
-        List.iter (fun var -> formule#reset_val var) !var_add; 
-        Conflict 
+(*************)
 
+(* constraint_propagation : 
+    doit effectuer toutes les propagations possibles
+      si conflit : doit annuler toutes les assignations propagées + renvoyer Conflict
+      si ok : renvoie Fine l où l est l'ensemble des variables assignées *) 
+let rec constraint_propagation formule l = 
+  match formule#find_singleton with
+    | None ->
+        begin
+          match formule#find_single_polarite with
+            | None -> Fine l
+            | Some (v,b) ->   
+                try
+                  debug 3 "Propagation : singleton found : %d %B" v b;
+                  debug 4 "Propagation : setting %d to %B" v b;
+                  formule#set_val b v;
+                  constraint_propagation formule (v::l)
+                with
+                  Clause_vide -> 
+                    begin
+                      List.iter (fun var -> formule#reset_val var) (v::l);
+                      Conflict
+                    end
+        end
+    | Some (v,b) ->
+        try
+          debug 3 "Propagation : single polarity found : %d %B" v b;
+          debug 4 "Propagation : setting %d to %B" v b;
+          formule#set_val b v;
+          constraint_propagation formule (v::l)
+        with
+          Clause_vide -> 
+            begin
+              List.iter (fun var -> formule#reset_val var) (v::l);
+              Conflict
+            end   
+                
+            
+(*************)        
+            
+            
 (* Algo dpll *)
 let algo n cnf = 
   let formule = new formule_dpll in
@@ -66,7 +77,7 @@ let algo n cnf =
   (* Renvoie true si la propagation réussit, false sinon *)
   let rec aux () =
     debug 2 "Dpll : starting propagation";
-    match constraint_propagation formule with
+    match constraint_propagation formule [] with
       | Conflict -> 
           record_stat "Conflits";
           debug 2 ~stops:true "Dpll : conflict found";

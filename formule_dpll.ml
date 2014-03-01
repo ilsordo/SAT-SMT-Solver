@@ -27,7 +27,7 @@ object(self)
     let dest = if b then occurences_pos else occurences_neg in
     let set = match dest#find v with
       | None -> 
-          let set = new clauseset in (***)
+          let set = new clauseset in
           dest#set v set;
           set
       | Some set -> set in
@@ -40,8 +40,7 @@ object(self)
   (* Accède à l'une des listes d'occurences en supposant qu'elle a été initialisée *)
   method private get_occurences occ v =
     match occ#find v with
-      | None -> assert false 
-      (* Cette variable aurait du être initialisée à l'ajout de la clause *) 
+      | None -> assert false (* Cette variable aurait du être initialisée à l'ajout de la clause *) 
       | Some occurences -> occurences
 
   (* Cache une clause des listes d'occurences de toutes les variables sauf v_ref *)
@@ -112,15 +111,18 @@ object(self)
 
   method find_single_polarite = (* on cherche une var sans pari qui n'apparaitrait qu'avec une seule polarité *)
     let rec parcours_polar m n = 
-      if m>n 
-      then None 
-      else  if not (paris#mem m) 
-        then if (self#get_occurences occurences_pos m)#is_empty 
-          then Some (m,false) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
-          else if (self#get_occurences occurences_neg m)#is_empty
-          then Some (m,true)
-          else parcours_polar (m+1) n
-          else parcours_polar (m+1) n
+      if m>n then 
+        None 
+      else 
+        if not (paris#mem m) then 
+          if (self#get_occurences occurences_pos m)#is_empty then 
+            Some (m,false) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
+          else 
+            if (self#get_occurences occurences_neg m)#is_empty then 
+              Some (m,true)
+            else parcours_polar (m+1) n
+        else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars
+
 
 end
