@@ -8,20 +8,16 @@ class formule_dpll =
 object(self)
   inherit formule as super
 
-  val occurences_pos : clauseset vartable = new vartable 0 (* associe à chaque variable les clauses auxquelles elle appartient *)
-  val occurences_neg : clauseset vartable = new vartable 0
+  val occurences_pos : clauseset vartable = new vartable 0 (* associe à chaque variable les clauses dans lesquelles elle apparait positivement *)
+  val occurences_neg : clauseset vartable = new vartable 0 (* associe à chaque variable les clauses dans lesquelles elle apparait négativement *)
 
-  method init n clauses_init =
+  method init n clauses_init = (* crée l'ensemble des clauses et remplie occurences_pos/neg à partir de clauses_init (int list list = liste de clauses) *)
     super#init n clauses_init;
     for i=1 to n do
       occurences_pos#set i (new clauseset);
       occurences_neg#set i (new clauseset)
     done;
     clauses#iter self#register_clause
-
-  method add_clause c =
-    super#add_clause c;
-    self#register_clause c
       
   method private add_occurence b c v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
     let dest = if b then occurences_pos else occurences_neg in
@@ -32,19 +28,21 @@ object(self)
           set
       | Some set -> set in
     set#add c
-      
-  method private register_clause c = (* Met c dans les listes d'occurences de ses variables *)
+     
+  method private register_clause c = (* Met c dans les occurences de ses variables *)
     c#get_vpos#iter (self#add_occurence true c);
     c#get_vneg#iter (self#add_occurence false c)
 
-  (* Accède à l'une des listes d'occurences en supposant qu'elle a été initialisée *)
-  method private get_occurences occ v =
+  method add_clause c = (* ajoute la clause c, et met à jour occurences_pos/neg en conséquence *)
+    super#add_clause c;
+    self#register_clause c
+    
+  method private get_occurences occ v =  (* Accède à l'une des occurences (occ) de la variable v, en supposant que cet ensemble a été initialisé *)
     match occ#find v with
-      | None -> assert false (* Cette variable aurait du être initialisée à l'ajout de la clause *) 
+      | None -> assert false (* cet ensemble aurait du être initialisé *) 
       | Some occurences -> occurences
 
-  (* Cache une clause des listes d'occurences de toutes les variables sauf v_ref *)
-  method private hide_occurences v_ref c =
+  method private hide_occurences v_ref c =  (* Cache une clause des occurences de toutes les variables qu'elle contient, sauf v_ref *)
     c#get_vpos#iter 
       (fun v -> 
         if v<>v_ref then 
@@ -54,7 +52,7 @@ object(self)
         if v<>v_ref then 
           (self#get_occurences occurences_neg v)#hide c)    
 
-  method set_val b v = (* on souhaite assigner la variable v à b (true ou false), et faire évoluer les clauses en conséquences *)
+  method set_val b v = (* on assigne la valeur b à la variable v, on cache les causes qui deviennent vraie, on cache v dans les clauses où elle est fausse *)
     let _ = match paris#find v with
       | None -> paris#set v b
       | Some _ -> assert false in (* Pas de double paris *)
@@ -63,7 +61,7 @@ object(self)
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
-    (* On supprime (valide) les clauses où apparait le littéral, elles ne sont plus pointées que par la liste des occurences de v*)
+    (* On supprime (valide) les clauses où apparait le littéral (b,v) (ces clauses sont devenues vraies), elles ne sont plus pointées que par la liste des occurences de v*)
     (self#get_occurences valider v)#iter 
       (fun c -> 
         clauses#hide c ; 
@@ -75,7 +73,7 @@ object(self)
         if c#is_empty then 
           raise Clause_vide)
 
-  method private show_occurences v_ref c =
+  method private show_occurences v_ref c = (* on rend visible c dans les occurences_pos/neg des variables qu'elle contient (exceptée v_ref) *)
     c#get_vpos#iter 
       (fun v -> 
         if v<>v_ref then 
@@ -85,10 +83,9 @@ object(self)
         if v<>v_ref then 
           (self#get_occurences occurences_neg v)#show c) 
       
-  (* Replace une clause dans les listes d'occurences de ses variables *)
-  method reset_val v =
+  method reset_val v = (* on souhaite annuler le pari sur la variable v, et rendre visible tout ce qui a été caché par set_val ci-dessus *)
     let b = match paris#find v with
-      | None -> assert false (* On ne revient pas sur un pari pas fait *)
+      | None -> assert false (* on n'annule pas un pari pas fait *)
       | Some b -> 
           paris#remove v ; 
           b in
@@ -97,15 +94,15 @@ object(self)
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
-    (* On invalide les clauses où apparaissait le littéral *)
+    (* On rend visible les clauses qui étaient vraies grâce à v *)
     (self#get_occurences invalider v)#iter 
       (fun c -> 
         clauses#show c;
         self#show_occurences v c);
-    (* On restaure les clauses où apparait la négation du littéral, on remet à jour les occurences des variables y apparaissant*)
+    (* On rend visible v dans les clauses où elle était cachée car fausse *)
     (self#get_occurences restaurer v)#iter 
       (fun c -> 
-        c#show_var (not b) v) (* On replace les occurences du littéral *)
+        c#show_var (not b) v) 
 
 (***)
 

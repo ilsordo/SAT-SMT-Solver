@@ -1,4 +1,4 @@
 #/bin/bash
 
-./main -algo dpll $@
+./main -algo DPLL $@
 

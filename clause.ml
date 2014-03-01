@@ -11,11 +11,11 @@ module VarSet = Set.Make(OrderedVar)
 
 type c_repr = VarSet.t
 
-type classif_varset = Empty | Singleton of variable | Bigger
+type classif_varset = Empty | Singleton of variable | Bigger (* un ensemble de variable est : vide || un singleton || contient 2 variables ou plus *)
 
-type literal = bool * variable
+type literal = bool * variable (* un littéral = une variable + sa positivité (+=true, -=false) *)
 
-let print_lit_wl p l =
+let print_lit_wl p l = (* afficher un littéral *)
   let s = match l with
     | None -> "None"
     | Some (b,var) -> Printf.sprintf "%d : %B" var b in
@@ -42,7 +42,7 @@ object (self : 'varset)
         vis <- VarSet.add x vis
       end
         
-  method add x = vis <- VarSet.add x vis (* ajoute x aux vars visibles // si x était déjà dans hid : après, si on le cache/montre, il ne sera plus que ds 1 endroit *)
+  method add x = vis <- VarSet.add x vis (* ajoute x aux vars visibles *)
      
   method mem x = VarSet.mem x vis  (* indique si la variable x est dans vis  *)
 
@@ -50,13 +50,13 @@ object (self : 'varset)
 
   method is_empty = VarSet.is_empty vis
 
-  method singleton = (* indique si vis est un singleton, et renvoie Some v si v est l'unique variable de vis, None sinon *)
+  method singleton = (* indique si vis est vide, singleton, ou contient plus de 1 élément *)
     match VarSet.cardinal vis with
       | 0 -> Empty
       | 1 -> Singleton (VarSet.choose vis)
       | _ -> Bigger
 
-(*method singleton = (* indique si vis est un singleton, et renvoie Some v si v est l'unique variable de vis, None sinon *)
+(*method singleton = (* tentative infructueuse d'améliorer la complexité de la méthode singleton *)
     try 
       let v = VarSet.min_elt vis in
         if (v = VarSet.max_elt vis) then
@@ -92,54 +92,55 @@ object
               vneg#add (-x))
       clause_init
 
-  method get_id = id
+  method get_id = id (* à chaque clause est associé un identifiant unique, attribué par la formule contenant la clause *)
     
-  method get_vpos = vpos
+  method get_vpos = vpos (* variables apparaissant positivement dans la clause *)
     
-  method get_vneg = vneg
+  method get_vneg = vneg (* variables apparaissant négativement dans la clause *)
     
   method is_tauto = vpos#intersects vneg (* indique si la clause est une tautologie *)
     
   method is_empty = vpos#is_empty && vneg#is_empty
     
-  method hide_var b x = (* b = true si x est une litteral positif, false si négatif *)
+  method hide_var b v = (* cache le littéral (b,v) *)
     if b then
-      vpos#hide x
+      vpos#hide v
     else 
-      vneg#hide x
+      vneg#hide v
 
-  method show_var b x = 
+  method show_var b v = (* montre le littéral (b,v) *)
     if b then
-      vpos#show x
+      vpos#show v
     else 
-      vneg#show x
+      vneg#show v
 
-  method mem b x = (* indique si x est présent dans la clause avec la positivite b *)
+  method mem b v = (* indique si le littéral (b,v) est (visible) dans la clause *)
     if b then
-      vpos#mem x
+      vpos#mem v
     else
-      vneg#mem x
+      vneg#mem v
 
-  method singleton = (* renvoie Some (x,b) si la clause est un singleton ne contenant que x avec la positivité b, None sinon *)
+  method singleton = (* renvoie Some (v,b) si la clause est un singleton ne contenant que v avec la positivité b, None sinon *)
     match (vpos#singleton, vneg#singleton) with
       | (Singleton v, Empty) -> Some (v,true)
       | (Empty, Singleton v) -> Some (v,false)
       | _ -> None
 
-  val mutable wl1 : literal option = None (* ces champs ne sont utilisées que pour les watched literals *)
-  val mutable wl2 : literal option = None
+  (* ces champs ne sont utilisées que pour les watched literals *)
+  val mutable wl1 : literal option = None (* premier littéral surveillé dans la clause *)
+  val mutable wl2 : literal option = None (* deuxième littéral surveillé dans la clause *)
     
-  method get_wl = match (wl1,wl2) with
+  method get_wl = match (wl1,wl2) with (* obtenir les 2 littéraux surveillés *)
     | (Some l1, Some l2) -> (l1,l2)
-    | _ -> assert false (* Jumelles cassées *)
+    | _ -> assert false (* on surveille forcèment 2 littéraux *)
 
-  method set_wl1 l = (* Si rien ne marche vérifier ici *)
+  method set_wl1 l = (* placer le littéral l sous surveillance, dans wl1 *)
     wl1 <- Some l
 
-  method set_wl2 l = (* Si rien ne marche vérifier ici *)
+  method set_wl2 l = (* placer le littéral l sous surveillance, dans wl2 *)
     wl2 <- Some l
 
-  method print p () = 
+  method print p () = (* fonction d'affichage des WL *)
     Printf.fprintf p "Clause %d : " id;
     if (wl1,wl2) <> (None,None) then
       Printf.fprintf p "Watched : (%a,%a)\n" print_lit_wl wl1 print_lit_wl wl2;
@@ -156,8 +157,6 @@ struct
   type t = clause
   let compare (c1 : t) c2 = compare c1#get_id c2#get_id
 end
-
-
 
 
 

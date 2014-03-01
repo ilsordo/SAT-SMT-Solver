@@ -1,0 +1,194 @@
+
+<!-- saved from url=(0146)http://webcache.googleusercontent.com/search?q=cache:J5GJxOvkfhcJ:perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu4.pdf+&cd=4&hl=fr&ct=clnk&gl=fr -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css"></style></head><body bgcolor="#ffffff" vlink="blue" link="blue"><div style="background:#fff;border:1px solid #999;margin:-1px -1px 0;padding:0;"><div style="background:#ddd;border:1px solid #999;color:#000;font:13px arial,sans-serif;font-weight:normal;margin:12px;padding:8px;text-align:left">Ceci est la version HTML du fichier <a href="http://perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu4.pdf" style="text-decoration:underline;color:#00c">http://perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu4.pdf</a>.<br> Lorsque <b><font color="#0039b6">G</font> <font color="#c41200">o</font> <font color="#f3c518">o</font> <font color="#0039b6">g</font> <font color="#30a72f">l</font> <font color="#c41200">e</font></b> explore le Web, il crée automatiquement une version HTML des documents récupérés.</div></div><div style="position:relative">
+
+
+
+<meta name="Creator" content="LaTeX with hyperref package">
+<meta name="Producer" content="pdfTeX-1.40.10">
+<meta name="CreationDate" content="D:20130417094837+02&#39;00&#39;">
+<meta name="ModDate" content="D:20130417094837+02&#39;00&#39;">
+<meta name="Fullbanner" content="This is pdfTeX, Version 3.1415926-1.40.10-2.2 (TeX Live 2009/Debian) kpathsea version 5.0.0">
+<title>Projet 2 L3IF — Quatri`eme et dernier rendu 1 Transformation de Tseitin, tout le monde 2 SAT pour résoudre des énigmes, tout</title>
+
+<table border="0" width="100%"><tbody><tr><td bgcolor="eeeeee" align="right"><font face="arial,sans-serif"><a name="1"><b>Page 1</b></a></font></td></tr></tbody></table><font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:283;left:251"><nobr>Projet 2 L3IF — Quatri`eme et dernier rendu</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:314;left:281"><nobr>`a faire en binôme, `a rendre pour le 20/5/2013 `a 23h59</nobr></div>
+<div style="position:absolute;top:332;left:111"><nobr>envoyez une archive qui compile `a benjamin.girault@ens-lyon.fr et daniel.hirschkoff@ens-lyon.fr</nobr></div>
+<div style="position:absolute;top:350;left:109"><nobr>Nota: il y aura un “point de contrôle” le 7 mai (sans rendu), pour s’assurer que vous avez bien avancé `a ce</nobr></div>
+<div style="position:absolute;top:368;left:424"><nobr>moment-l`a</nobr></div>
+<div style="position:absolute;top:401;left:130"><nobr>Le but de ce quatri`eme rendu est de concevoir plusieurs programmes s’appuyant sur SAT pour résoudre</nobr></div>
+<div style="position:absolute;top:419;left:108"><nobr>divers probl`emes. Votre rendu devra ainsi proposer divers exécutables. Il est recommandé de s’appuyer</nobr></div>
+<div style="position:absolute;top:437;left:108"><nobr>sur flex/bison (ou leur pendants en Caml ou Java) pour l’analyse de l’entrée de ces programmes. Rien ne</nobr></div>
+<div style="position:absolute;top:455;left:108"><nobr>vous empêche de partager du code entre les divers programmes (par exemple en expliquant comment le</nobr></div>
+<div style="position:absolute;top:473;left:108"><nobr>programme numéro 5 traduit son entrée dans le format des probl`emes du programme numéro 3). Autrement</nobr></div>
+<div style="position:absolute;top:491;left:108"><nobr>dit, vous êtes encouragés `a réfléchir avant de traiter ce rendu comme n probl`emes indépendants les uns des</nobr></div>
+<div style="position:absolute;top:509;left:108"><nobr>autres.</nobr></div>
+<div style="position:absolute;top:527;left:130"><nobr>Fournissez “votre meilleur solveur SAT” pour faire tourner ces exemples (sauf éventuellement pour la</nobr></div>
+<div style="position:absolute;top:545;left:108"><nobr>partie <a href="http://webcache.googleusercontent.com/search?q=cache:J5GJxOvkfhcJ:perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu4.pdf+&cd=4&hl=fr&ct=clnk&gl=fr#2">5</a>, qui pourra nécessiter de tripatouiller le solveur SAT). C’est l’occasion pour vous de revenir sur le</nobr></div>
+<div style="position:absolute;top:563;left:108"><nobr>code que vous avez développé durant le semestre, de faire des optimisations que vous n’auriez pas eu le temps</nobr></div>
+<div style="position:absolute;top:580;left:108"><nobr>de faire, etc. (comme toujours, expliquez-nous dans le fichier README les évolutions qu’il y a eu depuis le</nobr></div>
+<div style="position:absolute;top:598;left:108"><nobr>rendu précédent).</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:643;left:108"><nobr>1 Transformation de Tseitin, tout le monde</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:681;left:108"><nobr>Dans cette partie, il vous est demandé d’utilisé votre solveur SAT pour prendre en compte une formule</nobr></div>
+<div style="position:absolute;top:698;left:108"><nobr>logique quelconque.</nobr></div>
+<div style="position:absolute;top:716;left:130"><nobr>Cela signifie qu’il vous faudra implémenter des analyseurs lexical et syntaxique afin de transformer des</nobr></div>
+<div style="position:absolute;top:734;left:108"><nobr>formules logiques quelconques en formules en forme normale conjonctive.</nobr></div>
+<div style="position:absolute;top:752;left:130"><nobr>La grammaire des formules en entrée est la suivante:</nobr></div>
+<div style="position:absolute;top:784;left:298"><nobr>F</nobr></div>
+<div style="position:absolute;top:785;left:330"><nobr>::=</nobr></div>
+<div style="position:absolute;top:784;left:369"><nobr>F<font style="font-size:8px">1 </font>∨ F<font style="font-size:8px">2</font></nobr></div>
+<div style="position:absolute;top:782;left:425"><nobr>\</nobr></div>
+<div style="position:absolute;top:791;left:425"><nobr>\ F<font style="font-size:8px">1 </font>∧ F<font style="font-size:8px">2</font></nobr></div>
+<div style="position:absolute;top:782;left:492"><nobr>\</nobr></div>
+<div style="position:absolute;top:791;left:492"><nobr>\ ¬F</nobr></div>
+<div style="position:absolute;top:782;left:529"><nobr>\</nobr></div>
+<div style="position:absolute;top:791;left:529"><nobr>\ F<font style="font-size:8px">1 </font>⇒ F<font style="font-size:8px">2</font></nobr></div>
+<div style="position:absolute;top:782;left:602"><nobr>\</nobr></div>
+<div style="position:absolute;top:791;left:602"><nobr>\ x</nobr></div>
+<div style="position:absolute;top:819;left:108"><nobr>x désigne une variable propositionnelle. Concr`etement, les identificateurs seront des suites de lettres minus-</nobr></div>
+<div style="position:absolute;top:836;left:108"><nobr>cules, la conjonction et disjonction seront notées respectivement /\ et \/, l’implication =&gt; et la négation ~</nobr></div>
+<div style="position:absolute;top:854;left:108"><nobr>(bien entendu, les parenth`eses peuvent aussi être utilisées pour écrire les formules). `A vous de réfléchir aux</nobr></div>
+<div style="position:absolute;top:872;left:108"><nobr>priorités respectives des opérateurs.</nobr></div>
+<div style="position:absolute;top:890;left:130"><nobr>Il faudra que votre programme soit en mesure d’afficher la formule en forme normale conjonctive obtenue</nobr></div>
+<div style="position:absolute;top:908;left:108"><nobr>`a partir d’une formule logique en entrée. Comme pour le fonctionnement du solveur SAT, le programme</nobr></div>
+<div style="position:absolute;top:926;left:108"><nobr>répondra en indiquant si la formule est satisfiable ou pas, et, dans le cas positif, fournira une affectation des</nobr></div>
+<div style="position:absolute;top:944;left:108"><nobr>variables (de la formule de départ).</nobr></div>
+<div style="position:absolute;top:962;left:130"><nobr>Vous illustrerez le fonctionnement de tout cela sur quelques exemples.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:1006;left:108"><nobr>2 SAT pour résoudre des énigmes, tout le monde</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1044;left:108"><nobr>Dans les énigmes ci-dessous, on vous demande de traduire l’énigme de telle mani`ere que l’on puisse se</nobr></div>
+<div style="position:absolute;top:1062;left:108"><nobr>servir du solveur SAT pour résoudre l’énigme (il n’est pas question de coder une méthode appropriée — et</nobr></div>
+<div style="position:absolute;top:1080;left:108"><nobr>probablement plus efficace).</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:15px;font-family:Times">
+<div style="position:absolute;top:1119;left:108"><nobr>2.1 Latin</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1149;left:108"><nobr>Faites un programme qui prend en entrée un entier k, et renvoie un carré latin de taille k ×k, en s’appuyant</nobr></div>
+<div style="position:absolute;top:1167;left:108"><nobr>sur SAT (un tel carré latin comprend tous les entiers de 0 `a k − 1 sur chaque ligne et chaque colonne).</nobr></div>
+<div style="position:absolute;top:1245;left:455"><nobr>1</nobr></div>
+</span></font>
+
+<div style="position:absolute;top:1363;left:0"><hr><table border="0" width="100%"><tbody><tr><td bgcolor="eeeeee" align="right"><font face="arial,sans-serif"><a name="2"><b>Page 2</b></a></font></td></tr></tbody></table></div><font size="3" face="Times"><span style="font-size:15px;font-family:Times">
+<div style="position:absolute;top:1473;left:108"><nobr>2.2 Magique</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1503;left:108"><nobr>Même chose avec un carré magique (tous les entiers de 1 `a k<font style="font-size:8px">2 </font>sont disposés sur un carré k × k de mani`ere `a</nobr></div>
+<div style="position:absolute;top:1521;left:108"><nobr>ce que les sommes des lignes, des colonnes et des diagonales soient toutes égales).</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:15px;font-family:Times">
+<div style="position:absolute;top:1561;left:108"><nobr>2.3 Sudoku</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1591;left:108"><nobr>Inventez un format simple pour représenter une grille de sudoku, et utilisez SAT pour résoudre une grille</nobr></div>
+<div style="position:absolute;top:1608;left:108"><nobr>écrite dans ce format.</nobr></div>
+<div style="position:absolute;top:1635;left:130"><nobr>Il faudra, dans votre rendu, que vous expliquiez clairement comment chaque énigme est formalisée en un</nobr></div>
+<div style="position:absolute;top:1653;left:108"><nobr>probl`eme (sous forme d’un ensemble de contraintes, exprimées comme vous jugerez approprié de le faire), et</nobr></div>
+<div style="position:absolute;top:1671;left:108"><nobr>comment se fait la traduction entre l’énigme et un probl`eme en entrée du solveur SAT.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:1716;left:108"><nobr>3 SAT pour calculer sur les entiers, tout le monde</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1753;left:108"><nobr>Faites un programme qui permet de saisir une expression arithmétique écrite `a l’aide de constantes, addition</nobr></div>
+<div style="position:absolute;top:1771;left:108"><nobr>et soustraction, et affiche en sortie le résultat de l’évaluation de l’expression.</nobr></div>
+<div style="position:absolute;top:1789;left:130"><nobr>L’évaluation se fera de la mani`ere suivante: on convertit les entiers en leur représentation sur 32 bits, puis</nobr></div>
+<div style="position:absolute;top:1807;left:108"><nobr>on “programme” l’évaluation, et finalement on décode et affiche le résultat. Nous sommes bien d’accord, ce</nobr></div>
+<div style="position:absolute;top:1825;left:108"><nobr>n’est pas la mani`ere la plus efficace de faire des calculs sur les entiers.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:1870;left:108"><nobr>4 SAT pour résoudre des probl`emes NP-complets, tout le monde</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1907;left:108"><nobr>On s’intéresse ici au probl`eme de la colorabilité des graphes.</nobr></div>
+<div style="position:absolute;top:1925;left:130"><nobr>Votre programme prendra en entrée un graphe décrit suivant le format DIMACS (voir</nobr></div>
+<div style="position:absolute;top:1944;left:130"><nobr><a href="http://mat.gsia.cmu.edu/COLOR/instances.html">http://mat.gsia.cmu.edu/COLOR/instances.html po</a>ur quelques graphes).</nobr></div>
+<div style="position:absolute;top:1961;left:130"><nobr>Il vous est demandé de faire un programme prenant en entrée un entier k et la description d’un graphe,</nobr></div>
+<div style="position:absolute;top:1979;left:108"><nobr>et testant la k-colorabilité en s’appuyant sur votre solveur SAT. La sortie décrira un graphe au format</nobr></div>
+<div style="position:absolute;top:1997;left:108"><nobr>dot/graphviz (cf. rendu numéro 3), afin de pouvoir visualiser la coloration calculée.</nobr></div>
+<div style="position:absolute;top:2015;left:130"><nobr>On demande aussi un retour sur la complexité observée: pour quelles valeurs de k et tailles de graphe le</nobr></div>
+<div style="position:absolute;top:2033;left:108"><nobr>solveur rend-il les armes?</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:2078;left:108"><nobr>5 SMT (Satisfaction Modulo Theory) — avancés et semi-avancés</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:15px;font-family:Times">
+<div style="position:absolute;top:2116;left:108"><nobr>5.1 Satisfaction Modulo Congruence</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:2145;left:108"><nobr>Implémenter SMT, en version offline, pour la congruence. Pour ce faire, vous vous appuierez sur la struc-</nobr></div>
+<div style="position:absolute;top:2163;left:108"><nobr>ture d’ensemble union-find (ou ensemble de Tarjan), enrichie pour traiter les diségalités et la clôture par</nobr></div>
+<div style="position:absolute;top:2181;left:108"><nobr>congruence. Vous pouvez par exemple vous appuyer sur <font color="#006666"><a href="http://www.sdl.sri.com/users/bruno/publis/cav2007.pdf">cet article</a></font><a href="http://www.sdl.sri.com/users/bruno/publis/cav2007.pdf"></a>, Sections 4.1 et 4.2 pour ce faire.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:15px;font-family:Times">
+<div style="position:absolute;top:2221;left:108"><nobr>5.2 Bonus: contraintes arithmétiques</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:2251;left:108"><nobr>Codez l’algorithme décrit dans <font color="#006666"><a href="http://research.microsoft.com/en-us/um/people/leonardo/cav06.pdf">cet article</a></font><a href="http://research.microsoft.com/en-us/um/people/leonardo/cav06.pdf"></a>, (Section 4) pour fabriquer un solveur SMT permettant de prendre</nobr></div>
+<div style="position:absolute;top:2269;left:108"><nobr>en entrée des contraintes arithmétiques, et permettant de faire du SMT en version paresseuse, online (la</nobr></div>
+<div style="position:absolute;top:2287;left:108"><nobr>section 4.4 de <font color="#006666"><a href="http://www.sdl.sri.com/users/bruno/publis/cav2007.pdf">cet article </a></font>vous donne une présentation succincte du principe de fonctionnement de l’algorithme</nobr></div>
+<div style="position:absolute;top:2305;left:108"><nobr>en question).</nobr></div>
+<div style="position:absolute;top:2433;left:455"><nobr>2</nobr></div>
+</span></font>
+
+<div style="position:absolute;top:2551;left:0"><hr><table border="0" width="100%"><tbody><tr><td bgcolor="eeeeee" align="right"><font face="arial,sans-serif"><a name="3"><b>Page 3</b></a></font></td></tr></tbody></table></div><font size="3" face="Times"><span style="font-size:15px;font-family:Times">
+<div style="position:absolute;top:2661;left:108"><nobr>5.3 Bonus du bonus: analyses de programmes</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:2691;left:108"><nobr>Inspirez-vous de l’exemple suivant pour construire un programme prenant en entrée un triplet de Hoare et</nobr></div>
+<div style="position:absolute;top:2709;left:108"><nobr>indiquant si le triplet est satisfait. Les assertions pourront être simplifiées par rapport `a ce qui a été vu en</nobr></div>
+<div style="position:absolute;top:2727;left:108"><nobr>cours de Théorie de la Programmation, et les programmes appartiendront `a Imp sans boucle while .</nobr></div>
+<div style="position:absolute;top:2752;left:165"><nobr>if (x &lt; 5) {</nobr></div>
+<div style="position:absolute;top:2770;left:165"><nobr>y = x +3;</nobr></div>
+<div style="position:absolute;top:2788;left:165"><nobr>} else {</nobr></div>
+<div style="position:absolute;top:2788;left:322"><nobr>(x &lt; 5 /\ y = x + 3) \/ (x &gt;= 5 /\ y = x + 2)</nobr></div>
+<div style="position:absolute;top:2806;left:165"><nobr>y = x +2;</nobr></div>
+<div style="position:absolute;top:2824;left:165"><nobr>}</nobr></div>
+<div style="position:absolute;top:2836;left:130"><nobr>Si vous optez pour ce choix, n’hésitez pas `a interagir avec Daniel Hirschkoff pour discuter de comment</nobr></div>
+<div style="position:absolute;top:2854;left:108"><nobr>vous y prendre. Vous pourrez éventuellement vous appuyer sur un solveur existant pour la théorie utilisée.</nobr></div>
+<div style="position:absolute;top:2892;left:108"><nobr>Mode d’emploi des bonus. Vous n’avez droit aux bonus que si vous êtes avancé ou semi-avancé. Un</nobr></div>
+<div style="position:absolute;top:2910;left:108"><nobr>bonus peut substituer une partie (parmi les parties 1 `a 5). Attention: globalement, un bonus est plus difficile</nobr></div>
+<div style="position:absolute;top:2928;left:108"><nobr>qu’une autre partie du rendu, mais il peut être jugé plus intéressant, et est probablement plus instructif.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:2973;left:108"><nobr>6 Une ”check list” pour votre rendu</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:3010;left:108"><nobr>Il s’agit de votre dernier rendu: c’est celui-ci qui fera l’objet de l’étude la plus attentive de la part des</nobr></div>
+<div style="position:absolute;top:3028;left:108"><nobr>encadrants du cours. Il faut donc que cela s’approche autant que faire se peut d’un produit fini. Soignez</nobr></div>
+<div style="position:absolute;top:3046;left:108"><nobr>tout particuli`erement le code, les commentaires dans le code, éliminez le code mort que vous auriez tout</nobr></div>
+<div style="position:absolute;top:3064;left:108"><nobr>simplement commenté, supprimez les fichiers inutiles, relisez votre README, etc.</nobr></div>
+<div style="position:absolute;top:3096;left:130"><nobr>• Une archive envoyée `a l’heure aux deux encadrants, avec un nom significatif.</nobr></div>
+<div style="position:absolute;top:3126;left:130"><nobr>• C’est bien la derni`ere version du programme que vous nous envoyez.</nobr></div>
+<div style="position:absolute;top:3156;left:130"><nobr>• C¸a respecte les consignes du rendu.</nobr></div>
+<div style="position:absolute;top:3186;left:130"><nobr>• C¸a compile (sur votre ordinateur et sur les machines des salles libre-service).</nobr></div>
+<div style="position:absolute;top:3216;left:130"><nobr>• Ce fut testé.</nobr></div>
+<div style="position:absolute;top:3246;left:130"><nobr>• Un fichier README contient les explications</nobr></div>
+<div style="position:absolute;top:3276;left:162"><nobr>– sur le solveur SAT que vous fournissez, `a l’issue du semestre: ce qu’il fait, ce qu’il fait bien, ce</nobr></div>
+<div style="position:absolute;top:3294;left:178"><nobr>qu’il fait moins bien;</nobr></div>
+<div style="position:absolute;top:3318;left:162"><nobr>– sur l’utilisation de vos programmes (comment les exécuter, comment récupérer leurs sorties);</nobr></div>
+<div style="position:absolute;top:3342;left:162"><nobr>– sur les choix d’implémentation importants, et sur l’organisation du code;</nobr></div>
+<div style="position:absolute;top:3363;left:178"><nobr>expliquez, pour chaque programme qui est demandé dans ce rendu, quelles structures de données</nobr></div>
+<div style="position:absolute;top:3381;left:178"><nobr>sont utilisées pour récupérer l’entrée, et quels traitements sont mis en œuvre pour faire appel</nobr></div>
+<div style="position:absolute;top:3399;left:178"><nobr>ensuite au solveur SAT;</nobr></div>
+<div style="position:absolute;top:3423;left:162"><nobr>– sur la répartition (indicative, nous comprenons bien qu’au bout d’un certain temps vous travaillez</nobr></div>
+<div style="position:absolute;top:3441;left:178"><nobr>`a deux sur les mêmes fichiers) du travail dans les fichiers (qui a travaillé le plus sur quels fichiers).</nobr></div>
+<div style="position:absolute;top:3465;left:162"><nobr>– sur d’autres remarques que vous pouvez faire.</nobr></div>
+<div style="position:absolute;top:3494;left:130"><nobr>• Le code est structuré de mani`ere lisible, et commenté.</nobr></div>
+<div style="position:absolute;top:3621;left:455"><nobr>3</nobr></div>
+</span></font>
+<!-- t7123r20a1c7123e7087n16u8l0m0k0 -->
+
+
+</div></body></html>

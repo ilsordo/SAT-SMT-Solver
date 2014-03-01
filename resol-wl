@@ -1,4 +1,4 @@
 #/bin/bash
 
-./main -algo wl $@
+./main -algo WL $@
 

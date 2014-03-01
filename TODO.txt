@@ -2,13 +2,26 @@ Dans DPLL :
   - optimiser les tests de singletons (actuellement basés sur le cardinal >> est-ce fait en temps constant ?)
       >> après tests sur une formule (n,l,k)=(50000,3000,2000), il semble qu'utiliser max_elt et min_elt n'impact pas les perfs
 
-Accélérer la génération de tests aléatoires ?
-
-Construire une batterie de tests intéressants (notamment de petites formules avec des cas pathologiques)
-
-M'expliquer comment s'utilise l'option -b :)
-
-Travailler sur l'outil de stat (en fait c'est une des taches centrales du rendu 2)
+Dans WL : 
+  - optimisation : si la variable x est assignée à vraie, dans toute clause c non encore satisfaite où non x apparait (surveillé ou non), on met en place une surveillance sur x
+  
+Génération de tests aléatoires : 
+  - accélérer la génération de tests aléatoires ?
+  - comment générer une formule (n,l,k) forcèment satisfiable :
+      * tirer au hasard une assignation pour chacune des n variables
+      * tirer au hasard les clauses, mais rejeter toutes celles qui ne sont pas satisfaites
+      * cette méthode favoriserait des formules "plus simples" à résoudre
+  - page intéressante : http://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/descr.html
+  
+Tests : 
+  - Construire une batterie de tests intéressants (notamment de petites formules avec des cas pathologiques), 
+  - Pouvoir lancer des tests sur des dossiers de fichiers
+  - Vérifier que la réponse UNSATISFIABLE est correcte par un appel à minisat ?
+  - des fichiers de test ici : http://www.cs.ubc.ca/~hoos/SATLIB/benchm.html
+  
+Stats :
+  - Intégrer les stats partout (notamment WL)
+  - Compter les conflits, nb de paris... 
 
 Ajouter plus de commentaires ?
 
@@ -16,14 +29,7 @@ Utiliser le type literal partout où c'est possible
 
 Passer les champs occurences_pos/neg dans formule.ml ? (et abandonner la création temporaire de ces ensembles dans formule_wl.ml ?)
 
-Abandonner les ref : 
-  - dans algo_wl << done
-  - dans algo_dpll
-  - dans ...
-  
-Gestion du dépôt git : j'ai vu la "branche" que tu as créée pour le premier rendu (et j'ai ajouté une branche pour le rendu 1 bis), mais il ne faudrait pas
-plutôt utiliser l'outil "releases" ?
 
-On peut aussi mais là c'était juste pour garder une trace facilement accessible à certains points du rendu. Si on finit par battre minisat on pourra faire une vraie release :)
 
-Implémenter l'amélioration de WL (cf diapos)
+
+

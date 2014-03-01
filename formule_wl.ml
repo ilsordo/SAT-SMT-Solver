@@ -8,12 +8,12 @@ exception WLs_found of (literal*literal)
 
 exception WL_found of literal
 
-type wl_update = WL_Conflit | WL_New | WL_Assign of literal | WL_Nothing
+type wl_update = WL_Conflit | WL_New of literal | WL_Assign of literal | WL_Nothing
 
-(* ces types indiquent ce qui se passe lorsqu'on essaye de surveiller un nouveau littéral : 
-      WL_Conflit : tous les littéraux de la clause sont à vide
-      WL_New : un nouveau littéral a été trouvée et la surveillance a pu être mise en place
-      WL_Assign l : le littéral doit subire une assignation (seul littéral non nul de la clause)
+(* ces types indiquent ce qui se passe lorsqu'on essaye de déplacer les jumelles dans une clause : 
+      WL_Conflit : tous les littéraux de la clause sont à faux
+      WL_New : un nouveau littéral a été trouvé et la surveillance a été déplacée dessus
+      WL_Assign l : le littéral l doit subir une assignation (seul littéral non nul de la clause)
       WL_Nothing : on surveille déjà un littéral à vrai dans la clause, rien à faire
 *)
 
@@ -41,7 +41,7 @@ object(self)
 
 
 (* init = prétraitement : enlève tautologies + détecte clauses singletons et fait des assignations en conséquence
-    ATTENTION : init ne détecte aucune clause vide (mais peut en créer). Il faudra s'assurer de l'abscence de clauses vides par la suite *)
+    ATTENTION : init ne détecte aucune clause vide (mais peut en créer). Il faudra s'assurer de l'absence de clauses vides par la suite *)
   method init n clauses_init =
    for i=1 to n do (* on remplie wl_pos et wl_neg par du vide *)
       wl_pos#set i (new clauseset);
@@ -65,7 +65,7 @@ object(self)
       match occ#find var with
         | None -> new clauseset
         | Some occurences -> occurences in
-    let rec prepare () = (* trouve les clauses singletons, effectues les assignations/changement de clauses qui en découlent *)
+    let rec prepare () = (* trouve les clauses singletons, effectue les assignations/changement de clauses qui en découlent *)
       let res = 
         try 
           clauses#iter (fun c -> match c#singleton with Some s -> raise (Found s) | None -> ());
@@ -106,9 +106,9 @@ object(self)
 
 
 
-  (********* Les 2 méthodes le plus utiles au cours de l'algo :   *********)
+  (********* Les 2 méthodes le plus utiles au cours de l'algo WL :   *********)
 
-  method watch c l l_former = (* on veut que le litteral l surveille la clause c, et que l_former stop sa surveillance sur c *)
+  method watch c l l_former = (* on veut que le littéral l surveille la clause c, et que l_former stop sa surveillance sur c *)
     (self#get_wl l)#add c; (* l sait qu'il surveille c *)
     let (wl1,wl2) = c#get_wl in
       if l_former = wl1 then
@@ -123,42 +123,36 @@ object(self)
         end
 
 
-  method update_clause c wl = (* on doit quitter la surveillance du literal wl dans la clause c car un pari vient de le rendre faux // on présuppose wl faux dans c *)
-    debug 3 "Demande de quitter (%B, var %d) dans clause %d" (fst wl) (snd wl) (c#get_id);
-    let (wl1,wl2) = c#get_wl in (* on récupère les deux littéraux actuellemnt surveillés *)
-    let (b0,v0) = if wl=wl1 then wl2 else wl1 in (* le litteral qu'on veut conserver *)
-    match super#get_pari v0 with (* on regarde si le litteral qu'on garde est à vrai,faux ou indéterminé *)
+  method update_clause c wl = (* on doit quitter la surveillance du littéral wl dans la clause c car un pari vient de le rendre faux // on présuppose wl faux dans c *)
+    let (wl1,wl2) = c#get_wl in (* on récupère les deux littéraux actuellement surveillés dans c *)
+    let (b0,v0) = if wl=wl1 then wl2 else wl1 in (* le littéral qu'on veut conserver *)
+    match super#get_pari v0 with (* on regarde si le littéral qu'on garde est à vrai, faux ou indéterminé *)
       | None -> 
           begin
             try
               c#get_vpos#iter (fun var -> if (var<>v0 && super#get_pari var <> Some false) then raise (WL_found (true,var)) else ()) ;
               c#get_vneg#iter (fun var -> if (var<>v0 && super#get_pari var <> Some true) then raise (WL_found (false,var)) else ()) ;
-              debug 3 "Assignement %B forcé sur variable %d dans clause %d" b0 v0 (c#get_id);
-              WL_Assign (b0,v0) (* on ne peut pas déplacer la jumelle mais on peut assigner l'autre literal *)
+              WL_Assign (b0,v0) (* on ne peut pas déplacer la jumelle mais on peut assigner l'autre littéral *)
             with
               | WL_found l -> 
-                  debug 3 "Surveillance établie sur (%B, var %d) dans clause %d" (fst l) (snd l) (c#get_id); 
                   self#watch c l wl ; 
-                  WL_New (* on peut déplacer la jumelle *) 
+                  WL_New l (* on peut déplacer la jumelle *) 
           end
       | Some b ->
           begin
            if (b=b0) then (* alors (b0,v0) est vrai dans c *) 
               begin
-                debug 3 "Surveillance maintenue (cause : %B, var %d dans clause %d)" (fst wl) (snd wl) (c#get_id);
-                WL_Nothing (* on ne peut pas déplacer la jumelle mais l'autre literal est déjà vrai *)
+                WL_Nothing (* on ne peut pas déplacer la jumelle mais l'autre littéral est déjà vrai *)
               end  
            else (* (b0,v0) est faux dans c *)
               try
                 c#get_vpos#iter (fun var -> if (var<>v0 && super#get_pari var <> Some false) then raise (WL_found (true,var)) else ());
                 c#get_vneg#iter (fun var -> if (var<>v0 && super#get_pari var <> Some true) then raise (WL_found (false,var)) else ());
-                debug 3 "Conflit détecté dans clause : tout est faux (cause : %B, var %d dans clause %d)" (fst wl) (snd wl) (c#get_id);
-                WL_Conflit (* on ne peut pas déplacer la jumelle et l'autre literal est faux*)
+                WL_Conflit (* on ne peut pas déplacer la jumelle et l'autre littéral est faux*)
               with
                 | WL_found l -> 
-                    debug 3 "Surveillance établie sur (%B, var %d) dans clause %d" (fst l) (snd l) (c#get_id); 
                     self#watch c l wl; 
-                    WL_New (* on peut déplacer la jumelle *)
+                    WL_New l (* on peut déplacer la jumelle *)
           end
 
 

@@ -19,12 +19,6 @@ Pour exécuter le programme sur un fichier ex.cnf, entrer :
 
     ./resol ex.cnf 
 
-Pour afficher les informations sur le déroulement de l'algorithme :
-
-    ./resol -d n ex.cnf
-
-où d est un entier positif définissant le niveau de détail de la description (plus d est grand, plus il y aura d'informations)
-
 Pour générer une formule de k clauses de taille l avec n variables dans out.cnf :
 
     ./gen n l k > out.cnf
@@ -38,6 +32,35 @@ Pour utiliser l'algorithme watched literals :
     ./resol-wl ex.cnf
 
 Note: resol-wl accepte les mêmes options que resol
+
+Debuggage et exécution pas à pas
+================================
+
+Le debuggage est facilité par l'ajout au sein du code de lignes de la forme : 
+
+    debug 2 "Propagation : setting %d to %B" var b;
+
+Ceci à pour conséquence de définir un message d'affichage de profondeur 2. 
+
+Lors de l'exécution du code, il est possible d'activer l'affichage des messages de debuggage, jusqu'à une certaine profondeur.
+Par exemple, pour afficher l'ensemble des messages de debuggage de profondeur inférieure ou égale à 2, entrer : 
+
+    ./resol ex.cnf -d 2
+
+Dans l'exemple précédent, le debuggage peut mener par exemple à l'affichage de "Propagation : setting 3 to true".
+
+Il est aussi possible de définir une exécution pas à pas de l'algorithme en spécifiant :
+
+    debug 2 ~stops:true "Propagation : setting %d to %B" var b;
+
+La commande suivante aura alors pour conséquence d'afficher les messages de debuggage de profondeur au plus 3, et de stopper l'algorithme à chaque message de profondeur 3 rencontré : 
+
+    ./resol ex.cnf -d 3 -b 2
+    
+Enfin, lorsque le programme est exécuté avec une option de debuggage, des statistiques élémentaires sont fournies :
+  - Nombre de paris effectués au cours de l'exécution
+  - Nombre de conflits rencontrés
+  - Check : vérifie si l'assignation des variables renvoyé en résultat (dans le cas SATISFIABLE) est correcte. La réponse "Check : false" est particulièrement inquiétante puisqu'elle indique que l'algorithme utilisé n'a pas été implémenté correctement.
 
 Structures de données
 =====================

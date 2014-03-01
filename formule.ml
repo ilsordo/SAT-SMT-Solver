@@ -76,25 +76,29 @@ end
 
 class formule =
 object (self)
-  val mutable nb_vars = 0
-  val x = ref 0 (* compteur de clause *)
+  val mutable nb_vars = 0 (* nombre de variables dans la formule *)
+  val x = ref 0 (* compteur de clauses, permet d'associer un identifiant unique à chaque clause *)
   val clauses = new clauseset (* ensemble des clauses de la formule, peut contenir des clauses cachées/visibles *)
   val paris : bool vartable = new vartable 0 (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
 
-  method private reset n =
+  method private reset n = 
     x := 0;
     nb_vars <- n;
     clauses#reset;
     paris#reset
     
-  method init n clauses_init =
+  method init n clauses_init = (* crée l'ensemble des clauses à partir d'une int list list (= liste de clauses) *)
     self#reset n;
-    List.iter (fun c -> clauses#add (new clause x c)) clauses_init;
-    clauses#iter (fun c -> if c#is_tauto then clauses#remove c) (** on peut pas le fusionner avec la ligne précédente pour éviter un parcours ?*)
+    List.iter (
+      fun c -> 
+        let c_new = (new clause x c) in 
+          if (not c_new#is_tauto) then clauses#add c_new) 
+      clauses_init
+
 
   (***)
 
-  method get_nb_vars = nb_vars
+  method get_nb_vars = nb_vars 
 
   method get_pari v = (* indique si v a subi un pari, et si oui lequel *)
     paris#find v
@@ -106,21 +110,21 @@ object (self)
   method add_clause c = (* ajoute la clause c, dans les clauses et les occurences *)
     clauses#add c
 
-  method get_clauses = clauses
+  method get_clauses = clauses (* renvoie l'ensembles des clauses de la formule *)
 
-  method set_val b v =
+  method set_val b v = (* pari la valeur b sur la variable v *)
     match paris#find v with
       | None -> paris#set v b
       | Some _ -> assert false 
 
-  method reset_val v =
+  method reset_val v = (* annule le pari sur la variable v *)
     match paris#find v with
       | None -> assert false
       | Some b -> paris#remove v
 
   (******)
 
-  method find_singleton = (* renvoie la liste des (var,b) sans pari qui forment une clause singleton *)
+  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *)
     try 
       clauses#iter (fun c -> 
         match c#singleton with  
@@ -131,9 +135,9 @@ object (self)
     with 
       | Found x -> Some x
 
-  method check_empty_clause = clauses#iter (fun c -> if c#is_empty then raise Clause_vide)
+  method check_empty_clause = clauses#iter (fun c -> if c#is_empty then raise Clause_vide) (* indique s'il existe une clause vide *)
 
-  method eval =
+  method eval = (* indique si l'ensemble des paris actuels rendent la formule vraie *)
     let aux b v =
       match paris#find v with
         | Some b' when b=b' -> raise Exit

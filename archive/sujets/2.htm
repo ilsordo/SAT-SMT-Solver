@@ -1,0 +1,163 @@
+
+<!-- saved from url=(0146)http://webcache.googleusercontent.com/search?q=cache:cld8_rLgKE0J:perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu2.pdf+&cd=3&hl=fr&ct=clnk&gl=fr -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css"></style></head><body bgcolor="#ffffff" vlink="blue" link="blue"><div style="background:#fff;border:1px solid #999;margin:-1px -1px 0;padding:0;"><div style="background:#ddd;border:1px solid #999;color:#000;font:13px arial,sans-serif;font-weight:normal;margin:12px;padding:8px;text-align:left">Ceci est la version HTML du fichier <a href="http://perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu2.pdf" style="text-decoration:underline;color:#00c">http://perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu2.pdf</a>.<br> Lorsque <b><font color="#0039b6">G</font> <font color="#c41200">o</font> <font color="#f3c518">o</font> <font color="#0039b6">g</font> <font color="#30a72f">l</font> <font color="#c41200">e</font></b> explore le Web, il crée automatiquement une version HTML des documents récupérés.</div></div><div style="position:relative">
+
+
+
+<meta name="Creator" content="LaTeX with hyperref package">
+<meta name="Producer" content="pdfTeX-1.40.10">
+<meta name="CreationDate" content="D:20130311072232+01&#39;00&#39;">
+<meta name="ModDate" content="D:20130311072232+01&#39;00&#39;">
+<meta name="Fullbanner" content="This is pdfTeX, Version 3.1415926-1.40.10-2.2 (TeX Live 2009/Debian) kpathsea version 5.0.0">
+<title>Projet 2 L3IF — Deuxi`eme rendu 1 Diverses versions du solveur: heuristiques 2 Performances</title>
+
+<table border="0" width="100%"><tbody><tr><td bgcolor="eeeeee" align="right"><font face="arial,sans-serif"><a name="1"><b>Page 1</b></a></font></td></tr></tbody></table><font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:283;left:302"><nobr>Projet 2 L3IF — Deuxi`eme rendu</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:314;left:281"><nobr>`a faire en binôme, `a rendre pour le 26/3/2013 `a 23h59</nobr></div>
+<div style="position:absolute;top:332;left:111"><nobr>envoyez une archive qui compile `a benjamin.girault@ens-lyon.fr et daniel.hirschkoff@ens-lyon.fr</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:377;left:108"><nobr>1 Diverses versions du solveur: heuristiques</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:415;left:108"><nobr>Le solveur en lui-même devra se comporter en entrée et en sortie comme lors du DM et du rendu 1 (vous</nobr></div>
+<div style="position:absolute;top:432;left:108"><nobr>pouvez prévoir des adaptations en sortie pour traiter la partie 2, mais le fonctionnement “de base” devra</nobr></div>
+<div style="position:absolute;top:450;left:108"><nobr>toujours être fourni).</nobr></div>
+<div style="position:absolute;top:468;left:130"><nobr>Il faudra également qu’il soit possible, sans trop de difficulté, d’utiliser diverses versions du solveur, en</nobr></div>
+<div style="position:absolute;top:486;left:108"><nobr>fonction des optimisations que vous aurez codées (voir ci-dessous). Vous pourrez pour ce faire soit gérer</nobr></div>
+<div style="position:absolute;top:504;left:108"><nobr>des options que l’on peut entrer en ligne de commande, soit engendrer (un tant soit peu élégamment, en</nobr></div>
+<div style="position:absolute;top:522;left:108"><nobr>particulier en évitant de dupliquer maladroitement de grandes parties du code) des exécutables différents.</nobr></div>
+<div style="position:absolute;top:540;left:130"><nobr>Le solveur devra se décliner en plusieurs versions:</nobr></div>
+<div style="position:absolute;top:569;left:130"><nobr>• La version du rendu 1, éventuellement nettoyée de bugs que vous auriez découverts apr`es le premier</nobr></div>
+<div style="position:absolute;top:588;left:145"><nobr>rendu (mais sans améliorations significatives concernant l’efficacité).</nobr></div>
+<div style="position:absolute;top:612;left:145"><nobr>Pour les binômes “avancés”, le rendu 1 fournit deux versions, avec et sans watched literals.</nobr></div>
+<div style="position:absolute;top:641;left:130"><nobr>• Diverses versions en plus.</nobr></div>
+<div style="position:absolute;top:672;left:162"><nobr>– Pour les avancés. Les trois heuristiques vues en cours (RAND, MOMS, DLIS).</nobr></div>
+<div style="position:absolute;top:696;left:162"><nobr>– Pour les non avancés. Au moins RAND et une “optimisation” du solveur, `a choisir entre les</nobr></div>
+<div style="position:absolute;top:713;left:178"><nobr>Watched Literals et une heuristique autre que RAND (MOMS ou DLIS).</nobr></div>
+<div style="position:absolute;top:742;left:130"><nobr>• Si de votre propre chef vous implémentez d’autres améliorations, elles sont évidemment les bienvenues.</nobr></div>
+<div style="position:absolute;top:769;left:130"><nobr>`A noter au passage qu’il est demandé que RAND soit dynamique: il ne s’agit pas de permuter aléatoirement</nobr></div>
+<div style="position:absolute;top:791;left:108"><nobr>l’entrée avant de faire tourner le programme qui parie sur la prochaine variable non assignée, mais bien de</nobr></div>
+<div style="position:absolute;top:809;left:108"><nobr>parier au hasard “en cours de route”.</nobr></div>
+<div style="position:absolute;top:827;left:130"><nobr>Bien entendu, toutes les versions fournies du solveur devront être testées et renvoyer des résultats corrects.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:872;left:108"><nobr>2 Performances</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:15px;font-family:Times">
+<div style="position:absolute;top:910;left:108"><nobr>2.1 Moulinettes pour les tests</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:940;left:108"><nobr>Une partie importante de ce rendu porte sur l’évaluation de l’efficacité de votre programme (pas nécessairement</nobr></div>
+<div style="position:absolute;top:958;left:108"><nobr>l’efficacité en elle-même). On se focalise ici sur la complexité en temps, vous pouvez également, si vous le</nobr></div>
+<div style="position:absolute;top:976;left:108"><nobr>souhaitez, traiter également la complexité en espace.</nobr></div>
+<div style="position:absolute;top:994;left:130"><nobr>Il vous est demandé de rendre, outre le programme pour résoudre SAT (dans différentes versions), de</nobr></div>
+<div style="position:absolute;top:1011;left:108"><nobr>petits programmes permettant de faire tourner des tests, ainsi que les résultats de ces tests, sous forme de</nobr></div>
+<div style="position:absolute;top:1029;left:108"><nobr>courbes.</nobr></div>
+<div style="position:absolute;top:1047;left:130"><nobr>Pour fabriquer ces “moulinettes” de tests, vous pouvez:</nobr></div>
+<div style="position:absolute;top:1076;left:130"><nobr>• soit prendre comme point de départ l’exemple minimal qui est proposé `a partir de la page www du</nobr></div>
+<div style="position:absolute;top:1095;left:145"><nobr>cours (script bash / génération de fichier gnuplot).</nobr></div>
+<div style="position:absolute;top:1124;left:130"><nobr>• soit coder tout ou partie de cette composante de tests dans le langage de programmation que vous</nobr></div>
+<div style="position:absolute;top:1143;left:145"><nobr>utilisez pour votre solveur SAT (autrement dit étendre le programme en ajoutant des fonctions qui</nobr></div>
+<div style="position:absolute;top:1161;left:145"><nobr>appellent le solveur et stockent les observations dans des fichiers — ne vous amusez pas `a reprogrammer</nobr></div>
+<div style="position:absolute;top:1180;left:145"><nobr>gnuplot pour le tracé des courbes!).</nobr></div>
+<div style="position:absolute;top:1245;left:455"><nobr>1</nobr></div>
+</span></font>
+
+<div style="position:absolute;top:1363;left:0"><hr><table border="0" width="100%"><tbody><tr><td bgcolor="eeeeee" align="right"><font face="arial,sans-serif"><a name="2"><b>Page 2</b></a></font></td></tr></tbody></table></div><font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1476;left:130"><nobr>Il faudra dans votre rendu:</nobr></div>
+<div style="position:absolute;top:1505;left:130"><nobr>• expliquer dans le fichier README comment sont fabriquées les moulinettes, et comment on peut s’en</nobr></div>
+<div style="position:absolute;top:1523;left:145"><nobr>servir;</nobr></div>
+<div style="position:absolute;top:1552;left:130"><nobr>• présenter in fine des courbes (gnuplot permet d’engendrer du pdf) accompagnant vos réponses pour</nobr></div>
+<div style="position:absolute;top:1571;left:145"><nobr>les deux parties qui suivent (<a href="http://webcache.googleusercontent.com/search?q=cache:cld8_rLgKE0J:perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu2.pdf+&cd=3&hl=fr&ct=clnk&gl=fr#2">2.2 </a>et 2.3).</nobr></div>
+<div style="position:absolute;top:1601;left:108"><nobr>Vous trouverez en ligne des pages de tutoriaux pour bash (par exemple <a href="http://www.tldp.org/LDP/Bash-Beginners-Guide/html/">ceci</a>) et gnuplot (par exemple cela).</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:15px;font-family:Times">
+<div style="position:absolute;top:1641;left:108"><nobr>2.2 Exploration de Random k-SAT</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1671;left:108"><nobr>Dans un premier temps, il vous est demandé d’engendrer des formules en forme normale conjonctive compor-</nobr></div>
+<div style="position:absolute;top:1688;left:108"><nobr>tant n variables, avec m clauses (engendrées indépendamment) ayant toutes le même nombre k de litéraux.</nobr></div>
+<div style="position:absolute;top:1706;left:108"><nobr>Pour chaque clause, on tire au hasard uniformément k variables distinctes, et on lance une pi`ece pour chaque</nobr></div>
+<div style="position:absolute;top:1724;left:108"><nobr>litéral pour savoir s’il est nié<a href="http://webcache.googleusercontent.com/search?q=cache:cld8_rLgKE0J:perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu2.pdf+&cd=3&hl=fr&ct=clnk&gl=fr#2"></a><font style="font-size:8px"><a href="http://webcache.googleusercontent.com/search?q=cache:cld8_rLgKE0J:perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu2.pdf+&cd=3&hl=fr&ct=clnk&gl=fr#2">1</a></font><a href="http://webcache.googleusercontent.com/search?q=cache:cld8_rLgKE0J:perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu2.pdf+&cd=3&hl=fr&ct=clnk&gl=fr#2"></a>.</nobr></div>
+<div style="position:absolute;top:1742;left:130"><nobr>On se focalisera sur le cas k = 3. Tracez différentes courbes, chacune `a n fixé, o`u vous aurez en abscisses le</nobr></div>
+<div style="position:absolute;top:1760;left:108"><nobr>rapport (nombre de clauses sur nombre de variables, soit m/n, entre 2 et 10), et en ordonnées quelque chose</nobr></div>
+<div style="position:absolute;top:1778;left:108"><nobr>qui traduit la complexité en temps. Pour évaluer cette quantité, vous pouvez comparer les résultats obtenus</nobr></div>
+<div style="position:absolute;top:1796;left:108"><nobr>en mesurant le temps d’exécution, et/ou le nombre de paris faits par l’algorithme DPLL avant d’aboutir `a</nobr></div>
+<div style="position:absolute;top:1814;left:108"><nobr>la réponse.</nobr></div>
+<div style="position:absolute;top:1832;left:130"><nobr>On vous demande de faire tourner les tests dans deux situations:</nobr></div>
+<div style="position:absolute;top:1861;left:130"><nobr>• avec la version la plus efficace de votre solveur;</nobr></div>
+<div style="position:absolute;top:1891;left:130"><nobr>• avec minisat (disponible sur les machines des salles libre-service de l’ENS — ici vous pourrez ne</nobr></div>
+<div style="position:absolute;top:1910;left:145"><nobr>mesurer que le temps d’exécution pour évaluer la complexité en temps).</nobr></div>
+<div style="position:absolute;top:1936;left:108"><nobr>`A chaque fois, il ne faut pas se contenter d’un seul test pour chaque jeu de param`etres, mais faire tourner</nobr></div>
+<div style="position:absolute;top:1957;left:108"><nobr>plusieurs tests et calculer une moyenne.</nobr></div>
+<div style="position:absolute;top:1975;left:130"><nobr>Comme indiqué `a la partie 2<a href="http://webcache.googleusercontent.com/search?q=cache:cld8_rLgKE0J:perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu2.pdf+&cd=3&hl=fr&ct=clnk&gl=fr#1">.1,</a> il faudra également que tout cela soit reproductible facilement par les</nobr></div>
+<div style="position:absolute;top:1993;left:108"><nobr>encadrants du cours, autrement dit que vous vous serviez de scripts ou de programmes pour engendrer les</nobr></div>
+<div style="position:absolute;top:2011;left:108"><nobr>tests, et que vous expliquiez clairement dans le README comment rejouer vos expériences.</nobr></div>
+<div style="position:absolute;top:2029;left:130"><nobr>Vous pourrez trouver en ligne, par exemple i<a href="https://ece.uwaterloo.ca/~vganesh/TEACHING/W2013/SATSMT/SATSolvers-Survey.pdf">ci,</a> Section 2.3.1 (pages 21-23) une idée de ce `a quoi on peut</nobr></div>
+<div style="position:absolute;top:2047;left:108"><nobr>s’attendre.</nobr></div>
+<div style="position:absolute;top:2070;left:130"><nobr>Si vous avez le temps, vous pourrez également faire le même type d’exploration pour k = 3 (une fois que</nobr></div>
+<div style="position:absolute;top:2087;left:108"><nobr>les moulinettes sont en place et marchent, cela ne devrait pas être tr`es compliqué).</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:15px;font-family:Times">
+<div style="position:absolute;top:2127;left:108"><nobr>2.3 La vie de votre solveur</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:2157;left:108"><nobr>On vous demande également de faire tourner des tests pour comparer l’efficacité de diverses versions de</nobr></div>
+<div style="position:absolute;top:2175;left:108"><nobr>votre solveur. `A vous de choisir des jeux de tests que vous jugez significatifs, d’écrire les moulinettes idoines,</nobr></div>
+<div style="position:absolute;top:2193;left:108"><nobr>et de documenter les comparaisons que vous avez pu faire. La réflexion sur la construction des jeux de</nobr></div>
+<div style="position:absolute;top:2211;left:108"><nobr>tests est importante — typiquement, vous devrez vous poser des questions comme “quel genre de clauses est</nobr></div>
+<div style="position:absolute;top:2229;left:108"><nobr>susceptible d’avantager/de faire souffrir telle heuristique?”.</nobr></div>
+<div style="position:absolute;top:2247;left:130"><nobr>N’hésitez pas `a être généreux en termes de versions différentes de votre solveur: avec ou sans l’heuristique</nobr></div>
+<div style="position:absolute;top:2264;left:108"><nobr>machin, et avec ou sans watched literals, cela donne 4 versions.</nobr></div>
+</span></font>
+<font size="2" face="Times"><span style="font-size:6px;font-family:Times">
+<div style="position:absolute;top:2291;left:125"><nobr>1<font style="font-size:9px">Vous pouvez si vous le souhaitez consulter<a href="http://www.cs.ubc.ca/~hoos/SATLIB/Benchmarks/SAT/RND3SAT/descr.html"> “Uniform Random 3-Sat” (a</a>vec une définition lég`erement différente) — mais il</font></nobr></div>
+</span></font>
+<font size="2" face="Times"><span style="font-size:9px;font-family:Times">
+<div style="position:absolute;top:2307;left:108"><nobr>vous est demandé d’engendrer vous-mêmes vos clauses.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:2433;left:455"><nobr>2</nobr></div>
+</span></font>
+
+<div style="position:absolute;top:2551;left:0"><hr><table border="0" width="100%"><tbody><tr><td bgcolor="eeeeee" align="right"><font face="arial,sans-serif"><a name="3"><b>Page 3</b></a></font></td></tr></tbody></table></div><font size="3" face="Times"><span style="font-size:15px;font-family:Times">
+<div style="position:absolute;top:2661;left:108"><nobr>2.4 Conclusions pleines de sagesse</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:2691;left:108"><nobr>Dans le fichier README, ou dans un fichier `a part (auquel cas mentionnez-le dans le README!), vous col-</nobr></div>
+<div style="position:absolute;top:2709;left:108"><nobr>lecterez les observations que vous pouvez faire sur les expériences menées en traitant les questions proposées</nobr></div>
+<div style="position:absolute;top:2727;left:108"><nobr>dans cette partie <a href="http://webcache.googleusercontent.com/search?q=cache:cld8_rLgKE0J:perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu2.pdf+&cd=3&hl=fr&ct=clnk&gl=fr#1">2</a>. Vous expliquerez vos choix, les difficultés que vous avez rencontrées, et des hypoth`eses</nobr></div>
+<div style="position:absolute;top:2745;left:108"><nobr>permettant d’expliquer d’éventuelles sources d’inefficacité.</nobr></div>
+<div style="position:absolute;top:2763;left:130"><nobr>Bien entendu, en fonction de l’efficacité de votre solveur, vous aurez plus ou moins de latitude pour</nobr></div>
+<div style="position:absolute;top:2781;left:108"><nobr>explorer des jeux de tests étendus et variés. Il vous est néanmoins demandé de calibrer vos expériences de</nobr></div>
+<div style="position:absolute;top:2799;left:108"><nobr>façon `a pouvoir “observer” quelque chose de pertinent (il n’est pas envisageable que votre programme ne</nobr></div>
+<div style="position:absolute;top:2817;left:108"><nobr>marche uniquement que sur des probl`emes `a deux clauses de deux litéraux chacune).</nobr></div>
+<div style="position:absolute;top:2839;left:108"><nobr>Une remarque importante: les capacités des cerveaux des encadrants du cours sont telles qu’on ne sait pas</nobr></div>
+<div style="position:absolute;top:2857;left:108"><nobr>regarder plus de 12 courbes. Le travail d’analyse de l’efficacité est aussi un travail de synth`ese, et nous ne</nobr></div>
+<div style="position:absolute;top:2875;left:108"><nobr>souhaitons pas recevoir les résultats de 100 expériences bruts de décoffrage.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:2920;left:108"><nobr>3 Une ”check list” pour votre rendu</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:2956;left:130"><nobr>• Une archive envoyée `a l’heure aux deux encadrants, avec si possible un nom significatif.</nobr></div>
+<div style="position:absolute;top:2986;left:130"><nobr>• C’est bien la derni`ere version du programme que vous nous envoyez.</nobr></div>
+<div style="position:absolute;top:3016;left:130"><nobr>• C¸a respecte les consignes du rendu.</nobr></div>
+<div style="position:absolute;top:3046;left:130"><nobr>• C¸a compile (sur votre ordinateur et sur les machines des salles libre-service).</nobr></div>
+<div style="position:absolute;top:3076;left:130"><nobr>• Ce fut testé.</nobr></div>
+<div style="position:absolute;top:3106;left:130"><nobr>• Un fichier README contient les explications</nobr></div>
+<div style="position:absolute;top:3136;left:162"><nobr>– sur l’utilisation de vos programmes (comment les exécuter, comment récupérer leurs sorties);</nobr></div>
+<div style="position:absolute;top:3160;left:162"><nobr>– sur les choix d’implémentation importants, et sur l’organisation du code;</nobr></div>
+<div style="position:absolute;top:3184;left:162"><nobr>– sur la répartition (indicative, nous comprenons bien qu’au bout d’un certain temps vous travaillez</nobr></div>
+<div style="position:absolute;top:3202;left:178"><nobr>`a deux sur les mêmes fichiers) du travail dans les fichiers (qui a travaillé le plus sur quels fichiers).</nobr></div>
+<div style="position:absolute;top:3226;left:162"><nobr>– sur d’autres remarques que vous pouvez faire.</nobr></div>
+<div style="position:absolute;top:3255;left:130"><nobr>• Le code est structuré de mani`ere lisible, et commenté.</nobr></div>
+<div style="position:absolute;top:3621;left:455"><nobr>3</nobr></div>
+</span></font>
+
+
+</div></body></html>

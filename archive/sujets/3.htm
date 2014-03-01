@@ -1,0 +1,115 @@
+
+<!-- saved from url=(0146)http://webcache.googleusercontent.com/search?q=cache:wF2UoAHsfhoJ:perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu3.pdf+&cd=2&hl=fr&ct=clnk&gl=fr -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css"></style></head><body bgcolor="#ffffff" vlink="blue" link="blue"><div style="background:#fff;border:1px solid #999;margin:-1px -1px 0;padding:0;"><div style="background:#ddd;border:1px solid #999;color:#000;font:13px arial,sans-serif;font-weight:normal;margin:12px;padding:8px;text-align:left">Ceci est la version HTML du fichier <a href="http://perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu3.pdf" style="text-decoration:underline;color:#00c">http://perso.ens-lyon.fr/daniel.hirschkoff/P2/docs/rendu3.pdf</a>.<br> Lorsque <b><font color="#0039b6">G</font> <font color="#c41200">o</font> <font color="#f3c518">o</font> <font color="#0039b6">g</font> <font color="#30a72f">l</font> <font color="#c41200">e</font></b> explore le Web, il crée automatiquement une version HTML des documents récupérés.</div></div><div style="position:relative">
+
+
+
+<meta name="Creator" content="LaTeX with hyperref package">
+<meta name="Producer" content="pdfTeX-1.40.10">
+<meta name="CreationDate" content="D:20130328162014+01&#39;00&#39;">
+<meta name="ModDate" content="D:20130328162014+01&#39;00&#39;">
+<meta name="Fullbanner" content="This is pdfTeX, Version 3.1415926-1.40.10-2.2 (TeX Live 2009/Debian) kpathsea version 5.0.0">
+<title>Projet 2 L3IF — Troisi`eme rendu 1 Clause learning 2 Expliquer les conflits</title>
+
+<table border="0" width="100%"><tbody><tr><td bgcolor="eeeeee" align="right"><font face="arial,sans-serif"><a name="1"><b>Page 1</b></a></font></td></tr></tbody></table><font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:283;left:303"><nobr>Projet 2 L3IF — Troisi`eme rendu</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:314;left:281"><nobr>`a faire en binôme, `a rendre pour le 16/4/2013 `a 23h59</nobr></div>
+<div style="position:absolute;top:332;left:111"><nobr>envoyez une archive qui compile `a benjamin.girault@ens-lyon.fr et daniel.hirschkoff@ens-lyon.fr</nobr></div>
+<div style="position:absolute;top:365;left:130"><nobr>Dans ce troisi`eme rendu, on raffine encore l’algorithme DPLL, en ajoutant l’apprentissage de clauses.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:410;left:108"><nobr>1 Clause learning</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:447;left:108"><nobr>Enrichissez votre programme avec l’apprentissage de clauses, en modifiant la façon dont le backtrack est fait.</nobr></div>
+<div style="position:absolute;top:465;left:108"><nobr>Autrement dit, plutôt que de systématiquement revenir sur le dernier pari qui a été fait, analysez la raison</nobr></div>
+<div style="position:absolute;top:483;left:108"><nobr>du conflit et ajoutez une clause `a chaque backtrack, en retournant en arri`ere vers un point judicieux (pas</nobr></div>
+<div style="position:absolute;top:501;left:108"><nobr>nécessairement le dernier pari).</nobr></div>
+<div style="position:absolute;top:519;left:130"><nobr>Il faudra que les améliorations que vous aviez codées pour les rendus précédents continuent de marcher</nobr></div>
+<div style="position:absolute;top:537;left:108"><nobr>avec cet enrichissement, ce qui pourra nécessiter de reprendre en partie l’organisation de votre code.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:582;left:108"><nobr>2 Expliquer les conflits</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:619;left:108"><nobr>Votre programme devra donner la possibilité de “documenter” l’ajout de clauses (ce qui pourra d’ailleurs</nobr></div>
+<div style="position:absolute;top:637;left:108"><nobr>s’avérer utile en cours de développement, pour trouver des bugs), et ceci suivant deux déclinaisons:</nobr></div>
+<div style="position:absolute;top:670;left:126"><nobr>1. Il faudra d’une part que votre programme propose un minimum d’interaction pour pouvoir visualiser</nobr></div>
+<div style="position:absolute;top:688;left:145"><nobr>le résultat de l’analyse lors des backtracks. Plus précisément:</nobr></div>
+<div style="position:absolute;top:717;left:163"><nobr>• on lance le programme, il s’arrête au premier conflit, et il affiche la clause qui est ajoutée lors de</nobr></div>
+<div style="position:absolute;top:736;left:178"><nobr>ce conflit;</nobr></div>
+<div style="position:absolute;top:759;left:163"><nobr>• on peut alors taper</nobr></div>
+<div style="position:absolute;top:784;left:190"><nobr>– ”g” pour engendrer un fichier dot décrivant le graphe des conflits;</nobr></div>
+<div style="position:absolute;top:805;left:190"><nobr>– ”r” pour afficher la preuve par résolution qui aboutit `a la clause qui est ajoutée lors du conflit</nobr></div>
+<div style="position:absolute;top:822;left:206"><nobr>courant;</nobr></div>
+<div style="position:absolute;top:843;left:190"><nobr>– ”c” pour continuer jusqu’au prochain conflit (et la saisie au clavier recommence);</nobr></div>
+<div style="position:absolute;top:864;left:190"><nobr>– ”s 12” pour continuer et s’arrêter 12 conflits plus loin;</nobr></div>
+<div style="position:absolute;top:885;left:190"><nobr>– ”t” pour terminer l’exécution sans s’arrêter.</nobr></div>
+<div style="position:absolute;top:915;left:145"><nobr>Pour la commande g, il faudra engendrer un fichier au format dot/graphviz. Voir ic<a href="http://www.graphviz.org/Documentation/dotguide.pdf">i, </a>et le petit</nobr></div>
+<div style="position:absolute;top:933;left:145"><nobr>exemple disponible depuis la page www du cours. Le graphe devra mettre en évidence les nœuds du</nobr></div>
+<div style="position:absolute;top:951;left:145"><nobr>graphe qui sont dans le niveau de décision courant, ainsi que ceux qui font partie de l’ensemble “UIP”</nobr></div>
+<div style="position:absolute;top:969;left:145"><nobr>choisi, afin que la clause nouvellement engendrée soit facilement visible.</nobr></div>
+<div style="position:absolute;top:993;left:145"><nobr>Pour la commande r, il faudra engendrer un fichier L<font style="font-size:8px">A</font>TEX (un exemple se trouve sur la page du cours).</nobr></div>
+<div style="position:absolute;top:1017;left:145"><nobr>Il faudra également mettre un “interrupteur” (switch) permettant de désactiver le mode interactif, qui</nobr></div>
+<div style="position:absolute;top:1035;left:145"><nobr>peut être fastidieux `a manipuler. Cela peut se faire par exemple par l’intermédiaire d’une option de</nobr></div>
+<div style="position:absolute;top:1053;left:145"><nobr>votre exécutable.</nobr></div>
+<div style="position:absolute;top:1083;left:126"><nobr>2. D’autre part, `a l’issue d’une exécution, un fichier de documentation sera produit (comme ci-dessus,</nobr></div>
+<div style="position:absolute;top:1100;left:145"><nobr>mettez un “interrupteur” afin de pouvoir désactiver la génération de ce fichier de documentation).</nobr></div>
+<div style="position:absolute;top:1118;left:145"><nobr>Ce fichier permettra de reconstruire l’information suivante pour l’ensemble des backtracks qui ont été</nobr></div>
+<div style="position:absolute;top:1136;left:145"><nobr>effectués lors de l’exécution:</nobr></div>
+<div style="position:absolute;top:1165;left:163"><nobr>• quel était le graphe des conflits lors de ce backtrack;</nobr></div>
+<div style="position:absolute;top:1189;left:163"><nobr>• quelle clause a été ajoutée.</nobr></div>
+<div style="position:absolute;top:1245;left:455"><nobr>1</nobr></div>
+</span></font>
+
+<div style="position:absolute;top:1363;left:0"><hr><table border="0" width="100%"><tbody><tr><td bgcolor="eeeeee" align="right"><font face="arial,sans-serif"><a name="2"><b>Page 2</b></a></font></td></tr></tbody></table></div><font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1472;left:145"><nobr>`A vous de concevoir un format approprié (si possible, pas trop verbeux) pour le stockage de cette</nobr></div>
+<div style="position:absolute;top:1494;left:145"><nobr>information.</nobr></div>
+<div style="position:absolute;top:1514;left:147"><nobr>Écrivez un programme `a part, capable de lire ces “fichiers de documentation”, et d’afficher les mêmes</nobr></div>
+<div style="position:absolute;top:1535;left:145"><nobr>informations que ci-dessus, pour un numéro de backtrack passé en argument (on tapera typiquement</nobr></div>
+<div style="position:absolute;top:1553;left:145"><nobr>quelque chose comme “histoire documentation.txt 7” pour examiner le 7`eme backtrack).</nobr></div>
+<div style="position:absolute;top:1586;left:130"><nobr>Il est tr`es recommandé que ces deux modes d’exploration des conflits (en cours d’exécution / apr`es coup)</nobr></div>
+<div style="position:absolute;top:1604;left:108"><nobr>s’appuient sur du code en commun.</nobr></div>
+<div style="position:absolute;top:1643;left:108"><nobr>Travail `a faire, suivant les binômes. Pour tout le monde: dans votre rendu, proposez au moins un</nobr></div>
+<div style="position:absolute;top:1661;left:108"><nobr>exemple servant de support `a un “guide d’utilisation” de votre syst`eme d’exploration des conflits: on lance</nobr></div>
+<div style="position:absolute;top:1679;left:108"><nobr>le programme, on s’arrête sur tel ou tel backtrack, et on constate que la clause ajoutée est “blabla”.</nobr></div>
+<div style="position:absolute;top:1697;left:130"><nobr>Si vous n’êtes pas semi-avancés ou avancés, vous pouvez choisir entre traiter l’option g ou l’option r, dans</nobr></div>
+<div style="position:absolute;top:1715;left:108"><nobr>les deux déclinaisons du programme (version interactive, fichier de documentation). Si vous êtes semi-avancés</nobr></div>
+<div style="position:absolute;top:1733;left:108"><nobr>ou avancés, faites tout.</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:1777;left:108"><nobr>3 Expériences</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1815;left:108"><nobr>Reprenez les moulinettes du rendu numéro 2 afin de concevoir des expériences mettant en évidence</nobr></div>
+<div style="position:absolute;top:1844;left:130"><nobr>• les améliorations de performances apportées par les approches ajoutées lors de ce rendu;</nobr></div>
+<div style="position:absolute;top:1874;left:130"><nobr>• une étude de la combinaison entre apprentissage de clauses et les autres heuristiques que vous avez</nobr></div>
+<div style="position:absolute;top:1892;left:145"><nobr>implémentées précédemment (watched literals, Rand, MOMS, DLIS).</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:19px;font-family:Times">
+<div style="position:absolute;top:1937;left:108"><nobr>4 Une ”check list” pour votre rendu</nobr></div>
+</span></font>
+<font size="3" face="Times"><span style="font-size:12px;font-family:Times">
+<div style="position:absolute;top:1974;left:130"><nobr>• Une archive envoyée `a l’heure aux deux encadrants, avec un nom significatif.</nobr></div>
+<div style="position:absolute;top:2004;left:130"><nobr>• C’est bien la derni`ere version du programme que vous nous envoyez.</nobr></div>
+<div style="position:absolute;top:2034;left:130"><nobr>• C¸a respecte les consignes du rendu.</nobr></div>
+<div style="position:absolute;top:2063;left:130"><nobr>• C¸a compile (sur votre ordinateur et sur les machines des salles libre-service).</nobr></div>
+<div style="position:absolute;top:2093;left:130"><nobr>• Ce fut testé.</nobr></div>
+<div style="position:absolute;top:2123;left:130"><nobr>• Un fichier README contient les explications</nobr></div>
+<div style="position:absolute;top:2154;left:162"><nobr>– sur l’utilisation de vos programmes (comment les exécuter, comment récupérer leurs sorties);</nobr></div>
+<div style="position:absolute;top:2178;left:162"><nobr>– sur les choix d’implémentation importants, et sur l’organisation du code;</nobr></div>
+<div style="position:absolute;top:2199;left:178"><nobr>en particulier, expliquez comment vous avez dû modifier votre code pour prendre en compte</nobr></div>
+<div style="position:absolute;top:2222;left:191"><nobr>∗ le fait que l’on peut ajouter des clauses en cours de route;</nobr></div>
+<div style="position:absolute;top:2243;left:191"><nobr>∗ la nécessité de garder une trace de la raison pour laquelle la valeur d’un litéral a été déduite;</nobr></div>
+<div style="position:absolute;top:2268;left:162"><nobr>– sur la répartition (indicative, nous comprenons bien qu’au bout d’un certain temps vous travaillez</nobr></div>
+<div style="position:absolute;top:2285;left:178"><nobr>`a deux sur les mêmes fichiers) du travail dans les fichiers (qui a travaillé le plus sur quels fichiers).</nobr></div>
+<div style="position:absolute;top:2309;left:162"><nobr>– sur d’autres remarques que vous pouvez faire.</nobr></div>
+<div style="position:absolute;top:2338;left:130"><nobr>• Le code est structuré de mani`ere lisible, et commenté.</nobr></div>
+<div style="position:absolute;top:2433;left:455"><nobr>2</nobr></div>
+</span></font>
+
+
+</div></body></html>

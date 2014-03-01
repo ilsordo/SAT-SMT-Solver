@@ -6,20 +6,20 @@ open Debug
 
 type config = { mutable input : string option; mutable algo : int -> int list list -> answer; mutable nom_algo : string }
 
-let config = { input = None; algo = Algo_dpll.algo; nom_algo = "dpll" }
+let config = { input = None; algo = Algo_dpll.algo; nom_algo = "DPLL" }
 
 (* Utilise le module Arg pour modifier l'environnement config *)
 let parse_args () =
   let use_msg = "Usage:\n resol [file.cnf] [options]\n" in
   let parse_algo s =
     let algo = match s with
-      | "dpll" -> Algo_dpll.algo
-      | "wl" -> Algo_wl.algo 
+      | "DPLL" -> Algo_dpll.algo
+      | "WL" -> Algo_wl.algo 
     | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.algo <- algo;
     config.nom_algo <- s in
   let speclist = Arg.align [
-    ("-algo",Arg.String parse_algo,"dpll|wl");
+    ("-algo",Arg.String parse_algo,"DPLL|WL");
     ("-d",Arg.Int set_debug_level,"k Debug depth k");
     ("-b",Arg.Int set_blocking_level,"k Interaction depth k")] in
   Arg.parse speclist (fun s -> config.input <- Some s) use_msg
