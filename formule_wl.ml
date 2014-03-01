@@ -43,7 +43,7 @@ object(self)
 (* init = prétraitement : enlève tautologies + détecte clauses singletons et fait des assignations en conséquence
     ATTENTION : init ne détecte aucune clause vide (mais peut en créer). Il faudra s'assurer de l'abscence de clauses vides par la suite *)
   method init n clauses_init =
-   for i=1 to n do
+   for i=1 to n do (* on remplie wl_pos et wl_neg par du vide *)
       wl_pos#set i (new clauseset);
       wl_neg#set i (new clauseset)
     done;
@@ -60,12 +60,12 @@ object(self)
     let register_clause c = (* Met c dans les listes d'occurences de ses variables *)
       c#get_vpos#iter (add_occurence occ_pos c);
       c#get_vneg#iter (add_occurence occ_neg c) in
-    clauses#iter register_clause;
-    let get_occurences occ var = 
+    clauses#iter register_clause; (* remplit occ_pos et occ_neg *)
+    let get_occurences occ var =  (* permet d'obtenir occ_pos ou neg d'une var *)
       match occ#find var with
         | None -> new clauseset
         | Some occurences -> occurences in
-    let rec prepare () =
+    let rec prepare () = (* trouve les clauses singletons, effectues les assignations/changement de clauses qui en découlent *)
       let res = 
         try 
           clauses#iter (fun c -> match c#singleton with Some s -> raise (Found s) | None -> ());
@@ -111,7 +111,7 @@ object(self)
   method watch c l l_former = (* on veut que le litteral l surveille la clause c, et que l_former stop sa surveillance sur c *)
     (self#get_wl l)#add c; (* l sait qu'il surveille c *)
     let (wl1,wl2) = c#get_wl in
-      if l_former=wl1 then
+      if l_former = wl1 then
         begin
           c#set_wl1 l; (* c sait qu'il est surveillé par l *)
           (self#get_wl l_former)#remove c (* l_former sait qu'il ne surveille plus c *)
@@ -123,41 +123,43 @@ object(self)
         end
 
 
-  method update_clause c wl = (* on doit quitter la surveillance du literal wl dans la clause c car un pari vient de le rendre faux *)
+  method update_clause c wl = (* on doit quitter la surveillance du literal wl dans la clause c car un pari vient de le rendre faux // on présuppose wl faux dans c *)
     debug 3 "Demande de quitter (%B, var %d) dans clause %d" (fst wl) (snd wl) (c#get_id);
-    let (wl1,wl2) = c#get_wl in (* on récupère les deux litéraux actuellemnt surveillés *)
-    let (b0,v0) = if wl=wl1 then wl2 else wl1 in (* le literal qu'on veut conserver *)
-    match super#get_pari v0 with (* on regarde si le literal qu'on garde est à vrai,faux ou indéterminé *)
+    let (wl1,wl2) = c#get_wl in (* on récupère les deux littéraux actuellemnt surveillés *)
+    let (b0,v0) = if wl=wl1 then wl2 else wl1 in (* le litteral qu'on veut conserver *)
+    match super#get_pari v0 with (* on regarde si le litteral qu'on garde est à vrai,faux ou indéterminé *)
       | None -> 
           begin
             try
-              c#get_vpos#iter (fun var -> if (var != v0 && not (super#get_pari var = Some false)) then raise (WL_found (true,var)) else ()) ;
-              c#get_vneg#iter (fun var -> if (var != v0 && not (super#get_pari var = Some true)) then raise (WL_found (false,var)) else ()) ;
+              c#get_vpos#iter (fun var -> if (var<>v0 && super#get_pari var <> Some false) then raise (WL_found (true,var)) else ()) ;
+              c#get_vneg#iter (fun var -> if (var<>v0 && super#get_pari var <> Some true) then raise (WL_found (false,var)) else ()) ;
               debug 3 "Assignement %B forcé sur variable %d dans clause %d" b0 v0 (c#get_id);
               WL_Assign (b0,v0) (* on ne peut pas déplacer la jumelle mais on peut assigner l'autre literal *)
             with
-              | WL_found l -> (debug 3 "Surveillance établie sur (%B, var %d) dans clause %d" (fst l) (snd l) (c#get_id); (self#watch c l wl ; WL_New)) (* on peut déplacer la jumelle *) 
+              | WL_found l -> 
+                  debug 3 "Surveillance établie sur (%B, var %d) dans clause %d" (fst l) (snd l) (c#get_id); 
+                  self#watch c l wl ; 
+                  WL_New (* on peut déplacer la jumelle *) 
           end
       | Some b ->
           begin
-           if (b=b0) (* alors (b0,v0) est vrai dans c *) then 
+           if (b=b0) then (* alors (b0,v0) est vrai dans c *) 
               begin
                 debug 3 "Surveillance maintenue (cause : %B, var %d dans clause %d)" (fst wl) (snd wl) (c#get_id);
                 WL_Nothing (* on ne peut pas déplacer la jumelle mais l'autre literal est déjà vrai *)
               end  
            else (* (b0,v0) est faux dans c *)
               try
-                c#get_vpos#iter (fun var -> if (var != v0 && not (super#get_pari var = Some false)) then raise (WL_found (true,var)) else ());
-                c#get_vneg#iter (fun var -> if (var != v0 && not (super#get_pari var = Some true)) then raise (WL_found (false,var)) else ());
+                c#get_vpos#iter (fun var -> if (var<>v0 && super#get_pari var <> Some false) then raise (WL_found (true,var)) else ());
+                c#get_vneg#iter (fun var -> if (var<>v0 && super#get_pari var <> Some true) then raise (WL_found (false,var)) else ());
                 debug 3 "Conflit détecté dans clause : tout est faux (cause : %B, var %d dans clause %d)" (fst wl) (snd wl) (c#get_id);
                 WL_Conflit (* on ne peut pas déplacer la jumelle et l'autre literal est faux*)
               with
-                | WL_found l -> (debug 3 "Surveillance établie sur (%B, var %d) dans clause %d" (fst l) (snd l) (c#get_id); self#watch c l wl ; WL_New) (* on peut déplacer la jumelle *)
+                | WL_found l -> 
+                    debug 3 "Surveillance établie sur (%B, var %d) dans clause %d" (fst l) (snd l) (c#get_id); 
+                    self#watch c l wl; 
+                    WL_New (* on peut déplacer la jumelle *)
           end
-
-
-
-
 
 
 

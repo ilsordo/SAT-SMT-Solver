@@ -4,18 +4,8 @@ open Clause
 open Debug
 open Answer
 
-
 exception Wl_fail
 
-let print_valeur p v = function
-  | true -> Printf.fprintf p "v %d\n" v
-  | false -> Printf.fprintf p "v -%d\n" v
-
-let print_answer p = function
-  | Unsolvable -> Printf.fprintf p "s UNSATISFIABLE\n"
-  | Solvable valeurs -> 
-      Printf.fprintf p "s SATISFIABLE\n";
-      valeurs#iter (print_valeur p)
 
 (***************************************************)
 
@@ -41,22 +31,22 @@ let next_pari formule = (* Some v si on peut faire le prochain pari sur v, None 
 (* l : liste des assignations effectuées depuis le dernier pari, inclu *)
 let rec constraint_propagation (formule : Formule_wl.formule_wl) var b l =
   debug 3 "Assignation %B sur variable %d" b var; 
-  formule#get_paris#set var b; (* on pari b sur var *)
+  formule#set_val b var; (* on pari b sur var *)
   (formule#get_wl (not b,var))#fold  (* on parcourt  les clauses où var est surveillée et est devenue fausse, ie là où il faut surveiller un nouveau litteral *) 
     (fun c l_next -> match (formule#update_clause c (not b,var)) with
       | WL_Conflit -> 
-         debug 3 "Conflit dans clause %d (tentative d'abandon du wl (%B,%d))" c#get_id (fst l_next) (snd l_next); 
-         formule#get_paris#remove var;
+         debug 3 "Conflit dans clause %d (tentative d'abandon du wl (%B,%d))" c#get_id b var; 
+         formule#reset_val var;
          List.iter (fun v -> formule#get_paris#remove v) l_next;
          raise Wl_fail
       | WL_New -> 
-          debug 3 "Déplacement de jumelle dans clause %d (abandon du wl (%B,%d))" c#get_id (fst l_next) (snd l_next); 
+          debug 3 "Déplacement de jumelle dans clause %d (abandon du wl (%B,%d))" c#get_id b var; 
           l_next
       | WL_Assign (b_next,v_next) -> 
-          debug 3 "Assignation %B demandée sur variable %d (abandon du wl (%B,%d))" b_next v_next (fst l_next) (snd l_next);  
+          debug 3 "Assignation %B demandée sur variable %d (abandon du wl (%B,%d))" b_next v_next b var;   
           constraint_propagation formule v_next b_next l_next
       | WL_Nothing -> 
-          debug 3 "Aucune conséquence, clause %d déjà vraie (tentative d'abandon du wl (%B,%d))" c#get_id (fst l_next) (snd l_next); 
+          debug 3 "Aucune conséquence, clause %d déjà vraie (tentative d'abandon du wl (%B,%d))" c#get_id b var; 
           l_next
     ) (var::l)
 
@@ -74,7 +64,7 @@ let algo n cnf =
           debug 1 "Aucun pari disponible"; 
           true (* plus rien à parier = c'est gagné *)
       | Some var ->  
-          debug 1 "Pari à venir sur variable %d" var ; 
+          debug 1 "Pari à venir sur variable %d" var; 
           try 
             debug 2 "Pari à true sur variable %d" var; 
             let l = (constraint_propagation formule var true []) in (* lève une exception si conflit créé, sinon renvoie liste des vars assignées *)
@@ -87,8 +77,9 @@ let algo n cnf =
                 begin
                   debug 2 "Echec du pari à true sur variable %d" var ;  
                   List.iter (
-                    fun v -> debug 2 "Assignation annulée sur variable %d (à partir de propagation pari à true sur variable %d)" v var;
-                    formule#get_paris#remove v
+                    fun v -> 
+                      debug 2 "Assignation annulée sur variable %d (à partir de propagation pari à true sur variable %d)" v var;
+                      formule#reset_val v
                   ) l; (* on annule les assignations *)
                   raise Wl_fail
                 end
@@ -105,7 +96,11 @@ let algo n cnf =
                   else
                     begin
                       debug 2 "Echec du pari à false sur variable %d" var ;  
-                      List.iter (fun var -> debug 1 "Pari à false annulé sur variable %d " var ; formule#get_paris#remove var) l; (* sinon il faut backtracker sur le pari précédent *)
+                      List.iter (
+                        fun var -> 
+                          debug 1 "Pari à false annulé sur variable %d " var; 
+                          formule#reset_val var
+                      ) l; (* sinon il faut backtracker sur le pari précédent *)
                       false
                     end   
                 with
