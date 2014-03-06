@@ -1,0 +1,110 @@
+   0  $accept : %entry% $end
+
+   1  main : color_formule EOF
+
+   2  color_formule : INT INT edges
+
+   3  edges : EDGE INT INT edges
+   4        |
+
+   5  %entry% : '\001' main
+
+state 0
+	$accept : . %entry% $end  (0)
+
+	'\001'  shift 1
+	.  error
+
+	%entry%  goto 2
+
+
+state 1
+	%entry% : '\001' . main  (5)
+
+	INT  shift 3
+	.  error
+
+	main  goto 4
+	color_formule  goto 5
+
+
+state 2
+	$accept : %entry% . $end  (0)
+
+	$end  accept
+
+
+state 3
+	color_formule : INT . INT edges  (2)
+
+	INT  shift 6
+	.  error
+
+
+state 4
+	%entry% : '\001' main .  (5)
+
+	.  reduce 5
+
+
+state 5
+	main : color_formule . EOF  (1)
+
+	EOF  shift 7
+	.  error
+
+
+state 6
+	color_formule : INT INT . edges  (2)
+	edges : .  (4)
+
+	EDGE  shift 8
+	EOF  reduce 4
+
+	edges  goto 9
+
+
+state 7
+	main : color_formule EOF .  (1)
+
+	.  reduce 1
+
+
+state 8
+	edges : EDGE . INT INT edges  (3)
+
+	INT  shift 10
+	.  error
+
+
+state 9
+	color_formule : INT INT edges .  (2)
+
+	.  reduce 2
+
+
+state 10
+	edges : EDGE INT . INT edges  (3)
+
+	INT  shift 11
+	.  error
+
+
+state 11
+	edges : EDGE INT INT . edges  (3)
+	edges : .  (4)
+
+	EDGE  shift 8
+	EOF  reduce 4
+
+	edges  goto 12
+
+
+state 12
+	edges : EDGE INT INT edges .  (3)
+
+	.  reduce 3
+
+
+6 terminals, 5 nonterminals
+6 grammar rules, 13 states

@@ -1,0 +1,34 @@
+### Starting build.
+# Target: main.ml.depends, tags: { extension:ml, file:main.ml, ocaml, ocamldep, quiet }
+/usr/bin/ocamldep -modules main.ml > main.ml.depends
+# Target: color.ml.depends, tags: { extension:ml, file:color.ml, ocaml, ocamldep, quiet }
+/usr/bin/ocamldep -modules color.ml > color.ml.depends
+# Target: colorLexer.mll, tags: { extension:mll, file:colorLexer.mll, lexer, ocaml, ocamllex, quiet }
+/usr/bin/ocamllex -q colorLexer.mll
+# Target: colorLexer.ml.depends, tags: { extension:ml, file:colorLexer.ml, ocaml, ocamldep, quiet }
+/usr/bin/ocamldep -modules colorLexer.ml > colorLexer.ml.depends
+# Target: colorParser.mly, tags: { extension:mly, file:colorParser.mly, ocaml, ocamlyacc, parser, quiet }
+/usr/bin/ocamlyacc -v colorParser.mly
+# Target: colorParser.mli.depends, tags: { extension:mli, file:colorParser.mli, ocaml, ocamldep, quiet }
+/usr/bin/ocamldep -modules colorParser.mli > colorParser.mli.depends
+# Target: colorParser.cmi, tags: { byte, compile, extension:mli, file:colorParser.mli, interf, ocaml, quiet }
+/usr/bin/ocamlc -c -o colorParser.cmi colorParser.mli
+# Target: color.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:color.cmo, file:color.ml, implem, ocaml, quiet }
+/usr/bin/ocamlc -c -o color.cmo color.ml
+# Target: colorLexer.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:colorLexer.cmo, file:colorLexer.ml, implem, ocaml, quiet }
+/usr/bin/ocamlc -c -o colorLexer.cmo colorLexer.ml
+# Target: main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet }
+/usr/bin/ocamlc -c -o main.cmo main.ml
+# Target: colorParser.ml.depends, tags: { extension:ml, file:colorParser.ml, ocaml, ocamldep, quiet }
+/usr/bin/ocamldep -modules colorParser.ml > colorParser.ml.depends
+# Target: colorParser.cmx, tags: { compile, extension:cmx, extension:ml, file:colorParser.cmx, file:colorParser.ml, implem, native, ocaml, quiet }
+/usr/bin/ocamlopt -c -o colorParser.cmx colorParser.ml
+# Target: color.cmx, tags: { compile, extension:cmx, extension:ml, file:color.cmx, file:color.ml, implem, native, ocaml, quiet }
+/usr/bin/ocamlopt -c -o color.cmx color.ml
+# Target: colorLexer.cmx, tags: { compile, extension:cmx, extension:ml, file:colorLexer.cmx, file:colorLexer.ml, implem, native, ocaml, quiet }
+/usr/bin/ocamlopt -c -o colorLexer.cmx colorLexer.ml
+# Target: main.cmx, tags: { compile, extension:cmx, extension:ml, file:main.cmx, file:main.ml, implem, native, ocaml, quiet }
+/usr/bin/ocamlopt -c -o main.cmx main.ml
+# Target: main.native, tags: { dont_link_with, extension:native, file:main.native, link, native, ocaml, program, quiet }
+/usr/bin/ocamlopt unix.cmxa color.cmx colorParser.cmx colorLexer.cmx main.cmx -o main.native
+# Compilation successful.

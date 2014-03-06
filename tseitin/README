@@ -1,0 +1,25 @@
+à priori l'algo est ok (testé à part)
+
+je n'ai pas réussi à intégrer tseitin au reste du projet : 
+  j'ai placé tous les fichiers figurant dans ce dossier dans le dossier parent (là où il y a tout le projet)
+  j'ai modifié le makefile comme ça : 
+  
+      all: generator solver tseitin
+
+      generator:
+      	ocamlbuild gen.native; rm gen.native; cp _build/gen.native gen
+      solver:
+      	ocamlbuild -yaccflag -v main.native; rm main.native; cp _build/main.native main
+      tseitin:
+      	ocamlbuild -yaccflag -v tseitin.native; rm tseitin.native; cp _build/tseitin.native tseitin
+      debug:
+	      ocamlbuild -yaccflag -v main.d.byte
+      clean:
+      	ocamlbuild -clean
+      	
+  je pensais générer un exécutable tseitin, mais ça compile pas...
+  
+A propos de renommage.ml : 
+  l'objet renommage permet de renommer une cnf (ie une int list list) pour que les variables soit bien des entiers entre 1 et n
+  par exemple : ((d,ef,4),(rr,d)) ---> ((1,2,3),(4,1))
+  c'est pratique pour traiter des problèmes tq color, tseitin... on peut utiliser des string pour les variables puis effectuer un renommage

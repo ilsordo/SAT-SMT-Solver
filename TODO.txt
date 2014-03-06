@@ -29,7 +29,18 @@ Utiliser le type literal partout où c'est possible
 
 Passer les champs occurences_pos/neg dans formule.ml ? (et abandonner la création temporaire de ces ensembles dans formule_wl.ml ?)
 
+Avoir un prg qui prend une formule (CNF) avec des var qcq et le transforme au format DIMACS, en renvoyant Map d'association
+
+./tseitin fichier.txt
+  >> affiche SATISFIABLE / UNSATISFIABLE + affection des variables (éventuellement string) si possible
+./tseitin-wl fichier.txt
+./tseitin -algo wl fichier.txt
+./tseitin -cnf fichier.txt
 
 
+./colorie k fichier.col
+./colorie-wl k fichier.col
+./colorie -algo dpll k fichier.col
+  >> affiche sortie au format dot/graphviz
 
 

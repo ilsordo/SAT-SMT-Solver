@@ -1,17 +1,15 @@
 {
-open Parser;;        
+open ColorParser;;        
 }
 
 
 rule token = parse
   | [' ' '\t' '\n']     			{ token lexbuf }    
   | "c"						            { comment lexbuf }
-  | "p" | "cnf"					      { token lexbuf }
-  | '-'						            { MINUS }
+  | "p" | "edge"				      { token lexbuf }
+  | "e"                       { EDGE }
   | ['1'-'9']['0'-'9']* as s 	{ INT (int_of_string s) } 
-  | "0"						            { ENDC }
   | eof            			      { EOF } 
-  | "%"            			      { EOF } 
 
 
 and comment = parse

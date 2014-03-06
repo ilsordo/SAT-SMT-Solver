@@ -2,10 +2,11 @@
  #                                                    #
  #   PROJET 2 : Rendu 1                               #
  #                                                    #
- #   Maxime Lesourd                                   #
+ #   Maxime LESOURD                                   #
  #   Yassine HAMOUDI                                  #
  #                                                    #
  ######################################################
+
 
 
 Compilation et exécution    
@@ -32,6 +33,8 @@ Pour utiliser l'algorithme watched literals :
     ./resol-wl ex.cnf
 
 Note: resol-wl accepte les mêmes options que resol
+
+
 
 Debuggage et exécution pas à pas
 ================================
@@ -61,6 +64,8 @@ Enfin, lorsque le programme est exécuté avec une option de debuggage, des stat
   - Nombre de paris effectués au cours de l'exécution
   - Nombre de conflits rencontrés
   - Check : vérifie si l'assignation des variables renvoyé en résultat (dans le cas SATISFIABLE) est correcte. La réponse "Check : false" est particulièrement inquiétante puisqu'elle indique que l'algorithme utilisé n'a pas été implémenté correctement.
+
+
 
 Structures de données
 =====================
@@ -111,6 +116,8 @@ formule_wl.ml:
 
 * wl_pos et wl_neg : 2 vartable de clauseset permettant de savoir pour chaque littéral dans quelles clauses il apparait.
 
+
+
 Algorithme DPLL
 ===============
 
@@ -126,6 +133,8 @@ Prétraitement:
 
 Le prétraitement effectué se limite à supprimer les clauses trivialement satisfiables : celles contenant x et -x.
 La première étape de propagation des contraintes n'est jamais annulée (sauf si on ne trouve pas d'assignation) et joue donc le rôle du prétraitement.
+
+
 
 Algorithme Watched Literals
 ===========================
@@ -156,6 +165,8 @@ Les différents opérations menées prennent appuies sur les deux faits suivants
   - A tout instant, chaque clause connait les 2 littéraux qui la surveillent (accès en temps constant à cette information)
   - A tout instant, chaque littéral connait les clauses qu'il surveille
 
+
+
 Suivi de l'algorithme
 =====================
 
@@ -167,10 +178,13 @@ Ces statistiques sont affichées à partir de '-d 1'.
 La classe formule permet l'évaluation de la formule en utilisant l'assignation calculée si la formule est satisfiable.
 Le résultat renvoyé par l'exécutable est donc systématiquement vérifié et le résultat de la vérification est affiché à partir de '-d 1'.
 
+
+
 Générateur
 ==========
 
 Un générateur de clauses est fourni avec le solveur, il génère des clauses uniformément (on extrait les premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.
+
 
 
 Analyse des performances

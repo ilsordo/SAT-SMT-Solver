@@ -1,0 +1,9 @@
+le programme color est indépendant du reste du projet pour l'instant
+
+pour l'exécuter : 
+    make
+    ./colorie < file
+
+pour l'instant on doit entrer manuellement la couleur dans main.ml (4 actuellement)
+
+utiliser l'objet renommage pour réecrire partiellement le programme (cf README dans tseitin)
