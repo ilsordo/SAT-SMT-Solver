@@ -3,7 +3,7 @@
 module Renommage = Map.Make(String)
 
 
-class renommage =
+class ['a] renommage =
 object
   val mutable assoc = Renommage.empty
 
@@ -27,7 +27,7 @@ let makefresh () =
 
 let rec renommer_clause clause assoc fresh f_new = match clause with 
   | [] -> f_new
-  | (b,v)::q -> if (assoc#mem v) then 
+  | (b,v)::q -> if (assoc#mem v) then 
                   (renommer_clause q assoc fresh ((b,assoc#find v)::f_new)) 
                 else 
                   begin
