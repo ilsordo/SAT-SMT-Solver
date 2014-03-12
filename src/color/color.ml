@@ -1,5 +1,6 @@
-
+(*
 module Association = Map.Make(String)
+*)
 
 (*** attention : multicoloration d'un sommet possible *)
 (*** optimiser la fusion : travailler sur une seule liste qu'on fait grossir *)
