@@ -1,7 +1,7 @@
 open Sys
 open Printf
 
-let shuffle tab l = (* applique une permutation circulaire aléatoire sur le tableau tab de taille n *)
+let shuffle tab l = (* calcule les l premiers termes d'une permutation aléatoire du tableau tab *)
   let n = Array.length tab in
   for i = 0 to l-1 do
       let x = Random.int (n - i) + i in

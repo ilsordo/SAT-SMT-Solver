@@ -93,8 +93,7 @@ let tseitin formule = (* renvoie formule original + CNF + table d'association. P
 		  
 		  
 		  
-		  
-		  
+				  
 type config = { mutable input : string option; mutable algo : int -> int list list -> answer; mutable affichage : bool ; mutable nom_algo : string }
 
 let config = { input = None; algo = Algo_dpll.algo; affichage = false ; nom_algo = "dpll" }
