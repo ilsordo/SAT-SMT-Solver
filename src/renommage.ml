@@ -26,7 +26,7 @@ let makefresh () =
 
 
 let rec renommer_clause clause assoc fresh f_new = match clause with 
-  | [] -> c_new
+  | [] -> f_new
   | (b,v)::q -> if (assoc#mem v) then 
                   (renommer_clause q assoc fresh ((b,assoc#find v)::f_new)) 
                 else 
