@@ -21,11 +21,6 @@ let makefresh () =
 
 let mfresh=makefresh() (* génère des variables fraiches *)
 
-let concat l1 l2 = (* concatenation de 2 listes *)
-  let rec aux l res=match l with
-    | [] -> res
-    | t::q -> aux q (t::res)
-  in aux l1 l2
 *)
 
 let formule_to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
@@ -36,19 +31,20 @@ let formule_to_cnf t_formule = (* construit la cnf, en utilisant des variables f
     | And(f,g) -> let ((b1,v1),h1)=aux f in
                   let ((b2,v2),h2)=aux g in
                   let fresh="_"^(mfresh()) in
-                    ((true,fresh),concat h1 (concat h2 [[(not b1,v1);(not b2,v2);(true,fresh)];[(false,fresh);(b1,v1)];[(false,fresh);(b2,v2)]])) 
+                    ((true,fresh),List.rev_append h1 (List.rev_append h2 [[(not b1,v1);(not b2,v2);(true,fresh)];[(false,fresh);(b1,v1)];[(false,fresh);(b2,v2)]])) 
     | Or(f,g) -> let ((b1,v1),h1)=aux f in
                  let ((b2,v2),h2)=aux g in
                  let fresh="_"^mfresh() in
-                   ((true,fresh),concat h1 (concat h2 [[(not b1,v1);(true,fresh)];[(not b2,v2);(true,fresh)];[(false,fresh);(b1,v1);(b2,v2)]])) 
+                   ((true,fresh),List.rev_append h1 (List.rev_append h2 [[(not b1,v1);(true,fresh)];[(not b2,v2);(true,fresh)];[(false,fresh);(b1,v1);(b2,v2)]])) 
     | Imp(f,g) -> let ((b1,v1),h1)=aux f in
                   let ((b2,v2),h2)=aux g in
                   let fresh="_"^mfresh() in
-                    ((true,fresh),concat h1 (concat h2 [[(b1,v1);(true,fresh)];[(not b2,v2);(true,fresh)];[(false,fresh);(not b1,v1);(b2,v2)]]))
-    | Equ(f,g) -> let ((b1,v1),h1)=aux f in
+                    ((true,fresh),List.rev_append h1 (List.rev_append h2 [[(b1,v1);(true,fresh)];[(not b2,v2);(true,fresh)];[(false,fresh);(not b1,v1);(b2,v2)]]))
+    | Equ(f,g) -> aux (And(Imp(f,g),Imp(g,f)))
+                  (* let ((b1,v1),h1)=aux f in
                   let ((b2,v2),h2)=aux g in
                   let fresh="_"^(mfresh()) in
-                    ((true,fresh),concat h1 (concat h2 [[(false,fresh);(not b1,v1);(b2,v2)];[(false,fresh);(b1,v1);(not b2,v2)];[(true,fresh);(b1,v1);(b2,v2)];[(true,fresh);(b1,v1);(b2,v2)]])) 
+                    ((true,fresh),List.rev_append h1 (List.rev_append h2 [[(false,fresh);(not b1,v1);(b2,v2)];[(false,fresh);(b1,v1);(not b2,v2)];[(true,fresh);(b1,v1);(b2,v2)];[(true,fresh);(b1,v1);(b2,v2)]])) *)
   in let (p,f)=aux t_formule in
     ([p]::f)
       

@@ -19,12 +19,6 @@ end
 
 
 
-let concat l1 l2 = (* concatenation de 2 listes *)
-  let rec aux l res=match l with
-    | [] -> res
-    | t::q -> aux q (t::res)
-  in aux l1 l2
-
 let makefresh () =
   let n = ref 0 in
   fun () -> incr n; string_of_int !n
