@@ -1,12 +1,12 @@
-INCLUDE = tseitin
-CC = ocamlbuild -Is $(INCLUDE)
+BUILD = src/_build
+CC = ocamlbuild -I src -build-dir $(BUILD)
 
 all: generator solver
 
 generator:
-	$(CC) gen.native; rm gen.native; cp _build/gen.native gen
+	$(CC) src/gen/gen.native; cp $(BUILD)/src/gen/gen.native gen
 solver:
-	$(CC) -yaccflag -v main.native; rm main.native; cp _build/main.native main
+	$(CC) src/main.native; cp $(BUILD)/src/main.native main
 debug:
 	$(CC) -yaccflag -v main.d.byte
 clean:
