@@ -28,16 +28,8 @@ let edge_constraint i j k cnf = (* produit une _formule_ (CNF) indiquant que les
       aux (l-1) ([(false,(string_of_int i)^"_"^(string_of_int l));(false,(string_of_int j)^"_"^(string_of_int l))]::res)
   in aux k cnf
 
-
   
-let concat l1 l2 = (* concatenation de 2 listes *)
-  let rec aux l res=match l with
-    | [] -> res
-    | t::q -> aux q (t::res)
-  in aux l1 l2
-  
-  
-let color_to_cnf c_formule k = (* produit une formule vraie ssi on peut colorier c_formule avec k couleurs *)
+let to_cnf c_formule k = (* construit la cnf indiquant la coloration, utilise des variables fraiches *)
   let (v,e,c_f) = c_formule in
   let rec aux l res = match l with
     | [] -> res
@@ -46,7 +38,7 @@ let color_to_cnf c_formule k = (* produit une formule vraie ssi on peut colorier
   
   
   
-      
+(*
 let convert_clause c assoc = (* remplace les noms des variables dans la clause c, d'après la table d'association assoc *)
   let rec aux c res = match c with
 		  | [] -> res
@@ -73,5 +65,5 @@ let color formule k = (* renvoie formule original + CNF + table d'association. P
 		  ) c_formule;
   (c_formule,convert_formule c_formule !assoc,!assoc)
 		  
-		  
+*)		  
 		  
