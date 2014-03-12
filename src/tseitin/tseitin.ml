@@ -23,7 +23,7 @@ let mfresh=makefresh() (* génère des variables fraiches *)
 
 *)
 
-let formule_to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
+let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
   let rec aux t_f = match t_f with
     | Var v -> ((true,v),[])
     | Not f -> let ((b,v),g)=aux f in
