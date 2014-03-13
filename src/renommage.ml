@@ -5,7 +5,7 @@ module Renommage = Map.Make(String)
 
 class ['a] renommage =
 object
-  val mutable assoc = Renommage.empty
+  val mutable assoc : ('a) Renommage.t = Renommage.empty
 
   method mem x = Renommage.mem x assoc
   
@@ -14,6 +14,8 @@ object
   method add x y = assoc <- Renommage.add x y assoc
   
   method find x = Renommage.find x assoc
+  
+  method iter f = Renommage.iter f assoc
 
 end
 
@@ -23,17 +25,18 @@ let makefresh () =
   let n = ref 0 in
   fun () -> incr n; string_of_int !n
 
-
+let signe b = 
+  if b then 1 else -1
 
 let rec renommer_clause clause assoc fresh f_new = match clause with 
   | [] -> f_new
   | (b,v)::q -> if (assoc#mem v) then 
-                  (renommer_clause q assoc fresh ((b,assoc#find v)::f_new)) 
+                  (renommer_clause q assoc fresh (((signe b)*(assoc#find v))::f_new)) 
                 else 
                   begin
-                    let x=fresh() in
+                    let x=int_of_string(fresh()) in
                       assoc#add v x;
-                      (renommer_clause q assoc fresh ((b,x)::f_new))
+                      (renommer_clause q assoc fresh ((signe(b)*x)::f_new))
                   end
 
   

@@ -1,6 +1,5 @@
-(*
-module Association = Map.Make(String)
-*)
+
+open Renommage
 
 (*** attention : multicoloration d'un sommet possible *)
 (*** optimiser la fusion : travailler sur une seule liste qu'on fait grossir *)
@@ -38,33 +37,13 @@ let to_cnf c_formule k = (* construit la cnf indiquant la coloration, utilise de
   in aux c_f (vertices_constraint v k)
   
   
+      
+let parse input =
+  try
+    let lex = Lexing.from_channel input in
+    ColorParser.main ColorLexer.token lex
+  with
+    | _ -> 
+        Printf.eprintf "Input error\n%!";
+        exit 1
   
-(*
-let convert_clause c assoc = (* remplace les noms des variables dans la clause c, d'après la table d'association assoc *)
-  let rec aux c res = match c with
-		  | [] -> res
-		  | (b,v)::q -> if b then aux q ((Association.find v assoc)::res) else aux q ((-(Association.find v assoc))::res) 
-  in aux c []
-
-let convert_formule f assoc = (* remplace les noms des variables dans la formule f, d'après la table d'association assoc *)
-  let rec aux f res = match f with
-		  | [] -> res
-		  | t::q -> aux q ((convert_clause t assoc)::res)
-  in aux f []
-		  
-		  
-		  		                   
-let color formule k = (* renvoie formule original + CNF + table d'association. Pour ce restreindre aux vars de départ, on ne regardera pas les _ dans la table *)
-  let c_formule = color_to_cnf formule k in
-    let m=ref 1 in (* associe à chaque variable (string) un nombre unique. Permet d'avoir le format DIMACS *)
-    let assoc=ref Association.empty in
-  		List.iter 
-		  (fun l -> List.iter 
-		              (fun (b,s) -> if (not (Association.mem s !assoc)) then 
-		                              (assoc:=(Association.add s !m !assoc); incr m)
-		               ) l
-		  ) c_formule;
-  (c_formule,convert_formule c_formule !assoc,!assoc)
-		  
-*)		  
-		  

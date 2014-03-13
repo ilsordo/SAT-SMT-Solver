@@ -1,4 +1,4 @@
-type t
 
-val parse : in_channel -> t
-val to_cnf : t -> int list list
+
+val parse : in_channel -> int*(int list list)
+val to_cnf : int*(int list list) -> int*(int list list)

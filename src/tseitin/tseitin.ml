@@ -1,3 +1,5 @@
+open Renommage
+
 type tseitin_formule =
   | Var of string
   | And of tseitin_formule*tseitin_formule (* et *)
@@ -8,6 +10,7 @@ type tseitin_formule =
 
 
 let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
+  let mfresh=makefresh() in
   let rec aux t_f = match t_f with
     | Var v -> ((true,v),[])
     | Not f -> let ((b,v),g)=aux f in
@@ -27,12 +30,13 @@ let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches 
     | Equ(f,g) -> aux (And(Imp(f,g),Imp(g,f)))
   in let (p,f)=aux t_formule in
     ([p]::f)
-      
+    
+      (*
 let parse input =
   try
     let lex = Lexing.from_channel input in
-    TseitinParser.main TseitinLexer.token lexbuf
+    TseitinParser.main TseitinLexer.token lex
   with
     | _ -> 
-        eprintf "Input error\n%!";
-        exit 1
+        Printf.eprintf "Input error\n%!";
+        exit 1*)

@@ -1,5 +1,5 @@
 {
-open TseitinParser;;        
+open TseitinParser;;       
 }
 
 

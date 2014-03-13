@@ -4,7 +4,7 @@ open Printf
 open Formule
 open Debug
 
-type problem = Cnf | Color of int | Tseitin
+
 
 type config = 
     { 
@@ -61,18 +61,18 @@ let get_formule input = function
       let (n,cnf) = Cnf.parse input in 
       (None,n,cnf)
   | Tseitin -> 
-      let (cnf,assoc) = Renommage.renommer (Tseitin.to_cnf (Tseitin.parse input)) in
+      let (cnf,assoc) = Renommage.renommer (Tseitin.to_cnf (TseitinP.parse input)) in
       (Some assoc,assoc#cardinal,cnf)
   | Color k -> 
-      let (cnf,assoc) = Renommage.renommer (Tseitin.to_cnf (Tseitin.parse input) k) in
+      let (cnf,assoc) = Renommage.renommer (Color.to_cnf (Color.parse input) k) in
       (Some assoc,assoc#cardinal,cnf)
 
 let main () =
   parse_args();
-  let (assoc,n,cnf) = get_formule (get_input()) in
+  let (assoc,n,cnf) = get_formule (get_input()) config.problem_type in
   debug 1 "Using algorithm %s" config.nom_algo;
   let answer = config.algo n cnf in
-  printf "%a\n%!" print_answer answer;
+  printf "%a\n%!" print_answer (answer,assoc,config.problem_type);
   debug 1 "Stats :\n%t%!" print_stats;
   begin
     match answer with

@@ -5,7 +5,7 @@ let parse input =
     (n,f)
   with
     | _ -> 
-        eprintf "Input error\n%!";
+        Printf.eprintf "Input error\n%!";
         exit 1
 
 let to_cnf c = c
