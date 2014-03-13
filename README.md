@@ -63,7 +63,7 @@ La commande suivante aura alors pour conséquence d'afficher les messages de deb
 Enfin, lorsque le programme est exécuté avec une option de debuggage, des statistiques élémentaires sont fournies :
   - Nombre de paris effectués au cours de l'exécution
   - Nombre de conflits rencontrés
-  - Check : vérifie si l'assignation des variables renvoyé en résultat (dans le cas SATISFIABLE) est correcte. La réponse "Check : false" est particulièrement inquiétante puisqu'elle indique que l'algorithme utilisé n'a pas été implémenté correctement.
+  - Check : vérifie si l'assignation des variables renvoyée en résultat (dans le cas SATISFIABLE) est correcte. La réponse "Check : false" est particulièrement inquiétante puisqu'elle indique que l'algorithme utilisé n'a pas été implémenté correctement.
 
 
 
