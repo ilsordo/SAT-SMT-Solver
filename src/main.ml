@@ -64,10 +64,10 @@ let get_formule input = function
       (None,n,cnf)
   | Tseitin -> 
       let (cnf,assoc) = Renommage.renommer (Tseitin.to_cnf (Tseitin.parse input)) in
-      (Some assoc,assoc#cardinal,cnf)
+      (Some assoc,assoc#max,cnf)
   | Color k -> 
       let (cnf,assoc) = Renommage.renommer (Color.to_cnf (Color.parse input) k) in
-      (Some assoc,assoc#cardinal,cnf)
+      (Some assoc,assoc#max,cnf)
 
 let print_cnf p (n,f) = 
   fprintf p "p cnf %d %d\n" n (List.length f);

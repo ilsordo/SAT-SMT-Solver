@@ -1,34 +1,53 @@
+module Values = Map.Make(String)
+module Names = Map.Make(struct type t = int let compare = compare end)
 
 
-module Renommage = Map.Make(String)
+(* Table de correspondance entre des chaines de caractères et des noms de variables (int) *)
+class renommage =
+object (self)
+  (* l'objet gère ses variables fraiches *)
+  val mutable count = 0
 
+  val mutable values : int Values.t = Values.empty
 
-class ['a] renommage =
-object
-  val mutable assoc : ('a) Renommage.t = Renommage.empty
+  val mutable names : string Names.t = Names.empty
 
-  method mem x = Renommage.mem x assoc
+  (* Variable maximale utilisée *)
+  method max = count
+
+  method private get_fresh = 
+    count <- count + 1;
+    count
   
-  method cardinal = Renommage.cardinal assoc
+  method bind s =
+    assert (not (Values.mem s values)); (* Par sécurité *)
+    let x = self#get_fresh in
+    values <- Values.add s x values;
+    names <- Names.add x s names;
+    x
   
-  method add x y = assoc <- Renommage.add x y assoc
+  method get_value s = 
+    try 
+      Some (Values.find s values)
+    with Not_found -> None
+
+  method get_name x = 
+    try 
+      Some (Names.find x names)
+    with Not_found -> None
+      
   
-  method find x = Renommage.find x assoc
-  
-  method iter f = Renommage.iter f assoc
+  method iter f = Values.iter f values
 
 end
-
-
-
-let makefresh () =
-  let n = ref 0 in
-  fun () -> incr n; string_of_int !n
 
 let signe b = 
   if b then 1 else -1
 
-let rec renommer_clause clause assoc fresh f_new = match clause with 
+(** J'ai réécrit les fonctions suivantes avec map *)
+
+(*
+let rec renommer_clause assoc fresh f_new = function
   | [] -> f_new
   | (b,v)::q -> if (assoc#mem v) then 
                   (renommer_clause q assoc fresh (((signe b)*(assoc#find v))::f_new)) 
@@ -38,20 +57,33 @@ let rec renommer_clause clause assoc fresh f_new = match clause with
                       assoc#add v x;
                       (renommer_clause q assoc fresh ((signe(b)*x)::f_new))
                   end
+*)
+
+let renommer_clause assoc =
+  let renommer_litteral (b,v) =
+    let x = match assoc#get_value v with
+      | Some x -> x
+      | None -> assoc#bind v in
+    signe b * x in
+  List.map renommer_litteral
 
   
-let renommer formule = (* renvoie CNF avec vars normalisées + table d'association *)
-  let fresh=makefresh() in
+let renommer f = (* renvoie CNF avec vars normalisées + table d'association *)
   let assoc = new renommage in
-  let rec aux f f_new = match f with
+  (*let rec aux f f_new = match f with 
     | [] -> f_new
     | t::q -> 
-        aux q ((renommer_clause t assoc fresh [])::f_new)
+        aux q ((renommer_clause assoc fresh [] t)::f_new)
    in
-    (aux formule [],assoc) (* formule avec renommage des variables pour format DIMACS + table d'association (ancienne var, var renomée) *)
+    (aux formule [],assoc)*)
+  (List.map (renommer_clause assoc) f, assoc)
+ (* formule avec renommage des variables pour format DIMACS + table d'association (ancienne var, var renomée) *)
 
-  
-  
 
+(* énumère les f(n0), f(n0 + 1) , etc *)
+class ['a] counter n0 (f:int->'a) =
+object
+  val mutable n = n0 - 1
 
-		  
+  method next = n <- n + 1; f n
+end
