@@ -1,8 +1,11 @@
-
 open Renommage
+open Answer
+open Printf
 
 (*** attention : multicoloration d'un sommet possible *)
 (*** optimiser la fusion : travailler sur une seule liste qu'on fait grossir *)
+
+type t = (int*int*((int*int) list))
 
 let vertex_constraint i k = (* produit une clause (i_1,i_2...i_k) indiquant que le sommet i doit prendre 1 couleur parmi k *)
   let rec aux j res = 
@@ -47,3 +50,15 @@ let parse input =
         Printf.eprintf "Input error\n%!";
         exit 1
   
+let print_sommet values p name id =
+  if name <> "" && name.[0] <> '_' && values#find id = Some true then
+    let l = String.length name in
+    let cut = String.index name '_' in
+    Printf.fprintf p "%s colorié en %s\n" (String.sub name 0 cut) (String.sub name (cut+1) (l-cut-1))
+
+(* Format de sortie ? *)
+let print_answer p k assoc = function
+  | Unsolvable -> fprintf p "s Pas de coloriage à %d couleurs\n" k
+  | Solvable values ->
+      fprintf p "s Coloriable en %d couleurs\n" k;
+      assoc#iter (print_sommet values p)

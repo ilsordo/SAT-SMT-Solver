@@ -1,15 +1,27 @@
 open Formule
+open Printf
+open Debug
 
 type answer = Unsolvable | Solvable of bool vartable
 
-type problem = Cnf | Color of int | Tseitin
-
-
+let check n cnf = function
+  | Unsolvable -> ()
+  | Solvable valeurs ->
+      let f_verif = new formule in
+      f_verif#init n cnf;
+      valeurs#iter (fun v b -> f_verif#set_val b v);
+      debug 1 "Check : %B\n%!" f_verif#eval
 
 let print_valeur p v = function (* affichage d'une variable (int) et de sa valeur *)
-  | true -> Printf.fprintf p "v %d\n" v
-  | false -> Printf.fprintf p "v -%d\n" v
+  | true -> fprintf p "v %d\n" v
+  | false -> fprintf p "v -%d\n" v
 
+let print_answer p = function
+  | Unsolvable -> fprintf p "s UNSATISFIABLE\n"
+  | Solvable values -> 
+      fprintf p "s SATISFIABLE\n";
+      values#iter (print_valeur p)
+(*
 let print_valeur_s p s = function (* affichage d'une variable (string) et de sa valeur *)
   | None -> assert false
   | Some true -> Printf.fprintf p "v %s\n" s
@@ -48,3 +60,4 @@ let print_answer p (answer,assoc,pb_type) = match answer with
               | Some b -> print_valeur p v b
             done 
                                      
+*)

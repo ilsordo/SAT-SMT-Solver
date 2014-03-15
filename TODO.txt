@@ -1,12 +1,8 @@
-Dans DPLL : 
-  - optimiser les tests de singletons (actuellement basés sur le cardinal >> est-ce fait en temps constant ?)
-      >> après tests sur une formule (n,l,k)=(50000,3000,2000), il semble qu'utiliser max_elt et min_elt n'impact pas les perfs
-
 Dans WL : 
   - optimisation : si la variable x est assignée à vraie, dans toute clause c non encore satisfaite où non x apparait (surveillé ou non), on met en place une surveillance sur x
   
 Génération de tests aléatoires : 
-  - accélérer la génération de tests aléatoires ?
+  - accélérer la génération de tests aléatoires ? (* OK? je ne vois pas comment faire mieux *)
   - comment générer une formule (n,l,k) forcèment satisfiable :
       * tirer au hasard une assignation pour chacune des n variables
       * tirer au hasard les clauses, mais rejeter toutes celles qui ne sont pas satisfaites

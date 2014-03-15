@@ -1,5 +1,7 @@
 open Renommage
 open TseitinFormule
+open Answer
+open Printf
 
 type t = TseitinFormule.t
 
@@ -38,3 +40,24 @@ let parse input =
     | _ -> 
         Printf.eprintf "Input error\n%!";
         exit 1
+
+let print_var values p name id =
+  if name <> "" && name.[0] <> '_' then
+    let s = if values#find id = Some true then "" else "-" in
+    Printf.fprintf p "v %s%s\n" s name
+
+let print_answer p assoc = function
+  | Unsolvable -> fprintf p "s UNSATISFIABLE\n"
+  | Solvable values ->
+      fprintf p "s SATISFIABLE\n";
+      assoc#iter (print_var values p)
+
+
+
+
+
+
+
+
+
+
