@@ -37,11 +37,13 @@ let parse_args () =
     config.nom_algo <- s in
   
   let speclist = Arg.align [
-    ("-color",Arg.Int (fun k -> config.problem_type <- (Color k)),"k");
-    ("-tseitin",Arg.Unit (fun () -> config.problem_type <- Tseitin),"");
     ("-algo",Arg.String parse_algo,"dpll|wl");
     ("-d",Arg.Int set_debug_level,"k Debug depth k");
-    ("-b",Arg.Int set_blocking_level,"k Interaction depth k")] in
+    ("-b",Arg.Int set_blocking_level,"k Interaction depth k");
+    ("-color",Arg.Int (fun k -> config.problem_type <- (Color k)),"k");
+    ("-tseitin",Arg.Unit (fun () -> config.problem_type <- Tseitin),"");
+    ("-print_cnf",Arg.Unit (fun () -> config.print_cnf <- true)," Prints reduction");
+  ] in
   
   Arg.parse speclist (fun s -> config.input <- Some s) use_msg
     
@@ -61,16 +63,21 @@ let get_formule input = function
       let (n,cnf) = Cnf.parse input in 
       (None,n,cnf)
   | Tseitin -> 
-      let (cnf,assoc) = Renommage.renommer (Tseitin.to_cnf (TseitinP.parse input)) in
+      let (cnf,assoc) = Renommage.renommer (Tseitin.to_cnf (Tseitin.parse input)) in
       (Some assoc,assoc#cardinal,cnf)
   | Color k -> 
       let (cnf,assoc) = Renommage.renommer (Color.to_cnf (Color.parse input) k) in
       (Some assoc,assoc#cardinal,cnf)
 
+let print_cnf p (n,f) = 
+  fprintf p "p cnf %d %d\n" n (List.length f);
+  List.iter (fun c -> List.iter (fprintf p "%d ") c; fprintf p "0\n") f 
+
 let main () =
   parse_args();
   let (assoc,n,cnf) = get_formule (get_input()) config.problem_type in
   debug 1 "Using algorithm %s" config.nom_algo;
+  if config.print_cnf then debug 1 "Reduction :\n%a\n%!" print_cnf (n,cnf);
   let answer = config.algo n cnf in
   printf "%a\n%!" print_answer (answer,assoc,config.problem_type);
   debug 1 "Stats :\n%t%!" print_stats;

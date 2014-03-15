@@ -4,20 +4,20 @@ open TseitinParser;;
 
 
 rule token = parse
-  | [' ' '\t' '\n']     			              { token lexbuf }   
+  | [' ' '\t' '\n']     			{ token lexbuf }   
   
   | ['a'-'z'](['1'-'9'] | ['a'-'z'])* as s 	{ VAR s }
   
-  | '('						                          { LPAREN }  
-  | ')'						                          { RPAREN } 
+  | '('						{ LPAREN }  
+  | ')'						{ RPAREN } 
    
-  | "\\/"						                        { OR }
-  | '~'						                          { NOT }
-  | "=>"						                        { IMP }
-  | "<=>"						                        { EQU }
-  | "/\\"						                        { AND }
+  | "\\/"					{ OR }
+  | '~'					        { NOT }
+  | "=>"					{ IMP }
+  | "<=>"				        { EQU }
+  | "/\\"					{ AND }
   
-  | eof            			                    { EOF } 
+  | eof            			        { EOF } 
 
 
 

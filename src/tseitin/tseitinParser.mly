@@ -1,5 +1,5 @@
 %{
-open Tseitin
+open TseitinFormule
 %}
 
 %token <string> VAR 
@@ -15,23 +15,23 @@ open Tseitin
 %right NOT /* pas nécessaire ? */
 
 %start main             	
-%type <Tseitin.tseitin_formule> main
+%type <TseitinFormule.t> main
 
 %%
 
 
 main:                      
-| tseitin_formule EOF                     { $1 }
+| formule EOF                             { $1 }
   ;
 
-  tseitin_formule:	
-| LPAREN tseitin_formule RPAREN           { $2 }
+  formule:	
+| LPAREN formule RPAREN                   { $2 }
 | VAR                                     { Var($1) }
-| tseitin_formule AND tseitin_formule     { And($1,$3) }	
-| tseitin_formule OR tseitin_formule      { Or($1,$3) }													
-| tseitin_formule IMP tseitin_formule     { Imp($1,$3) }
-| tseitin_formule EQU tseitin_formule     { Equ($1,$3) }
-| NOT tseitin_formule                     { Not($2) }			
+| formule AND formule                     { And($1,$3) }	
+| formule OR formule                      { Or($1,$3) }													
+| formule IMP formule                     { Imp($1,$3) }
+| formule EQU formule                     { Equ($1,$3) }
+| NOT formule                             { Not($2) }			
   ;
   
 
