@@ -3,7 +3,6 @@ open Answer
 open Printf
 
 (*** attention : multicoloration d'un sommet possible *)
-(*** optimiser la fusion : travailler sur une seule liste qu'on fait grossir *)
 
 type t = (int*int*((int*int) list))
 
