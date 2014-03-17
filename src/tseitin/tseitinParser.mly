@@ -7,12 +7,10 @@ open TseitinFormule
 %token AND OR IMP NOT EQU
 %token EOF
 
-%left AND
-%left OR
-%left EQU
-%left IMP 
-
 %right NOT /* pas nécessaire ? */
+%left EQU IMP
+%left OR AND
+
 
 %start main             	
 %type <TseitinFormule.t> main

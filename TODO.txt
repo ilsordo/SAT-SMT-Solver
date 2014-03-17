@@ -1,53 +1,35 @@
-print_cnf :
-  - si pas d'arg supplémentaires : affiches "f"
-  - si -d 1 : affiche dans le désordre ? (et commence par un f encore ?)
+Print_cnf : prq l'intégrer au debuggage ? Ne faudrait-il pas plutôt que "-print_cnf" produise une sortie au format DIMACS (càd juste la cnf, sans résolution) et éventuellemnt "-print_cnf -d 1" permette d'avoir à la fois la cnf et la résolution ?
   
   
-ajouter une option "print_assoc" (par ex) pour afficher les correspondances du renommage
+Ajouter une option "-print_assoc" (par ex) pour afficher les correspondances du renommage. Ainsi avec les options "-print_cnf -print_assoc" on verrait bien la cnf créée à partir de la formule initiale 
 
 
-si 0 conflits (avec -d 1) ça n'affiche pas "Conflits : 0"
+Ajouter dans la classe stat la possibilité d'initialiser à 0 une statistique. Comme ça, s'il y a 0 conflit ou pari, les statistiques l'indiquent à l'utilisateur (actuellement, s'il y a 0 conflit la statistique de conflit n'apparait pas car elle n'est jamais créée par exemple)
 
 
-vérifier priorité utilisées dans tseitin
+Vérifier priorité des opérateurs dans parser de tseitin
 
 
-le traitement de % a été ajouté temporairement dans lexer.ml (ou parser je sais plus)
+Le traitement de % a été ajouté temporairement dans lexer.ml (c'est pour gérer des fichiers tests qui finissent par %). Penser à l'enlever
 
 
+J'ai ajouté les fichiers bash pour tseitin et colorie
+
+
+Vérifier format sortie de color (possibilité de ne pas renvoyer un format dot ? enregistrer un dot sans l'afficher dans le terminal ?) et tseitin
 
 
 -------------------------------------------------------------------------------------------
 
+Ajouter des fichiers tests
+
+
 Dans WL : 
   - optimisation : si la variable x est assignée à vraie, dans toute clause c non encore satisfaite où non x apparait (surveillé ou non), on met en place une surveillance sur x
-  
-  
-Tests : 
-  - Construire une batterie de tests intéressants (notamment de petites formules avec des cas pathologiques), 
-  - Pouvoir lancer des tests sur des dossiers de fichiers
-  - Vérifier que la réponse UNSATISFIABLE est correcte par un appel à minisat ?
-  - des fichiers de test ici : http://www.cs.ubc.ca/~hoos/SATLIB/benchm.html
   
   
 Utiliser le type literal partout où c'est possible
 
 
 Passer les champs occurences_pos/neg dans formule.ml ? (et abandonner la création temporaire de ces ensembles dans formule_wl.ml ?)
-
-
-Suggestion de syntaxe :
-
-./tseitin fichier.txt
-  >> affiche SATISFIABLE / UNSATISFIABLE + affection des variables (éventuellement string) si possible
-./tseitin-wl fichier.txt
-./tseitin -algo wl fichier.txt
-./tseitin -cnf fichier.txt
-
-
-./colorie k fichier.col
-./colorie-wl k fichier.col
-./colorie -algo dpll k fichier.col
-  >> affiche sortie au format dot/graphviz
-
 

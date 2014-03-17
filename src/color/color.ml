@@ -64,6 +64,8 @@ let print_answer p k assoc = function
       assoc#iter (print_sommet values p)
 *)      
       
+(* Fonctions d'affichage de la sortie *)
+
 let print_aretes p cnf assoc = (***)
   let rec aux l = match l with
     | [] -> ()

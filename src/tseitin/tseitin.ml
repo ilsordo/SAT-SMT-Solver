@@ -6,7 +6,7 @@ open Printf
 type t = TseitinFormule.t
 
 let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
-  let fresh = new counter 0 string_of_int in
+  let fresh = new counter 0 string_of_int in (* générateur de variables fraiches successives *)
   let rec aux = function
     | Var v -> ((true,v),[])
     | Not f -> 
@@ -40,6 +40,9 @@ let parse input =
     | _ -> 
         Printf.eprintf "Input error\n%!";
         exit 1
+
+
+(* Fonctions d'affichage de la sortie *)
 
 let print_var values p name id =
   if name <> "" && name.[0] <> '_' then
