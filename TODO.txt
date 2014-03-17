@@ -1,3 +1,24 @@
+print_cnf :
+  - si pas d'arg supplémentaires : affiches "f"
+  - si -d 1 : affiche dans le désordre ? (et commence par un f encore ?)
+  
+  
+ajouter une option "print_assoc" (par ex) pour afficher les correspondances du renommage
+
+
+si 0 conflits (avec -d 1) ça n'affiche pas "Conflits : 0"
+
+
+vérifier priorité utilisées dans tseitin
+
+
+le traitement de % a été ajouté temporairement dans lexer.ml (ou parser je sais plus)
+
+
+
+
+-------------------------------------------------------------------------------------------
+
 Dans WL : 
   - optimisation : si la variable x est assignée à vraie, dans toute clause c non encore satisfaite où non x apparait (surveillé ou non), on met en place une surveillance sur x
   

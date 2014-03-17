@@ -49,6 +49,7 @@ let parse input =
         Printf.eprintf "Input error\n%!";
         exit 1
   
+(*
 let print_sommet values p name id =
   if name <> "" && name.[0] <> '_' && values#find id = Some true then
     let l = String.length name in
@@ -61,3 +62,52 @@ let print_answer p k assoc = function
   | Solvable values ->
       fprintf p "s Coloriable en %d couleurs\n" k;
       assoc#iter (print_sommet values p)
+*)      
+      
+let print_aretes p cnf assoc = (***)
+  let rec aux l = match l with
+    | [] -> ()
+    | [v1;v2]::q -> 
+        begin
+         if (v1<0) then
+           match assoc#get_name (-v1) with
+             | None -> assert false
+             | Some s1 ->
+                 let l1 = String.length s1 in
+                 let cut1 = String.index s1 '_' in
+                   if ((String.sub s1 (cut1+1) (l1-cut1-1))="1") then 
+                     begin 
+                       match assoc#get_name (-v2) with
+                         | None -> assert false
+                         | Some s2 -> 
+                             let cut2 = String.index s2 '_' in
+                               Printf.fprintf p "\"%s\" -- \"%s\" \n" (String.sub s1 0 cut1) (String.sub s2 0 cut2)
+                      end
+        end;
+        aux q
+    | t::q -> aux q
+  in aux cnf
+    
+                         
+let print_sommet values p couleurs name id =
+  if name <> "" && name.[0] <> '_' && values#find id = Some true then
+    let l = String.length name in
+    let cut = String.index name '_' in
+    Printf.fprintf p "\"%s\" [shape=circle, style=filled, fillcolor=\"%s\"]\n" (String.sub name 0 cut) (couleurs.((int_of_string (String.sub name (cut+1) (l-cut-1)))-1))
+    
+          
+let print_answer p k assoc cnf = function (***)
+  | Unsolvable -> fprintf p "s Pas de coloriage à %d couleurs\n" k
+  | Solvable values ->
+      begin
+        Random.self_init();
+        let couleurs = Array.make k "" in 
+          for i=0 to k-1 do
+            couleurs.(i) <- ((string_of_float (Random.float 1.0))^","^(string_of_float (Random.float 1.0))^","^(string_of_float (Random.float 1.0)))
+          done;
+        fprintf p "graph {\n";
+        print_aretes p cnf assoc; (***)
+        assoc#iter (print_sommet values p couleurs);
+        fprintf p "}\n"
+     end    
+      

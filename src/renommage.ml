@@ -11,7 +11,7 @@ object (self)
   val mutable values : int Values.t = Values.empty
 
   val mutable names : string Names.t = Names.empty
-
+  
   (* Variable maximale utilisée *)
   method max = count
 

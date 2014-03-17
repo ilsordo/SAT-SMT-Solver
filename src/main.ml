@@ -19,7 +19,7 @@ let print_cnf p (n,f) =
   fprintf p "p cnf %d %d\n" n (List.length f);
   List.iter (fun c -> List.iter (fprintf p "%d ") c; fprintf p "0\n") f 
 
-let print_answer p (answer,assoc,problem) = 
+let print_answer p (answer,assoc,cnf,problem) = (***)
   match problem with
     | Cnf ->
         Answer.print_answer p answer
@@ -28,7 +28,7 @@ let print_answer p (answer,assoc,problem) =
         Tseitin.print_answer p assoc answer
     | Color k ->
         let assoc = match assoc with Some x -> x | None -> assert false in
-        Color.print_answer p k assoc answer
+        Color.print_answer p k assoc cnf answer (***)
 
 
 let main () =
@@ -37,7 +37,7 @@ let main () =
   debug 1 "Using algorithm %s" config.nom_algo;
   if config.print_cnf then debug 1 "Reduction :\n%a\n%!" print_cnf (n,cnf);
   let answer = config.algo n cnf in
-  printf "%a\n%!" print_answer (answer,assoc,config.problem_type);
+  printf "%a\n%!" print_answer (answer,assoc,cnf,config.problem_type); (***)
   debug 1 "Stats :\n%t%!" print_stats;
   check n cnf answer;
   exit 0
