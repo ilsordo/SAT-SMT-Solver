@@ -3,7 +3,7 @@ module Names = Map.Make(struct type t = int let compare = compare end)
 
 
 (* Table de correspondance entre des chaines de caractères et des noms de variables (int) *)
-class renommage =
+class reduction (print_answer : out_channel -> reduction -> answer -> unit) =
 object (self)
   
   val mutable count = 0 (* l'objet gère ses variables fraiches *)
@@ -39,6 +39,8 @@ object (self)
   
   method iter f = Values.iter f values
 
+  method print_answer p answer = print_answer p self answer
+
 end
 
 
@@ -55,8 +57,8 @@ let renommer_clause assoc =
   List.map renommer_litteral
 
   
-let renommer f = (* renvoie CNF avec vars normalisées + table d'association *)
-  let assoc = new renommage in
+let renommer f print_answer = (* renvoie CNF avec vars normalisées + table d'association *)
+  let assoc = new reduction print_answer in
   (List.map (renommer_clause assoc) f, assoc)
 
 
@@ -67,3 +69,13 @@ object
 
   method next = n <- n + 1; f n
 end
+
+
+
+
+
+
+
+
+
+

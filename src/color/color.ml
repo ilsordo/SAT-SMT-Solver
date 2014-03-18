@@ -1,4 +1,4 @@
-open Renommage
+open Reduction
 open Answer
 open Printf
 
@@ -98,7 +98,7 @@ let print_sommet values p couleurs name id =
     Printf.fprintf p "\"%s\" [shape=circle, style=filled, fillcolor=\"%s\"]\n" (String.sub name 0 cut) (couleurs.((int_of_string (String.sub name (cut+1) (l-cut-1)))-1))
     
           
-let print_answer p k assoc cnf = function (***)
+let print_answer k cnf p assoc = function (***)
   | Unsolvable -> fprintf p "s Pas de coloriage à %d couleurs\n" k
   | Solvable values ->
       begin

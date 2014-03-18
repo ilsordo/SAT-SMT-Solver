@@ -1,4 +1,4 @@
-open Renommage
+open Reduction
 open Answer
 
 type t
@@ -7,7 +7,7 @@ val parse : in_channel -> t
 
 val to_cnf : t -> int -> (bool*string) list list
 
-val print_answer : out_channel -> int ->  renommage -> int list list -> answer -> unit
+val print_answer : int -> int list list -> out_channel -> reduction -> answer -> unit
 
 
 

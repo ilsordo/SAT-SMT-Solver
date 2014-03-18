@@ -1,4 +1,4 @@
-open Renommage
+open Reduction
 open TseitinFormule
 open Answer
 open Printf

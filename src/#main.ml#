@@ -24,7 +24,7 @@ let print_answer p (answer,assoc) = (***)
     | None ->
         Answer.print_answer p answer
     | Some reduction ->
-        reduction#print_answer answer
+        reduction#print_answer p answer
 
 let main () =
   parse_args();
