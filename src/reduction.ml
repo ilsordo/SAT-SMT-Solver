@@ -1,11 +1,11 @@
 module Values = Map.Make(String)
 module Names = Map.Make(struct type t = int let compare = compare end)
 
+type print_answer_t = out_channel -> Answer.answer -> unit
 
 (* Table de correspondance entre des chaines de caractères et des noms de variables (int) *)
-class reduction (print_answer : out_channel -> reduction -> answer -> unit) =
+class reduction (f : reduction  -> print_answer_t) =
 object (self)
-  
   val mutable count = 0 (* l'objet gère ses variables fraiches *)
 
   val mutable values : int Values.t = Values.empty (* string vers int *)
@@ -39,7 +39,7 @@ object (self)
   
   method iter f = Values.iter f values
 
-  method print_answer p answer = print_answer p self answer
+  method print_answer p answer = f (self:>reduction) p answer
 
 end
 

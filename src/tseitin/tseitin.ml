@@ -49,7 +49,7 @@ let print_var values p name id =
     let s = if values#find id = Some true then "" else "-" in
     Printf.fprintf p "v %s%s\n" s name
 
-let print_answer p assoc = function
+let print_answer assoc p = function
   | Unsolvable -> fprintf p "s UNSATISFIABLE\n"
   | Solvable values ->
       fprintf p "s SATISFIABLE\n";

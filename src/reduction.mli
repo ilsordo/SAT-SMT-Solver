@@ -1,4 +1,6 @@
-class reduction : (reduction -> Answer.answer -> unit) -> 
+type print_answer_t = out_channel -> Answer.answer -> unit
+
+class reduction : (reduction -> print_answer_t) -> 
 object  
   method max : int
   
@@ -10,16 +12,20 @@ object
 
   method iter : (string -> int -> unit) -> unit
 
-  method print_answer : out_channel -> Answer.answer -> unit
-  
+  method print_answer : print_answer_t
 end
 
-val renommer : (bool*string) list list -> (out_channel -> reduction -> Answer.answer -> unit) -> (int list list*reduction)
+
+val renommer : (bool*string) list list -> (reduction -> print_answer_t) -> (int list list*reduction)
 
 class ['a] counter : int -> (int -> 'a) ->
 object
   method next : 'a
 end
+
+
+
+
 
 
 

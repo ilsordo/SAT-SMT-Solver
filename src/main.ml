@@ -12,7 +12,8 @@ let get_formule input = function
       let (cnf,assoc) = Reduction.renommer (Tseitin.to_cnf (Tseitin.parse input))  (Tseitin.print_answer) in
       (Some assoc,assoc#max,cnf)
   | Color k -> 
-      let (cnf,assoc) = Reduction.renommer (Color.to_cnf (Color.parse input) k) (Color.print_answer k cnf) in
+      let raw = Color.parse input in
+      let (cnf,assoc) = Reduction.renommer (Color.to_cnf raw k) (Color.print_answer k raw) in
       (Some assoc,assoc#max,cnf)
 
 let print_cnf p (n,f) = 
@@ -24,7 +25,7 @@ let print_answer p (answer,assoc) = (***)
     | None ->
         Answer.print_answer p answer
     | Some reduction ->
-        reduction#print_answer answer
+        reduction#print_answer p answer
 
 let main () =
   parse_args();

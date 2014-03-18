@@ -49,23 +49,9 @@ let parse input =
         Printf.eprintf "Input error\n%!";
         exit 1
   
-(*
-let print_sommet values p name id =
-  if name <> "" && name.[0] <> '_' && values#find id = Some true then
-    let l = String.length name in
-    let cut = String.index name '_' in
-    Printf.fprintf p "%s colorié en %s\n" (String.sub name 0 cut) (String.sub name (cut+1) (l-cut-1))
 
-(* Format de sortie ? *)
-let print_answer p k assoc = function
-  | Unsolvable -> fprintf p "s Pas de coloriage à %d couleurs\n" k
-  | Solvable values ->
-      fprintf p "s Coloriable en %d couleurs\n" k;
-      assoc#iter (print_sommet values p)
-*)      
-      
 (* Fonctions d'affichage de la sortie *)
-
+(*
 let print_aretes p cnf assoc = (***)
   let rec aux l = match l with
     | [] -> ()
@@ -89,8 +75,10 @@ let print_aretes p cnf assoc = (***)
         aux q
     | t::q -> aux q
   in aux cnf
-    
-                         
+*)
+
+let print_aretes p l = List.iter (fun (i,j) -> fprintf p "\"%d\" -- \"%d\" \n" i j) l
+
 let print_sommet values p couleurs name id =
   if name <> "" && name.[0] <> '_' && values#find id = Some true then
     let l = String.length name in
@@ -98,7 +86,7 @@ let print_sommet values p couleurs name id =
     Printf.fprintf p "\"%s\" [shape=circle, style=filled, fillcolor=\"%s\"]\n" (String.sub name 0 cut) (couleurs.((int_of_string (String.sub name (cut+1) (l-cut-1)))-1))
     
           
-let print_answer k cnf p assoc = function (***)
+let print_answer k (_,_,l) assoc p = function (***)
   | Unsolvable -> fprintf p "s Pas de coloriage à %d couleurs\n" k
   | Solvable values ->
       begin
@@ -107,9 +95,14 @@ let print_answer k cnf p assoc = function (***)
           for i=0 to k-1 do
             couleurs.(i) <- ((string_of_float (Random.float 1.0))^","^(string_of_float (Random.float 1.0))^","^(string_of_float (Random.float 1.0)))
           done;
-        fprintf p "graph {\n";
-        print_aretes p cnf assoc; (***)
+        fprintf p "graph {\n%a" print_aretes l;
         assoc#iter (print_sommet values p couleurs);
         fprintf p "}\n"
      end    
       
+
+
+
+
+
+
