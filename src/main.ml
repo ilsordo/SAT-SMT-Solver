@@ -34,7 +34,10 @@ let main () =
   begin
     match config.print_cnf with 
       | None -> ()
-      | Some p -> fprintf p "c Reduction :\n%a\n%!" print_cnf (n,cnf)
+      | Some p -> 
+          match assoc with
+            | None -> print_cnf p (n,cnf)
+            | Some assoc -> fprintf p "c Reduction\n%a\n\n%t%!" print_cnf (n,cnf) assoc#print_reduction
   end;
   let answer = config.algo n cnf in
   printf "%a\n%!" print_answer (answer,assoc);
