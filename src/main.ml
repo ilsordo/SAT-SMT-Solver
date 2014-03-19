@@ -20,7 +20,7 @@ let print_cnf p (n,f) =
   fprintf p "p cnf %d %d\n" n (List.length f);
   List.iter (fun c -> List.iter (fprintf p "%d ") c; fprintf p "0\n") f 
 
-let print_answer p (answer,assoc) = (***)
+let print_answer p (answer,assoc) =
   match assoc with
     | None ->
         Answer.print_answer p answer
