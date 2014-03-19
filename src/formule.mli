@@ -4,6 +4,7 @@ exception Clause_vide
 
 class clauseset :
 object
+  method size : int
   method add : clause -> unit
   method hide : clause -> unit
   method is_empty : bool

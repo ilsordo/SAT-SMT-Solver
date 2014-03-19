@@ -9,6 +9,7 @@ object
   method get_paris : bool vartable
   method add_clause : clause -> unit
   method get_clauses : clauseset
+  method get_nb_occ : bool -> int -> int 
   method set_val : bool -> variable -> unit
   method reset_val : variable -> unit
   method find_singleton : (variable*bool) option
