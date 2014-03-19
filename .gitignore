@@ -11,5 +11,5 @@
 src/_build/*
 *.native
 *.byte
-./main
-./gen
+main
+gen
