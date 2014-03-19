@@ -35,12 +35,15 @@ object (self)
     try 
       Some (Names.find x names)
     with Not_found -> None
-      
-  
+       
   method iter f = Values.iter f values
 
   method print_answer p answer = f (self:>reduction) p answer
 
+  method print_reduction p = 
+    Printf.fprintf p "Réduction : \n"; 
+    Values.iter (fun s n -> Printf.fprintf p "%s  ->  %d\n" s n) values
+    
 end
 
 

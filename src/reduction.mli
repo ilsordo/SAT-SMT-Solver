@@ -13,6 +13,8 @@ object
   method iter : (string -> int -> unit) -> unit
 
   method print_answer : print_answer_t
+  
+  method print_reduction : out_channel -> unit
 end
 
 

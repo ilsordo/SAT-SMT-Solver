@@ -4,16 +4,10 @@ Print_cnf : prq l'intégrer au debuggage ? Ne faudrait-il pas plutôt que "-prin
 Ajouter une option "-print_assoc" (par ex) pour afficher les correspondances du renommage. Ainsi avec les options "-print_cnf -print_assoc" on verrait bien la cnf créée à partir de la formule initiale 
 
 
-Ajouter dans la classe stat la possibilité d'initialiser à 0 une statistique. Comme ça, s'il y a 0 conflit ou pari, les statistiques l'indiquent à l'utilisateur (actuellement, s'il y a 0 conflit la statistique de conflit n'apparait pas car elle n'est jamais créée par exemple)
-
-
 Vérifier priorité des opérateurs dans parser de tseitin
 
 
 Le traitement de % a été ajouté temporairement dans lexer.ml (c'est pour gérer des fichiers tests qui finissent par %). Penser à l'enlever
-
-
-J'ai ajouté les fichiers bash pour tseitin et colorie
 
 
 Vérifier format sortie de color (possibilité de ne pas renvoyer un format dot ? enregistrer un dot sans l'afficher dans le terminal ?) et tseitin
