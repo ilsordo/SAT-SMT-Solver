@@ -47,7 +47,7 @@ let parse_args () =
     ("-b",        Arg.Int set_blocking_level,                         "k Interaction depth k");
     ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),"k");
     ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- Tseitin),"");
-    ("-print_cnf",Arg.String parse_output,                            " Prints reduction");
+    ("-print_cnf",Arg.String parse_output,                            "[f|-] Prints reduction to f (- = stdout");
   ] in
   
   Arg.parse speclist (fun s -> config.input <- Some s) use_msg
