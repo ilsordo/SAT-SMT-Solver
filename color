@@ -1,4 +1,5 @@
 #/bin/bash
 
-./main -algo dpll -color $@
-
+./main -color $@ | fdp -Tpdf > tmp
+evince tmp
+rm tmp

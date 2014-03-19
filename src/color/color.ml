@@ -90,12 +90,11 @@ let print_answer k (_,_,l) assoc p = function (***)
   | Unsolvable -> fprintf p "s Pas de coloriage à %d couleurs\n" k
   | Solvable values ->
       begin
-        Random.self_init();
         let couleurs = Array.make k "" in 
           for i=0 to k-1 do
-            couleurs.(i) <- ((string_of_float (Random.float 1.0))^","^(string_of_float (Random.float 1.0))^","^(string_of_float (Random.float 1.0)))
+            couleurs.(i) <- string_of_float (float_of_int i/.(float_of_int k))^",1.0,1.0"
           done;
-        fprintf p "graph {\n%a" print_aretes l;
+        fprintf p "graph {\n %a" print_aretes l;
         assoc#iter (print_sommet values p couleurs);
         fprintf p "}\n"
      end    
