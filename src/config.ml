@@ -6,7 +6,7 @@ type problem = Cnf | Color of int | Tseitin
 type config = 
     { 
       mutable problem_type : problem;
-      mutable print_cnf : bool;
+      mutable print_cnf : out_channel option;
       mutable input : string option; 
       mutable algo : int -> int list list -> Answer.answer; 
       mutable nom_algo : string 
@@ -15,7 +15,7 @@ type config =
 let config = 
   { 
     problem_type = Cnf;
-    print_cnf = false;
+    print_cnf = None;
     input = None;
     algo = Algo_dpll.algo;
     nom_algo = "dpll"
@@ -32,14 +32,22 @@ let parse_args () =
       | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.algo <- algo;
     config.nom_algo <- s in
+
+  let parse_output s =
+    if s = "-" then
+      config.print_cnf <- Some stdout
+    else
+      let out = try Some (open_out s)
+        with Sys_error e -> eprintf "Error : %s" e; None in
+      config.print_cnf <- out in
   
   let speclist = Arg.align [
-    ("-algo",Arg.String parse_algo,"dpll|wl");
-    ("-d",Arg.Int set_debug_level,"k Debug depth k");
-    ("-b",Arg.Int set_blocking_level,"k Interaction depth k");
-    ("-color",Arg.Int (fun k -> config.problem_type <- (Color k)),"k");
-    ("-tseitin",Arg.Unit (fun () -> config.problem_type <- Tseitin),"");
-    ("-print_cnf",Arg.Unit (fun () -> config.print_cnf <- true)," Prints reduction");
+    ("-algo",     Arg.String parse_algo,                              "dpll|wl");
+    ("-d",        Arg.Int set_debug_level,                            "k Debug depth k");
+    ("-b",        Arg.Int set_blocking_level,                         "k Interaction depth k");
+    ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),"k");
+    ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- Tseitin),"");
+    ("-print_cnf",Arg.String parse_output,                            " Prints reduction");
   ] in
   
   Arg.parse speclist (fun s -> config.input <- Some s) use_msg

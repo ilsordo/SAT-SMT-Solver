@@ -25,10 +25,13 @@ let rec indent p k =
  
 (* Usage : remplacer eprintf format arg1 ... argN par debug k format arg1 ... argN *)
 
-class stat =
+class stat init =
 object
   val data : (string,int) Hashtbl.t = Hashtbl.create 10
   
+  initializer
+    List.iter (fun s -> Hashtbl.add data s 0) init
+    
   method record s = 
     try 
       let n = Hashtbl.find data s in
@@ -44,7 +47,7 @@ object
     Hashtbl.iter (fun s n -> fprintf p "[stats] %s = %d\n" s n) data
 end
   
-let stats = new stat
+let stats = new stat ["Conflits";"Paris"] (* Pour afficher Conflits = 0 *)
   
 let record_stat s = stats#record s
 
