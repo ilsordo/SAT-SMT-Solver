@@ -31,7 +31,11 @@ let main () =
   parse_args();
   let (assoc,n,cnf) = get_formule (get_input()) config.problem_type in
   debug 1 "Using algorithm %s" config.nom_algo;
-  if config.print_cnf then debug 1 "Reduction :\n%a\n%!" print_cnf (n,cnf)
+  begin
+    match config.print_cnf with 
+      | None -> ()
+      | Some p -> fprintf p "c Reduction :\n%a\n%!" print_cnf (n,cnf)
+  end;
   let answer = config.algo n cnf in
   printf "%a\n%!" print_answer (answer,assoc);
   debug 1 "Stats :\n%t%!" print_stats;
