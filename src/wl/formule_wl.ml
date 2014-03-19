@@ -28,22 +28,22 @@ object(self)
   val wl_pos : clauseset vartable = new vartable 0 (* pour chaque variable, les clauses où elle apparait positivement et est surveillée *)
   val wl_neg : clauseset vartable = new vartable 0 (* pour chaque variable, les clauses où elle apparait négativement et est surveillée *)
 
- method get_wl lit = (* obtenir les clauses où le littéral lit est surveillé *)
+  method get_wl lit = (* obtenir les clauses où le littéral lit est surveillé *)
     if (fst lit) then
-     match wl_pos#find (snd lit) with
+      match wl_pos#find (snd lit) with
         | None -> assert false (* aurait du être initialisé avant *)
         | Some s -> s
     else
-     match wl_neg#find (snd lit) with
+      match wl_neg#find (snd lit) with
         | None -> assert false (* aurait du être initialisé avant *)
         | Some s -> s
 
 
 
-(* init = prétraitement : enlève tautologies + détecte clauses singletons et fait des assignations en conséquence
-    ATTENTION : init ne détecte aucune clause vide (mais peut en créer). Il faudra s'assurer de l'absence de clauses vides par la suite *)
+  (* init = prétraitement : enlève tautologies + détecte clauses singletons et fait des assignations en conséquence
+     ATTENTION : init ne détecte aucune clause vide (mais peut en créer). Il faudra s'assurer de l'absence de clauses vides par la suite *)
   method init n clauses_init =
-   for i=1 to n do (* on remplie wl_pos et wl_neg par du vide *)
+    for i=1 to n do (* on remplie wl_pos et wl_neg par du vide *)
       wl_pos#set i (new clauseset);
       wl_neg#set i (new clauseset)
     done;
@@ -88,7 +88,7 @@ object(self)
     prepare() 
 
 
-(* Initialise les watched literals en en choisissant 2 par clauses. On s'assurera avant qu'aucune clause n'est singleton *)
+  (* Initialise les watched literals en en choisissant 2 par clauses. On s'assurera avant qu'aucune clause n'est singleton *)
   method init_wl =
     let pull b v temp = (* Extrait 2 éléments *)
       match temp with None -> Some (b,v) | Some l -> raise (WLs_found (l,(b,v))) in
@@ -111,16 +111,16 @@ object(self)
   method watch c l l_former = (* on veut que le littéral l surveille la clause c, et que l_former stop sa surveillance sur c *)
     (self#get_wl l)#add c; (* l sait qu'il surveille c *)
     let (wl1,wl2) = c#get_wl in
-      if l_former = wl1 then
-        begin
-          c#set_wl1 l; (* c sait qu'il est surveillé par l *)
-          (self#get_wl l_former)#remove c (* l_former sait qu'il ne surveille plus c *)
-        end
-      else
-        begin
-          c#set_wl2 l; (* c sait qu'il est surveillé par l *)
-          (self#get_wl l_former)#remove c (* l_former sait qu'il ne surveille plus c *)
-        end
+    if l_former = wl1 then
+      begin
+        c#set_wl1 l; (* c sait qu'il est surveillé par l *)
+        (self#get_wl l_former)#remove c (* l_former sait qu'il ne surveille plus c *)
+      end
+    else
+      begin
+        c#set_wl2 l; (* c sait qu'il est surveillé par l *)
+        (self#get_wl l_former)#remove c (* l_former sait qu'il ne surveille plus c *)
+      end
 
 
   method update_clause c wl = (* on doit quitter la surveillance du littéral wl dans la clause c car un pari vient de le rendre faux // on présuppose wl faux dans c *)
@@ -140,11 +140,11 @@ object(self)
           end
       | Some b ->
           begin
-           if (b=b0) then (* alors (b0,v0) est vrai dans c *) 
+            if (b=b0) then (* alors (b0,v0) est vrai dans c *) 
               begin
                 WL_Nothing (* on ne peut pas déplacer la jumelle mais l'autre littéral est déjà vrai *)
               end  
-           else (* (b0,v0) est faux dans c *)
+            else (* (b0,v0) est faux dans c *)
               try
                 c#get_vpos#iter (fun var -> if (var<>v0 && super#get_pari var <> Some false) then raise (WL_found (true,var)) else ());
                 c#get_vneg#iter (fun var -> if (var<>v0 && super#get_pari var <> Some true) then raise (WL_found (false,var)) else ());
@@ -156,6 +156,12 @@ object(self)
           end
 
 
+  method get_nb_occ b x = 
+    let occ = if b then wl_pos else wl_neg in
+    match occ#find x with
+      | None -> assert false
+      | Some occ -> occ#size
+          
 
 
 

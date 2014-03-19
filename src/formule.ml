@@ -124,6 +124,8 @@ object (self)
       | None -> assert false
       | Some b -> paris#remove v
 
+
+  method get_nb_occ (_:bool) (_:int) = 0 (* Non implémenté *)
   (******)
 
   method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *)
