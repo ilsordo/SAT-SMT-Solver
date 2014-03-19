@@ -1,7 +1,4 @@
-Print_cnf : prq l'intégrer au debuggage ? Ne faudrait-il pas plutôt que "-print_cnf" produise une sortie au format DIMACS (càd juste la cnf, sans résolution) et éventuellemnt "-print_cnf -d 1" permette d'avoir à la fois la cnf et la résolution ?
-  
-  
-Ajouter une option "-print_assoc" (par ex) pour afficher les correspondances du renommage. Ainsi avec les options "-print_cnf -print_assoc" on verrait bien la cnf créée à partir de la formule initiale 
+ 
 
 
 Vérifier priorité des opérateurs dans parser de tseitin

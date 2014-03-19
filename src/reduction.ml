@@ -41,8 +41,9 @@ object (self)
   method print_answer p answer = f (self:>reduction) p answer
 
   method print_reduction p = 
-    Printf.fprintf p "c Réduction : \n"; 
-    Values.iter (fun s n -> Printf.fprintf p "c %s  ->  %d\n" s n) values
+    Printf.fprintf p "c Renommage : \n"; 
+    Values.iter (fun s n -> Printf.fprintf p "c %s  ->  %d\n" s n) values;
+    Printf.fprintf p "\n"; 
     
 end
 

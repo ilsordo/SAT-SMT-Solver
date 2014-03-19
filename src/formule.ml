@@ -14,6 +14,8 @@ object
   val mutable vis = ClauseSet.empty (* clauses visibles *)
   val mutable hid = ClauseSet.empty (* clauses cachées *)
 
+  method size = ClauseSet.cardinal vis
+  
   method hide c = (* cacher la clause c si elle est déjà visible *)
     if (ClauseSet.mem c vis) then 
       begin
