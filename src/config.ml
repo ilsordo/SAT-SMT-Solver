@@ -8,8 +8,10 @@ type config =
       mutable problem_type : problem;
       mutable print_cnf : out_channel option;
       mutable input : string option; 
-      mutable algo : int -> int list list -> Answer.answer; 
-      mutable nom_algo : string 
+      mutable algo : Algo.t;
+      mutable nom_algo : string;
+      mutable heuristic : Heuristic.t;
+      mutable nom_heuristic : string
     }
 
 let config = 
@@ -18,7 +20,9 @@ let config =
     print_cnf = None;
     input = None;
     algo = Algo_dpll.algo;
-    nom_algo = "dpll"
+    nom_algo = "dpll";
+    heuristic = Heuristic.(next polarite_rand);
+    nom_heuristic = "next_rand"
   }
 
 (* Utilise le module Arg pour modifier l'environnement config *)
@@ -33,6 +37,16 @@ let parse_args () =
     config.algo <- algo;
     config.nom_algo <- s in
 
+  let parse_heuristic s =
+    let heuristic = match s with
+      | "next_rand" -> Heuristic.(next polarite_rand)
+      | "next_mf" -> Heuristic.(next polarite_most_frequent)
+      | "rand_rand" -> Heuristic.(rand polarite_rand)
+      | "rand_mf" -> Heuristic.(rand polarite_most_frequent)
+      | "moms" -> Heuristic.moms
+      | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
+    config.heuristic <- heuristic;
+    config.nom_heuristic <- s in
   let parse_output s =
     if s = "-" then
       config.print_cnf <- Some stdout
@@ -43,6 +57,7 @@ let parse_args () =
   
   let speclist = Arg.align [
     ("-algo",     Arg.String parse_algo,                              "dpll|wl");
+    ("-h",        Arg.String parse_heuristic,                         " Heuristic");
     ("-d",        Arg.Int set_debug_level,                            "k Debug depth k");
     ("-b",        Arg.Int set_blocking_level,                         "k Interaction depth k");
     ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),"k");

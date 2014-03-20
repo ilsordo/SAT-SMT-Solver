@@ -13,6 +13,7 @@ object ('a)
   method hide : variable -> unit
   method intersects : 'a -> bool
   method is_empty : bool
+  method size : int
   method mem : variable -> bool
   method show : variable -> unit
   method singleton : classif_varset
@@ -32,6 +33,7 @@ object
   method hide_var : bool -> variable -> unit
   method show_var : bool -> variable -> unit
   method is_empty : bool
+  method size : int
   method is_tauto : bool
   method mem : bool -> variable -> bool
   method singleton : (variable*bool) option

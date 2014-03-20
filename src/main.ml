@@ -1,8 +1,8 @@
-open Answer
 open Lexing
 open Printf
 open Debug
 open Config
+open Algo
 
 let get_formule input = function
   | Cnf -> 
@@ -30,7 +30,7 @@ let print_answer p (answer,assoc) =
 let main () =
   parse_args();
   let (assoc,n,cnf) = get_formule (get_input()) config.problem_type in
-  debug 1 "Using algorithm %s" config.nom_algo;
+  debug 1 "Using algorithm %s and heuristic %s" config.nom_algo config.nom_heuristic;
   begin
     match config.print_cnf with 
       | None -> ()
@@ -39,10 +39,10 @@ let main () =
             | None -> print_cnf p (n,cnf)
             | Some assoc -> fprintf p "c Réduction :\n%a\n%t%!" print_cnf (n,cnf) assoc#print_reduction
   end;
-  let answer = config.algo n cnf in
+  let answer = config.algo config.heuristic n cnf in
   printf "%a\n%!" print_answer (answer,assoc);
   debug 1 "Stats :\n%t%!" print_stats;
-  check n cnf answer;
+  Answer.check n cnf answer;
   exit 0
 
 let _ = main()

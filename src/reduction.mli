@@ -1,4 +1,4 @@
-type print_answer_t = out_channel -> Answer.answer -> unit
+type print_answer_t = out_channel -> Answer.t -> unit
 
 class reduction : (reduction -> print_answer_t) -> 
 object  

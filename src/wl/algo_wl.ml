@@ -6,23 +6,6 @@ open Answer
 
 exception Wl_fail
 
-
-(***************************************************)
-
-
-let next_pari formule = (* Some v si on peut faire le prochain pari sur v, None si tout a été parié *)
-  let n=formule#get_nb_vars in
-  let rec parcours_paris = function
-    | 0 -> None
-    | m -> 
-        if (formule#get_pari m != None) then 
-          parcours_paris (m-1) 
-        else 
-          Some m in
-  parcours_paris n
-
-(***************************************************)
-
 (* constraint_propagation reçoit un ordre d'assignation de b sur la variable var : 
       elle doit faire cette assignation et toutes celles qui en découlent, ssi pas de conflits créés
       si conflits, aucune assignation ne doit être faite + toutes les variables figurant dans l doivent être dé-assignées
@@ -58,21 +41,21 @@ let rec constraint_propagation (formule : Formule_wl.formule_wl) var b l =
 
 
 (* Algo WL *)
-let algo n cnf =
+let algo next_pari n cnf =
   let formule = new formule_wl in
 
 
   let rec aux()= (* aux fait un pari et essaye de le prolonger le plus loin possible *)
-    match next_pari formule with
+    match next_pari (formule:>formule) with
       | None -> 
           debug 1 "Done\n";
           true (* plus rien à parier = c'est gagné *)
-      | Some var ->  
+      | Some (b,var) ->  
           try 
             record_stat "Paris";
-            debug 2 "WL : trying with %d true" var ;
+            debug 2 "WL : trying with %d %B" var b;
             debug 2 "WL : starting propagation";
-            let l = (constraint_propagation formule var true []) in (* lève une exception si conflit créé, sinon renvoie liste des vars assignées *)
+            let l = (constraint_propagation formule var b []) in (* lève une exception si conflit créé, sinon renvoie liste des vars assignées *)
               if aux () then (* on réussit à poursuivre l'assignation jusqu'au bout *)
                 begin
                   true (* c'est gagné *)
@@ -88,9 +71,9 @@ let algo n cnf =
           with
             | Wl_fail ->   
                 try 
-                  debug 2 "WL : trying with %d false" var ;
+                  debug 2 "WL : trying with %d %B" var (not b);
                   debug 2 "WL : starting propagation";
-                  let l = constraint_propagation formule var false [] in (* on a encore une chance en pariant faux *)
+                  let l = constraint_propagation formule var (not b) [] in (* on a encore une chance en pariant faux *)
                   if aux () then (* on réussit à poursuivre l'assignation jusqu'au bout *)
                     begin
                      true (* c'est gagné *)

@@ -5,8 +5,10 @@ type config =
       mutable problem_type : problem;
       mutable print_cnf : out_channel option;
       mutable input : string option; 
-      mutable algo : int -> int list list -> Answer.answer; 
-      mutable nom_algo : string 
+      mutable algo : Algo.t; 
+      mutable nom_algo : string;
+      mutable heuristic : Heuristic.t;
+      mutable nom_heuristic : string
     }
 
 val config : config

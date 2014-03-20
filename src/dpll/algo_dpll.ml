@@ -8,19 +8,6 @@ type propagation_result = Fine of variable list | Conflict
 
 (*************)
 
-let next_pari formule = (* Some v si on doit faire le prochain pari sur v, None si tout a été parié *)
-  let n=formule#get_nb_vars in
-  let rec parcours_paris = function
-    | 0 -> None
-    | m -> 
-        if (formule#get_pari m != None) then 
-          parcours_paris (m-1) 
-        else 
-          Some m in
-  parcours_paris n
-
-(*************)
-
 (* constraint_propagation : 
     doit effectuer toutes les propagations possibles
       si conflit : doit annuler toutes les assignations propagées + renvoyer Conflict
@@ -64,7 +51,7 @@ let rec constraint_propagation formule l =
             
             
 (* Algo DPLL *)
-let algo n cnf = 
+let algo next_pari n cnf = 
   let formule = new formule_dpll in
 
   let try_pari var b = (* assigne b à la variable var, fait évoluer les clauses en conséquence *)
@@ -84,19 +71,19 @@ let algo n cnf =
           debug 2 ~stops:true "DPLL : conflict found";
           false
       |  Fine var_prop -> 
-          match next_pari formule with (* un pari est nécessaire pour prolonger l'assignation courante des variables *)
+          match next_pari (formule:>formule) with (* un pari est nécessaire pour prolonger l'assignation courante des variables *)
             | None -> 
                 debug 1 "Done\n";
                 true (* plus aucun pari à faire, c'est gagné *)
-            | Some var -> 
+            | Some (b,var) -> 
                 record_stat "Paris";
-                try_pari var true; (* on fait un pari : true sur var *)
+                try_pari var b; (* on fait un pari : true sur var *)
                 if aux () then (* on essaye de le prolonger *)
                   true (* on a rendu la formule satisfiable *)
                 else
                   begin
                     formule#reset_val var; (* on doit annuler le pari *)
-                    try_pari var false; (* on retente un autre pari : false sur var *)
+                    try_pari var (not b); (* on retente un autre pari : false sur var *)
                     if aux() then (* on essaye de le prolonger *)
                       true (* on a rendu la formule satisfiable *)
                     else

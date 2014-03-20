@@ -50,6 +50,8 @@ object (self : 'varset)
 
   method is_empty = VarSet.is_empty vis
 
+  method size = VarSet.cardinal vis
+
   method singleton = (* indique si vis est vide, singleton, ou contient plus de 1 élément *)
     match VarSet.cardinal vis with
       | 0 -> Empty
@@ -101,6 +103,8 @@ object
   method is_tauto = vpos#intersects vneg (* indique si la clause est une tautologie *)
     
   method is_empty = vpos#is_empty && vneg#is_empty
+
+  method size = vpos#size + vneg#size
     
   method hide_var b v = (* cache le littéral (b,v) *)
     if b then
