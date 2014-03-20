@@ -1,3 +1,1 @@
-open Answer
-
-val algo : int -> int list list -> answer
+val algo : Algo.t

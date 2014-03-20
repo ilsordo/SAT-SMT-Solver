@@ -1,7 +1,7 @@
 module Values = Map.Make(String)
 module Names = Map.Make(struct type t = int let compare = compare end)
 
-type print_answer_t = out_channel -> Answer.answer -> unit
+type print_answer_t = out_channel -> Answer.t -> unit
 
 (* Table de correspondance entre des chaines de caractères et des noms de variables (int) *)
 class reduction (f : reduction  -> print_answer_t) =
