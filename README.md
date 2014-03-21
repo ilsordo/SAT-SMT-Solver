@@ -1,16 +1,28 @@
- ######################################################
- #                                                    #
- #   PROJET 2 : Rendu 1                               #
- #                                                    #
- #   Maxime LESOURD                                   #
- #   Yassine HAMOUDI                                  #
- #                                                    #
- ######################################################
+
+#   PROJET 2 : Rendu 2
+
+#### Maxime LESOURD
+#### Yassine HAMOUDI
 
 
 
-Compilation et exécution    
-========================
+******************************************************************************
+
+1. Compilation et exécution    
+2. Debuggage et exécution pas à pas
+3. Structures de données
+4. Algorithme DPLL
+5. Algorithme Watched Literals
+6. Suivi de l'algorithme
+7. Générateur
+8. Analyse des performances
+
+******************************************************************************
+
+
+
+1. Compilation et exécution    
+===========================
 
 Pour compiler, entrer : 
 
@@ -36,8 +48,8 @@ Note: resol-wl accepte les mêmes options que resol
 
 
 
-Debuggage et exécution pas à pas
-================================
+2. Debuggage et exécution pas à pas
+===================================
 
 Le debuggage est facilité par l'ajout au sein du code de lignes de la forme : 
 
@@ -67,8 +79,8 @@ Enfin, lorsque le programme est exécuté avec une option de debuggage, des stat
 
 
 
-Structures de données
-=====================
+3. Structures de données
+========================
 
 Les structures suivantes sont utilisées par l'algorithme :
 
@@ -118,8 +130,8 @@ formule_wl.ml:
 
 
 
-Algorithme DPLL
-===============
+4. Algorithme DPLL
+==================
 
 L'algorithme DPLL est implémenté comme une alternance de phases de propagation de contraintes et de paris sur des variables libres.
 
@@ -136,8 +148,8 @@ La première étape de propagation des contraintes n'est jamais annulée (sauf s
 
 
 
-Algorithme Watched Literals
-===========================
+5. Algorithme Watched Literals
+==============================
 
 Prétraitement:
 --------------
@@ -167,8 +179,8 @@ Les différents opérations menées prennent appuies sur les deux faits suivants
 
 
 
-Suivi de l'algorithme
-=====================
+6. Suivi de l'algorithme
+========================
 
 Un système de suivi de l'algorithme est fourni par le module Debug, il permet d'afficher sélectivement des informations sur le déroulement de l'algorithme en plaçant des appels à 'debug' paramétrés par une profondeur dans le code. Le paramètre -d permet alors d'afficher les informations jusqu'à une certaine profondeur et -b de mettre l'exécution en pause sur certains évènements.
 
@@ -180,15 +192,15 @@ Le résultat renvoyé par l'exécutable est donc systématiquement vérifié et 
 
 
 
-Générateur
-==========
+7. Générateur
+=============
 
 Un générateur de clauses est fourni avec le solveur, il génère des clauses uniformément (on extrait les premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.
 
 
 
-Analyse des performances
-========================
+8. Analyse des performances
+===========================
 
 Les algorithmes terminent instantanément sur les exemples fournis avec l'énoncé.
 
