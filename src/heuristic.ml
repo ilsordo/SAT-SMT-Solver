@@ -77,9 +77,8 @@ let moms (formule:formule) = (* prochain litteral : celui qui apparait le plus d
         n in
     let rec max_occ (max, lit) = function
       | 0 -> lit
-      | v when formule#get_pari v <> None -> Debug.debug 1 "Deja %d" v; max_occ (max, lit) (v-1)
+      | v when formule#get_pari v <> None -> max_occ (max, lit) (v-1)
       | v -> 
-                Debug.debug 1 "Candidat %d" v;
           let pos = elements#fold (count_occ (true,v)) 0 in
           let neg = elements#fold (count_occ (false,v)) 0 in
           let (max',lit') = 
@@ -88,12 +87,10 @@ let moms (formule:formule) = (* prochain litteral : celui qui apparait le plus d
             else 
               (neg,(false,v)) in
           let (max, lit) = 
-            if max'>=max then (* <------------ *)
-              (Debug.debug 1 "On prend %d" v;
-              (max',lit') )
+            if max'>=max then (* <---------------------------------------- *)
+              (max',lit')
             else 
-               (Debug.debug 1 "Better %d avec %d" (snd lit) max;
-              (max,lit)) in
+              (max,lit) in
           max_occ (max, lit) (v-1) in
     let lit = max_occ (0,(false,0)) n in
     assert (snd lit <> 0); (* Should not happen *)
