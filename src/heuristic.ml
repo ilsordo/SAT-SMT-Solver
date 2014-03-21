@@ -4,15 +4,15 @@ type t = formule -> Clause.literal option
 
 type pol = Formule.formule -> Clause.variable -> bool
 
-let polarite_rand _ _ = Random.bool()
+let polarite_rand _ _ = Random.bool() (* prochaine polarite = booleen aleatoire *)
 
-let polarite_most_frequent formule x =
+let polarite_most_frequent formule x = (* prochaine polarite = celle qui permet de rendre le plus d clauses vraies (via x) *)
   if formule#get_nb_occ true x > formule#get_nb_occ false x then
     true
   else
     false
 
-let next polarite formule = 
+let next polarite formule = (* prochaine variable = plus grande variable disponible *)
   let n = formule#get_nb_vars in
   let rec parcours_paris = function
     | 0 -> None
@@ -25,7 +25,7 @@ let next polarite formule =
 
 
 (* Bug *)
-let rand polarite formule =
+let rand polarite formule = (* prochaine variable = variable aleatoire *)
   let n = formule#get_nb_vars in
   let count = formule#get_paris#size in
   if count = n then 
@@ -52,7 +52,7 @@ let rand polarite formule =
     find_pari n (Random.int (n-count))
     
     
-let moms (formule:formule) = 
+let moms (formule:formule) = (* prochain litteral : celui qui apparait le plus dans les clauses de taille min *)
   let n = formule#get_nb_vars in
   if formule#get_paris#size = n then
     None
@@ -77,8 +77,9 @@ let moms (formule:formule) =
         n in
     let rec max_occ (max, lit) = function
       | 0 -> lit
-      | v when formule#get_pari v <> None -> max_occ (max, lit) (v-1)
+      | v when formule#get_pari v <> None -> Debug.debug 1 "Deja %d" v; max_occ (max, lit) (v-1)
       | v -> 
+                Debug.debug 1 "Candidat %d" v;
           let pos = elements#fold (count_occ (true,v)) 0 in
           let neg = elements#fold (count_occ (false,v)) 0 in
           let (max',lit') = 
@@ -87,10 +88,12 @@ let moms (formule:formule) =
             else 
               (neg,(false,v)) in
           let (max, lit) = 
-            if max'>max then
-              (max',lit') 
+            if max'>=max then (* <------------ *)
+              (Debug.debug 1 "On prend %d" v;
+              (max',lit') )
             else 
-              (max,lit) in
+               (Debug.debug 1 "Better %d avec %d" (snd lit) max;
+              (max,lit)) in
           max_occ (max, lit) (v-1) in
     let lit = max_occ (0,(false,0)) n in
     assert (snd lit <> 0); (* Should not happen *)
