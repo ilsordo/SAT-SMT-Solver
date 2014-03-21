@@ -1,0 +1,53 @@
+
+
+Améliorations : 
+--------------
+  - pouvoir fixer grain de passage x
+
+
+
+
+FILES_TEST.SH : 
+  - tant qu'on réussit à lire un triplé n l k
+  - faire x fois : 
+      - générer un test n l k aléatoire et le mettre dans un fichier
+      - exécuter tout le monde dessus
+      - ajouter le temps de chacun à un compteur perso
+  - diviser chaque compteur perso par x
+  - générer une ligne de COMPARAISON.DAT
+  - très sensible au retour de ligne
+  - ajouter sur première ligne : nb_test precision (pour éviter lignes de fin fichier)
+  
+  
+
+TEST : 
+
+100 4   88
+74  41  33
+12  854 44
+44  56  5
+
+(sous-entendu : n l k)
+
+
+
+COMPARAISON.DAT :
+
+n_l_k DPLL-MOMS WL-RAND WL-MOMS
+8_7_1 2.99      2.3     21.1
+4_9_1 7.23      1.12    6.6
+2_3_9 2.94      3.41    24.618
+6_2_4 4.59      28.621  52.5
+
+
+SCRIPT-PLOT.P :
+  
+  Titre : 
+    - description des tests (k fixé, k=4*n...)
+  Abscisse :
+    - n_l_k ou (n,l,k) pour chaque cas (ordonné ?)
+    - Tests/Testcases
+  Ordonnée : 
+    - temps exécution
+  Légende : 
+    - algo machin + heuristique

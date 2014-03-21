@@ -1,0 +1,5 @@
+Lexer modifié pour géré fin fichier avec %
+
+entrer : 
+    bash files-test.sh dossier
+ pour avoir les temps d'exécution de dpll et wl sur les fichiers figurant dans le dossier "dossier"
