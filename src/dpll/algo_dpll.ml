@@ -62,7 +62,6 @@ let algo next_pari n cnf =
         Clause_vide ->
           assert false in
   
-
   let rec aux () =  (* essaye de poursuivre les assignations courantes jusqu'à rendre la formule vraie. Renvoie true si réussit, false si impossible *)
     debug 2 "DPLL : starting propagation";
     match constraint_propagation formule [] with (* on commence par faire les assignations nécessaires (singletons, polarité unique) *)

@@ -57,16 +57,6 @@ object (self : 'varset)
       | 0 -> Empty
       | 1 -> Singleton (VarSet.choose vis)
       | _ -> Bigger
-
-(*method singleton = (* tentative infructueuse d'améliorer la complexité de la méthode singleton *)
-    try 
-      let v = VarSet.min_elt vis in
-        if (v = VarSet.max_elt vis) then
-          (Singleton v)
-        else
-          Bigger
-    with
-      Not_found -> Empty*)
       
   method iter f = VarSet.iter f vis 
 

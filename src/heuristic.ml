@@ -32,15 +32,26 @@ let rand polarite formule =
     None
   else
     (* Traverse k variables libres à partir de i*) 
-    let rec find_pari i = function
-      | 0 -> Some (polarite formule i,i)
+(*  let rec find_pari i = function
+      | 0 -> Some (polarite formule i,i) (* qd on a atteint 0, on doit prendre la prochaine var libre disponible, qui n'a pas de raison d'être i *)
       | k -> 
           Debug.debug 1 "Rand %d" k;
           match formule#get_paris#find k with
-            | None -> find_pari (i+1) (k-1)
-            | Some _ -> find_pari (i+1) k in
+            | None -> find_pari (i+1) (k-1) (* prq i+1 alors que tu commences avec i=n ? *)
+            | Some _ -> find_pari (i+1) k in (* idem *)
     find_pari n (Random.int (n-count))
-
+*)
+    let rec find_pari i k =
+      match formule#get_paris#find i with
+        | None -> 
+            if k=0 then
+              Some (polarite formule i,i)
+            else
+              find_pari (i-1) (k-1)
+        | Some _ -> find_pari (i-1) k in
+    find_pari n (Random.int (n-count))
+    
+    
 let moms (formule:formule) = 
   let n = formule#get_nb_vars in
   if formule#get_paris#size = n then
