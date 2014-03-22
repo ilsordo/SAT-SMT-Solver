@@ -31,16 +31,6 @@ let rand polarite formule = (* prochaine variable = variable aleatoire *)
   if count = n then 
     None
   else
-    (* Traverse k variables libres à partir de i*) 
-(*  let rec find_pari i = function
-      | 0 -> Some (polarite formule i,i) (* qd on a atteint 0, on doit prendre la prochaine var libre disponible, qui n'a pas de raison d'être i *)
-      | k -> 
-          Debug.debug 1 "Rand %d" k;
-          match formule#get_paris#find k with
-            | None -> find_pari (i+1) (k-1) (* prq i+1 alors que tu commences avec i=n ? *)
-            | Some _ -> find_pari (i+1) k in (* idem *)
-    find_pari n (Random.int (n-count))
-*)
     let rec find_pari i k =
       match formule#get_paris#find i with
         | None -> 
@@ -51,7 +41,9 @@ let rand polarite formule = (* prochaine variable = variable aleatoire *)
         | Some _ -> find_pari (i-1) k in
     find_pari n (Random.int (n-count))
     
-    
+(* Max par rapport au premier membre, priorité au premier *)
+let max_v (x1,v1) (x2,v2) = if x1>=x2 then (x1,v1) else (x2,v2)
+
 let moms (formule:formule) = (* prochain litteral : celui qui apparait le plus dans les clauses de taille min *)
   let n = formule#get_nb_vars in
   if formule#get_paris#size = n then
@@ -81,17 +73,57 @@ let moms (formule:formule) = (* prochain litteral : celui qui apparait le plus d
       | v -> 
           let pos = elements#fold (count_occ (true,v)) 0 in
           let neg = elements#fold (count_occ (false,v)) 0 in
-          let (max',lit') = 
-            if pos>neg then 
-              (pos,(true,v)) 
-            else 
-              (neg,(false,v)) in
-          let (max, lit) = 
-            if max'>=max then (* <---------------------------------------- *)
-              (max',lit')
-            else 
-              (max,lit) in
+          let (max',lit') = max_v (pos,(true,v)) (neg,(false,v)) in
+          let (max, lit) = max_v (max',lit') (max,lit) in
           max_occ (max, lit) (v-1) in
     let lit = max_occ (0,(false,0)) n in
     assert (snd lit <> 0); (* Should not happen *)
     Some lit
+
+let dlis (formule:formule) =
+  let n = formule#get_nb_vars in
+  if formule#get_paris#size = n then
+    None
+  else
+    let scores_pos = new vartable 0 in
+    let scores_neg = new vartable 0 in
+    let add pol w v =
+      let scores = if pol then scores_pos else scores_neg in
+      match scores#find v with
+        | None -> scores#set v w
+        | Some s -> scores#set v (s+.w) in
+    formule#get_clauses#iter 
+      (fun c ->
+        let w = 2. ** (-. (float_of_int c#size)) in
+        c#get_vpos#iter (add true w);
+        c#get_vneg#iter (add false w)
+      );
+    let (_,lit) = scores_pos#fold
+      (fun v w curr -> max_v (w,(true,v)) curr) 
+      (scores_neg#fold 
+         (fun v w curr -> max_v (w,(true,v)) curr) 
+         (0.,(false,0))
+      ) in
+    assert (snd lit <> 0); (* Should not happen *)
+    Some lit
+      
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

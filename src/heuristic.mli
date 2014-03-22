@@ -12,7 +12,7 @@ val rand : pol -> t
 
 val moms : t
 
-
+val dlis : t
 
 
 
