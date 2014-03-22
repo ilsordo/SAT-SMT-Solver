@@ -45,7 +45,7 @@ object(self)
     
   method private get_occurences occ v =  (* Accède à l'une des occurences (occ) de la variable v, en supposant que cet ensemble a été initialisé *)
     match occ#find v with
-      | None -> debug 1 "AAARGH %d" v;assert false (* cet ensemble aurait du être initialisé *) 
+      | None -> assert false (* cet ensemble aurait du être initialisé *) 
       | Some occurences -> occurences
 
   method private hide_occurences v_ref c =  (* Cache une clause des occurences de toutes les variables qu'elle contient, sauf v_ref *)

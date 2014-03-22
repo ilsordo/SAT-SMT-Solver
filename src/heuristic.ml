@@ -6,7 +6,7 @@ type pol = Formule.formule -> Clause.variable -> bool
 
 let polarite_rand _ _ = Random.bool() (* prochaine polarite = booleen aleatoire *)
 
-let polarite_most_frequent formule x = (* prochaine polarite = celle qui permet de rendre le plus d clauses vraies (via x) *)
+let polarite_most_frequent formule x = (* prochaine polarite = celle qui permet de rendre le plus de clauses vraies (via x) *)
   if formule#get_nb_occ true x > formule#get_nb_occ false x then
     true
   else
