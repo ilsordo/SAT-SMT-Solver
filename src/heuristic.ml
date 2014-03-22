@@ -89,10 +89,15 @@ let dlis (formule:formule) =
     let scores_pos = new vartable 0 in
     let scores_neg = new vartable 0 in
     let add pol w v =
-      let scores = if pol then scores_pos else scores_neg in
-      match scores#find v with
-        | None -> scores#set v w
-        | Some s -> scores#set v (s+.w) in
+      if formule#get_pari v = None then
+        let scores = if pol then scores_pos else scores_neg in
+        match scores#find v with
+          | None -> scores#set v w
+          | Some s -> scores#set v (s+.w) in
+    for v = 1 to n do
+      add true 0. n;
+      add false 0. v
+    done;
     formule#get_clauses#iter 
       (fun c ->
         let w = 2. ** (-. (float_of_int c#size)) in
@@ -103,89 +108,11 @@ let dlis (formule:formule) =
       (fun v w curr -> max_v (w,(true,v)) curr) 
       (scores_neg#fold 
          (fun v w curr -> max_v (w,(false,v)) curr) 
-         (0.,(false,0))
+         (0.,(false,-1))
       ) in
     assert (snd lit <> 0); (* Should not happen *)
     Some lit
       
-    
-(*
-
-
-let dlis (formule:formule) = (* prochain litteral : celui qui rend le plus de clauses vraies *)
-  let n = formule#get_nb_vars in
-  if formule#get_paris#size = n then
-    None
-  else
-    let rec most_eff (max,lit) = function
-      | 0 -> lit
-      | v when formule#get_pari v <> None -> most_eff (max,lit) (v-1) 
-      | v -> 
-          let pos = formule#get_nb_occ true v in
-          let neg = formule#get_nb_occ false v in
-          let (max',lit') = 
-            if pos>neg then 
-              (pos,(true,v)) 
-            else 
-              (neg,(false,v)) in
-          let (max, lit) = 
-            if max'>=max then
-              (max',lit')
-            else 
-              (max,lit) in      
-          most_eff (max, lit) (v-1) in      
-    let lit = most_eff (0,(false,0)) n in
-    assert (snd lit <> 0); (* Should not happen *)
-    Some lit       
-      
-      
-      
-      
-let dlis_score (formule:formule) = (* prochain litteral : celui qui a le meilleur score *)
-  let n = formule#get_nb_vars in
-  if formule#get_paris#size = n then
-    None
-  else
-    let score b v = 
-      let occ=formule#get_occ b v in
-        occ#fold (fun c s -> s+.(1./.(2.**(-.(float_of_int c#size)))))  0. in
-    let rec high_score (max,lit) = function
-      | 0 -> lit
-      | v when formule#get_pari v <> None -> high_score (max,lit) (v-1) 
-      | v -> 
-          let s_pos = score true v in
-          let s_neg = score false v in
-          let (max',lit') = 
-            if s_pos>s_neg then 
-              (s_pos,(true,v)) 
-            else 
-              (s_neg,(false,v)) in
-          let (max, lit) = 
-            if max'>=max then
-              (max',lit')
-            else 
-              (max,lit) in      
-          high_score (max, lit) (v-1) in      
-    let lit = high_score (0.,(false,0)) n in
-    assert (snd lit <> 0); (* Should not happen *)
-    Some lit           
-    
-    
-    *)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
