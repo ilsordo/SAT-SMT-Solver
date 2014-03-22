@@ -1,62 +1,66 @@
 #!/bin/bash
 
 
-rm -f donnes.dat
+rm -f donnees.dat
 
-x=2 # nb de repetition de chaque test
 
-#echo "Temps d'exécution des algorithmes ($x passages)" >> donnees.dat 
-echo "n_l_k WL DPLL" >> donnees.dat
 
-while read line
+read NB_ALGOS # nb d'algos qu'on va utiliser (1 algo = wl ou dpll + 1 heuristique)
+
+for i in `seq 1 $NB_ALGOS` # on recupère tous les algos
 do
-  for i in $line
-  do
-    if [[ $place -eq 0 ]]
-      then 
-        n=$i
-        place=1
-      else
-        if [[ $place -eq 1 ]]
-          then 
-            l=$i
-            place=2
-          else
-            if [[ $place -eq 2 ]]
-              then 
-                k=$i
-                place=0
-            fi
-        fi
-    fi
-  done
+  read ALGO HEUR
+  algos[$i]=$ALGO # wl ou dpll
+  heurs[$i]=$HEUR # 1 heuristique
+done
   
-  WL=0
-  DPLL=0
+read NB_TESTS NB_PASSAGES # nb de tests qu'on va mener / nb de fois que chaque test sera répété
+
+
+# on rempli le début de donnees.dat
+echo "$NB_ALGOS $NB_PASSAGES" >> donnees.dat
+printf "n_l_k" >> donnees.dat
+for f in `seq 1 $NB_ALGOS`
+do
+  printf " %s+%s" ${algos[$f]} ${heurs[$f]}  >> donnees.dat
+done
+printf "\n"  >> donnees.dat
+
+
+
+for j in `seq 1 $NB_TESTS`
+do
+  read n l k # on récupère un test = un triplet (n,l,k)
+  
+  for p in `seq 1 $NB_ALGOS`
+  do
+    res[$p]=0 # on met les tps d'exécution pour chaque algo à 0
+  done
    
-  STORE=$(pwd)
+  STORE=$(pwd) # on sauve le répertoire dans lequel on est
   cd ..
-  cd ..
-  for j in `seq 1 $x`
+  cd .. # on est placé au niveau de l'exécutable resol
+  for h in `seq 1 $NB_PASSAGES`
   do
     rm -f /tmp/cnf-temp.txt
-    ./gen $n $l $k >> /tmp/cnf-temp.txt
+    ./gen $n $l $k >> /tmp/cnf-temp.txt # on génère un test (n,l,k) aléatoire
 
-    echo "passage $j sur ($n,$l,$k) pour WL"
-    /usr/bin/time -f'%U' -o /tmp/stat-temp.txt ./resol /tmp/cnf-temp.txt
-    TEMP=`cat /tmp/stat-temp.txt`
-    WL=`echo "$WL + $TEMP" | bc -l`
- 
-    echo "passage $j sur ($n,$l,$k) pour DPLL"   
-    /usr/bin/time -f'%U' -o /tmp/stat-temp.txt ./resol-wl /tmp/cnf-temp.txt 
-    TEMP=`cat /tmp/stat-temp.txt`
-    DPLL=`echo "$DPLL + $TEMP" | bc -l`
+    for m in `seq 1 $NB_ALGOS` # pour chaque algo...
+    do
+      echo "(test $j / $NB_TESTS) passage $h sur ($n,$l,$k) pour ${algos[$m]} avec ${heurs[$m]}"
+      /usr/bin/time -f'%U' -o /tmp/stat-temp.txt ./resol -algo ${algos[$m],,} -h ${heurs[$m],,}  /tmp/cnf-temp.txt # on récupère le tps d'exécution
+      TEMP=`cat /tmp/stat-temp.txt`
+      res[$m]=`echo "${res[$m]} + $TEMP" | bc -l` # on l'ajoute au temps stocké pour cet algo
+    done 
   done
-  cd $STORE
-  
-  WL=`echo "$WL / $x" | bc -l`
-  DPLL=`echo "$DPLL / $x" | bc -l`
-  
-  echo "($n,$l,$k)" $WL $DPLL >> donnees.dat 
-done
+  cd $STORE # on revient dans le répertoire du début
 
+  # on enregistre dans donnees.dat les tps d'exécution moyen de chaque algo sur (n,l,k)
+  printf "(%d,%d,%d)" $n $l $k >> donnees.dat  
+  for r in `seq 1 $NB_ALGOS`
+  do
+    res[$r]=`echo "scale=3; ${res[$r]} / $NB_PASSAGES" | bc -l` # on divise par le nombres de passages pour avoir un temps moyen d'exécution pour chaque algo
+    printf " %s" ${res[$r]} >> donnees.dat
+  done
+  printf "\n" >> donnees.dat
+done

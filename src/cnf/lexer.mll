@@ -11,7 +11,6 @@ rule token = parse
   | ['1'-'9']['0'-'9']* as s 	{ INT (int_of_string s) } 
   | "0"						            { ENDC }
   | eof            			      { EOF } 
-  | "%"            			      { EOF } 
 
 
 and comment = parse

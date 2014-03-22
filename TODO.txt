@@ -1,13 +1,8 @@
- 
-
-
 Vérifier priorité des opérateurs dans parser de tseitin
 
+Corriger sortie de color
 
-Le traitement de % a été ajouté temporairement dans lexer.ml (c'est pour gérer des fichiers tests qui finissent par %). Penser à l'enlever
-
-
-Vérifier format sortie de color (possibilité de ne pas renvoyer un format dot ? enregistrer un dot sans l'afficher dans le terminal ?) et tseitin
+Renommer color en colorie (cf sujet)
 
 
 -------------------------------------------------------------------------------------------
