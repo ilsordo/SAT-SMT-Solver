@@ -1,5 +1,5 @@
 BUILD = src/_build
-CC = ocamlbuild -I src -build-dir $(BUILD)
+CC = ocamlbuild -I src -libs unix -build-dir $(BUILD)
 
 all: generator solver
 
