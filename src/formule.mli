@@ -20,6 +20,7 @@ class ['a] vartable :
   int ->
 object
   method iter : (variable -> 'a -> unit) -> unit
+  method fold : 'b.(variable -> 'a -> 'b -> 'b) -> 'b -> 'b
   method find : variable -> 'a option
   method mem : variable -> bool
   method remove : variable -> unit

@@ -44,6 +44,7 @@ let parse_args () =
       | "rand_rand" -> Heuristic.(rand polarite_rand)
       | "rand_mf" -> Heuristic.(rand polarite_most_frequent)
       | "moms" -> Heuristic.moms
+      | "dlis" -> Heuristic.dlis
       | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.heuristic <- heuristic;
     config.nom_heuristic <- s in
@@ -58,8 +59,8 @@ let parse_args () =
   let speclist = Arg.align [
     ("-algo",     Arg.String parse_algo,                              "dpll|wl");
     ("-h",        Arg.String parse_heuristic,                         " Heuristic");
-    ("-d",        Arg.Int set_debug_level,                            "k Debug depth k");
-    ("-b",        Arg.Int set_blocking_level,                         "k Interaction depth k");
+    ("-d",        Arg.Int debug#set_debug_level,                            "k Debug depth k");
+    ("-b",        Arg.Int debug#set_blocking_level,                         "k Interaction depth k");
     ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),"k");
     ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- Tseitin),"");
     ("-print_cnf",Arg.String parse_output,                            "[f|-] Prints reduction to f (- = stdout");

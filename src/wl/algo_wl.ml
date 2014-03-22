@@ -13,26 +13,26 @@ exception Wl_fail
 *)
 (* l : liste des assignations effectuées depuis le dernier pari, inclu *)
 let rec constraint_propagation (formule : Formule_wl.formule_wl) var b l =
-  debug 5 "Propagation : setting %d to %B" var b;
+  debug#p 5 "Propagation : setting %d to %B" var b;
   formule#set_val b var; (* on pari b sur var *)
-  debug 3 "WL : abandon watched literal %d %B required" var (not b); 
+  debug#p 3 "WL : abandon watched literal %d %B required" var (not b); 
   (formule#get_wl (not b,var))#fold  (* on parcourt  les clauses où var est surveillée et est devenue fausse, ie là où il faut surveiller un nouveau littéral *) 
     (fun c l_next -> match (formule#update_clause c (not b,var)) with
       | WL_Conflit -> 
-         record_stat "Conflits";
-         debug 2 ~stops:true "WL : Conflict : clause %d false " c#get_id;
-         debug 4 "Propagation : cannot leave wl %B %d in clause %d" (not b) var c#get_id; 
+         stats#record "Conflits";
+         debug#p 2 ~stops:true "WL : Conflict : clause %d false " c#get_id;
+         debug#p 4 "Propagation : cannot leave wl %B %d in clause %d" (not b) var c#get_id; 
          formule#reset_val var;
          List.iter (fun v -> formule#get_paris#remove v) l_next;
          raise Wl_fail
       | WL_New l -> 
-          debug 4 "Propagation : watched literal has moved from %B %d to %B %d in clause %d" (not b) var (fst l) (snd l) c#get_id ; 
+          debug#p 4 "Propagation : watched literal has moved from %B %d to %B %d in clause %d" (not b) var (fst l) (snd l) c#get_id ; 
           l_next
       | WL_Assign (b_next,v_next) -> 
-          debug 4 "Propagation : setting %d to %B in clause %d is necessary (leaving %B %d impossible)" v_next b_next c#get_id (not b) var; 
+          debug#p 4 "Propagation : setting %d to %B in clause %d is necessary (leaving %B %d impossible)" v_next b_next c#get_id (not b) var; 
           constraint_propagation formule v_next b_next l_next
       | WL_Nothing -> 
-          debug 4 "Propagation : clause %d satisfied (leaving wl %B %d unnecessary)" c#get_id (not b) var; 
+          debug#p 4 "Propagation : clause %d satisfied (leaving wl %B %d unnecessary)" c#get_id (not b) var; 
           l_next
     ) (var::l)
 
@@ -48,13 +48,13 @@ let algo next_pari n cnf =
   let rec aux()= (* aux fait un pari et essaye de le prolonger le plus loin possible *)
     match next_pari (formule:>formule) with
       | None -> 
-          debug 1 "Done\n";
+          debug#p 1 "Done\n";
           true (* plus rien à parier = c'est gagné *)
       | Some (b,var) ->  
           try 
-            record_stat "Paris";
-            debug 2 "WL : trying with %d %B" var b;
-            debug 2 "WL : starting propagation";
+            stats#record "Paris";
+            debug#p 2 "WL : trying with %d %B" var b;
+            debug#p 2 "WL : starting propagation";
             let l = (constraint_propagation formule var b []) in (* lève une exception si conflit créé, sinon renvoie liste des vars assignées *)
               if aux () then (* on réussit à poursuivre l'assignation jusqu'au bout *)
                 begin
@@ -71,8 +71,8 @@ let algo next_pari n cnf =
           with
             | Wl_fail ->   
                 try 
-                  debug 2 "WL : trying with %d %B" var (not b);
-                  debug 2 "WL : starting propagation";
+                  debug#p 2 "WL : trying with %d %B" var (not b);
+                  debug#p 2 "WL : starting propagation";
                   let l = constraint_propagation formule var (not b) [] in (* on a encore une chance en pariant faux *)
                   if aux () then (* on réussit à poursuivre l'assignation jusqu'au bout *)
                     begin
@@ -80,7 +80,7 @@ let algo next_pari n cnf =
                      end
                   else
                     begin
-                      debug 2 "WL : backtracking on var %d" var;
+                      debug#p 2 "WL : backtracking on var %d" var;
                       List.iter (
                         fun var -> 
                           formule#reset_val var
@@ -90,7 +90,7 @@ let algo next_pari n cnf =
                 with
                   | Wl_fail ->
                       begin
-                        debug 2 "WL : backtracking on var %d" var; 
+                        debug#p 2 "WL : backtracking on var %d" var; 
                         false
                       end
   in

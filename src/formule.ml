@@ -70,6 +70,9 @@ object (self)
   method remove v = Hashtbl.remove data v
 
   method iter f = Hashtbl.iter f data
+
+  method fold : 'b.(variable -> 'a -> 'b -> 'b) -> 'b -> 'b = fun f -> fun a -> Hashtbl.fold f data a
+
 end
 
 
