@@ -42,7 +42,7 @@ Pour avoir le graphe :
 
 -----------
 
-Pas besoins de toucher à run_tests.sh (qui permet d'avoir donnees.dat) et plop.p (qui permet d'avoir le graphe). Pour avoir un pdf, il y a juste 1 ligne à décommenter dans plop.p 
+Pas besoins de toucher à run_tests.sh (qui permet d'avoir donnees.dat) et plop.p (qui permet d'avoir le graphe). Pour avoir un pdf, il y a juste 1 ligne à décommenter dans plop.p
 
 
 ----------
