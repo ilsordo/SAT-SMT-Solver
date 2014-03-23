@@ -16,6 +16,7 @@ set xlabel "Tests (n,l,k)"
 set ylabel "Temps exécution (s)"
 
 
+#set autoscale x
 
 set style data linespoints
 
@@ -29,4 +30,4 @@ set pointsize 1
 #     "donnees.dat" every ::1 using 3:xticlabels(1) title columnheader(3)
 
 
-plot for [i=2:(3+1)] "<(sed '1d' donnees.dat)"  using i:xticlabels(1) title columnheader(i)
+plot for [i=2:(NB_ALGOS+1)] "<(sed '1d' donnees.dat)"  using i:xticlabels(1) title columnheader(i)

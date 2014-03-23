@@ -39,6 +39,7 @@ object
   method get_pari : variable -> bool option
   method get_paris : bool vartable
   method add_clause : clause -> unit
+  method clause_current_size : clause -> int
   method get_clauses : clauseset
   method get_nb_occ : bool -> int -> int
   method set_val : bool -> variable -> unit

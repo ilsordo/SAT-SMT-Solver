@@ -45,6 +45,8 @@ let parse_args () =
       | "rand_mf" -> Heuristic.(rand polarite_most_frequent)
       | "moms" -> Heuristic.moms
       | "dlis" -> Heuristic.dlis
+      | "jewa" -> Heuristic.jewa
+      | "dlcs" -> Heuristic.(dlcs polarite_most_frequent)
       | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.heuristic <- heuristic;
     config.nom_heuristic <- s in

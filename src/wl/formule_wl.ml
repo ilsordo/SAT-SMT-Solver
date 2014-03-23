@@ -38,7 +38,12 @@ object(self)
         | None -> assert false (* aurait du être initialisé avant *)
         | Some s -> s
 
-
+  method clause_current_size c =
+    c#get_vpos#fold 
+      (fun v res -> if self#get_pari v = None then res+1 else res) 
+      (c#get_vneg#fold
+        (fun v res -> if self#get_pari v = None then res+1 else res)  
+        0)
 
   (* init = prétraitement : enlève tautologies + détecte clauses singletons et fait des assignations en conséquence
      ATTENTION : init ne détecte aucune clause vide (mais peut en créer). Il faudra s'assurer de l'absence de clauses vides par la suite *)

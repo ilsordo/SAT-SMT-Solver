@@ -14,8 +14,9 @@ val moms : t
 
 val dlis : t
 
+val jewa : t
 
-
+val dlcs : pol -> t
 
 
 

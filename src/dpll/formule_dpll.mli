@@ -7,6 +7,7 @@ object
   method get_nb_vars : int
   method get_pari : variable -> bool option
   method get_paris : bool vartable
+  method clause_current_size : clause -> int
   method add_clause : clause -> unit
   method get_clauses : clauseset
   method get_nb_occ : bool -> int -> int 

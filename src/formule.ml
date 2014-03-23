@@ -129,6 +129,8 @@ object (self)
 
 
   method get_nb_occ (_:bool) (_:int) = 0 (* Non implémenté *)
+  
+  method clause_current_size (_:clause) = 0
   (******)
 
   method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *)

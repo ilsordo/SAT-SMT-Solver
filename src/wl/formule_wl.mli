@@ -9,6 +9,7 @@ object
   method watch : clause -> literal -> literal -> unit
   method init_wl : unit
   method init : int -> variable list list -> unit
+  method clause_current_size : clause -> int
   method get_nb_vars : int
   method get_pari : variable -> bool option
   method get_paris : bool vartable

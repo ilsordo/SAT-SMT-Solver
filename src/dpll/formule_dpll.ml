@@ -43,6 +43,8 @@ object(self)
         | None -> assert false
         | Some occ -> occ#size
     
+  method clause_current_size c = c#size
+  
   method private get_occurences occ v =  (* Accède à l'une des occurences (occ) de la variable v, en supposant que cet ensemble a été initialisé *)
     match occ#find v with
       | None -> debug#p 1 "AAARGH %d" v;assert false (* cet ensemble aurait du être initialisé *) 
