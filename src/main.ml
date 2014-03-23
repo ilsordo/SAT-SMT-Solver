@@ -48,7 +48,7 @@ let main () =
   let answer = config.algo config.heuristic n cnf in
   timer#stop;
   printf "%a\n%!" print_answer (answer,assoc);
-  debug#p 1 "Stats :\n%t%!" stats#print;
+  debug#p 0 " Stats :\n%t%!" stats#print;
   Answer.check n cnf answer;
   exit 0
 

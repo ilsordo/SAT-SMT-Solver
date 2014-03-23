@@ -25,7 +25,7 @@ object
 (* Usage : remplacer eprintf format arg1 ... argN par debug#p k format arg1 ... argN *)
   method p : 'a.int -> ?stops:bool -> ('a, out_channel, unit) format -> 'a =
     fun k ?(stops=false) ->
-    assert (k>0);
+    assert (k>=0);
     if debug_level >= k then
       begin
         fprintf (error_channel) "[debug]%a" indent k;
@@ -64,7 +64,7 @@ object
   method print p =
     Hashtbl.iter (fun s n -> fprintf p "[stats] %s = %d\n" s n) data;
     fprintf p "\n";
-    List.iter (fun (s,t) -> fprintf p "[stats] %s : %.5f s\n" s t) timers
+    List.iter (fun (s,t) -> fprintf p "[timer] %s : %.5f s\n" s t) timers
 
   method get_timer s = 
     let start = Unix.times() in 
