@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+# -*- coding: utf-8 -*-
 require 'tempfile'
 
 Heuristics = ["rand_rand","rand_mf","next_rand","next_mf","moms","dlis"]
@@ -59,17 +60,17 @@ class Database
   attr :data
 
   def initialize (source = nil)
-    @data = {}
-    @data.default = nil
-    @mutex = Mutex::new
-    raise ArgumentError if source and not source.is_a? IO
     if source
-      merge! Marshal.load(source)
+      @data = Marshal.load(open source)
+    else
+      @data = {}
     end
+    @mutex = Mutex::new
   end
 
-  def save
-    Marshal.dump(self)
+  def save dest
+    out = open dest, "w"
+    out.write Marshal.dump(data)
   end
 
   def record problem, report
@@ -87,6 +88,46 @@ class Database
     raise ArgumentError unless o.is_a? Database
     o.data.each { |problem,report| self.record problem,report }
     self
+  end
+
+  # On accède aux données par h[valeur][algo]
+  # names : { :title => "titre", :xlabel => "x label", :ylabel => ylabel }
+  def to_gnuplot (filter,skel,names)
+    names = names.dup
+    h = Hash::new { |hash,key| hash[key] = Hash::new 0 }
+    data.each do |problem, report|
+      x = filter.call(problem, report)
+      h[x[0]]["#{problem.algo}+#{problem.heuristic}"] += x[1] if x
+    end
+    h1 = {}
+    h.sort_by{ |key,value| key }.each{ |key,value| h1[key] = value} # tri de hash huhuhu
+
+    algos = h1.values.max { |x| x.length }.keys
+    names[:ncols] = algos.length
+    data = Tempfile::new "data"
+    names[:data] = data.path
+    
+    data.write "PARAM"
+    algos.each { |algo| data.write (" "+algo.upcase) }
+    data.write "\n"
+    h1.each do |param, cols|
+      data.write param
+      algos.each do |algo|
+        if cols[algo]
+          data.write (" "+cols[algo].to_s)
+        else
+          data.write " ?0"
+        end
+      end
+      data.write "\n"
+    end
+    data.flush
+    
+    script = Tempfile::new "script"
+    script.write (open skel).read.gsub(/#\{(\w*)\}/) { |match| names[$1.to_sym] }
+    script.flush
+
+    system "gnuplot -persist #{script.path}"
   end
 end
 
@@ -134,9 +175,9 @@ class Problem
       IO::popen "./main -algo #{@algo} -h #{@heuristic} #{temp.path} 2>&1" do |io|
         io.each do |line|
           case line
-          when /\[stats\] (?<stat>\w+) = (?<value>\d+)/
+          when /\[stats\] (?<stat>.+) = (?<value>\d+)/
             result.stats[$~[:stat]] = $~[:value].to_i
-          when /\[timer\] (?<timer>\w+) : (?<value>\d+(\.\d+)?) s/
+          when /\[timer\] (?<timer>.+) : (?<value>\d+(\.\d+)?)/
             result.timers[$~[:timer]] = $~[:value].to_f
           when /s SATISFIABLE/
             result.sat = 1.0
@@ -171,36 +212,17 @@ def run_tests(n,l,k,algos,heuristics,sample=1,&block)
   true
 end
 
-def select_data(n,l,k,&block)
-  lambda { |p|
+# Sélectionne les données selon nlk et passe les données acceptées à une fonction qui calcule la valeur mesurée
+# Le traitement du yield doit renvoyer [paramètre,valeur] 
+def select_data(n,l,k,algos,h,&block)
+  lambda { |p,r|
     if (n==nil or n===p.n) and (l==nil or l===p.l) and (k==nil or k===p.k)
-      yield p
+      if (algos == nil or algos === p.algo) and (h==nil or h===p.heuristic)
+        yield(p, r)
+      end
     end
   }
 end
 
-class Gnuplot
-  attr :script_file
-  def initialize title, columns, data
-    
+  
 
-def main
-  puts "Hello World"
-  db = Database::new
-  algos = ["dpll","wl"]
-  h = ["rand_rand","rand_mf"]
-  n = (1..5).map {|x| 10*x}
-  l = [3]
-  k = (1..5).map {|x| 10*x}
-  sample = 5
-  Threads.times do 
-    Thread::new do
-      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) }  
-    end
-  end
-  db
-end
-
-if __FILE__ == $0
-  main
-end
