@@ -1,0 +1,10 @@
+#/bin/bash
+
+./main -color $@ > tmp
+if ! grep --color=never coloriage tmp 
+then
+  cat tmp | fdp -Tpdf > graph.pdf
+  evince graph.pdf 2> /dev/null&
+fi
+rm tmp
+exit 0

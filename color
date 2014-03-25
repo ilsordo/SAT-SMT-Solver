@@ -1,5 +1,0 @@
-#/bin/bash
-
-./main -color $@ | fdp -Tpdf > tmp
-evince tmp 2> /dev/null
-rm tmp

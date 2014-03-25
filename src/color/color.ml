@@ -49,34 +49,6 @@ let parse input =
         Printf.eprintf "Input error\n%!";
         exit 1
   
-
-(* Fonctions d'affichage de la sortie *)
-(*
-let print_aretes p cnf assoc = (***)
-  let rec aux l = match l with
-    | [] -> ()
-    | [v1;v2]::q -> 
-        begin
-         if (v1<0) then
-           match assoc#get_name (-v1) with
-             | None -> assert false
-             | Some s1 ->
-                 let l1 = String.length s1 in
-                 let cut1 = String.index s1 '_' in
-                   if ((String.sub s1 (cut1+1) (l1-cut1-1))="1") then 
-                     begin 
-                       match assoc#get_name (-v2) with
-                         | None -> assert false
-                         | Some s2 -> 
-                             let cut2 = String.index s2 '_' in
-                               Printf.fprintf p "\"%s\" -- \"%s\" \n" (String.sub s1 0 cut1) (String.sub s2 0 cut2)
-                      end
-        end;
-        aux q
-    | t::q -> aux q
-  in aux cnf
-*)
-
 let print_aretes p l = List.iter (fun (i,j) -> fprintf p "\"%d\" -- \"%d\" \n" i j) l
 
 let print_sommet values p couleurs name id =
@@ -84,10 +56,9 @@ let print_sommet values p couleurs name id =
     let l = String.length name in
     let cut = String.index name '_' in
     Printf.fprintf p "\"%s\" [shape=circle, style=filled, fillcolor=\"%s\"]\n" (String.sub name 0 cut) (couleurs.((int_of_string (String.sub name (cut+1) (l-cut-1)))-1))
-    
-          
+            
 let print_answer k (_,_,l) assoc p = function (***)
-  | Unsolvable -> fprintf p "s Pas de coloriage Ã  %d couleurs\n" k
+  | Unsolvable -> fprintf p "Pas de coloriage à %d couleurs\n" k
   | Solvable values ->
       begin
         let couleurs = Array.make k "" in 
