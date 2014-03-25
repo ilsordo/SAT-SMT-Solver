@@ -64,7 +64,7 @@ object
   method print p =
     Hashtbl.iter (fun s n -> fprintf p "[stats] %s = %d\n" s n) data;
     fprintf p "\n";
-    List.iter (fun (s,t) -> fprintf p "[timer] %s : %.5f s\n" s t) timers
+    List.iter (fun (s,t) -> fprintf p "[timer] %s : %.5f\n" s t) timers
 
   method get_timer s = 
     let start = Unix.times() in 
