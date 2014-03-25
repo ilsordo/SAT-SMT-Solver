@@ -27,6 +27,32 @@ def main
   db.to_gnuplot filter,"stats_script/skel.p",names
 end
 
+
+def populate name
+  db = Database::new
+
+  algos = Algos
+  h = Heuristics
+  n = (1..100).map {|x| 100*x}
+  l = [3]
+  k = (1..100).map {|x| 100*x}
+  sample = 5
+
+  Threads.times do 
+    Thread::new do
+      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) }  
+    end
+  end
+
+  while Thread::list.length != 1 do
+    puts "Saving"
+    db.save name
+    sleep 600    
+  end
+
+  db.to_gnuplot filter,"stats_script/skel.p",names
+end
+
 if __FILE__ == $0
   main
 end

@@ -70,7 +70,9 @@ class Database
 
   def save dest
     out = open dest, "w"
+    @mutex.lock
     out.write Marshal.dump(data)
+    @mutex.unlock
   end
 
   def record problem, report
@@ -95,9 +97,18 @@ class Database
   def to_gnuplot (filter,skel,names)
     names = names.dup
     h = Hash::new { |hash,key| hash[key] = Hash::new 0 }
+    count = Hash::new { |hash,key| hash[key] = Hash::new 0 }
     data.each do |problem, report|
       x = filter.call(problem, report)
-      h[x[0]]["#{problem.algo}+#{problem.heuristic}"] += x[1] if x
+      if x
+        h[x[0]]["#{problem.algo}+#{problem.heuristic}"] += x[1]
+        count[x[0]]["#{problem.algo}+#{problem.heuristic}"] += report.count
+      end
+    end
+    h.each do |param, algos|
+      algos.each do |key, value|
+        h[param][key] /= count [param][key]
+      end
     end
     h1 = {}
     h.sort_by{ |key,value| key }.each{ |key,value| h1[key] = value} # tri de hash huhuhu
