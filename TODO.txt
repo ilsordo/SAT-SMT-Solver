@@ -1,3 +1,7 @@
+-----------------------------------
+TODO
+-----------------------------------
+
 Corriger sortie de color
 
 Normal que les stats sont toujours présentes (sans avoir besoin d'activer le debuggage) ?
@@ -16,6 +20,15 @@ Parfois (toujours ?) ./gen -color 45 0.5 | ./color 4 ne marche pas
 
 Revoir algos de tseitin et color (pb stack_overflow ?)
 
+Génération d'un graphe sans le nb d'arêtes
+
+-----------------------------------
+OTHER
+-----------------------------------
+
+script terminé, pour essayer, depuis la racine du projet ./stats_script/script.rb
+
+cmt a changé debug ? on peut chronom des portions de code ?
 
 -----------------------------------
 DONE
