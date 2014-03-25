@@ -107,7 +107,7 @@ class Database
     data = Tempfile::new "data"
     names[:data] = data.path
     
-    data.write "# PARAM"
+    data.write "PARAM"
     algos.each { |algo| data.write (" "+algo.upcase) }
     data.write "\n"
     h1.each do |param, cols|
@@ -118,12 +118,16 @@ class Database
         else
           data.write " ?0"
         end
-        data.write "\n"
       end
+      data.write "\n"
     end
     data.flush
-    puts (open data.path).read
-    script = (open skel).read.gsub(/#\{(\w*)\}/) { |match| names[$1.to_sym] }
+    
+    script = Tempfile::new "script"
+    script.write (open skel).read.gsub(/#\{(\w*)\}/) { |match| names[$1.to_sym] }
+    script.flush
+
+    system "gnuplot -persist #{script.path}"
   end
 end
 
