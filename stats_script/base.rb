@@ -70,7 +70,9 @@ class Database
 
   def save dest
     out = open dest, "w"
+    @mutex.lock
     out.write Marshal.dump(data)
+    @mutex.unlock
   end
 
   def record problem, report
