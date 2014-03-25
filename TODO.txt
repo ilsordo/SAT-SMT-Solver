@@ -1,8 +1,8 @@
-Vérifier priorité des opérateurs dans parser de tseitin
-
 Corriger sortie de color
 
 Renommer color en colorie (cf sujet)
+
+Ajouter dans le readme les upgrade dans debug
 
 
 -------------------------------------------------------------------------------------------
@@ -19,3 +19,15 @@ Utiliser le type literal partout où c'est possible
 
 Passer les champs occurences_pos/neg dans formule.ml ? (et abandonner la création temporaire de ces ensembles dans formule_wl.ml ?)
 
+
+-----------------------------------
+DONE
+-----------------------------------
+
+# Priorités dans Tseitin : 
+  => : right associative
+  <=> : non associative
+  /\,\/ : left associative
+
+  priorité :   
+    NOT > AND > OR > IMP > EQU
