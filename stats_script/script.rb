@@ -45,8 +45,10 @@ def populate name
   end
 
   while Thread::list.length != 1 do
+    system "date -R"
     puts "Saving"
     db.save name
+    puts "Done"
     sleep 600    
   end
 
