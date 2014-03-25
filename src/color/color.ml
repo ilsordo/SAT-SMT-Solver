@@ -14,7 +14,7 @@ let vertex_constraint i k = (* produit une clause (i_1,i_2...i_k) indiquant que 
       aux (j-1) ((true,(string_of_int i)^"_"^(string_of_int j))::res)
   in aux k []
   
-let vertices_constraint n k = (* produit une _fomule_ (CNF) indiquant que chaque sommet entre 1 et n doit être colorié *)
+let vertices_constraint n k = (* produit une _fomule_ (CNF) indiquant que chaque sommet entre 1 et n doit Ãªtre coloriÃ© *)
   let rec aux i res=
     if i=0 then
       res
@@ -22,7 +22,7 @@ let vertices_constraint n k = (* produit une _fomule_ (CNF) indiquant que chaque
   in aux n []  
   
   
-let edge_constraint i j k cnf = (* produit une _formule_ (CNF) indiquant que les sommets i et j ne doivent pas partager une même couleur parmi les k possibles, et l'ajoute à la cnf déjà traitée cnf *)
+let edge_constraint i j k cnf = (* produit une _formule_ (CNF) indiquant que les sommets i et j ne doivent pas partager une mÃªme couleur parmi les k possibles, et l'ajoute Ã  la cnf dÃ©jÃ  traitÃ©e cnf *)
   let rec aux l res = 
     if l=0 then
       res
@@ -87,7 +87,7 @@ let print_sommet values p couleurs name id =
     
           
 let print_answer k (_,_,l) assoc p = function (***)
-  | Unsolvable -> fprintf p "s Pas de coloriage à %d couleurs\n" k
+  | Unsolvable -> fprintf p "s Pas de coloriage Ã  %d couleurs\n" k
   | Solvable values ->
       begin
         let couleurs = Array.make k "" in 

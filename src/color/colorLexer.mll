@@ -4,7 +4,7 @@ open ColorParser;;
 
 
 rule token = parse
-  | [' ' '\t' '\n']     			{ token lexbuf }    
+  | [' ' '\t' '\n' '\r'] 			{ token lexbuf }    
   | "c"						            { comment lexbuf }
   | "p" | "edge"				      { token lexbuf }
   | "e"                       { EDGE }
