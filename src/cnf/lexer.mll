@@ -4,7 +4,7 @@ open Parser;;
 
 
 rule token = parse
-  | [' ' '\t' '\n' '\r']     			{ token lexbuf }    
+  | [' ' '\t' '\n' '\r']     	{ token lexbuf }    
   | "c"						            { comment lexbuf }
   | "p" | "cnf"					      { token lexbuf }
   | '-'						            { MINUS }

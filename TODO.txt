@@ -1,28 +1,28 @@
 Corriger sortie de color
 
+Normal que les stats sont toujours présentes (sans avoir besoin d'activer le debuggage) ?
+
 Renommer color en colorie (cf sujet)
 
-Ajouter dans le readme les upgrade dans debug
+Problème d'encodage accents ? (dans les commentaires, dans print_cnf sur tseitin)
 
+Ajouter dans le README : 
+  - les upgrades de debug/stats (temps...)
+  - comment stocker un print_cnf (- ou file)
+  - comment jongler entre heur+algo (-algo wl -g dlis)
+  - ...
 
--------------------------------------------------------------------------------------------
+Parfois (toujours ?) ./gen -color 45 0.5 | ./color 4 ne marche pas
 
-Ajouter des fichiers tests
-
-
-Dans WL : 
-  - optimisation : si la variable x est assignée à vraie, dans toute clause c non encore satisfaite où non x apparait (surveillé ou non), on met en place une surveillance sur x
-  
-  
-Utiliser le type literal partout où c'est possible
-
-
-Passer les champs occurences_pos/neg dans formule.ml ? (et abandonner la création temporaire de ces ensembles dans formule_wl.ml ?)
+Revoir algos de tseitin et color (pb stack_overflow ?)
 
 
 -----------------------------------
 DONE
 -----------------------------------
+
+# Ajout des '\r' dans les lexer
+
 
 # Priorités dans Tseitin : 
   => : right associative
