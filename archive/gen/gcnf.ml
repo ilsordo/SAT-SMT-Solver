@@ -1,4 +1,3 @@
-open Config_random
 open Printf
 
 let shuffle tab l = (* calcule les l premiers termes d'une permutation aléatoire du tableau tab *)
@@ -25,9 +24,8 @@ let random_cnf n l k p = (* génère une formule aléatoire de n variables et k 
     fprintf p "%a0\n" (print_tab l) tab
   done
 
-let gen () = 
-  let (n,l,k) = (config.param1,config.param2,config.param3) in
-    if (l<=n) then
-      printf "p cnf %d %d\n%t%!" n k (random_cnf n l k)
-    else
-      eprintf "Error : la taille des clauses est supérieure au nombre de variables (l>n)\n%!"
+let gen n l k = 
+  if (l<=n) then
+    printf "p cnf %d %d\n%t%!" n k (random_cnf n l k)
+  else
+    eprintf "Error : la taille des clauses est supérieure au nombre de variables (l>n)\n%!"

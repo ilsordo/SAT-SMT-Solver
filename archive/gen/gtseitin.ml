@@ -1,4 +1,3 @@
-open Config_random
 open Printf
 
 let random_connecteur = function 
@@ -21,10 +20,12 @@ let rec random_formula n c p = (* génère une formule aléatoire de c connecteu
           fprintf p "(%t)%s(%t)" (random_formula n ((c-1)/2)) s (random_formula n (c-1-(c-1)/2))
 
 
-let gen () = 
-  let (n,c) = (config.param1,config.param2) in
-    if (c>0 && n>0) then
+let gen n c = 
+  if (c>0 && n>0) then
     printf "%t\n%!" (random_formula n c) 
-    else
-      eprintf "Error : n et c doivent être supérieur à 0\n%!"
+  else
+    begin
+      eprintf "Error : n et c doivent être supérieur à 0\n%!"; 
+      exit 1
+    end
 

@@ -45,8 +45,10 @@ def populate name
   end
 
   while Thread::list.length != 1 do
+    system "date -R"
     puts "Saving"
     db.save name
+    puts "Done"
     sleep 600    
   end
 
@@ -56,3 +58,6 @@ end
 if __FILE__ == $0
   main
 end
+
+
+# l = select_data(nil,3,nil,nil,nil) { |p,r|  [p.k/(p.n.to_f),r.result.timers["Time (s)"]/r.count] if p.k/p.n < 10 and not "rand_rand" == p.heuristic}
