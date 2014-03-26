@@ -27,7 +27,6 @@ def main
   db.to_gnuplot filter,"stats_script/skel.p",names
 end
 
-
 def populate name
   db = Database::new
 

@@ -203,18 +203,22 @@ class Problem
 end
 
 
+def run_test(n,l,k,a,h,sample = 1)
+  report = Report::new
+  p = Problem::new(n,l,k,a,h)
+  sample.times do || 
+      report << p.gen.call
+  end
+  report
+end
+
 def run_tests(n,l,k,algos,heuristics,sample=1,&block)
   n.each do |n_|
     l.each do |l_|
       k.each do |k_|
         algos.each do |a_|
           heuristics.each do |h_|
-            report = Report::new
-            p = Problem::new(n_,l_,k_,a_,h_)
-            sample.times do || 
-                report << p.gen.call
-            end
-            yield p, report
+            yield p, (run_test(n_,l_,k_,a_,sample))
           end
         end
       end
@@ -222,6 +226,8 @@ def run_tests(n,l,k,algos,heuristics,sample=1,&block)
   end
   true
 end
+
+
 
 # Sélectionne les données selon nlk et passe les données acceptées à une fonction qui calcule la valeur mesurée
 # Le traitement du yield doit renvoyer [paramètre,valeur] 
