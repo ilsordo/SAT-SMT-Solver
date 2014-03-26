@@ -114,7 +114,7 @@ class Database
     h.sort_by{ |key,value| key }.each{ |key,value| h1[key] = value} # tri de hash huhuhu
 
     algos = h1.values.max { |x| x.length }.keys
-    names[:ncols] = algos.length
+    names[:ncols] = algos.length + 1
     data = Tempfile::new "data"
     names[:data] = data.path
     
