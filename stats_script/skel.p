@@ -1,5 +1,10 @@
 reset
 
+### pour pdf
+# set term pdfcairo
+# set output "courbe1.pdf" # le nom du fichier qui est engendre
+
+
 set title "#{title}"
 set xlabel "#{xlabel}"
 set ylabel "#{ylabel}"
