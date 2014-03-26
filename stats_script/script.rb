@@ -68,7 +68,7 @@ def exemple
     end
   end
 
-  my_iter db do |r| p r end
+  Threads.times do my_iter db end
 
   db
 end
