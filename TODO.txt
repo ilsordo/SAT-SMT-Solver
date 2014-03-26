@@ -2,11 +2,9 @@
 TODO
 -----------------------------------
 
-Corriger sortie de color
 
 Normal que les stats sont toujours présentes (sans avoir besoin d'activer le debuggage) ?
 
-Renommer color en colorie (cf sujet)
 
 Problème d'encodage accents ? (dans les commentaires, dans print_cnf sur tseitin)
 
@@ -21,6 +19,8 @@ Parfois (toujours ?) ./gen -color 45 0.5 | ./color 4 ne marche pas
 Revoir algos de tseitin et color (pb stack_overflow ?)
 
 Génération d'un graphe sans le nb d'arêtes
+
+Color et print_cnf
 
 -----------------------------------
 OTHER

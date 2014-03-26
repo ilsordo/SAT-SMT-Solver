@@ -42,7 +42,7 @@ let main () =
       | Some p -> 
           match assoc with
             | None -> print_cnf p (n,cnf)
-            | Some assoc -> fprintf p "c RÃ©duction :\n%a\n%t%!" print_cnf (n,cnf) assoc#print_reduction
+            | Some assoc -> fprintf p "c Réduction :\n%a\n%t%!" print_cnf (n,cnf) assoc#print_reduction
   end;
   let timer = stats#get_timer "Time (s)" in
   let answer = config.algo config.heuristic n cnf in
