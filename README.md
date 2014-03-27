@@ -122,16 +122,16 @@ Messages de debuggage
 
 La mise en place de messages de debuggage se fait au sein du code en ajoutant des lignes de la forme : 
 
-  debug#p 2 "Propagation : setting %d to %B" var b; 
+    debug#p 2 "Propagation : setting %d to %B" var b; 
     
 Ici, le message de debuggage est "Propagation : setting var to b" (%d et %B sont remplacé par var et b).
 L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, plus le message de debuggage doit indiquer une information précise. Par exemple, le message suivant à la profondeur la plus faible puisqu'il indique uniquement l'algorithme utilisé : 
 
-  debug#p 1 "Using algorithm %s and heuristic %s" config.nom_algo config.nom_heuristic;
+    debug#p 1 "Using algorithm %s and heuristic %s" config.nom_algo config.nom_heuristic;
 
 Afin d'afficher tous messages de profondeur au plus k lors de l'exécution de l'algorithme, il faut entrer l'option : 
 
-  -d k
+    -d k
   
 Enfin, à partir d'une profondeur de debuggage 1 (-d 1), si le programme renvoie SATISFIABLE, l'assignation des variables obtenue en résultat est vérifiée sur la formule de départ et une ligne "[debug] Check : " indique si cette assignation est bien valide (true ou false).
   
@@ -140,11 +140,11 @@ Exécution pas à pas
 
 Il est possible de stopper l'algorithme sur certain messages de debuggage. Pour cela, il faut inscrire au sein du code : 
 
-  debug#p 2 ~stops:true "Propagation : setting %d to %B" var b;
+    debug#p 2 ~stops:true "Propagation : setting %d to %B" var b;
 
 Pour afficher tous les messages de debuggage de profondeur au plus k et stopper l'algorithme à chaque message de profondeur l (l >= k) rencontré, entrer l'option : 
 
-  -d k -b l
+    -d k -b l
 
 Statistiques
 ------------
@@ -153,7 +153,7 @@ Différents types de données peuvent être enregistrés au cours de l'algorithm
 
 Une table de hashage permet d'associer des entiers à des strings et d'indenter ces entier. Il suffit pour cela d'inclure la ligne suivante au sein du code :  
  
-  stats#record s;
+    stats#record s;
   
 Cette ligne à pour conséquence, chaque fois qu'elle est rencontrée, d'indenter l'entier associé au string s. Si s ne figure pas dans la table de hashage, il est ajouté et se voit associer la valeur 1.
 
@@ -167,11 +167,11 @@ Timers
 Il est possible d'obtenir des temps d'exécution sur des portions de code.
 Un nouveau timer peut être définie et démarré de la façon suivante (au sein du code) : 
 
-  let timer = stats#get_timer "Time (s)"
+    let timer = stats#get_timer "Time (s)"
   
 Pour arrêter le timer définie ci-dessus : 
 
-  timer#stop;
+    timer#stop;
   
 
 
