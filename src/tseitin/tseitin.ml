@@ -32,6 +32,8 @@ let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches 
      ([p]::f)
     
 
+(* Récupération de l'entrée *)
+
 let parse input =
   try
     let lex = Lexing.from_channel input in
@@ -42,7 +44,7 @@ let parse input =
         exit 1
 
 
-(* Fonctions d'affichage de la sortie *)
+(* Affichage de la sortie *)
 
 let print_var values p name id =
   if name <> "" && name.[0] <> '_' then

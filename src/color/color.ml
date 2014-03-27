@@ -2,8 +2,6 @@ open Reduction
 open Answer
 open Printf
 
-(*** attention : multicoloration d'un sommet possible *)
-
 type t = (int*int*((int*int) list))
 
 let vertex_constraint i k = (* produit une clause (i_1,i_2...i_k) indiquant que le sommet i doit prendre 1 couleur parmi k *)
@@ -14,7 +12,7 @@ let vertex_constraint i k = (* produit une clause (i_1,i_2...i_k) indiquant que 
       aux (j-1) ((true,(string_of_int i)^"_"^(string_of_int j))::res)
   in aux k []
   
-let vertices_constraint n k = (* produit une _fomule_ (CNF) indiquant que chaque sommet entre 1 et n doit Ãªtre coloriÃ© *)
+let vertices_constraint n k = (* produit une _fomule_ (CNF) indiquant que chaque sommet entre 1 et n doit être colorié *)
   let rec aux i res=
     if i=0 then
       res
@@ -22,7 +20,7 @@ let vertices_constraint n k = (* produit une _fomule_ (CNF) indiquant que chaque
   in aux n []  
   
   
-let edge_constraint i j k cnf = (* produit une _formule_ (CNF) indiquant que les sommets i et j ne doivent pas partager une mÃªme couleur parmi les k possibles, et l'ajoute Ã  la cnf dÃ©jÃ  traitÃ©e cnf *)
+let edge_constraint i j k cnf = (* produit une _formule_ (CNF) indiquant que les sommets i et j ne doivent pas partager une même couleur parmi les k possibles, et l'ajoute à la cnf déjà  traitée cnf *)
   let rec aux l res = 
     if l=0 then
       res
@@ -39,7 +37,11 @@ let to_cnf c_formule k = (* construit la cnf indiquant la coloration, utilise de
   in aux c_f (vertices_constraint v k)
   
   
-      
+ 
+ 
+(* Récupération de l'entrée *)
+
+     
 let parse input =
   try
     let lex = Lexing.from_channel input in
@@ -49,6 +51,11 @@ let parse input =
         Printf.eprintf "Input error\n%!";
         exit 1
   
+  
+  
+(* Affichage de la sortie *)
+
+
 let print_aretes p l = List.iter (fun (i,j) -> fprintf p "\"%d\" -- \"%d\" \n" i j) l
 
 let print_sommet values p couleurs name id =

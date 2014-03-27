@@ -112,34 +112,67 @@ Afficher la cnf convertie à partir de l'entrée :
     
 
 
-2. Debuggage et exécution pas à pas
-===================================
+2. Suivi de l'algorithme et debuggage
+=====================================
 
-Le debuggage est facilité par l'ajout au sein du code de lignes de la forme : 
+L'ensemble des outils de debuggage et de suivi des exécutions figurent dans le fichier debug.ml. Une brève description est fournie ci-dessous.
 
-    debug 2 "Propagation : setting %d to %B" var b;
+Messages de debuggage
+---------------------
 
-Ceci à pour conséquence de définir un message d'affichage de profondeur 2. 
+La mise en place de messages de debuggage se fait au sein du code en ajoutant des lignes de la forme : 
 
-Lors de l'exécution du code, il est possible d'activer l'affichage des messages de debuggage, jusqu'à une certaine profondeur.
-Par exemple, pour afficher l'ensemble des messages de debuggage de profondeur inférieure ou égale à 2, entrer : 
-
-    ./resol ex.cnf -d 2
-
-Dans l'exemple précédent, le debuggage peut mener par exemple à l'affichage de "Propagation : setting 3 to true".
-
-Il est aussi possible de définir une exécution pas à pas de l'algorithme en spécifiant :
-
-    debug 2 ~stops:true "Propagation : setting %d to %B" var b;
-
-La commande suivante aura alors pour conséquence d'afficher les messages de debuggage de profondeur au plus 3, et de stopper l'algorithme à chaque message de profondeur 3 rencontré : 
-
-    ./resol ex.cnf -d 3 -b 2
+  debug#p 2 "Propagation : setting %d to %B" var b; 
     
-Enfin, lorsque le programme est exécuté avec une option de debuggage, des statistiques élémentaires sont fournies :
-  - Nombre de paris effectués au cours de l'exécution
-  - Nombre de conflits rencontrés
-  - Check : vérifie si l'assignation des variables renvoyée en résultat (dans le cas SATISFIABLE) est correcte. La réponse "Check : false" est particulièrement inquiétante puisqu'elle indique que l'algorithme utilisé n'a pas été implémenté correctement.
+Ici, le message de debuggage est "Propagation : setting var to b" (%d et %B sont remplacé par var et b).
+L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, plus le message de debuggage doit indiquer une information précise. Par exemple, le message suivant à la profondeur la plus faible puisqu'il indique uniquement l'algorithme utilisé : 
+
+  debug#p 1 "Using algorithm %s and heuristic %s" config.nom_algo config.nom_heuristic;
+
+Afin d'afficher tous messages de profondeur au plus k lors de l'exécution de l'algorithme, il faut entrer l'option : 
+
+  -d k
+  
+Enfin, à partir d'une profondeur de debuggage 1 (-d 1), si le programme renvoie SATISFIABLE, l'assignation des variables obtenue en résultat est vérifiée sur la formule de départ et une ligne "[debug] Check : " indique si cette assignation est bien valide (true ou false).
+  
+Exécution pas à pas
+---------------------
+
+Il est possible de stopper l'algorithme sur certain messages de debuggage. Pour cela, il faut inscrire au sein du code : 
+
+  debug#p 2 ~stops:true "Propagation : setting %d to %B" var b;
+
+Pour afficher tous les messages de debuggage de profondeur au plus k et stopper l'algorithme à chaque message de profondeur l (l >= k) rencontré, entrer l'option : 
+
+  -d k -b l
+
+Statistiques
+------------
+
+Différents types de données peuvent être enregistrés au cours de l'algorithme.
+
+Une table de hashage permet d'associer des entiers à des strings et d'indenter ces entier. Il suffit pour cela d'inclure la ligne suivante au sein du code :  
+ 
+  stats#record s;
+  
+Cette ligne à pour conséquence, chaque fois qu'elle est rencontrée, d'indenter l'entier associé au string s. Si s ne figure pas dans la table de hashage, il est ajouté et se voit associer la valeur 1.
+
+Deux statistiques sont actuellement intégrées à notre code : 
+  * nombre de conflits (provoquant un backtracking)
+  * nombre de paris effectués
+
+Timers
+------
+
+Il est possible d'obtenir des temps d'exécution sur des portions de code.
+Un nouveau timer peut être définie et démarré de la façon suivante (au sein du code) : 
+
+  let timer = stats#get_timer "Time (s)"
+  
+Pour arrêter le timer définie ci-dessus : 
+
+  timer#stop;
+  
 
 
 
@@ -242,6 +275,30 @@ Les différents opérations menées prennent appuies sur les deux faits suivants
   - A tout instant, chaque littéral connait les clauses qu'il surveille
 
 
+5. Algorithme Tseitin
+=====================
+
+L'algorithme Tseitin permet de convertir une formule propositionnelle en une cnf.
+Le dossier src/tseitin contient l'ensemble des outils mis en place à cette fin. En particulier, le fichier tseitin.ml contient l'algorithme de conversion.
+
+COMPLEXITE ESPACE+TEMPS
+
+
+
+5. Algorithme Colorie
+=====================
+
+L'algorithme Colorie indique, pour un entier k et un graphe G, si G peut-être colorié à l'aide de k couleurs distincts.
+Le dossier src/color contient l'ensemble des outils mis en place à cette fin.
+
+On rappelle ci-dessous la procédure permettant de construire une cnf indiquant si le graphe G=(V,E) peut être colorié avec k couleurs :
+  - pour chaque sommet i, on produit la clause i_1\/i_2\/...\/i_k indiquant que i doit se voir attribuer une couleur entre 1 et k
+  - pour chaque arête (i,j), pour chaque entier l entre 1 et k, on produit la clause ~i_l\/~j_l indiquant que i et j ne doivent pas avoir la même couleur.
+  
+COMPLEXITE ESPACE+TEMPS
+
+
+
 6. Heuristiques
 ===============
 
@@ -296,17 +353,6 @@ On dispose également des heuristiques suivantes :
   JEWA (-h jewa)
     attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2**-|C|)
     renvoie le littéral avec le plus grand score
-   
-6. Suivi de l'algorithme
-========================
-
-Un système de suivi de l'algorithme est fourni par le module Debug, il permet d'afficher sélectivement des informations sur le déroulement de l'algorithme en plaçant des appels à 'debug' paramétrés par une profondeur dans le code. Le paramètre -d permet alors d'afficher les informations jusqu'à une certaine profondeur et -b de mettre l'exécution en pause sur certains évènements.
-
-Un système de statistiques permet de compter les appels à certaines parties du code pour détecter les sections les plus utilisées.
-Ces statistiques sont affichées à partir de '-d 1'.
-
-La classe formule permet l'évaluation de la formule en utilisant l'assignation calculée si la formule est satisfiable.
-Le résultat renvoyé par l'exécutable est donc systématiquement vérifié et le résultat de la vérification est affiché à partir de '-d 1'.
 
 
 
