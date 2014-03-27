@@ -283,7 +283,14 @@ Le dossier src/tseitin contient l'ensemble des outils mis en place à cette fin.
 
 COMPLEXITE ESPACE+TEMPS
 
+Priorités dans Tseitin : 
+  => : right associative
+  <=> : non associative
+  /\,\/ : left associative
 
+  priorité :   
+    NOT > AND > OR > IMP > EQU
+    
 
 5. Algorithme Colorie
 =====================

@@ -11,7 +11,7 @@ def main
   n = (1..5).map {|x| 10*x}
   l = [3]
   k = (1..5).map {|x| 10*x}
-  sample = 5
+  sample = 5                    # nombres de passages (*nb de proc ?)
 
   Threads.times do 
     Thread::new do
@@ -28,6 +28,8 @@ def main
 
   db.to_gnuplot filter,"stats_script/skel.p",names
 end
+
+
 
 def populate name
   db = Database::new
@@ -56,6 +58,8 @@ def populate name
   db.to_gnuplot filter,"stats_script/skel.p",names
 end
 
+
+
 def exemple
   db = Database::new
   
@@ -77,19 +81,3 @@ if __FILE__ == $0
   main
 end
 
-
-# l = select_data(nil,3,nil,nil,nil) { |p,r|  [p.k/(p.n.to_f),r.result.timers["Time (s)"]/r.count] if p.k/p.n < 10 and not "rand_rand" == p.heuristic}
-
-# l = select_data(100,3,(100..1000),nil,"rand_rand") { |p,r| ["(#{p.n},#{p.l},#{p.k})",r.result.timers["Time (s)"]/r.count] }
-
-
-# intervalle (debut..fin) (exclusif) sauf si ...
-# ensemble [a,b,c]
-# tout nil
-
-# filtre = select_data(n,l,k,algo,h) { |p,r| [paramètre,valeur] }
-
-# attributs de p : n,l,k,algo,heuristic
-# attributs de r : count , result.timers[], result.sat, result.stats[]
-
-# substitution : "blabla #{variable} blabla" 
