@@ -28,24 +28,88 @@ Pour compiler, entrer :
 
     make
 
-Pour exécuter le programme sur un fichier ex.cnf, entrer : 
+DPLL et WL
+----------
+
+Exécuter DPLL sur le fichier ex.cnf : 
 
     ./resol ex.cnf 
 
-Pour générer une formule de k clauses de taille l avec n variables dans out.cnf :
+Exécuter WL sur le fichier ex.cnf : 
 
-    ./gen n l k > out.cnf
+    ./resol-wl ex.cnf 
 
-Pour le résoudre à la volée :
+Tseitin
+-------
 
-    ./gen n l k | ./resol 
+Résoudre la formule propositionnelle contenue dans le fichier ex.txt : 
 
-Pour utiliser l'algorithme watched literals :
+    ./tseitn ex.txt
+    
+Colorie
+-------
 
-    ./resol-wl ex.cnf
+Essayer un coloriage à k couleur du graphe ex.col : 
 
-Note: resol-wl accepte les mêmes options que resol
+    ./colorie k ex.col 
+    
 
+Générateur
+----------
+
+Générer une cnf de k clauses de taille l avec n variables :
+  
+    ./gen n l k
+
+Générer un formule propositionnelle comportant n variables différentes et c connecteurs (parmi ~,\/,/\,=>,<=>) :
+
+    ./gen -tseitin n c
+    
+Générer un graphe à n sommets, avec probabilité p d'existence pour chaque arête :
+
+    ./gen -color n p
+    
+Enregistrer l'entrée générée dans un fichier ex.cnf : 
+  
+    ./gen -tseitin n c > ex.txt
+     
+Résoudre l'entrée générée à la volée : 
+
+    ./gen -color n p | ./colorie     
+        
+Options
+-------
+
+Affichage des messages d'aide : 
+
+    --
+    
+Fixer un algorithme de résolution : 
+
+    -algo [dpll|wl]
+    
+Fixer une heuristique de résolution : 
+
+    -h [dlis|...]
+    
+Afficher les messages de débuggage de niveau au plus k : 
+
+    -d k
+    
+Exécuter l'algorithme pas à pas, en stoppant à chaque étape de profondeur k :
+(nécessite l'option -d r avec r supérieur à k)
+
+    -b k
+    
+Enregistrer dans le fichier f la cnf convertie à partir de l'entrée : 
+
+    -print_cnf f
+    
+Afficher la cnf convertie à partir de l'entrée :   
+(attention, cette option ne doit pas être exécutée avec ./colorie) 
+    
+    -print_cnf -
+    
 
 
 2. Debuggage et exécution pas à pas
@@ -87,7 +151,7 @@ Les structures suivantes sont utilisées par l'algorithme :
 clause.ml:
 ---------
 
-* variable : Les variables sont des entiers
+* variable : les variables sont des entiers
 
 * varset : objet représentant un ensemble de variables. Permet de cacher temporairement des variables.
 
@@ -178,7 +242,61 @@ Les différents opérations menées prennent appuies sur les deux faits suivants
   - A tout instant, chaque littéral connait les clauses qu'il surveille
 
 
+6. Heuristiques
+===============
 
+Les heuristiques permettent de déterminer le littéral sur lequel effectuer le prochain pari. Les différentes heuristiques implémentées sont décrites ci-dessous. Une analyse comparative de leurs performances figure.... 
+
+Heuristiques de choix de polarité
+---------------------------------
+
+Etant donnée une variables, ces heuristiques déterminent la polarité à lui joindre (pour obtenir un littéral).
+
+POLARITE_RAND :
+  renvoie une polarité aléatoire (true ou false)
+
+POLARITE_MOST_FREQUENT :
+  renvoie la polarité avec laquelle la variable apparait le plus fréquemment dans la formule
+
+Heuristiques de choix de variable
+---------------------------------
+
+NEXT :
+  renvoie la prochaine variable non encore assignée (ce choix est déterministe et dépend de l'entier représentant chaque variable)
+  
+RAND : 
+  renvoie une variable aléatoire non encore assignée
+
+DLCS : 
+  renvoie la variable apparaissant le plus fréquemment dans la formule
+
+Heuristiques de choix de littéral
+---------------------------------
+
+On indique pour chaque heuristique l'argument permettant de l'appeler (voir section ...)
+
+Les 2 catégories d'heuristiques décrites ci-dessous peuvent être combinées pour donner lieu à 6 heuristiques de choix de littéral : 
+
+  NEXT + POLARITE_RAND          (-h next_rand)
+  NEXT + POLARITE_MOST_FREQUENT (-h next_mf)
+  RAND + POLARITE_RAND          (-h rand_rand)
+  RAND + POLARITE_MOST_FREQUENT (-h rand_mf)
+  DLCS + POLARITE_RAND          (cette option n'est pas disponible)
+  DLCS + POLARITE_MOST_FREQUENT (-h dlcs)
+  
+On dispose également des heuristiques suivantes : 
+
+  MOMS (-h moms)
+    renvoie le littéral apparaissant le plus fréquemment dans les clauses de taille minimum
+    
+  DLIS (-h dlis)
+    pour DPLL : renvoie le littéral qui rend le plus de clauses satisfaites
+    pour WL : renvoie le littéral qui rend le plus de jumelles satisfaites
+    
+  JEWA (-h jewa)
+    attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2**-|C|)
+    renvoie le littéral avec le plus grand score
+   
 6. Suivi de l'algorithme
 ========================
 
@@ -195,41 +313,36 @@ Le résultat renvoyé par l'exécutable est donc systématiquement vérifié et 
 7. Générateur
 =============
 
-Un générateur de clauses est fourni avec le solveur, il génère des clauses uniformément (on extrait les premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.
+Le générateur permet d'obtenir des cnf, des formules propositionnelles et des graphes. Les méthodes de génération aléatoire sont décrites ci-dessous : 
 
+CNF
+---
 
+Le générateur prend en entrée 3 entiers : n l k
+Il produit une formule à n variables comportant k clauses de longueur l chacune.
+Les clauses sont choisises uniformément (on extrait les l premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.
 
-8. Analyse des performances
-===========================
+Tseitin
+-------
 
-Les algorithmes terminent instantanément sur les exemples fournis avec l'énoncé.
+Le générateur prend en entrée 2 entiers : n c
+Il produit une formule propositionnelle à n variables et c connecteurs logiques.
+Pour ce faire, l'algorithme récursif suivant est utilisé : 
 
-Les exemples difficiles sont hard.cnf et gen2.cnf  
+  TSEITIN_RANDOM(n,c)
+    Si c=0 alors
+      renvoyer une variable choisie aléatoirement entre 1 et n
+    Sinon
+      choisir aléatoirement un connecteur logique connect
+      Si connect=~ alors
+        renvoyer ~TSEITIN_RANDOM(n,c-1)
+      Sinon
+        renvoyer TSEITIN_RANDOM(n,(c-1)/2)connectTSEITIN_RANDOM(n,c-1-(c-1)/2)
 
-Les performances des algorithmes DPLL et WL ont été comparées sur un certain nombre d'entrées. Il est nécessaire de générer des entrées de taille particulièrement grande pour observer une différence dans les temps d'exécutions.
+Color
+-----
 
-Ci-dessous figurent les temps d'exécutions pour des entrées aléatoires de paramètre n_l_k (n : nombre de variables, l : longueur des clauses, k : nombre de clauses)
-On peut constater que l'algorithme WL est plus performant que DPLL sur nos exemples. Bien que ceci soit compréhensible pour des formules contenant de grandes clauses, il est plus surprenant de l'observer sur des formules 3-SAT. La lenteur de DPLL peut s'expliquer par la nécessité de propager toute assignation sur l'ensemble des clauses (ce qui se traduit par cacher/montrer de nombreuses clauses/variables), alors que WL ne propage que sur les littéraux surveillés.
-
-
-50000_3000_2000
-DPLL : 49s
-WL : 22s
-
-10000_6000_400
-DPLL : 18s
-WL : 11s
-
-10000_3_400
-DPLL : 3s
-WL : 2.6s
-
-10000_3_5000
-DPLL : 4.8s
-WL : 2.3s
-
-10000_3_20000
-DPLL : 23s
-WL : 1s
-
+Le générateur prend en entrée 1 entier n et un flottant p.
+Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d'existence p.
+Remarque : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.
 

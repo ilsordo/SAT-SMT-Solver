@@ -1,0 +1,24 @@
+./test.rb                         //charge les fonctions
+b=Database::new "db.db"           // charge la bdd
+q
+names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"} // légende
+l = select_data(nil,3,nil,nil,nil) { |p,r|  [p.k/(p.n.to_f),r.result.timers["Time (s)"]/r.count] /////if p.k/p.n < 10 and not "rand_rand" == p.heuristic////} // extraction de la bdd
+              // n l k algo heuri (nil si tout le monde)
+db.to_gnuplot l,"stats_script/skel.p",names // affichage du résultat
+
+
+# l = select_data(nil,3,nil,nil,nil) { |p,r|  [p.k/(p.n.to_f),r.result.timers["Time (s)"]/r.count] if p.k/p.n < 10 and not "rand_rand" == p.heuristic}
+
+# l = select_data(100,3,(100..1000),nil,"rand_rand") { |p,r| ["(#{p.n},#{p.l},#{p.k})",r.result.timers["Time (s)"]/r.count] }  //// r.count : pour moyenner !
+
+
+# intervalle (debut..fin) (exclusif) sauf si ...
+# ensemble [a,b,c]
+# tout nil
+
+# filtre = select_data(n,l,k,algo,h) { |p,r| [paramètre,valeur] }
+
+# attributs de p : n,l,k,algo,heuristic
+# attributs de r : count , result.timers[], result.sat, result.stats[]
+
+# substitution : "blabla #{variable} blabla" 
