@@ -10,13 +10,8 @@ def main
   h = ["rand_rand","rand_mf"]
   n = (1..5).map {|x| 10*x}
   l = [3]
-<<<<<<< HEAD
-  k = (1..5).map {|x| 100*x}
-  sample = 5                    # nombres de passages (*nb de proc ?)
-=======
   k = (1..5).map {|x| 10*x}
   sample = 5                    # nombres de passages (*nb de proc)
->>>>>>> 6f0f9129a943f6938fd9bfc64f7932727a6e1d00
 
   Threads.times do 
     Thread::new do
