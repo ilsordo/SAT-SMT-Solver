@@ -59,13 +59,13 @@ let parse_args () =
       config.print_cnf <- out in
   
   let speclist = Arg.align [
-    ("-algo",     Arg.String parse_algo,                              "dpll|wl");
-    ("-h",        Arg.String parse_heuristic,                         " Heuristic");
-    ("-d",        Arg.Int debug#set_debug_level,                            "k Debug depth k");
-    ("-b",        Arg.Int debug#set_blocking_level,                         "k Interaction depth k");
-    ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),"k");
-    ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- Tseitin),"");
-    ("-print_cnf",Arg.String parse_output,                            "[f|-] Prints reduction to f (- = stdout");
+    ("-algo",     Arg.String parse_algo,                              "[dpll|wl] Algorithm");
+    ("-h",        Arg.String parse_heuristic,                         "[next_rand|...] Heuristic");
+    ("-d",        Arg.Int debug#set_debug_level,                      "k Debug depth k");
+    ("-b",        Arg.Int debug#set_blocking_level,                   "k Interaction depth k");
+    ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),"k Color solver");
+    ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- Tseitin)," Tseitin solver");
+    ("-print_cnf",Arg.String parse_output,                            "[f|-] Prints reduction to f (- = stdout)");
   ] in
   
   Arg.parse speclist (fun s -> config.input <- Some s) use_msg

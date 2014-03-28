@@ -4,6 +4,9 @@ type t = formule -> Clause.literal option
 
 type pol = Formule.formule -> Clause.variable -> bool
 
+
+(*** Heuristiques de choix de polarité ***)
+
 let polarite_rand _ _ = Random.bool() (* prochaine polarite = booleen aleatoire *)
 
 let polarite_most_frequent formule x = (* prochaine polarite = celle qui permet de rendre le plus de clauses vraies (via x) *)
@@ -12,7 +15,11 @@ let polarite_most_frequent formule x = (* prochaine polarite = celle qui permet 
   else
     false
 
-let next polarite formule = (* prochaine variable = plus grande variable disponible *)
+
+
+(*** Heuristiques de choix de variable ***)
+
+let next polarite formule = (* prochaine variable = plus grande variable disponible (donc choix déterministe car basé sur noms des variables) *)
   let n = formule#get_nb_vars in
   let rec parcours_paris = function
     | 0 -> None
@@ -41,7 +48,29 @@ let rand polarite formule = (* prochaine variable = variable aleatoire *)
     find_pari n (Random.int (n-count))
 
 
+let dlcs polarite formule = (* prochaine variable : la plus fréquente *)
+  let n = formule#get_nb_vars in
+  if formule#get_paris#size = n then
+    None
+  else
+    let rec most_eff (max,var) = function
+      | 0 -> var
+      | v when formule#get_pari v <> None -> most_eff (max,var) (v-1) 
+      | v -> 
+          let pres = (formule#get_nb_occ true v) + (formule#get_nb_occ false v) in
+          let (max, var) = 
+            if pres>=max then
+              (pres,v)
+            else 
+              (max,var) in      
+          most_eff (max, var) (v-1) in      
+    let var = most_eff (0,0) n in
+    assert (var <> 0); (* Should not happen *)
+    Some (polarite formule var,var)
+    
+    
 
+(*** Heuristiques de choix de littéral ***)    
     
 (* Max par rapport au premier membre, priorité au premier *)
 let max_v (x1,v1) (x2,v2) = if x1>=x2 then (x1,v1) else (x2,v2)
@@ -78,16 +107,15 @@ let moms (formule:formule) = (* prochain litteral : celui qui apparait le plus d
           let (max',lit') = max_v (pos,(true,v)) (neg,(false,v)) in
           let (max, lit) = max_v (max',lit') (max,lit) in
           max_occ (max, lit) (v-1) in
-    let lit = max_occ (0,(false,0)) n in
+    let lit = max_occ (0,(false,0)) n in (* littéral le plus fréquent dans les clauses de taille min *)
     assert (snd lit <> 0); (* Should not happen *)
     Some lit
-    
 
 
 let dlis (formule:formule) = (* prochain litteral : celui qui rend le plus de clauses vraies *)
   let n = formule#get_nb_vars in
   if formule#get_paris#size = n then
-    None
+    None  
   else
     let rec most_eff (max,lit) = function
       | 0 -> lit
@@ -111,7 +139,7 @@ let dlis (formule:formule) = (* prochain litteral : celui qui rend le plus de cl
     Some lit       
 
 
-let jewa (formule:formule) =
+let jewa (formule:formule) = (* prochain litteral : celui qui a le plus grand score (score de l : somme (pour les clauses C contenant l) de (2**-|C|) *)
   let n = formule#get_nb_vars in
   if formule#get_paris#size = n then
     None
@@ -143,23 +171,4 @@ let jewa (formule:formule) =
     assert (snd lit <> 0); (* Should not happen *)
     Some lit    
     
-let dlcs polarite formule = (* prochaine variable : la plus fréquente *)
-  let n = formule#get_nb_vars in
-  if formule#get_paris#size = n then
-    None
-  else
-    let rec most_eff (max,var) = function
-      | 0 -> var
-      | v when formule#get_pari v <> None -> most_eff (max,var) (v-1) 
-      | v -> 
-          let pres = (formule#get_nb_occ true v) + (formule#get_nb_occ false v) in
-          let (max, var) = 
-            if pres>=max then
-              (pres,v)
-            else 
-              (max,var) in      
-          most_eff (max, var) (v-1) in      
-    let var = most_eff (0,0) n in
-    assert (var <> 0); (* Should not happen *)
-    Some (polarite formule var,var)
-       
+    

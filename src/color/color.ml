@@ -75,7 +75,7 @@ let print_answer k (_,_,l) assoc p = function (***)
         fprintf p "graph {\n %a" print_aretes l;
         assoc#iter (print_sommet values p couleurs);
         fprintf p "}\n"
-     end    
+     end
       
 
 
