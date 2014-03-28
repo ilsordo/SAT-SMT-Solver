@@ -31,6 +31,12 @@ class Result
     end
     self
   end
+
+  def to_s
+    "<sat=#{@sat}, timers=#{@timers}, stats=#{@stats}>"
+  end
+
+  alias inspect to_s
 end
 
 class Report
@@ -53,6 +59,12 @@ class Report
     @count += report.count - 1
     self << report.result
   end
+
+  def to_s
+    "<Report : count=#{@count}, #{@result}>"
+  end
+
+  alias inspect to_s
 end
 
 
@@ -121,8 +133,11 @@ class Database
       puts "No results available"
       return
     end
+
     h1 = {}
     h.sort_by{ |key,value| key }.each{ |key,value| h1[key] = value}
+    
+    p h1
 
     algos = h1.values.max { |x| x.length }.keys
     names[:ncols] = algos.length + 1
