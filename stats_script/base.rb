@@ -76,6 +76,7 @@ class Database
   end
 
   def record problem, report
+    raise ArgumentError unless problem and report
     @mutex.lock
     repr = @data[@data.keys[0]]
     if @data.key? problem then
@@ -218,7 +219,7 @@ def run_tests(n,l,k,algos,heuristics,sample=1,&block)
       k.each do |k_|
         algos.each do |a_|
           heuristics.each do |h_|
-            yield p, (run_test(n_,l_,k_,a_,sample))
+            yield [Problem::new(n_,l_,k_,a_,h_), (run_test(n_,l_,k_,a_,h_,sample))]
           end
         end
       end

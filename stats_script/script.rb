@@ -15,9 +15,11 @@ def main
 
   Threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) }  
+      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
     end
   end
+
+
 
   filter = select_data(nil,3,10,nil,nil) { |p,r|  [p.n,r.result.timers["Time (s)"]/r.count]}
   names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
@@ -55,7 +57,6 @@ def populate name
     sleep 600    
   end
 
-  db.to_gnuplot filter,"stats_script/skel.p",names
 end
 
 
