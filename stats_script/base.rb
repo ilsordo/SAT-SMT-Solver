@@ -137,7 +137,7 @@ class Database
     h1 = {}
     h.sort_by{ |key,value| key }.each{ |key,value| h1[key] = value}
     
-    p h1
+    # p h1
 
     algos = h1.values.max { |x| x.length }.keys
     names[:ncols] = algos.length + 1

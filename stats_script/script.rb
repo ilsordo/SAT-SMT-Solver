@@ -54,7 +54,7 @@ def debug
     t.join
   end
 
-  puts db.data
+  # puts db.data
 
   db.to_gnuplot filter,"stats_script/skel.p",names
 end
