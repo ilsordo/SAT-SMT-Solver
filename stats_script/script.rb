@@ -11,7 +11,7 @@ def main
   n = (1..5).map {|x| 10*x}
   l = [3]
   k = (1..5).map {|x| 10*x}
-  sample = 5                    # nombres de passages (*nb de proc ?)
+  sample = 5                    # nombres de passages (*nb de proc)
 
   Threads.times do 
     Thread::new do

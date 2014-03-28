@@ -109,13 +109,6 @@ object (self)
     paris#find v
 
   method get_paris = paris
-    
-  (***)
-
-  method add_clause c = (* ajoute la clause c, dans les clauses et les occurences *)
-    clauses#add c
-
-  method get_clauses = clauses (* renvoie l'ensembles des clauses de la formule *)
 
   method set_val b v = (* pari la valeur b sur la variable v *)
     match paris#find v with
@@ -126,12 +119,19 @@ object (self)
     match paris#find v with
       | None -> assert false
       | Some b -> paris#remove v
+          
+  (***)
 
+  method add_clause c = (* ajoute la clause c, dans les clauses et les occurences *)
+    clauses#add c
+
+  method get_clauses = clauses (* renvoie l'ensembles des clauses de la formule *)
 
   method get_nb_occ (_:bool) (_:int) = 0 (* Non implémenté *)
   
   method clause_current_size (_:clause) = 0
-  (******)
+
+  (***)
 
   method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *)
     try 

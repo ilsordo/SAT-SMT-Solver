@@ -9,13 +9,14 @@
 ******************************************************************************
 
 1. Compilation et exécution    
-2. Debuggage et exécution pas à pas
+2. Suivi de l'algorithme et debuggage
 3. Structures de données
 4. Algorithme DPLL
 5. Algorithme Watched Literals
-6. Suivi de l'algorithme
-7. Générateur
-8. Analyse des performances
+6. Algorithme Tseitin
+7. Algorithme Colorie
+8. Heuristiques
+9. Générateur
 
 ******************************************************************************
  
@@ -75,7 +76,7 @@ Enregistrer l'entrée générée dans un fichier ex.cnf :
      
 Résoudre l'entrée générée à la volée : 
 
-    ./gen -color n p | ./colorie     
+    ./gen -color n p | ./colorie k     
         
 Options
 -------
@@ -90,7 +91,7 @@ Fixer un algorithme de résolution :
     
 Fixer une heuristique de résolution : 
 
-    -h [dlis|...]
+    -h [next_rand|next_mf|rand_rand|rand_mf|dlcs|moms|dlis|jewa]
     
 Afficher les messages de débuggage de niveau au plus k : 
 
@@ -133,7 +134,7 @@ Afin d'afficher tous messages de profondeur au plus k lors de l'exécution de l'
 
     -d k
   
-Enfin, à partir d'une profondeur de debuggage 1 (-d 1), si le programme renvoie SATISFIABLE, l'assignation des variables obtenue en résultat est vérifiée sur la formule de départ et une ligne "[debug] Check : " indique si cette assignation est bien valide (true ou false).
+A noter : à partir d'une profondeur de debuggage 1 (-d 1), si le programme renvoie SATISFIABLE, l'assignation des variables obtenue en résultat est vérifiée sur la formule de départ et une ligne "[debug] Check : " indique si cette assignation est bien valide (true ou false).
   
 Exécution pas à pas
 ---------------------
@@ -142,7 +143,7 @@ Il est possible de stopper l'algorithme sur certain messages de debuggage. Pour 
 
     debug#p 2 ~stops:true "Propagation : setting %d to %B" var b;
 
-Pour afficher tous les messages de debuggage de profondeur au plus k et stopper l'algorithme à chaque message de profondeur l (l >= k) rencontré, entrer l'option : 
+Pour afficher tous les messages de debuggage de profondeur au plus k et stopper l'algorithme à chaque message de profondeur l (l <= k) rencontré, entrer l'option : 
 
     -d k -b l
 
@@ -151,11 +152,11 @@ Statistiques
 
 Différents types de données peuvent être enregistrés au cours de l'algorithme.
 
-Une table de hashage permet d'associer des entiers à des strings et d'indenter ces entier. Il suffit pour cela d'inclure la ligne suivante au sein du code :  
+Une table de hashage permet d'associer des entiers à des strings et d'indenter ces entiers. Il suffit pour cela d'inclure la ligne suivante au sein du code :  
  
     stats#record s;
   
-Cette ligne à pour conséquence, chaque fois qu'elle est rencontrée, d'indenter l'entier associé au string s. Si s ne figure pas dans la table de hashage, il est ajouté et se voit associer la valeur 1.
+Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'indenter l'entier associé au string s. Si s ne figure pas dans la table de hashage, il est ajouté et se voit associer la valeur 1.
 
 Deux statistiques sont actuellement intégrées à notre code : 
   * nombre de conflits (provoquant un backtracking)
@@ -173,7 +174,9 @@ Pour arrêter le timer définie ci-dessus :
 
     timer#stop;
   
-
+Actuellement, deux temps sont enregistrés par défaut : 
+  - le temps utilisée pour résoudre la cnf donnée
+  - le temps de réduction (pour tseitin et color) qui correspond au temps utilisé pour convertir le problème donné en entrée en une cnf
 
 
 3. Structures de données
@@ -237,8 +240,8 @@ La variable à assigner est choisie comme la première variable non assignée.
 La propagation des contraintes est accélérée par la connaissance par la formule des clauses contenant la variable assignée,
 On évite ainsi de parcourir toutes les clauses. 
 
-Prétraitement:
---------------
+Prétraitement :
+---------------
 
 Le prétraitement effectué se limite à supprimer les clauses trivialement satisfiables : celles contenant x et -x.
 La première étape de propagation des contraintes n'est jamais annulée (sauf si on ne trouve pas d'assignation) et joue donc le rôle du prétraitement.
@@ -248,8 +251,8 @@ La première étape de propagation des contraintes n'est jamais annulée (sauf s
 5. Algorithme Watched Literals
 ==============================
 
-Prétraitement:
---------------
+Prétraitement :
+---------------
 
 Le prétraitement s'effectue en trois étapes : 
   - suppression des tautologies
@@ -259,7 +262,7 @@ Le prétraitement s'effectue en trois étapes :
 Une fois la phase de prétraitement terminée (et si elle n'a pas échouée), on garantie alors qu'il est possible d'établir la surveillance de 2 littéraux différents par clause.
 
 Déroulement :
---------------
+-------------
 
 L'algorithme choisie une variable à assigner puis propage le résultat sur les watched literals : 
 Lorsqu'une paire (v1,v2) est surveillée dans une clause c et que l'on vient d'assigner v1 à true, il y a 4 possibilitées (que l'on résume par le type wl_update dans formule_wl.ml) : 
@@ -275,7 +278,7 @@ Les différents opérations menées prennent appuies sur les deux faits suivants
   - A tout instant, chaque littéral connait les clauses qu'il surveille
 
 
-5. Algorithme Tseitin
+6. Algorithme Tseitin
 =====================
 
 L'algorithme Tseitin permet de convertir une formule propositionnelle en une cnf.
@@ -283,16 +286,16 @@ Le dossier src/tseitin contient l'ensemble des outils mis en place à cette fin.
 
 COMPLEXITE ESPACE+TEMPS
 
-Priorités dans Tseitin : 
+Les associativités des différents opérateurs logiques sont :
   => : right associative
   <=> : non associative
   /\,\/ : left associative
 
-  priorité :   
-    NOT > AND > OR > IMP > EQU
+Les priorités sont :   
+  NOT > AND > OR > IMP > EQU
     
 
-5. Algorithme Colorie
+7. Algorithme Colorie
 =====================
 
 L'algorithme Colorie indique, pour un entier k et un graphe G, si G peut-être colorié à l'aide de k couleurs distincts.
@@ -302,14 +305,15 @@ On rappelle ci-dessous la procédure permettant de construire une cnf indiquant 
   - pour chaque sommet i, on produit la clause i_1\/i_2\/...\/i_k indiquant que i doit se voir attribuer une couleur entre 1 et k
   - pour chaque arête (i,j), pour chaque entier l entre 1 et k, on produit la clause ~i_l\/~j_l indiquant que i et j ne doivent pas avoir la même couleur.
   
-COMPLEXITE ESPACE+TEMPS
+Etant donné un graphe G=(V,E) et un entier de coloriage k, la cnf produite est donc constituée de |V| clauses de longueurs k, et k*|E| clauses de longueurs 2.
+Le temps nécessaire à la production de la cnf est linéaire en la taille de la cnf produite
 
 
 
-6. Heuristiques
+8. Heuristiques
 ===============
 
-Les heuristiques permettent de déterminer le littéral sur lequel effectuer le prochain pari. Les différentes heuristiques implémentées sont décrites ci-dessous. Une analyse comparative de leurs performances figure.... 
+Les heuristiques permettent de déterminer le littéral sur lequel effectuer le prochain pari. Les différentes heuristiques implémentées sont décrites ci-dessous.
 
 Heuristiques de choix de polarité
 ---------------------------------
@@ -347,7 +351,7 @@ Les 2 catégories d'heuristiques décrites ci-dessous peuvent être combinées p
   RAND + POLARITE_MOST_FREQUENT (-h rand_mf)
   DLCS + POLARITE_RAND          (cette option n'est pas disponible)
   DLCS + POLARITE_MOST_FREQUENT (-h dlcs)
-  
+
 On dispose également des heuristiques suivantes : 
 
   MOMS (-h moms)
@@ -363,10 +367,10 @@ On dispose également des heuristiques suivantes :
 
 
 
-7. Générateur
+9. Générateur
 =============
 
-Le générateur permet d'obtenir des cnf, des formules propositionnelles et des graphes. Les méthodes de génération aléatoire sont décrites ci-dessous : 
+Le générateur permet d'obtenir des cnf, des formules propositionnelles et des graphes. Les méthodes de génération aléatoire utilisées sont décrites ci-dessous : 
 
 CNF
 ---

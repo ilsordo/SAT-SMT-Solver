@@ -2,42 +2,45 @@
 Création d'une base de données
 ######################################
 
+# Lancer depuis la racine :
+  
 ./stats_script/script.rb
 
+# mettre nom du sous-script + file si stockage voulu dans file
 
 ######################################
 Exploitation de la base de données
 ######################################
 
-### Charger les fonctions
+# Charger les fonctions
 
 ./test.rb                         
 
-### Charger la bdd
+# Charger la bdd
 
 b=Database::new "db.db"          
 q                                 
 
-### Légende
+# Légende
 
 names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
 
-### Extraction de la bdd
-#### select_data(n,l,k,algo,heur)
-##### intervalle (debut..fin) (exclusif) sauf si ...
-##### ensemble [a,b,c]
-##### tout : nil
-#### |p,r| : abscisse / ordonné
-##### attributs de p : n,l,k,algo,heuristic
-##### attributs de r : count , result.timers[], result.sat, result.stats[]
-#### Remarquer : la substitution "blabla #{variable} blabla" (ici (#{p.n},#{p.l},#{p.k})")
-####             r.count : pour moyenner à posteriori !!! (count == nb de passages)
+# Extraction de la bdd
+## select_data(n,l,k,algo,heur)
+### intervalle (debut..fin) (exclusif) sauf si ...
+### ensemble [a,b,c]
+### tout : nil
+## |p,r| : abscisse / ordonné
+### attributs de p : n,l,k,algo,heuristic
+### attributs de r : count , result.timers[], result.sat, result.stats[]
+## Remarquer : la substitution "blabla #{variable} blabla" (ici (#{p.n},#{p.l},#{p.k})")
+##             r.count : pour moyenner à posteriori !!! (count == nb de passages)
 
 l = select_data(nil,3,nil,nil,nil) { |p,r|  [p.k/(p.n.to_f),r.result.timers["Time (s)"]/r.count] }
 l = select_data(nil,3,nil,nil,nil) { |p,r|  [p.k/(p.n.to_f),r.result.timers["Time (s)"]/r.count] }
 l = select_data(100,3,(100..1000),nil,"rand_rand") { |p,r| ["(#{p.n},#{p.l},#{p.k})",r.result.timers["Time (s)"]/r.count] }
 
-### Affichage du résulat
+# Affichage du résulat
 
 b.to_gnuplot l,"stats_script/skel.p",names
 
