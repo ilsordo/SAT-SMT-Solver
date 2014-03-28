@@ -96,6 +96,11 @@ class Database
   # On accède aux données par h[valeur][algo]
   # names : { :title => "titre", :xlabel => "x label", :ylabel => ylabel }
   def to_gnuplot (filter,skel,names)
+    if data.empty?
+      puts "Empty database"
+      return
+    end
+
     names = names.dup
     h = Hash::new { |hash,key| hash[key] = Hash::new 0 }
     count = Hash::new { |hash,key| hash[key] = Hash::new 0 }
@@ -111,8 +116,13 @@ class Database
         h[param][key] /= count [param][key]
       end
     end
+
+    if h.empty?
+      puts "No results available"
+      return
+    end
     h1 = {}
-    h.sort_by{ |key,value| key }.each{ |key,value| h1[key] = value} # tri de hash huhuhu
+    h.sort_by{ |key,value| key }.each{ |key,value| h1[key] = value}
 
     algos = h1.values.max { |x| x.length }.keys
     names[:ncols] = algos.length + 1

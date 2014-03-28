@@ -10,7 +10,7 @@ def main
   h = ["rand_rand","rand_mf"]
   n = (1..5).map {|x| 10*x}
   l = [3]
-  k = (1..5).map {|x| 10*x}
+  k = (1..5).map {|x| 100*x}
   sample = 5                    # nombres de passages (*nb de proc ?)
 
   Threads.times do 
@@ -21,7 +21,7 @@ def main
 
 
 
-  filter = select_data(nil,3,10,nil,nil) { |p,r|  [p.n,r.result.timers["Time (s)"]/r.count]}
+  filter = select_data(nil,3,10,nil,nil) { |p,r|  puts "Hiya"; [p.n,r.result.timers["Time (s)"]/r.count]}
   names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
 
   (Thread::list - [Thread::current]).each do |t|
