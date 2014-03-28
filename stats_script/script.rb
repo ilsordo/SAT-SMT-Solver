@@ -38,9 +38,9 @@ def populate name
 
   algos = Algos
   h = Heuristics
-  n = (1..100).map {|x| 100*x}
+  n = (1..100).map {|x| 10*x}
   l = [3]
-  k = (1..100).map {|x| 100*x}
+  k = (1..100).map {|x| 10*x}
   sample = 5
 
   Threads.times do 
