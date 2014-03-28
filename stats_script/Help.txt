@@ -4,9 +4,12 @@ Création d'une base de données
 
 # Lancer depuis la racine :
   
-./stats_script/script.rb
+./test.rb
 
-# mettre nom du sous-script + file si stockage voulu dans file
+# Choisir le script :
+  
+populate "name"
+
 
 ######################################
 Exploitation de la base de données

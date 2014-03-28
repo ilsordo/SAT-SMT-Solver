@@ -1,11 +1,3 @@
-Je pense que l'outil est bien utilisable maintenant. 
-Il faudra voir pour tseitin et color comment on fait (cmt générer des tests, quoi mesurer...).
-Il reste aussi à déterminer des tests pertinent : 
-  - pour du 3-sat, les tests avec nb_clauses=4.3*nb_variables sont intéressants
-  - ...
-
-------------
-
 TUTO :
   
 Dans un fichier "tests.txt" (ou tout autre nom de fichier...) : 

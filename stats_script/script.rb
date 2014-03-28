@@ -6,12 +6,12 @@ load "stats_script/base.rb"
 def main
   db = Database::new
 
-  algos = ["dpll","wl"]
-  h = ["rand_rand","rand_mf"]
-  n = (1..5).map {|x| 100*x}
+  algos = ["dpll"]
+  h = ["dlis"]
+  n = (1..1).map {|x| 100*x}
   l = [3]
-  k = (1..5).map {|x| 100*x}
-  sample = 5                    # nombres de passages (*nb de proc)
+  k = (1..10).map {|x| 100*x}
+  sample = 10                    # nombres de passages (*nb de proc)
 
   Threads.times do 
     Thread::new do
@@ -21,7 +21,7 @@ def main
 
 
 
-  filter = select_data(nil,3,100,nil,nil) { |p,r| [p.n,r.result.timers["Time (s)"]/r.count]}
+  filter = select_data(100,3,nil,nil,nil) { |p,r| [p.k,r.result.timers["Time (s)"]/r.count]}
   names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
 
   (Thread::list - [Thread::current]).each do |t|
@@ -30,6 +30,8 @@ def main
 
   db.to_gnuplot filter,"stats_script/skel.p",names
 end
+
+
 
 def debug
   db = Database::new
@@ -65,9 +67,9 @@ def populate name
 
   algos = Algos
   h = Heuristics
-  n = (1..100).map {|x| 10*x}
+  n = (1..3).map {|x| 10*x}
   l = [3]
-  k = (1..100).map {|x| 10*x}
+  k = (1..3).map {|x| 50*x}
   sample = 5
 
   Threads.times do 
@@ -81,7 +83,7 @@ def populate name
     puts "Saving"
     db.save name
     puts "Done"
-    sleep 600    
+    sleep 30    
   end
 
 end
