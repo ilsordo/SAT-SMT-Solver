@@ -86,6 +86,15 @@ def populate name
     sleep 30    
   end
 
+  (Thread::list - [Thread::current]).each do |t|
+    t.join
+  end
+
+  puts "Saving"
+  db.save name
+  puts "Done"
+
+
 end
 
 
