@@ -82,9 +82,8 @@ class Database
   end
 
   def save dest
-    out = open dest, "w"
     @mutex.lock
-    out.write Marshal.dump(data)
+    open(dest, "w") do |out| out.write Marshal.dump(data); out.flush end
     @mutex.unlock
   end
 
