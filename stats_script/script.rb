@@ -6,13 +6,14 @@ load "stats_script/base.rb"
 def main
   db = Database::new
 
-  algos = ["dpll"]
+ algos = ["dpll","wl"]
   h = ["dlis"]
   n = (1..1).map {|x| 100*x}
   l = [3]
   k = (1..10).map {|x| 100*x}
   sample = 10                    # nombres de passages (*nb de proc)
-
+  
+  
   Threads.times do 
     Thread::new do
       run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
@@ -65,16 +66,16 @@ end
 def populate name
   db = Database::new
 
-  algos = Algos
-  h = Heuristics
-  n = (1..3).map {|x| 10*x}
+  algos = ["dpll","wl"]
+  h = ["dlis"]
+  n = (1..1).map {|x| 100*x}
   l = [3]
-  k = (1..3).map {|x| 50*x}
-  sample = 5
+  k = (1..10).map {|x| 100*x}
+  sample = 10                    # nombres de passages (*nb de proc)
 
   Threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if report}  
+      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
     end
   end
 
@@ -86,6 +87,7 @@ def populate name
     sleep 30    
   end
 
+
 end
 
 
@@ -94,7 +96,7 @@ def exemple
   db = Database::new
   
   def my_iter db, &block
-    (30..100).each do |n|
+    (30..40).each do |n|
       (3*n..4*n).each do |k|
         problem, report = run_test(n,3,k,"dpll","dlis",5,1) # run_test(n,3,k,"dpll","dlis",10) 10 passages
         db.record(problem, report)
