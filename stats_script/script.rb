@@ -6,14 +6,13 @@ load "stats_script/base.rb"
 def main
   db = Database::new
 
- algos = ["dpll","wl"]
+  algos = ["dpll"]
   h = ["dlis"]
   n = (1..1).map {|x| 100*x}
   l = [3]
   k = (1..10).map {|x| 100*x}
   sample = 10                    # nombres de passages (*nb de proc)
-  
-  
+
   Threads.times do 
     Thread::new do
       run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
@@ -75,7 +74,7 @@ def populate name
 
   Threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
+      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if report}  
     end
   end
 
@@ -87,6 +86,14 @@ def populate name
     sleep 30    
   end
 
+  (Thread::list - [Thread::current]).each do |t|
+    t.join
+  end
+
+  puts "Saving"
+  db.save name
+  puts "Done"
+
 
 end
 
@@ -96,7 +103,7 @@ def exemple
   db = Database::new
   
   def my_iter db, &block
-    (30..40).each do |n|
+    (30..100).each do |n|
       (3*n..4*n).each do |k|
         problem, report = run_test(n,3,k,"dpll","dlis",5,1) # run_test(n,3,k,"dpll","dlis",10) 10 passages
         db.record(problem, report)
