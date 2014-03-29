@@ -262,11 +262,13 @@ end
 
 # Sélectionne les données selon nlk et passe les données acceptées à une fonction qui calcule la valeur mesurée
 # Le traitement du yield doit renvoyer [paramètre,valeur] 
-def select_data(n,l,k,algos,h,&block)
+def select_data(n,l,k,algos,h,min_count = nil, &block)
   lambda { |p,r|
     if (n==nil or n===p.n) and (l==nil or l===p.l) and (k==nil or k===p.k)
       if (algos == nil or algos === p.algo) and (h==nil or h===p.heuristic)
-        yield(p, r)
+        if min_count and r.count >= min_count
+          yield(p, r)
+        end
       end
     end
   }
