@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 require 'tempfile'
+require 'timeout'
 
 Heuristics = ["rand_rand","rand_mf","next_rand","next_mf","moms","dlis"]
 Algos = ["wl","dpll"]
@@ -228,23 +229,28 @@ class Problem
   end
 end
 
-
-def run_test(n,l,k,a,h,sample = 1)
+def run_test(n,l,k,a,h,sample = 1, limit = nil)
   report = Report::new
   p = Problem::new(n,l,k,a,h)
-  sample.times do || 
-      report << p.gen.call
+  sample.times do
+    Timeout::timeout(limit,Timeout::Error) do
+      begin
+        report << p.gen.call
+      rescue Timeout::Error
+        puts "Timeout : #{p}"
+      end
+    end
   end
-  report
+  [p,report]
 end
 
-def run_tests(n,l,k,algos,heuristics,sample=1,&block)
+def run_tests(n,l,k,algos,heuristics,sample=1, limit = nil,&block)
   n.each do |n_|
     l.each do |l_|
       k.each do |k_|
         algos.each do |a_|
           heuristics.each do |h_|
-            yield [Problem::new(n_,l_,k_,a_,h_), (run_test(n_,l_,k_,a_,h_,sample))]
+            yield run_test(n_,l_,k_,a_,h_,sample)
           end
         end
       end
