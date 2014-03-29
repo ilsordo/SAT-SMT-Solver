@@ -57,7 +57,7 @@ class Report
 
   def merge! report
     raise ArgumentError unless report.is_a? Report
-    @count += report.count - 1
+    @count += report.count
     self << report.result
   end
 
