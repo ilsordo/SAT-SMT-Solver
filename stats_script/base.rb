@@ -57,7 +57,7 @@ class Report
 
   def merge! report
     raise ArgumentError unless report.is_a? Report
-    @count += report.count
+    @count += report.count - 1
     self << report.result
   end
 
@@ -89,14 +89,16 @@ class Database
 
   def record problem, report
     raise ArgumentError unless problem and report
-    @mutex.lock
-    repr = @data[@data.keys[0]]
-    if @data.key? problem then
-      @data[problem].merge! report
-    else
-      @data[problem] = report
+    if report.result
+      @mutex.lock
+      repr = @data[@data.keys[0]]
+      if @data.key? problem then
+        @data[problem].merge! report
+      else
+        @data[problem] = report
+      end
+      @mutex.unlock
     end
-    @mutex.unlock
   end
 
   def merge! o
