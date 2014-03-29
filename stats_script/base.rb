@@ -7,7 +7,7 @@ Heuristics = ["rand_rand","rand_mf","next_rand","next_mf","moms","dlis"]
 Algos = ["wl","dpll"]
 Db_store = "data.db"
 Skeleton = "skel.p"
-Threads = 2
+Threads = 4
 
 class Result
   attr_accessor :timers, :stats, :sat

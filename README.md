@@ -278,27 +278,30 @@ Les différents opérations menées prennent appuies sur les deux faits suivants
   - A tout instant, chaque littéral connait les clauses qu'il surveille
 
 
+
 6. Algorithme Tseitin
 =====================
 
 L'algorithme Tseitin permet de convertir une formule propositionnelle en une cnf.
-Le dossier src/tseitin contient l'ensemble des outils mis en place à cette fin. En particulier, le fichier tseitin.ml contient l'algorithme de conversion.
 
-COMPLEXITE ESPACE+TEMPS
-
-Les associativités des différents opérateurs logiques sont :
+Nous avons choisi les associativités suivantes pour les différents opérateurs logiques :
   => : right associative
   <=> : non associative
   /\,\/ : left associative
 
 Les priorités sont :   
   NOT > AND > OR > IMP > EQU
-    
+  
+Le dossier src/tseitin contient l'ensemble des outils mis en place. En particulier, le fichier tseitin.ml contient l'algorithme de conversion.
+
+Etant donné une formule propositionnelle p, l'algorithme Tseitin produit une cnf [p] telle que p et [p] sont équisatisfiables. La taille de [p], ainsi que le temps d'exécution de l'algorithme, sont linéaires en la taille de p.
+
+  
 
 7. Algorithme Colorie
 =====================
 
-L'algorithme Colorie indique, pour un entier k et un graphe G, si G peut-être colorié à l'aide de k couleurs distincts.
+Etant donné un entier k et un graphe G, l'algorithme Colorie indique si G peut-être colorié à l'aide de k couleurs distincts.
 Le dossier src/color contient l'ensemble des outils mis en place à cette fin.
 
 On rappelle ci-dessous la procédure permettant de construire une cnf indiquant si le graphe G=(V,E) peut être colorié avec k couleurs :
@@ -306,7 +309,7 @@ On rappelle ci-dessous la procédure permettant de construire une cnf indiquant 
   - pour chaque arête (i,j), pour chaque entier l entre 1 et k, on produit la clause ~i_l\/~j_l indiquant que i et j ne doivent pas avoir la même couleur.
   
 Etant donné un graphe G=(V,E) et un entier de coloriage k, la cnf produite est donc constituée de |V| clauses de longueurs k, et k*|E| clauses de longueurs 2.
-Le temps nécessaire à la production de la cnf est linéaire en la taille de la cnf produite
+Le temps nécessaire à la production de la cnf est linéaire en la taille de la cnf produite.
 
 
 
@@ -399,7 +402,7 @@ Pour ce faire, l'algorithme récursif suivant est utilisé :
 Color
 -----
 
-Le générateur prend en entrée 1 entier n et un flottant p.
+Le générateur prend en entrée un entier n et un flottant p.
 Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d'existence p.
 Remarque : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.
 
