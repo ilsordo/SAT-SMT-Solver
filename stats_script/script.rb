@@ -67,14 +67,14 @@ def populate name
 
   algos = ["dpll"]
   h = ["dlis","next_rand"]
-  n = (1..1).map {|x| 1000*x}
+  n = (1..1).map {|x| 100*x}
   l = [3]
-  k = (1..1).map {|x| 4300*x}
+  k = (1..10).map {|x| 100*x}
   sample = 5                    # nombres de passages (*nb de proc)
 
   Threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample,1) { |problem, report| db.record(problem, report) if report}  # and problem ?
+      run_tests(n,l,k,algos,h,sample,2) { |problem, report| db.record(problem, report) if report}  # and problem ?
     end
   end
 
