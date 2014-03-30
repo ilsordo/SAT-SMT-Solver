@@ -66,11 +66,11 @@ def populate name
   db = Database::new
 
   algos = ["dpll"]
-  h = ["dlis","next_rand"]
-  n = (1..1).map {|x| 100*x}
+  h = ["next_rand"]
+  n = (1..1).map {|x| 1000*x}
   l = [3]
-  k = (1..10).map {|x| 100*x}
-  sample = 5                    # nombres de passages (*nb de proc)
+  k = (1..1).map {|x| 4300*x}
+  sample = 1                    # nombres de passages (*nb de proc)
 
   Threads.times do 
     Thread::new do

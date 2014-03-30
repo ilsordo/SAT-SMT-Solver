@@ -234,12 +234,12 @@ def run_test(n,l,k,a,h,sample = 1, limit = nil)
   report = Report::new
   p = Problem::new(n,l,k,a,h)
   sample.times do
-    Timeout::timeout(limit,Timeout::Error) do
-      begin
+    begin
+      Timeout::timeout(limit,Timeout::Error) do
         report << p.gen.call
-      rescue Timeout::Error
-        puts "Timeout : #{p}"
       end
+    rescue Timeout::Error
+        puts "Timeout : #{p}"
     end
   end
   [p,report]
