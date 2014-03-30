@@ -45,7 +45,7 @@ Tseitin
 
 Résoudre la formule propositionnelle contenue dans le fichier ex.txt : 
 
-    ./tseitn ex.txt
+    ./tseitin ex.txt
     
 Colorie
 -------
@@ -54,7 +54,6 @@ Essayer un coloriage à k couleur du graphe ex.col :
 
     ./colorie k ex.col 
     
-
 Générateur
 ----------
 
@@ -70,14 +69,14 @@ Générer un graphe à n sommets, avec probabilité p d'existence pour chaque ar
 
     ./gen -color n p
     
-Enregistrer l'entrée générée dans un fichier ex.cnf : 
+Enregistrer l'entrée générée dans un fichier ex.txt : 
   
     ./gen -tseitin n c > ex.txt
      
 Résoudre l'entrée générée à la volée : 
 
-    ./gen -color n p | ./colorie k     
-        
+    ./gen -color n p |./colorie k     
+                
 Options
 -------
 
@@ -111,6 +110,10 @@ Afficher la cnf convertie à partir de l'entrée :
     
     -print_cnf -
     
+Stocker les résultats d'un algorithme dans un fichier res.txt (n'enregistre ni les statistiques, ni les messages de debuggage) : 
+
+    ./resol ex.cnf > res.txt
+
 
 
 2. Suivi de l'algorithme et debuggage
@@ -126,7 +129,7 @@ La mise en place de messages de debuggage se fait au sein du code en ajoutant de
     debug#p 2 "Propagation : setting %d to %B" var b; 
     
 Ici, le message de debuggage est "Propagation : setting var to b" (%d et %B sont remplacé par var et b).
-L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, plus le message de debuggage doit indiquer une information précise. Par exemple, le message suivant à la profondeur la plus faible puisqu'il indique uniquement l'algorithme utilisé : 
+L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, plus le message de debuggage doit indiquer une information précise. Par exemple, le message suivant a une profondeur faible car il rensigne uniquement sur l'algorithme utilisé : 
 
     debug#p 1 "Using algorithm %s and heuristic %s" config.nom_algo config.nom_heuristic;
 
@@ -176,7 +179,8 @@ Pour arrêter le timer définie ci-dessus :
   
 Actuellement, deux temps sont enregistrés par défaut : 
   - le temps utilisée pour résoudre la cnf donnée
-  - le temps de réduction (pour tseitin et color) qui correspond au temps utilisé pour convertir le problème donné en entrée en une cnf
+  - le temps de réduction (pour tseitin et color) pour convertir le problème donné en entrée en une cnf
+
 
 
 3. Structures de données
@@ -344,7 +348,7 @@ DLCS :
 Heuristiques de choix de littéral
 ---------------------------------
 
-On indique pour chaque heuristique l'argument permettant de l'appeler (voir section ...)
+On indique pour chaque heuristique l'argument permettant de l'appeler.
 
 Les 2 catégories d'heuristiques décrites ci-dessous peuvent être combinées pour donner lieu à 6 heuristiques de choix de littéral : 
 
@@ -404,5 +408,7 @@ Color
 
 Le générateur prend en entrée un entier n et un flottant p.
 Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d'existence p.
+
 Remarque : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.
+
 
