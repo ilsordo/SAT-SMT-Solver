@@ -327,22 +327,23 @@ Heuristiques de choix de polarité
 Etant donnée une variables, ces heuristiques déterminent la polarité à lui joindre (pour obtenir un littéral).
 
 POLARITE_RAND :
-  renvoie une polarité aléatoire (true ou false)
+  * renvoie une polarité aléatoire (true ou false)
 
 POLARITE_MOST_FREQUENT :
-  renvoie la polarité avec laquelle la variable apparait le plus fréquemment dans la formule
+  * pour DPLL : renvoie la polarité avec laquelle la variable apparait le plus fréquemment dans la formule
+  * pour WL : renvoie la polarité avec laquelle la variable est la plus surveillée dans la formule
 
 Heuristiques de choix de variable
 ---------------------------------
 
 NEXT :
-  renvoie la prochaine variable non encore assignée (ce choix est déterministe et dépend de l'entier représentant chaque variable)
+  * renvoie la prochaine variable non encore assignée (ce choix est déterministe et dépend de l'entier représentant chaque variable)
   
 RAND : 
-  renvoie une variable aléatoire non encore assignée
+  * renvoie une variable aléatoire non encore assignée
 
 DLCS : 
-  renvoie la variable apparaissant le plus fréquemment dans la formule
+  * renvoie la variable apparaissant le plus fréquemment dans la formule
 
 Heuristiques de choix de littéral
 ---------------------------------
@@ -351,12 +352,12 @@ On indique pour chaque heuristique l'argument permettant de l'appeler.
 
 Les 2 catégories d'heuristiques décrites ci-dessous peuvent être combinées pour donner lieu à 6 heuristiques de choix de littéral : 
 
-  NEXT + POLARITE_RAND          (-h next_rand)
-  NEXT + POLARITE_MOST_FREQUENT (-h next_mf)
-  RAND + POLARITE_RAND          (-h rand_rand)
-  RAND + POLARITE_MOST_FREQUENT (-h rand_mf)
-  DLCS + POLARITE_RAND          (cette option n'est pas disponible)
-  DLCS + POLARITE_MOST_FREQUENT (-h dlcs)
+  * NEXT + POLARITE_RAND          (-h next_rand)
+  * NEXT + POLARITE_MOST_FREQUENT (-h next_mf)
+  * RAND + POLARITE_RAND          (-h rand_rand)
+  * RAND + POLARITE_MOST_FREQUENT (-h rand_mf)
+  * DLCS + POLARITE_RAND          (cette option n'est pas disponible)
+  * DLCS + POLARITE_MOST_FREQUENT (-h dlcs)
 
 On dispose également des heuristiques suivantes : 
 
