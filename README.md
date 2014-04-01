@@ -362,15 +362,15 @@ Les 2 catégories d'heuristiques décrites ci-dessous peuvent être combinées p
 On dispose également des heuristiques suivantes : 
 
   MOMS (-h moms)
-    renvoie le littéral apparaissant le plus fréquemment dans les clauses de taille minimum
+    * renvoie le littéral apparaissant le plus fréquemment dans les clauses de taille minimum
     
   DLIS (-h dlis)
-    pour DPLL : renvoie le littéral qui rend le plus de clauses satisfaites
-    pour WL : renvoie le littéral qui rend le plus de jumelles satisfaites
+    * pour DPLL : renvoie le littéral qui rend le plus de clauses satisfaites
+    * pour WL : renvoie le littéral qui rend le plus de jumelles satisfaites
     
-  JEWA (-h jewa)
-    attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2**-|C|)
-    renvoie le littéral avec le plus grand score
+  JEWA (Jeroslow-Wang) (-h jewa)
+    * attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2**-|C|)
+    * renvoie le littéral avec le plus grand score
 
 
 
