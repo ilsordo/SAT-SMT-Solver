@@ -308,8 +308,8 @@ Etant donné un entier k et un graphe G, l'algorithme Colorie indique si G peut-
 Le dossier src/color contient l'ensemble des outils mis en place à cette fin.
 
 On rappelle ci-dessous la procédure permettant de construire une cnf indiquant si le graphe G=(V,E) peut être colorié avec k couleurs :
-  - pour chaque sommet i, on produit la clause i_1\/i_2\/...\/i_k indiquant que i doit se voir attribuer une couleur entre 1 et k
-  - pour chaque arête (i,j), pour chaque entier l entre 1 et k, on produit la clause ~i_l\/~j_l indiquant que i et j ne doivent pas avoir la même couleur.
+  - pour chaque sommet i, on produit la clause i_1 \/ i_2 \/ ... \/ i_k indiquant que i doit se voir attribuer une couleur entre 1 et k
+  - pour chaque arête (i,j), pour chaque entier l entre 1 et k, on produit la clause ~i_l \/ ~j_l indiquant que i et j ne doivent pas avoir la même couleur.
   
 Etant donné un graphe G=(V,E) et un entier de coloriage k, la cnf produite est donc constituée de |V| clauses de longueurs k, et k*|E| clauses de longueurs 2.
 Le temps nécessaire à la production de la cnf est linéaire en la taille de la cnf produite.
