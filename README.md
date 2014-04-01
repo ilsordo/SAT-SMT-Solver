@@ -382,17 +382,18 @@ Le générateur permet d'obtenir des cnf, des formules propositionnelles et des 
 CNF
 ---
 
-Le générateur prend en entrée 3 entiers : n l k
+Le générateur prend en entrée 3 entiers : n l k.
 Il produit une formule à n variables comportant k clauses de longueur l chacune.
 Les clauses sont choisises uniformément (on extrait les l premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.
 
 Tseitin
 -------
 
-Le générateur prend en entrée 2 entiers : n c
+Le générateur prend en entrée 2 entiers : n c.
 Il produit une formule propositionnelle à n variables et c connecteurs logiques.
 Pour ce faire, l'algorithme récursif suivant est utilisé : 
 
+```
   TSEITIN_RANDOM(n,c)
     Si c=0 alors
       renvoyer une variable choisie aléatoirement entre 1 et n
@@ -402,6 +403,7 @@ Pour ce faire, l'algorithme récursif suivant est utilisé :
         renvoyer ~TSEITIN_RANDOM(n,c-1)
       Sinon
         renvoyer TSEITIN_RANDOM(n,(c-1)/2)connectTSEITIN_RANDOM(n,c-1-(c-1)/2)
+```
 
 Color
 -----
