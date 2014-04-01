@@ -101,7 +101,7 @@ Exécuter l'algorithme pas à pas, en stoppant à chaque étape de profondeur k 
 
     -b k
     
-Enregistrer dans le fichier f la cnf convertie à partir de l'entrée : 
+Enregistrer dans le fichier f la cnf convertie à partir du problème donné en entrée : 
 
     -print_cnf f
     
@@ -129,7 +129,7 @@ La mise en place de messages de debuggage se fait au sein du code en ajoutant de
     debug#p 2 "Propagation : setting %d to %B" var b; 
     
 Ici, le message de debuggage est "Propagation : setting var to b" (%d et %B sont remplacé par var et b).
-L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, plus le message de debuggage doit indiquer une information précise. Par exemple, le message suivant a une profondeur faible car il rensigne uniquement sur l'algorithme utilisé : 
+L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, plus le message de debuggage doit indiquer une information précise. Par exemple, le message suivant a une profondeur faible car il renseigne uniquement sur l'algorithme utilisé : 
 
     debug#p 1 "Using algorithm %s and heuristic %s" config.nom_algo config.nom_heuristic;
 
@@ -159,7 +159,7 @@ Une table de hashage permet d'associer des entiers à des strings et d'indenter 
  
     stats#record s;
   
-Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'indenter l'entier associé au string s. Si s ne figure pas dans la table de hashage, il est ajouté et se voit associer la valeur 1.
+Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'indenter l'entier associé au string s. Si s ne figure pas dans la table de hashage, il y est ajouté et se voit associer la valeur 1.
 
 Deux statistiques sont actuellement intégrées à notre code : 
   * nombre de conflits (provoquant un backtracking)
@@ -289,12 +289,11 @@ Les différents opérations menées prennent appuies sur les deux faits suivants
 L'algorithme Tseitin permet de convertir une formule propositionnelle en une cnf.
 
 Nous avons choisi les associativités suivantes pour les différents opérateurs logiques :
-  => : right associative
-  <=> : non associative
-  /\,\/ : left associative
+  * => : right associative
+  * <=> : non associative
+  * /\,\/ : left associative
 
-Les priorités sont :   
-  NOT > AND > OR > IMP > EQU
+Les priorités sont : NOT > AND > OR > IMP > EQU
   
 Le dossier src/tseitin contient l'ensemble des outils mis en place. En particulier, le fichier tseitin.ml contient l'algorithme de conversion.
 
