@@ -57,9 +57,7 @@ let algo next_pari n cnf =
             debug#p 2 "WL : starting propagation";
             let l = (constraint_propagation formule var b []) in (* lève une exception si conflit créé, sinon renvoie liste des vars assignées *)
               if aux () then (* on réussit à poursuivre l'assignation jusqu'au bout *)
-                begin
                   true (* c'est gagné *)
-                end
               else (* pb plus loin dans le backtracking, il faut tout annuler pour parier sur faux *)
                 begin
                   List.iter (
@@ -75,17 +73,14 @@ let algo next_pari n cnf =
                   debug#p 2 "WL : starting propagation";
                   let l = constraint_propagation formule var (not b) [] in (* on a encore une chance en pariant faux *)
                   if aux () then (* on réussit à poursuivre l'assignation jusqu'au bout *)
-                    begin
                      true (* c'est gagné *)
-                     end
                   else
                     begin
-                      debug#p 2 "WL : backtracking on var %d" var;
                       List.iter (
                         fun var -> 
                           formule#reset_val var
                       ) l; (* sinon il faut backtracker sur le pari précédent *)
-                      false
+                      raise Wl_fail
                     end   
                 with
                   | Wl_fail ->

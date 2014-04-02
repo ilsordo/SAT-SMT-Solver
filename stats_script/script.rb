@@ -72,16 +72,16 @@ def populate name
   db = Database::new
 
   algos = ["dpll"]
-  h = ["next_rand"]
-  n = (1..1).map {|x| 100*x}
-  l = [3]
-  k = (1..6).map {|x| 100*x}
-  sample = 2                    # nombres de passages (*nb de proc)
-  timeout = 5
+  h = ["dlis","jewa"]
+  n = (100..100).map {|x| 1*x}
+  l = [3,4,5]
+  k = (1..30).map {|x| 50*x}
+  sample = 3                    # nombres de passages (*nb de proc)
+  timeout = 300
   
   Threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ? # TIME LIMIT ici
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
     end
   end
 
@@ -90,7 +90,7 @@ def populate name
     puts "Saving"
     db.save name
     puts "Done"
-    sleep 5    
+    sleep 60 
   end
 
   (Thread::list - [Thread::current]).each do |t|
