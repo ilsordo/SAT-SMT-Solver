@@ -15,7 +15,7 @@ def main
 
   Threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample,0) { |problem, report| db.record(problem, report) if problem and report}  
+      run_tests(n,l,k,algos,h,sample,5) { |problem, report| db.record(problem, report) if problem and report}  
     end
   end
 
