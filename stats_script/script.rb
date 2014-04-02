@@ -12,10 +12,11 @@ def main
   l = [3]
   k = (1..1).map {|x| 100*x}
   sample = 2                    # nombres de passages (*nb de proc)
+  timeout = 0
 
   Threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample,0) { |problem, report| db.record(problem, report) if problem and report}  
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if problem and report}  
     end
   end
 
