@@ -17,13 +17,13 @@ let rec print_formule p = function
 
 let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
   let fresh = new counter 0 string_of_int in (* générateur de variables fraiches successives *)
-  let rec aux acc = function
-    | Var v -> ((true,v),acc)
-    | Not f -> 
-        let ((b,v),g) = aux acc f in
+  let rec aux cnf = function
+    | Var v ::q -> aux((true,v),cnf)
+    | Not f ::q -> 
+        let ((b,v),g) = aux cnf f in
         ((not b,v),g)
     | And(f,g) -> 
-        let ((b1,v1),h1) = aux acc f in
+        let ((b1,v1),h1) = aux cnf f in
         let ((b2,v2),h2) = aux h1 g in
         let fresh = "_"^fresh#next in
         ((true,fresh), 
@@ -33,7 +33,7 @@ let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches 
          ::h2
         )
     | Or(f,g) -> 
-        let ((b1,v1),h1) = aux acc f in
+        let ((b1,v1),h1) = aux cnf f in
         let ((b2,v2),h2) = aux h1 g in
         let fresh="_"^fresh#next in
         ((true,fresh),
@@ -43,7 +43,7 @@ let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches 
          ::h2
         ) 
     | Imp(f,g) -> 
-        let ((b1,v1),h1) = aux acc f in
+        let ((b1,v1),h1) = aux cnf f in
         let ((b2,v2),h2) = aux h1 g in
         let fresh="_"^fresh#next in
         ((true,fresh),
@@ -52,7 +52,7 @@ let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches 
          ::[(false,fresh);(not b1,v1);(b2,v2)]
          ::h2
         )
-    | Equ(f,g) -> aux acc (And(Imp(f,g),Imp(g,f)))
+    | Equ(f,g) -> aux cnf (And(Imp(f,g),Imp(g,f)))
   in let (p,f) = aux [] t_formule in
      ([p]::f)
 
