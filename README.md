@@ -45,7 +45,7 @@ Tseitin
 
 Résoudre la formule propositionnelle contenue dans le fichier ex.txt : 
 
-    ./tseitn ex.txt
+    ./tseitin ex.txt
     
 Colorie
 -------
@@ -54,7 +54,6 @@ Essayer un coloriage à k couleur du graphe ex.col :
 
     ./colorie k ex.col 
     
-
 Générateur
 ----------
 
@@ -70,14 +69,14 @@ Générer un graphe à n sommets, avec probabilité p d'existence pour chaque ar
 
     ./gen -color n p
     
-Enregistrer l'entrée générée dans un fichier ex.cnf : 
+Enregistrer l'entrée générée dans un fichier ex.txt : 
   
     ./gen -tseitin n c > ex.txt
      
 Résoudre l'entrée générée à la volée : 
 
-    ./gen -color n p | ./colorie k     
-        
+    ./gen -color n p |./colorie k     
+                
 Options
 -------
 
@@ -102,7 +101,7 @@ Exécuter l'algorithme pas à pas, en stoppant à chaque étape de profondeur k 
 
     -b k
     
-Enregistrer dans le fichier f la cnf convertie à partir de l'entrée : 
+Enregistrer dans le fichier f la cnf convertie à partir du problème donné en entrée : 
 
     -print_cnf f
     
@@ -111,6 +110,10 @@ Afficher la cnf convertie à partir de l'entrée :
     
     -print_cnf -
     
+Stocker les résultats d'un algorithme dans un fichier res.txt (n'enregistre ni les statistiques, ni les messages de debuggage) : 
+
+    ./resol ex.cnf > res.txt
+
 
 
 2. Suivi de l'algorithme et debuggage
@@ -126,7 +129,7 @@ La mise en place de messages de debuggage se fait au sein du code en ajoutant de
     debug#p 2 "Propagation : setting %d to %B" var b; 
     
 Ici, le message de debuggage est "Propagation : setting var to b" (%d et %B sont remplacé par var et b).
-L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, plus le message de debuggage doit indiquer une information précise. Par exemple, le message suivant à la profondeur la plus faible puisqu'il indique uniquement l'algorithme utilisé : 
+L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, plus le message de debuggage doit indiquer une information précise. Par exemple, le message suivant a une profondeur faible car il renseigne uniquement sur l'algorithme utilisé : 
 
     debug#p 1 "Using algorithm %s and heuristic %s" config.nom_algo config.nom_heuristic;
 
@@ -134,7 +137,7 @@ Afin d'afficher tous messages de profondeur au plus k lors de l'exécution de l'
 
     -d k
   
-A noter : à partir d'une profondeur de debuggage 1 (-d 1), si le programme renvoie SATISFIABLE, l'assignation des variables obtenue en résultat est vérifiée sur la formule de départ et une ligne "[debug] Check : " indique si cette assignation est bien valide (true ou false).
+_A noter_ : à partir d'une profondeur de debuggage 1 (-d 1), si le programme renvoie SATISFIABLE, l'assignation des variables obtenue en résultat est vérifiée sur la formule de départ et une ligne "[debug] Check : " indique si cette assignation est bien valide (true ou false).
   
 Exécution pas à pas
 ---------------------
@@ -156,7 +159,7 @@ Une table de hashage permet d'associer des entiers à des strings et d'indenter 
  
     stats#record s;
   
-Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'indenter l'entier associé au string s. Si s ne figure pas dans la table de hashage, il est ajouté et se voit associer la valeur 1.
+Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'indenter l'entier associé au string s. Si s ne figure pas dans la table de hashage, il y est ajouté et se voit associer la valeur 1.
 
 Deux statistiques sont actuellement intégrées à notre code : 
   * nombre de conflits (provoquant un backtracking)
@@ -176,7 +179,8 @@ Pour arrêter le timer définie ci-dessus :
   
 Actuellement, deux temps sont enregistrés par défaut : 
   - le temps utilisée pour résoudre la cnf donnée
-  - le temps de réduction (pour tseitin et color) qui correspond au temps utilisé pour convertir le problème donné en entrée en une cnf
+  - le temps de réduction (pour tseitin et color) pour convertir le problème donné en entrée en une cnf
+
 
 
 3. Structures de données
@@ -285,12 +289,11 @@ Les différents opérations menées prennent appuies sur les deux faits suivants
 L'algorithme Tseitin permet de convertir une formule propositionnelle en une cnf.
 
 Nous avons choisi les associativités suivantes pour les différents opérateurs logiques :
-  => : right associative
-  <=> : non associative
-  /\,\/ : left associative
+  * => : right associative
+  * <=> : non associative
+  * /\,\/ : left associative
 
-Les priorités sont :   
-  NOT > AND > OR > IMP > EQU
+Les priorités sont : NOT > AND > OR > IMP > EQU
   
 Le dossier src/tseitin contient l'ensemble des outils mis en place. En particulier, le fichier tseitin.ml contient l'algorithme de conversion.
 
@@ -305,8 +308,8 @@ Etant donné un entier k et un graphe G, l'algorithme Colorie indique si G peut-
 Le dossier src/color contient l'ensemble des outils mis en place à cette fin.
 
 On rappelle ci-dessous la procédure permettant de construire une cnf indiquant si le graphe G=(V,E) peut être colorié avec k couleurs :
-  - pour chaque sommet i, on produit la clause i_1\/i_2\/...\/i_k indiquant que i doit se voir attribuer une couleur entre 1 et k
-  - pour chaque arête (i,j), pour chaque entier l entre 1 et k, on produit la clause ~i_l\/~j_l indiquant que i et j ne doivent pas avoir la même couleur.
+  - pour chaque sommet i, on produit la clause i_1 \/ i_2 \/ ... \/ i_k indiquant que i doit se voir attribuer une couleur entre 1 et k
+  - pour chaque arête (i,j), pour chaque entier l entre 1 et k, on produit la clause ~i_l \/ ~j_l indiquant que i et j ne doivent pas avoir la même couleur.
   
 Etant donné un graphe G=(V,E) et un entier de coloriage k, la cnf produite est donc constituée de |V| clauses de longueurs k, et k*|E| clauses de longueurs 2.
 Le temps nécessaire à la production de la cnf est linéaire en la taille de la cnf produite.
@@ -324,49 +327,50 @@ Heuristiques de choix de polarité
 Etant donnée une variables, ces heuristiques déterminent la polarité à lui joindre (pour obtenir un littéral).
 
 POLARITE_RAND :
-  renvoie une polarité aléatoire (true ou false)
+  * renvoie une polarité aléatoire (true ou false)
 
 POLARITE_MOST_FREQUENT :
-  renvoie la polarité avec laquelle la variable apparait le plus fréquemment dans la formule
+  * pour DPLL : renvoie la polarité avec laquelle la variable apparait le plus fréquemment dans la formule
+  * pour WL : renvoie la polarité avec laquelle la variable est la plus surveillée dans la formule
 
 Heuristiques de choix de variable
 ---------------------------------
 
 NEXT :
-  renvoie la prochaine variable non encore assignée (ce choix est déterministe et dépend de l'entier représentant chaque variable)
+  * renvoie la prochaine variable non encore assignée (ce choix est déterministe et dépend de l'entier représentant chaque variable)
   
 RAND : 
-  renvoie une variable aléatoire non encore assignée
+  * renvoie une variable aléatoire non encore assignée
 
 DLCS : 
-  renvoie la variable apparaissant le plus fréquemment dans la formule
+  * renvoie la variable apparaissant le plus fréquemment dans la formule
 
 Heuristiques de choix de littéral
 ---------------------------------
 
-On indique pour chaque heuristique l'argument permettant de l'appeler (voir section ...)
+On indique pour chaque heuristique l'argument permettant de l'appeler.
 
 Les 2 catégories d'heuristiques décrites ci-dessous peuvent être combinées pour donner lieu à 6 heuristiques de choix de littéral : 
 
-  NEXT + POLARITE_RAND          (-h next_rand)
-  NEXT + POLARITE_MOST_FREQUENT (-h next_mf)
-  RAND + POLARITE_RAND          (-h rand_rand)
-  RAND + POLARITE_MOST_FREQUENT (-h rand_mf)
-  DLCS + POLARITE_RAND          (cette option n'est pas disponible)
-  DLCS + POLARITE_MOST_FREQUENT (-h dlcs)
+  * NEXT + POLARITE_RAND          (-h next_rand)
+  * NEXT + POLARITE_MOST_FREQUENT (-h next_mf)
+  * RAND + POLARITE_RAND          (-h rand_rand)
+  * RAND + POLARITE_MOST_FREQUENT (-h rand_mf)
+  * DLCS + POLARITE_RAND          (cette option n'est pas disponible)
+  * DLCS + POLARITE_MOST_FREQUENT (-h dlcs)
 
 On dispose également des heuristiques suivantes : 
 
-  MOMS (-h moms)
-    renvoie le littéral apparaissant le plus fréquemment dans les clauses de taille minimum
-    
-  DLIS (-h dlis)
-    pour DPLL : renvoie le littéral qui rend le plus de clauses satisfaites
-    pour WL : renvoie le littéral qui rend le plus de jumelles satisfaites
-    
-  JEWA (-h jewa)
-    attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2**-|C|)
-    renvoie le littéral avec le plus grand score
+MOMS (-h moms)
+  * renvoie le littéral apparaissant le plus fréquemment dans les clauses de taille minimum
+   
+DLIS (-h dlis)
+  * pour DPLL : renvoie le littéral qui rend le plus de clauses satisfaites
+  * pour WL : renvoie le littéral qui rend le plus de jumelles satisfaites
+  
+JEWA (Jeroslow-Wang) (-h jewa)
+  * attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2**-|C|)
+  * renvoie le littéral avec le plus grand score
 
 
 
@@ -378,17 +382,18 @@ Le générateur permet d'obtenir des cnf, des formules propositionnelles et des 
 CNF
 ---
 
-Le générateur prend en entrée 3 entiers : n l k
+Le générateur prend en entrée 3 entiers : n l k.
 Il produit une formule à n variables comportant k clauses de longueur l chacune.
 Les clauses sont choisises uniformément (on extrait les l premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.
 
 Tseitin
 -------
 
-Le générateur prend en entrée 2 entiers : n c
+Le générateur prend en entrée 2 entiers : n c.
 Il produit une formule propositionnelle à n variables et c connecteurs logiques.
 Pour ce faire, l'algorithme récursif suivant est utilisé : 
 
+```
   TSEITIN_RANDOM(n,c)
     Si c=0 alors
       renvoyer une variable choisie aléatoirement entre 1 et n
@@ -398,11 +403,14 @@ Pour ce faire, l'algorithme récursif suivant est utilisé :
         renvoyer ~TSEITIN_RANDOM(n,c-1)
       Sinon
         renvoyer TSEITIN_RANDOM(n,(c-1)/2)connectTSEITIN_RANDOM(n,c-1-(c-1)/2)
+```
 
 Color
 -----
 
 Le générateur prend en entrée un entier n et un flottant p.
 Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d'existence p.
-Remarque : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.
+
+_Remarque_ : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.
+
 

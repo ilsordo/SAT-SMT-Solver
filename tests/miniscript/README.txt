@@ -2,16 +2,18 @@
 |   MiniScript   |
 ------------------
 
+
 Les fichiers du présent dossier permettent de lancer automatiquement des batteries de tests sur les différents algorithmes et heuristiques.
+
 
 Mode d'emploi
 =============
 
-Créer un fichier test.txt (par exemple), et décrire un ensemble de tests à l'intérieur (le format à respecter est décrit section suivante) :
+Créer un fichier test.txt (par exemple), et décrire un ensemble de tests à l'intérieur (le format à respecter est décrit section suivante).
 
 Entrer dans le terminal :
   
-   bash run_tests.sh < tests.txt
+   bash run_tests.sh < test.txt
    
 Un fichier "donnees.dat" est généré (il est compréhensible par un humain...).
 
@@ -34,7 +36,7 @@ La syntaxe à respecter est la suivante :
     - ligne suivante : deux entiers séparés par un espace : NB_PASSAGES et NB_TESTS
       - NB_PASSAGES : nombre de fois que chaque test sera répété (pour obtenir une moyenne)
       - NB_TESTS : nombre de tests qui vont avoir lieu
-    - chacune des NB_TESTS lignes suivantes : un test par ligne, soit trois entiers n l k (ce qui correspond à une cnf de n variables, k clauses de longueur l)
+    - chacune des NB_TESTS lignes suivantes : un test par ligne, soit trois entiers n l k (ce qui correspond à une cnf de n variables et k clauses de longueur l)
 
 Exemple (3 algos, 4 tests, chaque test est répété 5 fois) : 
     3
@@ -62,12 +64,12 @@ Les heuristiques disponibles sont :
   JEWA
 
 
-
 Exemple
 =======
 
 Le dossier contient actuellment un exemple complet : 
   - le fichier test1.txt a été rempli avec un jeu de test
-  - le fichier donnes.sat contient les temps d'exécution obtenus
+  - le fichier donnees.sat contient les temps d'exécution obtenus
   - le fichier courbe1.pdf contient le graphe correspondant
+  
   
