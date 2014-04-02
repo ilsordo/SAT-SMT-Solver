@@ -208,10 +208,11 @@ class Problem
   def gen
     temp = Tempfile.open("sat")
     system "./gen #{@n} #{@l} #{@k} > #{temp.path}"
-    Proc::new {
+    Proc::new { |timeout|
+      timeout ||= 0
       result = Result::new
       #puts "./main -algo #{@algo} -h #{@heuristic} #{temp.path} 2>&1"
-      IO::popen "./main -algo #{@algo} -h #{@heuristic} #{temp.path} 2>&1" do |io|
+      IO::popen "if ! timeout #{timeout} ./main -algo #{@algo} -h #{@heuristic} #{temp.path} 2>&1; then echo \"Timeout\"" do |io|
         io.each do |line|
           case line
           when /\[stats\] (?<stat>.+) = (?<value>\d+)/
@@ -222,6 +223,8 @@ class Problem
             result.sat = 1.0
           when /s UNSATISFIABLE/
             result.sat = 0.0
+          when /Timeout/
+            raise Timeout::Error
           end
         end
       end
@@ -235,11 +238,9 @@ def run_test(n,l,k,a,h,sample = 1, limit = nil)
   p = Problem::new(n,l,k,a,h)
   sample.times do
     begin
-      Timeout::timeout(limit,Timeout::Error) do
-        report << p.gen.call
-      end
+      report << p.gen.call limit
     rescue Timeout::Error
-        puts "Timeout : #{p}"
+      puts "Timeout : #{p}"
     end
   end
   [p,report]
