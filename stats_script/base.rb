@@ -168,7 +168,7 @@ class Database
 
     system "gnuplot -persist #{script.path}"
     
-    data
+    # data
   end
 end
 

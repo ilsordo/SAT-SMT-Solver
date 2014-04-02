@@ -72,7 +72,7 @@ def populate name
   db = Database::new
 
   algos = ["dpll"]
-  h = ["next_rand","dlis"]
+  h = ["next_rand"]
   n = (1..1).map {|x| 100*x}
   l = [3]
   k = (1..6).map {|x| 100*x}
