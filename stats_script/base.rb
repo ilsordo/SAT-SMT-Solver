@@ -141,7 +141,11 @@ class Database
     
     # p h1
 
-    algos = h1.values.max { |x| x.length }.keys
+    algos = {}
+    h1.values.each { |x| x.keys.each { |algo| algos[algo] = true } }
+    algos = algos.keys
+    p algos
+    
     names[:ncols] = algos.length + 1
     data = Tempfile::new "data"
     names[:data] = data.path
