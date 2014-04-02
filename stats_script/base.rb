@@ -212,7 +212,7 @@ class Problem
       timeout ||= 0
       result = Result::new
       #puts "./main -algo #{@algo} -h #{@heuristic} #{temp.path} 2>&1"
-      IO::popen "if ! timeout #{timeout} ./main -algo #{@algo} -h #{@heuristic} #{temp.path} 2>&1; then echo \"Timeout\"" do |io|
+      IO::popen "if ! timeout #{timeout} ./main -algo #{@algo} -h #{@heuristic} #{temp.path} 2>&1; then echo \"Timeout\"; fi" do |io|
         io.each do |line|
           case line
           when /\[stats\] (?<stat>.+) = (?<value>\d+)/
