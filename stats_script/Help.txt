@@ -8,7 +8,7 @@ Création d'une base de données
 
 # Choisir le script :
   
-populate "name"
+populate "res.db"
 
 
 ######################################
@@ -24,11 +24,11 @@ Exploitation de la base de données
 b=Database::new "db.db"          
 q                                 
 
-# Légende
+# Etablir une légende
 
 names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
 
-# Extraction de la bdd
+# Extraction de la bdd + MIN COUNT maintenant
 ## select_data(n,l,k,algo,heur)
 ### intervalle (debut..fin) (exclusif) sauf si ...
 ### ensemble [a,b,c]
@@ -49,8 +49,3 @@ b.to_gnuplot l,"stats_script/skel.p",names
 
 
 
-
-
-----------------------------------
-
-if p.k/p.n < 10 and not "rand_rand" == p.heuristic

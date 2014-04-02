@@ -137,7 +137,7 @@ Afin d'afficher tous messages de profondeur au plus k lors de l'exécution de l'
 
     -d k
   
-_A noter_ : à partir d'une profondeur de debuggage 1 (-d 1), si le programme renvoie SATISFIABLE, l'assignation des variables obtenue en résultat est vérifiée sur la formule de départ et une ligne "[debug] Check : " indique si cette assignation est bien valide (true ou false).
+*A noter* : à partir d'une profondeur de debuggage 1 (-d 1), si le programme renvoie SATISFIABLE, l'assignation des variables obtenue en résultat est vérifiée sur la formule de départ et une ligne "[debug] Check : " indique si cette assignation est bien valide (true ou false).
   
 Exécution pas à pas
 ---------------------
@@ -411,6 +411,6 @@ Color
 Le générateur prend en entrée un entier n et un flottant p.
 Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d'existence p.
 
-_Remarque_ : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.
+*Remarque* : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.
 
 

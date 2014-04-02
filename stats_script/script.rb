@@ -7,15 +7,15 @@ def main
   db = Database::new
 
   algos = ["dpll"]
-  h = ["dlis"]
+  h = ["next_rand"]
   n = (1..1).map {|x| 100*x}
   l = [3]
-  k = (1..10).map {|x| 100*x}
-  sample = 10                    # nombres de passages (*nb de proc)
+  k = (1..1).map {|x| 100*x}
+  sample = 2                    # nombres de passages (*nb de proc)
 
   Threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
+      run_tests(n,l,k,algos,h,sample,0) { |problem, report| db.record(problem, report) if problem and report}  
     end
   end
 
@@ -74,7 +74,7 @@ def populate name
 
   Threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample,2) { |problem, report| db.record(problem, report) if report}  # and problem ?
+      run_tests(n,l,k,algos,h,sample,2) { |problem, report| db.record(problem, report) if report}  # and problem ? # TIME LIMIT ici
     end
   end
 
