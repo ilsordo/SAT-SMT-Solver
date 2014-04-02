@@ -5,32 +5,56 @@ open Printf
 
 type t = TseitinFormule.t
 
+
+let rec print_formule p = function
+  | Var v -> Printf.fprintf p "%s" v
+  | Not f -> Printf.fprintf p "Not(%a)" print_formule f
+  | And(f,g) -> Printf.fprintf p "(%a)/\\(%a)" print_formule f print_formule g
+  | Or(f,g) -> Printf.fprintf p "(%a)\\/(%a)" print_formule f print_formule g
+  | Imp(f,g) -> Printf.fprintf p "(%a)->(%a)" print_formule f print_formule g
+  | Equ(f,g) -> Printf.fprintf p "(%a)<->(%a)" print_formule f print_formule g
+
+
 let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
   let fresh = new counter 0 string_of_int in (* générateur de variables fraiches successives *)
-  let rec aux = function
-    | Var v -> ((true,v),[])
+  let rec aux acc = function
+    | Var v -> ((true,v),acc)
     | Not f -> 
-        let ((b,v),g) = aux f in
+        let ((b,v),g) = aux acc f in
         ((not b,v),g)
     | And(f,g) -> 
-        let ((b1,v1),h1)=aux f in
-        let ((b2,v2),h2)=aux g in
+        let ((b1,v1),h1) = aux acc f in
+        let ((b2,v2),h2) = aux h1 g in
         let fresh = "_"^fresh#next in
-        ((true,fresh),List.rev_append h1 (List.rev_append h2 [[(not b1,v1);(not b2,v2);(true,fresh)];[(false,fresh);(b1,v1)];[(false,fresh);(b2,v2)]])) 
+        ((true,fresh), 
+         [(not b1,v1);(not b2,v2);(true,fresh)]
+         ::[(false,fresh);(b1,v1)]
+         ::[(false,fresh);(b2,v2)]
+         ::h2
+        )
     | Or(f,g) -> 
-        let ((b1,v1),h1)=aux f in
-        let ((b2,v2),h2)=aux g in
+        let ((b1,v1),h1) = aux acc f in
+        let ((b2,v2),h2) = aux h1 g in
         let fresh="_"^fresh#next in
-        ((true,fresh),List.rev_append h1 (List.rev_append h2 [[(not b1,v1);(true,fresh)];[(not b2,v2);(true,fresh)];[(false,fresh);(b1,v1);(b2,v2)]])) 
+        ((true,fresh),
+         [(not b1,v1);(true,fresh)]
+         ::[(not b2,v2);(true,fresh)]
+         ::[(false,fresh);(b1,v1);(b2,v2)]
+         ::h2
+        ) 
     | Imp(f,g) -> 
-        let ((b1,v1),h1)=aux f in
-        let ((b2,v2),h2)=aux g in
+        let ((b1,v1),h1) = aux acc f in
+        let ((b2,v2),h2) = aux h1 g in
         let fresh="_"^fresh#next in
-        ((true,fresh),List.rev_append h1 (List.rev_append h2 [[(b1,v1);(true,fresh)];[(not b2,v2);(true,fresh)];[(false,fresh);(not b1,v1);(b2,v2)]]))
-    | Equ(f,g) -> aux (And(Imp(f,g),Imp(g,f)))
-  in let (p,f) = aux t_formule in
+        ((true,fresh),
+         [(b1,v1);(true,fresh)]
+         ::[(not b2,v2);(true,fresh)]
+         ::[(false,fresh);(not b1,v1);(b2,v2)]
+         ::h2
+        )
+    | Equ(f,g) -> aux acc (And(Imp(f,g),Imp(g,f)))
+  in let (p,f) = aux [] t_formule in
      ([p]::f)
-    
 
 (* Récupération de l'entrée *)
 
