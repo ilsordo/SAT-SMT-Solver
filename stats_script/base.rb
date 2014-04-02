@@ -239,6 +239,7 @@ def run_test(n,l,k,a,h,sample = 1, limit = nil)
   sample.times do
     begin
       report << p.gen.call limit
+    end
     rescue Timeout::Error
       puts "Timeout : #{p}"
     end
