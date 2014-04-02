@@ -7,12 +7,12 @@ def main
   db = Database::new
 
   algos = ["dpll"]
-  h = ["next_rand"]
+  h = ["next_rand","dlis"]
   n = (1..1).map {|x| 100*x}
   l = [3]
-  k = (1..1).map {|x| 100*x}
+  k = (1..6).map {|x| 100*x}
   sample = 2                    # nombres de passages (*nb de proc)
-  timeout = 0
+  timeout = 5
 
   Threads.times do 
     Thread::new do
@@ -22,7 +22,7 @@ def main
 
 
 
-  filter = select_data(100,3,nil,nil,nil) { |p,r| [p.k,r.result.timers["Time (s)"]/r.count]}
+  filter = select_data(100,3,nil,nil,nil,5) { |p,r| [p.k,r.result.timers["Time (s)"]/r.count]}
   names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
 
   (Thread::list - [Thread::current]).each do |t|
@@ -31,6 +31,8 @@ def main
 
   db.to_gnuplot filter,"stats_script/skel.p",names
 end
+
+
 
 
 
@@ -63,19 +65,23 @@ def debug
 end
 
 
+
+
+
 def populate name
   db = Database::new
 
   algos = ["dpll"]
-  h = ["next_rand"]
-  n = (1..1).map {|x| 1000*x}
+  h = ["next_rand","dlis"]
+  n = (1..1).map {|x| 100*x}
   l = [3]
-  k = (1..1).map {|x| 4300*x}
-  sample = 1                    # nombres de passages (*nb de proc)
-
+  k = (1..6).map {|x| 100*x}
+  sample = 2                    # nombres de passages (*nb de proc)
+  timeout = 5
+  
   Threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample,2) { |problem, report| db.record(problem, report) if report}  # and problem ? # TIME LIMIT ici
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ? # TIME LIMIT ici
     end
   end
 
@@ -84,7 +90,7 @@ def populate name
     puts "Saving"
     db.save name
     puts "Done"
-    sleep 30    
+    sleep 5    
   end
 
   (Thread::list - [Thread::current]).each do |t|

@@ -167,6 +167,8 @@ class Database
     script.flush
 
     system "gnuplot -persist #{script.path}"
+    
+    data
   end
 end
 
