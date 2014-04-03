@@ -1,1 +1,3 @@
 Timer sur zones de propagation
+
+Timer sur choix next_pari

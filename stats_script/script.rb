@@ -32,10 +32,6 @@ def main
   db.to_gnuplot filter,"stats_script/skel.p",names
 end
 
-
-
-
-
 def debug
   db = Database::new
 
@@ -67,17 +63,19 @@ end
 
 
 
+#################################
+#################################
 
-def populate name
+def phase name
   db = Database::new
 
   algos = ["dpll"]
-  h = ["dlis","jewa"]
-  n = (100..100).map {|x| 1*x}
+  h = ["jewa"]
+  n = (80..80).map {|x| 1*x}
   l = [3,4,5]
   k = (1..30).map {|x| 50*x}
-  sample = 3                    # nombres de passages (*nb de proc)
-  timeout = 300
+  sample = 2                    # nombres de passages (*nb de proc)
+  timeout = 600
   
   Threads.times do 
     Thread::new do
@@ -101,27 +99,122 @@ def populate name
   db.save name
   puts "Done"
 
+end
+
+#################################
+
+def all1 name
+  db = Database::new
+
+  algos = ["dpll","wl"]
+  h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
+  n = (1..100).map {|x| 100*x} # uniquement 100 et 200 fait en réalité
+  l = [3,25,50,75,100]
+  k = (1..30).map {|x| 100*x}
+  sample = 3                    # nombres de passages (*nb de proc)
+  timeout = 305
+  
+  Threads.times do 
+    Thread::new do
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
+    end
+  end
+
+  while Thread::list.length != 1 do
+    system "date -R"
+    puts "Saving"
+    db.save name
+    puts "Done"
+    sleep 600 
+  end
+
+  (Thread::list - [Thread::current]).each do |t|
+    t.join
+  end
+
+  puts "Saving"
+  db.save name
+  puts "Done"
+
 
 end
 
+#################################
 
-
-def exemple
+def sat3 name
   db = Database::new
   
   def my_iter db, &block
-    (30..100).each do |n|
-      (3*n..4*n).each do |k|
-        problem, report = run_test(n,3,k,"dpll","dlis",5,1) # run_test(n,3,k,"dpll","dlis",10) 10 passages
-        db.record(problem, report)
+    (1..20).each do |m|
+      problem, report = run_test(50*m,3,(4.27*50*m).round,"wl","dlcs",2,605)
+      db.record(problem, report)
       end
-    end
   end
 
   Threads.times do my_iter db end
 
-  db
+  while Thread::list.length != 1 do
+    system "date -R"
+    puts "Saving"
+    db.save name
+    puts "Done"
+    sleep 600 
+  end
+
+  (Thread::list - [Thread::current]).each do |t|
+    t.join
+  end
+
+  puts "Saving"
+  db.save name
+  puts "Done"
 end
+
+#################################
+
+def all2 name
+  db = Database::new
+
+  algos = ["dpll","wl"]
+  h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
+  n = 3000
+  l = [500,1000]
+  k = [1000,5000,10000]
+  sample = 3                    
+  timeout = 305
+  
+  Threads.times do 
+    Thread::new do
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
+    end
+  end
+
+  while Thread::list.length != 1 do
+    system "date -R"
+    puts "Saving"
+    db.save name
+    puts "Done"
+    sleep 600 
+  end
+
+  (Thread::list - [Thread::current]).each do |t|
+    t.join
+  end
+
+  puts "Saving"
+  db.save name
+  puts "Done"
+end
+
+
+#################################
+
+def combine(name1,name2) 
+  sat3 name1
+  all2 name2
+end
+
+#################################
 
 if __FILE__ == $0
   main
