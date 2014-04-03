@@ -3,7 +3,7 @@
 require 'tempfile'
 require 'timeout'
 
-Heuristics = ["rand_rand","rand_mf","next_rand","next_mf","moms","dlis"]
+Heuristics = ["rand_rand","rand_mf","next_rand","next_mf","moms","dlis","dlcs","jewa"]
 Algos = ["wl","dpll"]
 Db_store = "data.db"
 Skeleton = "skel.p"
@@ -172,7 +172,7 @@ class Database
 
     system "gnuplot -persist #{script.path}"
     
-    data
+    # data
   end
 end
 
@@ -244,6 +244,7 @@ def run_test(n,l,k,a,h,sample = 1, limit = nil)
   p = Problem::new(n,l,k,a,h)
   sample.times do
     begin
+      puts "Running : #{p}"
       report << p.gen.call(limit)
     rescue Timeout::Error
       puts "Timeout : #{p}"
