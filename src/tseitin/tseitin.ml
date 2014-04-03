@@ -41,9 +41,7 @@ let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches 
               cnf, (((And(Imp(f,g),Imp(g,f))), label)::q) in
         aux cnf formule in
   let label = fresh#next in
-  let rec alarm = Gc.create_alarm (fun () -> Printf.printf "max size %d\n%!" Gc.((stat()).top_heap_words);) in
   let res = [true,label]::(aux [] [t_formule, label]) in
-  Gc.delete_alarm alarm;
   res
     
 
