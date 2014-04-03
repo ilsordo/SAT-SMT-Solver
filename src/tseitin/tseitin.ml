@@ -21,26 +21,31 @@ let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches 
   let rec aux cnf = function (* le label peut être imposé par un connecteur ou laissé au choix *)
     | [] -> cnf
     | (f, label)::q ->
-        match f with
+        let cnf, formule = match f with
           | Var v ->
-              aux ((impl label v)::(impl v label)::cnf) q
+              ((impl label v)::(impl v label)::cnf), q
           | Not f ->
               let l1 = fresh#next in
-              aux ([(false,label);(false,l1)]::[(true,label);(true,l1)]::cnf) ((f,l1)::q)
+              ([(false,label);(false,l1)]::[(true,label);(true,l1)]::cnf), ((f,l1)::q)
           | And(f,g) ->
               let l1 = fresh#next in
               let l2 = fresh#next in
-              aux ([(true,label);(false,l1);(false,l2)]::(impl label l1)::(impl label l2)::cnf) ((f,l1)::(g,l2)::q)
+              ([(true,label);(false,l1);(false,l2)]::(impl label l1)::(impl label l2)::cnf), ((f,l1)::(g,l2)::q)
           | Or(f,g) ->
               let l1 = fresh#next in
               let l2 = fresh#next in
-              aux ([(false,label);(true,l1);(true,l2)]::(impl l1 label)::(impl l2 label)::cnf) ((f,l1)::(g,l2)::q)
+              ([(false,label);(true,l1);(true,l2)]::(impl l1 label)::(impl l2 label)::cnf), ((f,l1)::(g,l2)::q)
           | Imp(f,g) ->
-              aux cnf ((Or(Not f, g), label)::q)
+              cnf, ((Or(Not f, g), label)::q)
           | Equ(f,g) -> 
-              aux cnf (((And(Imp(f,g),Imp(g,f))), label)::q) in
+              cnf, (((And(Imp(f,g),Imp(g,f))), label)::q) in
+        aux cnf formule in
   let label = fresh#next in
-  [true,label]::(aux [] [t_formule, label])
+  let rec alarm = Gc.create_alarm (fun () -> Printf.printf "max size %d\n%!" Gc.((stat()).top_heap_words);) in
+  let res = [true,label]::(aux [] [t_formule, label]) in
+  Gc.delete_alarm alarm;
+  res
+    
 
 (* Récupération de l'entrée *)
 
