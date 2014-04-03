@@ -16,45 +16,34 @@ let rec print_formule p = function
 
 
 let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
-  let fresh = new counter 0 string_of_int in (* générateur de variables fraiches successives *)
-  let rec aux cnf = function
-    | Var v ::q -> aux((true,v),cnf)
-    | Not f ::q -> 
-        let ((b,v),g) = aux cnf f in
-        ((not b,v),g)
-    | And(f,g) -> 
-        let ((b1,v1),h1) = aux cnf f in
-        let ((b2,v2),h2) = aux h1 g in
-        let fresh = "_"^fresh#next in
-        ((true,fresh), 
-         [(not b1,v1);(not b2,v2);(true,fresh)]
-         ::[(false,fresh);(b1,v1)]
-         ::[(false,fresh);(b2,v2)]
-         ::h2
-        )
-    | Or(f,g) -> 
-        let ((b1,v1),h1) = aux cnf f in
-        let ((b2,v2),h2) = aux h1 g in
-        let fresh="_"^fresh#next in
-        ((true,fresh),
-         [(not b1,v1);(true,fresh)]
-         ::[(not b2,v2);(true,fresh)]
-         ::[(false,fresh);(b1,v1);(b2,v2)]
-         ::h2
-        ) 
-    | Imp(f,g) -> 
-        let ((b1,v1),h1) = aux cnf f in
-        let ((b2,v2),h2) = aux h1 g in
-        let fresh="_"^fresh#next in
-        ((true,fresh),
-         [(b1,v1);(true,fresh)]
-         ::[(not b2,v2);(true,fresh)]
-         ::[(false,fresh);(not b1,v1);(b2,v2)]
-         ::h2
-        )
-    | Equ(f,g) -> aux cnf (And(Imp(f,g),Imp(g,f)))
-  in let (p,f) = aux [] t_formule in
-     ([p]::f)
+  let fresh = new counter 1 (fun i -> "_"^(string_of_int i)) in (* générateur de variables fraiches successives *)
+  let impl x1 x2 = [(false,x1);(true,x2)] in (* Raccourci *)
+  let rec aux cnf = function (* le label peut être imposé par un connecteur ou laissé au choix *)
+    | [] -> cnf
+    | (f, label)::q ->
+        let cnf, formule = match f with
+          | Var v ->
+              ((impl label v)::(impl v label)::cnf), q
+          | Not f ->
+              let l1 = fresh#next in
+              ([(false,label);(false,l1)]::[(true,label);(true,l1)]::cnf), ((f,l1)::q)
+          | And(f,g) ->
+              let l1 = fresh#next in
+              let l2 = fresh#next in
+              ([(true,label);(false,l1);(false,l2)]::(impl label l1)::(impl label l2)::cnf), ((f,l1)::(g,l2)::q)
+          | Or(f,g) ->
+              let l1 = fresh#next in
+              let l2 = fresh#next in
+              ([(false,label);(true,l1);(true,l2)]::(impl l1 label)::(impl l2 label)::cnf), ((f,l1)::(g,l2)::q)
+          | Imp(f,g) ->
+              cnf, ((Or(Not f, g), label)::q)
+          | Equ(f,g) -> 
+              cnf, (((And(Imp(f,g),Imp(g,f))), label)::q) in
+        aux cnf formule in
+  let label = fresh#next in
+  let res = [true,label]::(aux [] [t_formule, label]) in
+  res
+    
 
 (* Récupération de l'entrée *)
 
