@@ -1,0 +1,126 @@
+Description de tests intéressants / méthodes pour les trouver.
+
+## Phase transition
+
+Lorsqu'on lance un test sur un triplet (n,l,k) quelconque, il y a de fortes chances que la formule générée soit trop facile à résoudre (il y a 2 extrémités : une formule avec peu de contraintes et donc facilement satisfiable / une formule avec beaucoup trop de contraintes et donc clairement insatisfiable).
+Pour trouver des formules "difficiles" : il existe un facteur f(l), tel que les formules de la forme (n,l,f(l)*n) sont les plus difficiles à résoudre (et donc les plus intéressantes).
+
+Le mot clé dans google c'est "phase transition random k sat". Quelques résultats : 
+
+ l   |     f(l)     |              source
+-----|--------------|-------------------------------------
+ 3   |  4,27        | http://arxiv.org/pdf/cs/0309020.pdf 
+ 4   |  9,93        | http://arxiv.org/pdf/cs/0309020.pdf
+ 5   |  21,11       | http://arxiv.org/pdf/cs/0309020.pdf 
+ 6   |  43,37       | http://arxiv.org/pdf/cs/0309020.pdf 
+ 7   |  87,79       | http://arxiv.org/pdf/cs/0309020.pdf 
+ 8   |  176,56      | http://arxiv.org/pdf/cs/0309020.pdf 
+ 9   |  354,01      | http://arxiv.org/pdf/cs/0309020.pdf 
+ 10  |  708,92      | http://arxiv.org/pdf/cs/0309020.pdf 
+ 20  |  726,8 (?)   | http://arxiv.org/pdf/cs.CC/0305009.pdf
+ 21  |  1453,3 (?)  | http://arxiv.org/pdf/cs.CC/0305009.pdf
+ ..  |  ....        | ...
+
+## Indication de performances
+
+#### 3-SAT 
+
+Très bon : 
+  * WL + DLCS (très très bon)
+  * DPLL + JEWA
+  * WL + DLIS
+  * DPLL + DLCS
+
+Bon : 
+  * DPLL + MOMS
+  * DPLL + DLIS
+  * WL + JEWA
+
+Pas génial : 
+  * WL + NEXT_MF
+  * WL + NEXT_RAND 
+  * WL + RAND_RAND 
+  * WL + RAND_MF
+
+Mauvais : 
+  * WL + MOMS
+  * DPLL + NEXT_RAND
+  * DPLL + NEXT_MF
+
+Inutilisables : 
+  * DPLL + RAND_MF
+  * DPLL + RAND_RAND (très très mauvais)
+
+
+
+
+
+## Propositions de tests
+
+* Nb de cnf satisfiables en fonction de (n,l,k) (pour montrer phase transition)
+
+* Pour n de 10 à 100 (c'est trop ? pas assez ?), par pas de 100 : (n,10,708.92*n) << l=10 c'est trop dur ?
+  * analyse : performances sur des cnf "intrinsèquement" difficiles (ie pas difficiles car très grosses)
+  * ça risque de prendre plus de 5min pour être résolu...
+
+* Interpréter les tests par rapport à la phase transition : avant la phase transition c'est satisfiable, après c'est non satisfiable. Est-ce que certaines heuristiques se comportent mieux avant/après ?
+
+
+#### Préselection
+
+1. Analyser all2.db et resserer les tests sur qqs algos et (n,l,k) intéressants/performants
+
+1. all2.db
+    * algos = ["dpll","wl"]
+    * h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
+    * n = [100,500,1000,2000] 
+    * l = [100,
+    * k =
+    * sample = 3 (*4)
+    * timeout = 305
+
+#### Tests en cours / terminés
+
+1. phase.db
+    * algos = ["dpll"]
+    * h = ["jewa"]
+    * n = 80
+    * l = [3,4,5]
+    * k = (1..30).map {|x| 50*x}
+    * sample = 2 (*4)
+    * timeout = 600
+
+2. all1.db (encore dans les tuyaux, je sort de la phase transition // quelques points pour n=300)
+    * algos = ["dpll","wl"]
+    * h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
+    * n = 100
+    * l = [3,25,50,75,100]
+    * k = (1..30).map {|x| 100*x}
+    * sample = 3 (*4)
+    * timeout = 305
+    * ++++++
+    * algos = ["dpll","wl"]
+    * h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
+    * n = 200
+    * l = 3
+    * k = (1..30).map {|x| 100*x}
+    * sample = 3 (*4)
+    * timeout = 305
+
+3. sat3.sb (bientôt)
+    * algos = ["wl"]
+    * h = ["dlcs"]
+    * n = (1..20).map {|x| 50*x}
+    * l = 3
+    * k = 4.27*n
+    * sample = 2 (*4)
+    * timeout = 605
+
+## Tests sur Color
+
+* (n,p)=(10..1000,0..1)
+  * ça devient très vite difficile à priori
+
+## Tests sur Tseitin
+
+* (n,c)=(10..1000,10..10000)
