@@ -78,13 +78,13 @@ object (self)
           
   method start_timer s = 
     let start = Unix.times() in 
-      Hashtbl.replace timers_temp s Unix.(start.tms_utime +. start.tms_stime) (* c'est bien Unix.(...) ? *)
+      Hashtbl.replace timers_temp s Unix.(start.tms_utime +. start.tms_stime) 
       
   method stop_timer s = 
     let stop = Unix.times() in
       try 
         let t = (Hashtbl.find timers_temp s) in
-          self#record_timer s Unix.(stop.tms_utime +. stop.tms_stime -. t)  (* c'est bien Unix.(...) ? *)
+          self#record_timer s Unix.(stop.tms_utime +. stop.tms_stime -. t) 
       with
         | Not_found -> 
             assert false         

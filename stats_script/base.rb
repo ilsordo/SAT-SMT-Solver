@@ -119,14 +119,14 @@ class Database
     h = Hash::new { |hash,key| hash[key] = Hash::new 0 }
     count = Hash::new { |hash,key| hash[key] = Hash::new 0 }
     data.each do |problem, report|
-      x = filter.call(problem, report)
-      if x
-        h[x[0]]["#{problem.algo}+#{problem.heuristic}"] += x[1]
-        count[x[0]]["#{problem.algo}+#{problem.heuristic}"] += report.count
+      serie, param, valeur = filter.call(problem, report)
+      if serie
+        h[param][serie] += valeur
+        count[param][serie] += report.count
       end
     end
-    h.each do |param, algos|
-      algos.each do |key, value|
+    h.each do |param, serie|
+      serie.each do |key, value|
         h[param][key] /= count [param][key]
       end
     end
@@ -141,23 +141,23 @@ class Database
     
     # p h1
 
-    algos = {}
-    h1.values.each { |x| x.keys.each { |algo| algos[algo] = true } }
-    algos = algos.keys
-    p algos
+    series = {}
+    h1.values.each { |x| x.keys.each { |serie| series[serie] = true } }
+    series = series.keys
+    p series
     
-    names[:ncols] = algos.length + 1
+    names[:ncols] = series.length + 1
     data = Tempfile::new "data"
     names[:data] = data.path
     
     data.write "PARAM"
-    algos.each { |algo| data.write (" "+algo.upcase) }
+    series.each { |serie| data.write (" "+serie.upcase) }
     data.write "\n"
     h1.each do |param, cols|
       data.write param
-      algos.each do |algo|
-        if cols[algo]
-          data.write (" "+cols[algo].to_s)
+      series.each do |serie|
+        if cols[serie]
+          data.write (" "+cols[serie].to_s)
         else
           data.write " ?0"
         end
@@ -175,6 +175,8 @@ class Database
     # data
   end
 end
+
+#"#{problem.algo}+#{problem.heuristic}"
 
 class Problem
 
@@ -242,10 +244,11 @@ end
 def run_test(n,l,k,a,h,sample = 1, limit = nil)
   report = Report::new
   p = Problem::new(n,l,k,a,h)
+  instance = p.gen
   sample.times do
     begin
       puts "Running : #{p}"
-      report << p.gen.call(limit)
+      report << instance.call(limit)
     rescue Timeout::Error
       puts "Timeout : #{p}"
     end
@@ -271,7 +274,7 @@ end
 
 
 # Sélectionne les données selon nlk et passe les données acceptées à une fonction qui calcule la valeur mesurée
-# Le traitement du yield doit renvoyer [paramètre,valeur] 
+# Le traitement du yield doit renvoyer [série,paramètre,valeur] 
 def select_data(n,l,k,algos,h,min_count = 0, &block)
   lambda { |p,r|
     if (n==nil or n===p.n) and (l==nil or l===p.l) and (k==nil or k===p.k)

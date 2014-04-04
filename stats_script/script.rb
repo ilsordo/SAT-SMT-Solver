@@ -22,7 +22,7 @@ def main
 
 
 
-  filter = select_data(100,3,nil,nil,nil,5) { |p,r| [p.k,r.result.timers["Time (s)"]/r.count]}
+  filter = select_data(100,3,nil,nil,nil,5) { |p,r| ["#{p.algo}+#{p.heuristic}",p.k,r.result.timers["Time (s)"]/r.count]}
   names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
 
   (Thread::list - [Thread::current]).each do |t|
@@ -48,7 +48,7 @@ def debug
     end
   end
 
-  filter = select_data(nil,3,10,nil,nil) { |p,r| [p.n,r.result.timers["Time (s)"]/r.count]}
+  filter = select_data(nil,3,10,nil,nil) { |p,r| ["#{p.algo}+#{p.heuristic}",p.n,r.result.timers["Time (s)"]/r.count]}
   names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
 
   (Thread::list - [Thread::current]).each do |t|
