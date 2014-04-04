@@ -151,14 +151,18 @@ def sat3 name
       end
   end
 
-  Threads.times do my_iter db end
+  Threads.times do 
+      Thread::new do
+        my_iter db 
+      end
+  end
 
   while Thread::list.length != 1 do
     system "date -R"
     puts "Saving"
     db.save name
     puts "Done"
-    sleep 600 
+    sleep 600
   end
 
   (Thread::list - [Thread::current]).each do |t|
@@ -177,7 +181,7 @@ def all2 name
 
   algos = ["dpll","wl"]
   h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
-  n = 3000
+  n = [3000]
   l = [500,1000]
   k = [1000,5000,10000]
   sample = 3                    
@@ -206,13 +210,6 @@ def all2 name
   puts "Done"
 end
 
-
-#################################
-
-def combine(name1,name2) 
-  sat3 name1
-  all2 name2
-end
 
 #################################
 

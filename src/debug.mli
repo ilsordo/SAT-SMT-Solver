@@ -13,7 +13,9 @@ val stats :
 < 
   record : string -> unit;
   print : out_channel -> unit;
-  get_timer : string -> < stop : unit >
+  record_timer : string -> float -> unit; 
+  start_timer : string -> unit;  
+  stop_timer : string -> unit
 >
 
 

@@ -70,7 +70,10 @@ let algo next_pari n cnf =
           debug#p 2 ~stops:true "DPLL : conflict found";
           false
       |  Fine var_prop -> 
-          match next_pari (formule:>formule) with (* un pari est nécessaire pour prolonger l'assignation courante des variables *)
+          stats#start_timer "Choosing (s)";
+          let l = next_pari (formule:>formule) in
+          stats#stop_timer "Choosing (s)";
+          match l with
             | None -> 
                 debug#p 1 "Done\n";
                 true (* plus aucun pari à faire, c'est gagné *)

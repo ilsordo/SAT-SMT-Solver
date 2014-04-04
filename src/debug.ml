@@ -43,7 +43,55 @@ object
 end
 
 
+(*********)
 
+let stats =
+  let init = ["Conflits";"Paris"] in
+object (self)
+  val data : (string,int) Hashtbl.t = Hashtbl.create 10
+  val timers : (string,float) Hashtbl.t = Hashtbl.create 10
+  val timers_temp : (string,float) Hashtbl.t = Hashtbl.create 10
+
+  initializer
+    List.iter (fun s -> Hashtbl.add data s 0) init
+    
+  method record s = 
+    try 
+      let n = Hashtbl.find data s in
+      Hashtbl.replace data s (n+1)
+    with
+      | Not_found -> 
+          Hashtbl.add data s 1
+
+  method print p =
+    Hashtbl.iter (fun s n -> fprintf p "[stats] %s = %d\n" s n) data;
+    fprintf p "\n";
+    Hashtbl.iter (fun s t -> fprintf p "[timer] %s : %.5f\n" s t) timers
+
+  method record_timer s t = 
+    try 
+      let t0 = Hashtbl.find timers s in
+      Hashtbl.replace timers s (t+.t0)
+    with
+      | Not_found -> 
+          Hashtbl.add timers s t
+          
+  method start_timer s = 
+    let start = Unix.times() in 
+      Hashtbl.replace timers_temp s Unix.(start.tms_utime +. start.tms_stime) (* c'est bien Unix.(...) ? *)
+      
+  method stop_timer s = 
+    let stop = Unix.times() in
+      try 
+        let t = (Hashtbl.find timers_temp s) in
+          self#record_timer s Unix.(stop.tms_utime +. stop.tms_stime -. t)  (* c'est bien Unix.(...) ? *)
+      with
+        | Not_found -> 
+            assert false         
+end
+
+
+(*
 let stats =
   let init = ["Conflits";"Paris"] in
 object
@@ -78,12 +126,7 @@ object
       ignore (dead = true)
   end
 end
-
-
-
-
-
-
+*)
 
 
 

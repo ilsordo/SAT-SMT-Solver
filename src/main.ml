@@ -10,15 +10,15 @@ let get_formule input = function
       (None,n,cnf)
   | Tseitin ->
       let raw = Tseitin.parse input in
-      let timer = stats#get_timer "Reduction (s)" in
+      stats#start_timer "Reduction (s)";
       let (cnf,assoc) = Reduction.renommer (Tseitin.to_cnf raw)  (Tseitin.print_answer) in
-      timer#stop;
+      stats#stop_timer "Reduction (s)";
       (Some assoc,assoc#max,cnf)
   | Color k -> 
       let raw = Color.parse input in
-      let timer = stats#get_timer "Reduction (s)" in
+      stats#start_timer "Reduction (s)";
       let (cnf,assoc) = Reduction.renommer (Color.to_cnf raw k) (Color.print_answer k raw) in
-      timer#stop;
+      stats#stop_timer "Reduction (s)";
       (Some assoc,assoc#max,cnf)
 
 let print_cnf p (n,f) = 
@@ -44,9 +44,9 @@ let main () =
             | None -> print_cnf p (n,cnf)
             | Some assoc -> fprintf p "c Réduction :\n%a\n%t%!" print_cnf (n,cnf) assoc#print_reduction
   end;
-  let timer = stats#get_timer "Time (s)" in
+  stats#start_timer "Time (s)";
   let answer = config.algo config.heuristic n cnf in
-  timer#stop;
+  stats#stop_timer "Time (s)";
   printf "%a\n%!" print_answer (answer,assoc);
   debug#p 0 " Stats :\n%t%!" stats#print;
   Answer.check n cnf answer;

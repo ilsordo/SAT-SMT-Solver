@@ -46,7 +46,10 @@ let algo next_pari n cnf =
 
 
   let rec aux()= (* aux fait un pari et essaye de le prolonger le plus loin possible *)
-    match next_pari (formule:>formule) with
+    stats#start_timer "Choosing (s)";
+    let l = next_pari (formule:>formule) in
+    stats#stop_timer "Choosing (s)";
+    match l with
       | None -> 
           debug#p 1 "Done\n";
           true (* plus rien à parier = c'est gagné *)
