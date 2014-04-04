@@ -247,7 +247,7 @@ def run_test(n,l,k,a,h,sample = 1, limit = nil)
   sample.times do
     begin
       puts "Running : #{p}"
-      report << instance.call(limit)
+      report << p.gen.call(limit)
     rescue Timeout::Error
       puts "Timeout : #{p}"
     end
@@ -259,7 +259,11 @@ def run_tests(n,l,k,algos,heuristics,sample=1, limit = nil,&block)
   n.each do |n_|
     l.each do |l_|
       k.each do |k_|
-        yield run_test(n_,l_,k_,algos,heuristics,sample,limit) # j'ai ajouté limit en argument
+        algos.each do |a_|
+          heuristics.each do |h_|
+            yield run_test(n_,l_,k_,a_,h_,sample,limit) # j'ai ajouté limit en argument
+          end
+        end
       end
     end
   end
