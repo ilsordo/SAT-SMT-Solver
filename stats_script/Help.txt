@@ -43,6 +43,11 @@ l = select_data(nil,3,nil,nil,nil) { |p,r|  [p.k/(p.n.to_f),r.result.timers["Tim
 l = select_data(nil,3,nil,nil,nil) { |p,r|  [p.k/(p.n.to_f),r.result.timers["Time (s)"]/r.count] }
 l = select_data(100,3,(100..1000),nil,"rand_rand") { |p,r| ["(#{p.n},#{p.l},#{p.k})",r.result.timers["Time (s)"]/r.count] }
 
+l = select_data(nil,4,nil,nil,nil,4) { |p,r|  ["#{p.algo}+#{p.heuristic}",p.k,r.result.stats["Conflits"]/r.count] }
+l = select_data(nil,4,nil,nil,nil,4) { |p,r|  ["#{p.algo}+#{p.heuristic}",p.k,r.result.stats["Paris"]/r.count] }
+
+
+
 # Affichage du résulat
 
 b.to_gnuplot l,"stats_script/skel.p",names

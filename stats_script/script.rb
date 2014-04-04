@@ -217,7 +217,7 @@ def all222 name
 
   algos = ["dpll"]
   h = ["next_rand"]
-  n = [30]
+  n = [600]
   l = [500]
   k = [100]
   sample = 3                    
@@ -246,6 +246,43 @@ def all222 name
   puts "Done"
 end
 
+#################################
+
+def small_length name
+  db = Database::new
+
+  algos = ["dpll","wl"]
+  h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
+  n = [50,100,150,200]
+  l = [3]
+  k = (1..30).map {|x| 100*x}
+  sample = 3                  
+  timeout = 305
+  
+  Threads.times do 
+    Thread::new do
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report} 
+    end
+  end
+
+  while Thread::list.length != 1 do
+    system "date -R"
+    puts "Saving"
+    db.save name
+    puts "Done"
+    sleep 600 
+  end
+
+  (Thread::list - [Thread::current]).each do |t|
+    t.join
+  end
+
+  puts "Saving"
+  db.save name
+  puts "Done"
+
+
+end
 
 if __FILE__ == $0
   main
