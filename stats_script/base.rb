@@ -151,7 +151,7 @@ class Database
     names[:data] = data.path
     
     data.write "PARAM"
-    series.each { |serie| data.write (" "+serie.upcase) }
+    series.each { |serie| data.write (" "+serie.to_s.upcase) }
     data.write "\n"
     h1.each do |param, cols|
       data.write param
@@ -244,7 +244,6 @@ end
 def run_test(n,l,k,a,h,sample = 1, limit = nil)
   report = Report::new
   p = Problem::new(n,l,k,a,h)
-  instance = p.gen
   sample.times do
     begin
       puts "Running : #{p}"
@@ -260,11 +259,7 @@ def run_tests(n,l,k,algos,heuristics,sample=1, limit = nil,&block)
   n.each do |n_|
     l.each do |l_|
       k.each do |k_|
-        algos.each do |a_|
-          heuristics.each do |h_|
-            yield run_test(n_,l_,k_,a_,h_,sample,limit)
-          end
-        end
+        yield run_test(n_,l_,k_,algos,heuristics,sample,limit) # j'ai ajouté limit en argument
       end
     end
   end
