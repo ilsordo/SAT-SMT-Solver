@@ -262,7 +262,7 @@ def run_tests(n,l,k,algos,heuristics,sample=1, limit = nil,&block)
       k.each do |k_|
         algos.each do |a_|
           heuristics.each do |h_|
-            yield run_test(n_,l_,k_,a_,h_,sample,limit) # j'ai ajouté limit en argument
+            yield run_test(n_,l_,k_,a_,h_,sample,limit)
           end
         end
       end
