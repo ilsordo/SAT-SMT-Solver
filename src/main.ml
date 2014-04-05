@@ -52,7 +52,15 @@ let main () =
   Answer.check n cnf answer;
   exit 0
 
-let _ = main()
+let _ = 
+  try
+    Printexc.record_backtrace true;
+    main()
+  with
+      Stack_overflow -> Printexc.print_backtrace stderr; flush stderr; raise Stack_overflow
+
+
+
 
 
 

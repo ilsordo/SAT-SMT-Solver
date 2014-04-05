@@ -65,12 +65,12 @@ let renommer_clause assoc =
       | Some x -> x
       | None -> assoc#bind v in
     signe b * x in
-  List.map renommer_litteral
+  List.rev_map renommer_litteral
 
   
 let renommer f print_answer = (* renvoie CNF avec vars normalisées + table d'association *)
   let assoc = new reduction print_answer in
-  (List.map (renommer_clause assoc) f, assoc)
+  (List.rev_map (renommer_clause assoc) f, assoc)
 
 
 (* énumère les f(n0), f(n0 + 1) , etc *)

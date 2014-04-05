@@ -8,6 +8,6 @@ generator:
 solver:
 	$(CC) src/main.native; cp $(BUILD)/src/main.native main
 debug:
-	$(CC) -yaccflag -v main.d.byte
+	$(CC) -yaccflag -v -tag debug main.d.byte ; cp $(BUILD)/src/main.d.byte main
 clean:
 	$(CC) -clean
