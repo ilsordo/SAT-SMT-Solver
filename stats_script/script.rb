@@ -212,40 +212,6 @@ end
 
 
 #################################
-def all222 name
-  db = Database::new
-
-  algos = ["dpll"]
-  h = ["next_rand"]
-  n = [600]
-  l = [500]
-  k = [100]
-  sample = 3                    
-  timeout = 305
-  
-  Threads.times do 
-    Thread::new do
-      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
-    end
-  end
-
-  while Thread::list.length != 1 do
-    system "date -R"
-    puts "Saving"
-    db.save name
-    puts "Done"
-    sleep 6 
-  end
-
-  (Thread::list - [Thread::current]).each do |t|
-    t.join
-  end
-
-  puts "Saving"
-  db.save name
-  puts "Done"
-end
-
 #################################
 
 def small_length name
@@ -280,9 +246,13 @@ def small_length name
   puts "Saving"
   db.save name
   puts "Done"
-
-
 end
+
+#################################
+
+
+#################################
+
 
 if __FILE__ == $0
   main
