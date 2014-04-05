@@ -6,6 +6,4 @@ Intégrer les stats des timers ci-dessus à la bdd
 
 Dans les scripts de tests, envoyer un même fichier généré sur l'ensemble des algos+heur
 
-Vérifier tseitin
-
 Stocker des jeux tests une bonne fois pour toute (la génération de (3000,1000,10000) prends 100s par ex...)
