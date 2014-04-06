@@ -8,21 +8,22 @@ http://nagaaym.github.io/projet2
 
 ******************************************************************************
 
-1. Compilation et exécution    
+1. Compilation et exécution
 2. Suivi de l'algorithme et debuggage
-3. Structures de données
-4. Algorithme DPLL
-5. Algorithme Watched Literals
-6. Algorithme Tseitin
-7. Algorithme Colorie
-8. Heuristiques
-9. Générateur
+3. Générateur
+4. Structures de données
+5. Algorithme DPLL
+6. Algorithme Watched Literals
+7. Algorithme Tseitin
+8. Algorithme Colorie
+9. Heuristiques
+10. Performances
 
 ******************************************************************************
  
 
 
-1. Compilation et exécution    
+1. Compilation et exécution
 ===========================
 
 Pour compiler, entrer : 
@@ -75,7 +76,7 @@ Enregistrer l'entrée générée dans un fichier ex.txt :
      
 Résoudre l'entrée générée à la volée : 
 
-    ./gen -color n p |./colorie k     
+    ./gen -color n p |./colorie k
                 
 Options
 -------
@@ -105,7 +106,7 @@ Enregistrer dans le fichier f la cnf convertie à partir du problème donné en 
 
     -print_cnf f
     
-Afficher la cnf convertie à partir de l'entrée :   
+Afficher la cnf convertie à partir de l'entrée :
 (attention, cette option ne doit pas être exécutée avec ./colorie) 
     
     -print_cnf -
@@ -116,7 +117,48 @@ Stocker les résultats d'un algorithme dans un fichier res.txt (n'enregistre ni 
 
 
 
-2. Suivi de l'algorithme et debuggage
+2. Générateur
+=============
+
+Le générateur permet d'obtenir des cnf, des formules propositionnelles et des graphes. Les méthodes de génération aléatoire utilisées sont décrites ci-dessous : 
+
+CNF
+---
+
+Le générateur prend en entrée 3 entiers : n l k.
+Il produit une formule à n variables comportant k clauses de longueur l chacune.
+Les clauses sont choisises uniformément (on extrait les l premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.
+
+Tseitin
+-------
+
+Le générateur prend en entrée 2 entiers : n c.
+Il produit une formule propositionnelle à n variables et c connecteurs logiques.
+Pour ce faire, l'algorithme récursif suivant est utilisé : 
+
+```
+  TSEITIN_RANDOM(n,c)
+    Si c=0 alors
+      renvoyer une variable choisie aléatoirement entre 1 et n
+    Sinon
+      choisir aléatoirement un connecteur logique connect
+      Si connect=~ alors
+        renvoyer ~TSEITIN_RANDOM(n,c-1)
+      Sinon
+        renvoyer TSEITIN_RANDOM(n,(c-1)/2)connectTSEITIN_RANDOM(n,c-1-(c-1)/2)
+```
+
+Color
+-----
+
+Le générateur prend en entrée un entier n et un flottant p.
+Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d'existence p.
+
+*Remarque* : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.
+
+
+
+3. Suivi de l'algorithme et debuggage
 =====================================
 
 L'ensemble des outils de debuggage et de suivi des exécutions figurent dans le fichier debug.ml. Une brève description est fournie ci-dessous.
@@ -171,19 +213,20 @@ Timers
 Il est possible d'obtenir des temps d'exécution sur des portions de code.
 Un nouveau timer peut être définie et démarré de la façon suivante (au sein du code) : 
 
-    let timer = stats#get_timer "Time (s)"
+    stats#start_timer "Time (s)";
   
 Pour arrêter le timer définie ci-dessus : 
 
-    timer#stop;
+    stats#stop_timer "Time (s)";
   
-Actuellement, deux temps sont enregistrés par défaut : 
-  - le temps utilisée pour résoudre la cnf donnée
-  - le temps de réduction (pour tseitin et color) pour convertir le problème donné en entrée en une cnf
+Actuellement, trois temps sont enregistrés par défaut : 
+  - "Time (s)" : le temps utilisée pour résoudre la cnf donnée
+  - "Reduction (s)" : le temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)
+  - "Decision (heuristic) (s)" : le temps utilisé par les heuristiques pour décider sur quels littéraux parier
 
 
 
-3. Structures de données
+4. Structures de données
 ========================
 
 Les structures suivantes sont utilisées par l'algorithme :
@@ -234,7 +277,7 @@ formule_wl.ml:
 
 
 
-4. Algorithme DPLL
+5. Algorithme DPLL
 ==================
 
 L'algorithme DPLL est implémenté comme une alternance de phases de propagation de contraintes et de paris sur des variables libres.
@@ -252,7 +295,7 @@ La première étape de propagation des contraintes n'est jamais annulée (sauf s
 
 
 
-5. Algorithme Watched Literals
+6. Algorithme Watched Literals
 ==============================
 
 Prétraitement :
@@ -283,7 +326,7 @@ Les différents opérations menées prennent appuies sur les deux faits suivants
 
 
 
-6. Algorithme Tseitin
+7. Algorithme Tseitin
 =====================
 
 L'algorithme Tseitin permet de convertir une formule propositionnelle en une cnf.
@@ -301,7 +344,7 @@ Etant donné une formule propositionnelle p, l'algorithme Tseitin produit une cn
 
   
 
-7. Algorithme Colorie
+8. Algorithme Colorie
 =====================
 
 Etant donné un entier k et un graphe G, l'algorithme Colorie indique si G peut-être colorié à l'aide de k couleurs distincts.
@@ -316,7 +359,7 @@ Le temps nécessaire à la production de la cnf est linéaire en la taille de la
 
 
 
-8. Heuristiques
+9. Heuristiques
 ===============
 
 Les heuristiques permettent de déterminer le littéral sur lequel effectuer le prochain pari. Les différentes heuristiques implémentées sont décrites ci-dessous.
@@ -374,43 +417,10 @@ JEWA (Jeroslow-Wang) (-h jewa)
 
 
 
-9. Générateur
-=============
+10. Performances
+================
 
-Le générateur permet d'obtenir des cnf, des formules propositionnelles et des graphes. Les méthodes de génération aléatoire utilisées sont décrites ci-dessous : 
+Une étude des performances des différents algorithmes et heuristiques figure dans le dossier "performances". Consulter le fichier README présent dans ce dossier pour plus d'informations.
 
-CNF
----
-
-Le générateur prend en entrée 3 entiers : n l k.
-Il produit une formule à n variables comportant k clauses de longueur l chacune.
-Les clauses sont choisises uniformément (on extrait les l premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.
-
-Tseitin
--------
-
-Le générateur prend en entrée 2 entiers : n c.
-Il produit une formule propositionnelle à n variables et c connecteurs logiques.
-Pour ce faire, l'algorithme récursif suivant est utilisé : 
-
-```
-  TSEITIN_RANDOM(n,c)
-    Si c=0 alors
-      renvoyer une variable choisie aléatoirement entre 1 et n
-    Sinon
-      choisir aléatoirement un connecteur logique connect
-      Si connect=~ alors
-        renvoyer ~TSEITIN_RANDOM(n,c-1)
-      Sinon
-        renvoyer TSEITIN_RANDOM(n,(c-1)/2)connectTSEITIN_RANDOM(n,c-1-(c-1)/2)
-```
-
-Color
------
-
-Le générateur prend en entrée un entier n et un flottant p.
-Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d'existence p.
-
-*Remarque* : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.
 
 

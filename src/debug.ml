@@ -68,7 +68,7 @@ object (self)
     fprintf p "\n";
     Hashtbl.iter (fun s t -> fprintf p "[timer] %s : %.5f\n" s t) timers
 
-  method record_timer s t = 
+  method private record_timer s t = 
     try 
       let t0 = Hashtbl.find timers s in
       Hashtbl.replace timers s (t+.t0)
@@ -89,45 +89,6 @@ object (self)
         | Not_found -> 
             assert false         
 end
-
-
-(*
-let stats =
-  let init = ["Conflits";"Paris"] in
-object
-  val data : (string,int) Hashtbl.t = Hashtbl.create 10
-  val mutable timers : (string*float) list = []
-
-  initializer
-    List.iter (fun s -> Hashtbl.add data s 0) init
-    
-  method record s = 
-    try 
-      let n = Hashtbl.find data s in
-      Hashtbl.replace data s (n+1)
-    with
-      | Not_found -> 
-          Hashtbl.add data s 1
-
-  method print p =
-    Hashtbl.iter (fun s n -> fprintf p "[stats] %s = %d\n" s n) data;
-    fprintf p "\n";
-    List.iter (fun (s,t) -> fprintf p "[timer] %s : %.5f\n" s t) timers
-
-  method get_timer s = 
-    let start = Unix.times() in 
-  object 
-    val mutable dead = false
-      
-    method stop =
-      let stop = Unix.times() in
-      timers <- Unix.(s, stop.tms_utime +. stop.tms_stime -. (start.tms_utime +. start.tms_stime))::timers;
-      assert (not dead);
-      ignore (dead = true)
-  end
-end
-*)
-
 
 
 

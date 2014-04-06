@@ -8,6 +8,7 @@ reset
 set title "#{title}"
 set xlabel "#{xlabel}"
 set ylabel "#{ylabel}"
+# set autoscale x
 
 set style data linespoints
 
@@ -16,7 +17,5 @@ set pointsize 1
 set datafile missing "0"
 
 plot for [i=2:#{ncols}] "#{data}" using (column(i)):xticlabels(1) title columnheader(i)
-
-set autoscale
 
 exit
