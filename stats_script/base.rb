@@ -277,7 +277,7 @@ end
 def select_data(n,l,k,algos,h,min_count = 0, &block)
   lambda { |p,r|
     if (n==nil or n===p.n) and (l==nil or l===p.l) and (k==nil or k===p.k)
-      if (algos == nil or algos === p.algo) and (h==nil or h===p.heuristic)
+      if (algos == nil or algos.include? p.algo) and (h==nil or h.include? p.heuristic)
         if r.count >= min_count
           yield(p, r)
         end

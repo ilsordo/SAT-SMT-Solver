@@ -351,13 +351,13 @@ end
 #################################
 #################################
 
-def tseitin name
-  db = Database::new "tseitin.db"
+def tseitin1 name
+  db = Database::new
 
   algos = ["dpll","wl"]
   h = ["dlcs","dlis","jewa"]
-  n = [10000,50000] #100,500,1000,5000
-  l = [100,500,1000,5000,10000,25000] # et quelques uns à 50000
+  n = [100,500,1000,5000,10000,50000]
+  l = [100,500,1000,5000,10000,25000]
   k = [1]
   sample = 3                    
   timeout = 305
@@ -389,12 +389,12 @@ end
 
 
 def tseitin2 name
-  db = Database::new
+  db = Database::new "tseitin2.db"
 
-  algos = ["dpll","wl"]
+  algos = ["wl"] #"dpll"
   h = ["dlcs","dlis","jewa"]
   n = [100]
-  l = [100,200,300,400,500,1000,1500,2000,2500,3000,3500,4000,4500,5000,10000,15000,20000,25000,30000,35000,40000,45000,50000]
+  l = [15000,20000,25000,30000,35000,40000,45000,50000]
   k = [1]
   sample = 3                    
   timeout = 305
@@ -424,11 +424,6 @@ end
 
 #################################
 
-def multi(name1,name2,name3)
-  phase_transition name1
-  big_length name2
-  hard_3sat name3
-end
 
 #################################
 if __FILE__ == $0

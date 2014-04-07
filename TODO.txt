@@ -12,10 +12,3 @@ Sur les tests :
   renommer test.rb -> run_test.rb
   déplacer stats_databses et stats_script dans performances
   mettre à jour les chemins nécessaires dans test.rb/base.rb
-  
-Extraction spécifique sur nom+algo (voir coupalge individuel)
-
-Tests sur Tseitin
-  n'utiliser que DLIS, DLCS et JEWA (MOMS timeout systématiquement, les autres n'ont aucune chance)
-  
-1..1000 dans select_data

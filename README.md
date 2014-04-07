@@ -3,7 +3,7 @@
 #### Maxime LESOURD
 #### Yassine HAMOUDI
 
-http://nagaaym.github.io/projet2
+http://nagaaym.github.io/projet2 (non à jour)
 
 
 ******************************************************************************
@@ -141,8 +141,8 @@ Pour ce faire, l'algorithme récursif suivant est utilisé :
     Si c=0 alors
       renvoyer une variable choisie aléatoirement entre 1 et n
     Sinon
-      choisir aléatoirement un connecteur logique connect
-      Si connect=~ alors
+      choisir aléatoirement un connecteur logique : connect
+      Si connect = ~ alors
         renvoyer ~TSEITIN_RANDOM(n,c-1)
       Sinon
         renvoyer TSEITIN_RANDOM(n,(c-1)/2)connectTSEITIN_RANDOM(n,c-1-(c-1)/2)
@@ -151,7 +151,7 @@ Pour ce faire, l'algorithme récursif suivant est utilisé :
 Color
 -----
 
-Le générateur prend en entrée un entier n et un flottant p.
+Le générateur prend en entrée un entier n et un flottant p (compris entre 0 et 1).
 Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d'existence p.
 
 *Remarque* : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.
@@ -161,7 +161,7 @@ Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d
 3. Suivi de l'algorithme et debuggage
 =====================================
 
-L'ensemble des outils de debuggage et de suivi des exécutions figurent dans le fichier debug.ml. Une brève description est fournie ci-dessous.
+L'ensemble des outils de debuggage et de suivi des exécutions figure dans le fichier debug.ml. Une brève description est fournie ci-dessous.
 
 Messages de debuggage
 ---------------------
@@ -197,7 +197,7 @@ Statistiques
 
 Différents types de données peuvent être enregistrés au cours de l'algorithme.
 
-Une table de hashage permet d'associer des entiers à des strings et d'indenter ces entiers. Il suffit pour cela d'inclure la ligne suivante au sein du code :  
+Une table de hashage permet d'associer des entiers à des strings et d'indenter ces entiers. Il suffit pour cela d'inclure la ligne suivante au sein du code : 
  
     stats#record s;
   
@@ -386,14 +386,15 @@ RAND :
   * renvoie une variable aléatoire non encore assignée
 
 DLCS : 
-  * renvoie la variable apparaissant le plus fréquemment dans la formule
-
+  * pour DPLL : renvoie la variable apparaissant le plus fréquemment dans la formule
+  * pour WL : renvoie la variable la plus surveillée dans la formule
+  
 Heuristiques de choix de littéral
 ---------------------------------
 
 On indique pour chaque heuristique l'argument permettant de l'appeler.
 
-Les 2 catégories d'heuristiques décrites ci-dessous peuvent être combinées pour donner lieu à 6 heuristiques de choix de littéral : 
+Les 2 catégories d'heuristiques décrites ci-dessus peuvent être combinées pour donner lieu à 6 heuristiques de choix de littéral : 
 
   * NEXT + POLARITE_RAND          (-h next_rand)
   * NEXT + POLARITE_MOST_FREQUENT (-h next_mf)
@@ -420,7 +421,7 @@ JEWA (Jeroslow-Wang) (-h jewa)
 10. Performances
 ================
 
-Une étude des performances des différents algorithmes et heuristiques figure dans le dossier "performances". Consulter le fichier README présent dans ce dossier pour plus d'informations.
+Une étude des performances des différents algorithmes et heuristiques figure dans le dossier "performances". Consulter le fichier README présent dans ce dossier pour de plus amples informations.
 
 
 
