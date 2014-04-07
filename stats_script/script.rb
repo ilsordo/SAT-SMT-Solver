@@ -349,6 +349,80 @@ def hard_3sat name
 end
 
 #################################
+#################################
+
+def tseitin name
+  db = Database::new "tseitin.db"
+
+  algos = ["dpll","wl"]
+  h = ["dlcs","dlis","jewa"]
+  n = [10000,50000] #100,500,1000,5000
+  l = [100,500,1000,5000,10000,25000] # et quelques uns à 50000
+  k = [1]
+  sample = 3                    
+  timeout = 305
+  
+  Threads.times do 
+    Thread::new do
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
+    end
+  end
+
+  while Thread::list.length != 1 do
+    system "date -R"
+    puts "Saving"
+    db.save name
+    puts "Done"
+    sleep 600 
+  end
+
+  (Thread::list - [Thread::current]).each do |t|
+    t.join
+  end
+
+  puts "Saving"
+  db.save name
+  puts "Done"
+end
+
+#################################
+
+
+def tseitin2 name
+  db = Database::new
+
+  algos = ["dpll","wl"]
+  h = ["dlcs","dlis","jewa"]
+  n = [100]
+  l = [100,200,300,400,500,1000,1500,2000,2500,3000,3500,4000,4500,5000,10000,15000,20000,25000,30000,35000,40000,45000,50000]
+  k = [1]
+  sample = 3                    
+  timeout = 305
+  
+  Threads.times do 
+    Thread::new do
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
+    end
+  end
+
+  while Thread::list.length != 1 do
+    system "date -R"
+    puts "Saving"
+    db.save name
+    puts "Done"
+    sleep 600 
+  end
+
+  (Thread::list - [Thread::current]).each do |t|
+    t.join
+  end
+
+  puts "Saving"
+  db.save name
+  puts "Done"
+end
+
+#################################
 
 def multi(name1,name2,name3)
   phase_transition name1

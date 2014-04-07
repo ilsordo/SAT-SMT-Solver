@@ -26,7 +26,7 @@ L'évaluation des performances se fait à 2 niveaux :
       * enregistrer dans des bases de données les résultats fournis par OCaml
       * permettre la manipulation des résultats obtenus (extraire des valeurs, tracer des courbes...)
   
-Différents tests ont ainsi été menés afin d'obtenir les bases de données figurant dans le dossier .... Le fichier ... joint à celles-ci renseigne sur leur contenu. Le fichier EXPERIENCE contient quant à lui une analyse détaillée des courbes figurant dans le dossier "courbes", construites à partir des bases de données.
+Différents tests ont ainsi été menés afin d'obtenir les bases de données figurant dans le dossier .... Le fichier ... joint à celles-ci renseigne sur leur contenu. Le fichier EXPERIENCE contient quant à lui une analyse détaillée des courbes figurant dans le dossier ..., construites à partir des bases de données.
 
 Les paragraphes 2 et 3 ci-dessous détaillent la procédure d'utilisation des scripts Ruby. Il est nécessaire d'installer au préalable les outils suivants : 
   * ruby (version 1.9 minimum)
