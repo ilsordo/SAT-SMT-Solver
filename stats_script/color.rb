@@ -13,10 +13,10 @@ def color1(name,threads)
     
   def boucle(algos,heuristics,&block)
     (1..100).each do |n|
-      (1..20).each do |x|
+      (0..20).each do |x|
         (1..n).each do |k|
-          10.times do 
-            p = ProblemColor::new(10*n,(1.0/x),k).gen
+          10.times do
+            p = ProblemColor::new(10*n,x/20.0,10*k).gen
             algos.each do |algo|
               heuristics.each do |h|
                 report = Report::new

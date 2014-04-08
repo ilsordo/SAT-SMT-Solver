@@ -39,7 +39,7 @@ class Report
   end
   
   def << result
-    raise ArgumentError unless result.is_a? Result and (count == 0 or (keys - ["count"]).sort == result.keys.sort)  
+    raise ArgumentError unless result.is_a? Result
     result.keys.each do |key|
       @data[key] += result[key]
     end
@@ -48,7 +48,7 @@ class Report
   end
 
   def merge! report
-    raise ArgumentError unless report.is_a? Report and (count == 0 or report.keys.sort == keys.sort) 
+    raise ArgumentError unless report.is_a? Report
     report.keys.each do |key|
       @data[key] += report[key]
     end
