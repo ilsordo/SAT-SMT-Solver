@@ -82,5 +82,5 @@ Afficher le graphe :
 Remarques : 
   * il est conseillé d'afficher les graphes obtenus en plein écran, et de cliquer sur "Apply autoscale" dans la fenêtre gnuplot pour un affichage optimal
   * il est possible de modifier le fichier "skel.p" pour enregistrer dans un fichier pdf le graphe obtenu
-    
+  * les filtres et name utilisés pour construire les courbes 1 à 7 figurent dans le fichier extraction.txt
     
