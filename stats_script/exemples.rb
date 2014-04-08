@@ -1,34 +1,7 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 
-def test 
-  db = Database::new
-
-  algos = ["dpll"]
-  h = ["next_rand","dlis"]
-  n = (1..1).map {|x| 100*x}
-  l = [3]
-  k = (1..6).map {|x| 100*x}
-  sample = 2                    # nombres de passages (*nb de proc)
-  timeout = 5
-
-  Threads.times do 
-    Thread::new do
-      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if problem and report}  
-    end
-  end
-
-  filter = select_data(100,3,nil,nil,nil,5) { |p,r| ["#{p.algo}+#{p.heuristic}",p.k,r.result.timers["Time (s)"]/r.count]}
-  names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
-
-  (Thread::list - [Thread::current]).each do |t|
-    t.join
-  end
-
-  db.to_gnuplot filter,"stats_script/skel.p",names
-end
-
-def debug(threads)
+def test1
   db = Database::new
 
   algos = ["dpll","wl"]
@@ -40,32 +13,30 @@ def debug(threads)
 
   threads.times do 
     Thread::new do
-      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
+      run_tests_cnf(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
     end
   end
-
-  filter = select_data(nil,3,10,nil,nil) { |p,r| ["#{p.algo}+#{p.heuristic}",p.n,r.result.timers["Time (s)"]/r.count]}
-  names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
+  
+  filter = select_data({:l => 3, :k => 10}) { |p,r| ["#{p[:algo]}+#{p[:heuristic]}", p[:n], r["Time (s)"]]}
+  names = {:title => "l = 3, k = 10", :xlabel=>"n", :ylabel => "Time (s)"}
 
   (Thread::list - [Thread::current]).each do |t|
     t.join
   end
 
-  # puts db.data
-
-  db.to_gnuplot filter,"stats_script/skel.p",names
+  db.to_gnuplot(filter,names)
 end
-
+  
 #################################
 # Série 1                       #
 #################################
 
-def phase(name, threads)
+def test2(name, threads)
   db = Database::new
 
   algos = ["dpll"]
   h = ["jewa"]
-  n = (80..80).map {|x| 1*x}
+  n = 80
   l = [3,4,5]
   k = (1..30).map {|x| 50*x}
   sample = 2                    # nombres de passages (*nb de proc)
@@ -92,6 +63,16 @@ def phase(name, threads)
   puts "Saving"
   db.save name
   puts "Done"
+end
+
+# A lancer après test2 avec le nom de la base de données créée
+
+def analyse_test2 name
+  db = Database::new name
+
+  filter = select_data({},2) { |p,r| ["l = #{p[:l]}", p[:k], r["Conflits"]]}
+  names = {:title => "n = 80, algo dpll+jewa", :xlabel=>"k", :ylabel => "Conflits"}
+  db.to_gnuplot(filter,names)
 end
 
 #################################
