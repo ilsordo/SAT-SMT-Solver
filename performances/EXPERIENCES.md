@@ -181,6 +181,8 @@ Nous n'avons pas étudié le temps de résolution sur des formules comportant de
 5. Tseitin
 ==========
 
+Nous avons conservé uniquement les heuristiques les plus performantes (DLIS, DLCS et JEWA) pour mener nos tests sur Tseitin. Les courbes qui suivent ont été construites avec un timeout à 300s et un minimum de .. résultats sur 8 passages. Nous avons fixé le nombre de variables des formules générées à n=100, et nous avons fait varier le nombre de connecteurs de .. à .. L'ensemble des résultats obtenus figurent sur la courbe 8 (échelle logarithmique en abscisse).
+
 
 
 6. Colorie
