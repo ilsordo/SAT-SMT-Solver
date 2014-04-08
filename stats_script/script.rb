@@ -1,32 +1,6 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 
-def debug(threads)
-  db = Database::new
-
-  algos = ["dpll","wl"]
-  h = ["rand_rand","rand_mf"]
-  n = (1..5).map {|x| 10*x}
-  l = [3]
-  k = (1..5).map {|x| 10*x}
-  sample = 5                    # nombres de passages (*nb de proc)
-
-  threads.times do 
-    Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
-    end
-  end
-  
-  filter = select_data({:l => 3, :k => 10}) { |p,r| ["#{p[:algo]}+#{p[:heuristic]}", p[:n], r["Time (s)"]]}
-  names = {:title => "l = 3, k = 10", :xlabel=>"n", :ylabel => "Time (s)"}
-
-  (Thread::list - [Thread::current]).each do |t|
-    t.join
-  end
-
-  db.to_gnuplot(filter,names)
-end
-
 #################################
 # Série 1                       #
 #################################
