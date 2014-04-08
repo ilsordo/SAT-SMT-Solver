@@ -10,7 +10,7 @@ def tseitin(name,threads)
      
   def boucle(l,algos,heuristics,&block)
     l.each do |c|
-      3.times do
+      2.times do
         p = ProblemTseitin::new(100,c)
         puts p
         proc = p.gen
@@ -18,7 +18,7 @@ def tseitin(name,threads)
           heuristics.each do |h|
             report = Report::new
             begin
-              entry,result = proc.call(algo,305)
+              entry,result = proc.call(algo,150)
               report << result
               yield(entry,report) if result
             end

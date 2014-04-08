@@ -33,6 +33,13 @@ def color1(name,threads)
   end
 
 
+<<<<<<< HEAD
+def color1(name,threads)
+  db = Database::new "colnew.db"
+
+  algos = ["wl"]
+  heuristics = ["dlis","dlcs"]
+=======
 
   threads.times do 
     Thread::new do
@@ -73,9 +80,10 @@ def color2(name,threads)
 
   algos = ["dpll","wl"]
   heuristics = ["dlis","dlcs","moms"]
+>>>>>>> 07cb508236e9d957afdf8f2ed6ad4d934546ed7f
     
   def boucle(algos,heuristics,&block)
-    (1..1000).each do |n|
+    (101..1000).each do |n|
       (0..5).each do |x|
         timeout = {}
         (1..(n/10)).each do |k|
@@ -136,4 +144,3 @@ def analyze_time_verp name
 
   db.to_gnuplot l,"stats_script/skel.p",names
 end
-
