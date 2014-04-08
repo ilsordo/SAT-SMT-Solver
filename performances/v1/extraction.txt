@@ -1,0 +1,58 @@
+Quelques exemples de l'usage de select_data et name (cf README et courbes obtenues)
+
+
+Courbe 1
+
+l = select_data(200,3,nil,"wl","dlcs") { |p,r| ["#{p.algo}+#{p.heuristic}",p.k,r.result.timers["Time (s)"]/r.count]
+
+name = {:title => "Temps d'exécution en fonction du nombre de clauses (200 variables, formules 3-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Temps d'exécution de l'algorithme (s)"}
+
+--------------------------
+
+Courbe 2
+
+l = select_data(200,3,nil,"wl","dlcs",6) { |p,r| ["#{p.algo}+#{p.heuristic}",p.k,r.result.stats["Conflits"]/r.count]}
+
+name = {:title => "Nombre de conflits en moyenne en fonction du nombre de clauses (200 variables, formules 3-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Nombre de conflits"}
+
+--------------------------
+
+Courbe 3
+
+l = select_data(80,4,nil,nil,nil,6) { |p,r| ["#{p.algo}+#{p.heuristic}",p.k,r.result.timers["Time (s)"]/r.count]}
+
+name = {:title => "Temps d'exécution en fonction du nombre de clauses (80 variables, formules 4-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Temps d'exécution de l'algorithme (s)"}
+
+--------------------------
+
+Courbe 4
+
+l = select_data(2000,500,nil,["dpll","wl"],["rand_mf","rand_rand","next_rand","next_mf"],6) { |p,r| ["#{p.algo}+#{p.heuristic}",p.k,r.result.timers["Time (s)"]/r.count]}
+
+name = {:title => "Temps d'exécution en fonction du nombre de clauses (2000 variables, formules 500-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Temps d'exécution de l'algorithme (s)"}
+
+--------------------------
+
+Courbe 5
+
+l = select_data(150,3,100..2000,["dpll","wl"],["rand_mf","rand_rand","next_rand","next_mf","moms","jewa"],12) { |p,r| ["#{p.algo}+#{p.heuristic}",p.k,r.result.timers["Decision (heuristic) (s)"]/r.count]}
+
+name = {:title => "Temps de décision en fonction du nombre de clauses (150 variables, formules 3-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Temps de décision des algorithmes (s)"}
+
+--------------------------
+
+Courbe 6
+
+l = select_data(150,3,100..2000,["dpll","wl"],["rand_mf","rand_rand","next_rand","next_mf"],6) { |p,r| ["#{p.algo}+#{p.heuristic}",p.k,(r.result.timers["Time (s)"]-r.result.timers["Decision (heuristic) (s)"])/r.count]}
+
+name = {:title => "Temps de résolution en fonction du nombre de clauses (150 variables, formules 3-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Temps de résolution des algorithmes (s)"}
+
+--------------------------
+
+Courbe 7
+
+l = select_data(200,3,100..2000,["dpll","wl"],["moms","jewa","dlis","dlcs"],6) { |p,r| ["#{p.algo}+#{p.heuristic}",p.k,(r.result.timers["Time (s)"]-r.result.timers["Decision (heuristic) (s)"])/r.count]}
+
+name = {:title => "Temps de résolution en fonction du nombre de clauses (200 variables, formules 3-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Temps de résolution des algorithmes (s)"}
+
+
