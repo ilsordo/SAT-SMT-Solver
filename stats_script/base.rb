@@ -5,7 +5,7 @@ require 'timeout'
 
 Heuristics = ["rand_rand","rand_mf","next_rand","next_mf","moms","dlis","dlcs","jewa"]
 Algos = ["wl","dpll"]
-Skeleton = "skel.p"
+Skeleton = "stats_script/skel.p"
 
 class Result < Hash
 
@@ -96,7 +96,7 @@ class Database
 
   # On accède aux données par h[valeur][série]
   # names : { :title => "titre", :xlabel => "x label", :ylabel => ylabel }
-  def to_gnuplot (filter,skel,names)
+  def to_gnuplot (filter,names)
     if data.empty?
       puts "Empty database"
       return
@@ -155,12 +155,10 @@ class Database
     data.flush
     
     script = Tempfile::new "script"
-    script.write (open skel).read.gsub(/#\{(\w*)\}/) { |match| names[$1.to_sym] }
+    script.write (open Skeleton).read.gsub(/#\{(\w*)\}/) { |match| names[$1.to_sym] }
     script.flush
 
     system "gnuplot -persist #{script.path}"
-    
-    # data
   end
 end
 
@@ -269,15 +267,26 @@ class ProblemTseitin < Problem
   end
 end
 
-
-
-def run_tests(n,l,k,algos,heuristics,sample=1, limit = nil,&block)
+def run_tests_cnf(n,l,k,algos,heuristics,sample=1, limit = nil,&block)
+  limit ||= 0
   n.each do |n_|
     l.each do |l_|
       k.each do |k_|
-        algos.each do |a_|
-          heuristics.each do |h_|
-            yield run_test(n_,l_,k_,a_,h_,sample,limit) # j'ai ajouté limit en argument
+        sample.times do
+          p = ProblemCnf::new(n_,l_,k_)
+          puts p
+          proc = p.gen
+          algos.each do |a_|
+            heuristics.each do |h_|
+              report = Report::new
+              begin
+                entry,result = proc.call(a_,h_,limit)
+                report << result
+                yield(entry,report) if result
+              rescue Timeout::Error
+                puts "Timeout : #{p}, #{a_}, #{h_}"
+              end 
+            end
           end
         end
       end
@@ -289,11 +298,11 @@ end
 
 
 
-# Sélectionne les données selon nlk et passe les données acceptées à une fonction qui calcule la valeur mesurée
+# Sélectionne les données selon constraints et passe les données acceptées à une fonction qui calcule la valeur mesurée
 # Le traitement du yield doit renvoyer [série,paramètre,valeur] 
-def select_data(params,min_count = 0, &block)
+def select_data(constraints,min_count = 0, &block)
   lambda { |entry,report|
-    if report.count >= min_count and (params.all? do |param,range| (range.respond_to? "include?" and range.include? entry[param]) or range === entry[param] end)
+    if report.count >= min_count and (constraints.all? do |param,range| (range.respond_to? "include?" and range.include? entry[param]) or range === entry[param] end)
       yield(entry,report)
     else
       nil

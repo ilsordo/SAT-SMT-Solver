@@ -1,10 +1,6 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 
-require 'pry'
-
-load "stats_script/base.rb"
-
 def tseitin(name,threads)
   db = Database::new
 
@@ -55,6 +51,3 @@ def tseitin(name,threads)
   puts "Done"
 end
 
-
-
-pry
