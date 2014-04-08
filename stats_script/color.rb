@@ -9,20 +9,29 @@ def color1(name,threads)
   db = Database::new
 
   algos = ["dpll","wl"]
-  heuristics = ["dlcs","jewa","dlis"]
+  heuristics = ["dlis","jewa","dlcs"]
     
   def boucle(algos,heuristics,&block)
-    (1..100).each do |n|
-      (0..20).each do |x|
+    (1..1000).each do |n|
+      (0..5).each do |x|
+        timeout = {}
         (1..n).each do |k|
-          10.times do
-            p = ProblemColor::new(10*n,x/20.0,10*k).gen
+          2.times do ### corrigé ici
+            p = ProblemColor::new(10*n,x/5.0,10*k)
+            puts p
+            proc = p.gen
             algos.each do |algo|
               heuristics.each do |h|
                 report = Report::new
-                entry,result = p.call(algo,h,600)
-                report << result
-                yield(entry,report) if result
+                begin
+                  raise Timeout::Error if timeout[algo+h]
+                  entry,result = proc.call(algo,h,60)
+                  report << result
+                  yield(entry,report) if result
+                rescue Timeout::Error
+                  puts "Timeout : #{p}, #{algo}, #{h}"
+                  timeout[algo+h] = true
+                end 
               end
             end
           end
