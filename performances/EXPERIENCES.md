@@ -174,7 +174,7 @@ Conclusion
 
 A nouveau, on a pu constater que les performances d'une heuristiqus sont intrinséquement liées aux structures de données et aux algorithmes (DPLL ou WL) utilisés en amont. Ainsi, notre étude des temps de résolution a confirmé que les heuristiques MOMS et JEWA se mariaient mieux avec DPLL, là où DLIS et DLCS s'adaptent bien à WL.
 
-Nous n'avons pas étudié le temps de résolution sur des formules comportant de longues clauses. En effet, comme indiqué partie 2, les seules formules à longues clauses pouvant être résolues par nos algorithmes sont beaucoup trop simple. Par exemple, pour n=2000, l=500 et k variant de 500 à 2000, les temps de résolutions toutes heuristiques confondues sont inférieurs à 1s.
+Nous n'avons pas étudié le temps de résolution sur des formules comportant de longues clauses. En effet, comme indiqué partie 2, les seules formules à longues clauses pouvant être résolues par nos algorithmes sont beaucoup trop simples. Par exemple, pour n=2000, l=500 et k variant de 500 à 2000, les temps de résolutions toutes heuristiques confondues sont inférieurs à 1s.
 
 
 

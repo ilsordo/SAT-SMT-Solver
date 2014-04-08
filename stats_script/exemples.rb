@@ -1,6 +1,33 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 
+def test 
+  db = Database::new
+
+  algos = ["dpll"]
+  h = ["next_rand","dlis"]
+  n = (1..1).map {|x| 100*x}
+  l = [3]
+  k = (1..6).map {|x| 100*x}
+  sample = 2                    # nombres de passages (*nb de proc)
+  timeout = 5
+
+  Threads.times do 
+    Thread::new do
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if problem and report}  
+    end
+  end
+
+  filter = select_data(100,3,nil,nil,nil,5) { |p,r| ["#{p.algo}+#{p.heuristic}",p.k,r.result.timers["Time (s)"]/r.count]}
+  names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
+
+  (Thread::list - [Thread::current]).each do |t|
+    t.join
+  end
+
+  db.to_gnuplot filter,"stats_script/skel.p",names
+end
+
 def debug(threads)
   db = Database::new
 
@@ -13,18 +40,20 @@ def debug(threads)
 
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
+      run_tests(n,l,k,algos,h,sample) { |problem, report| db.record(problem, report) if problem and report}  
     end
   end
-  
-  filter = select_data({:l => 3, :k => 10}) { |p,r| ["#{p[:algo]}+#{p[:heuristic]}", p[:n], r["Time (s)"]]}
-  names = {:title => "l = 3, k = 10", :xlabel=>"n", :ylabel => "Time (s)"}
+
+  filter = select_data(nil,3,10,nil,nil) { |p,r| ["#{p.algo}+#{p.heuristic}",p.n,r.result.timers["Time (s)"]/r.count]}
+  names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
 
   (Thread::list - [Thread::current]).each do |t|
     t.join
   end
 
-  db.to_gnuplot(filter,names)
+  # puts db.data
+
+  db.to_gnuplot filter,"stats_script/skel.p",names
 end
 
 #################################
@@ -44,7 +73,7 @@ def phase(name, threads)
   
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
     end
   end
 
@@ -80,7 +109,7 @@ def all1(name, threads)
   
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report} 
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report} 
     end
   end
 
@@ -151,7 +180,7 @@ def all2(name, threads)
   
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
     end
   end
 
@@ -189,7 +218,7 @@ def small_length(name, threads)
   
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report} 
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report} 
     end
   end
 
@@ -225,7 +254,7 @@ def phase_transition(name, threads)
   
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
     end
   end
 
@@ -261,7 +290,7 @@ def big_length(name, threads)
   
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
     end
   end
 
@@ -333,7 +362,7 @@ def tseitin1(name, threads)
   
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
     end
   end
 
@@ -370,7 +399,7 @@ def tseitin2(name, threads)
   
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
+      run_tests(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
     end
   end
 
