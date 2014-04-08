@@ -191,13 +191,13 @@ Nous avons conservé uniquement les heuristiques les plus performantes (DLIS, DL
 Comparaison des heuristiques:
 -----------------------------
 
-Certaines heuristiques se montrent inutilisables sur les instances de COLOR, une comparaison des combinaisons algorithme/heuristique sur une petite instance de COLOR permet de détecter ces heuristiques (fonction color1 de color.rb). L'instance choisie est le 10-coloriage d'un graphe de 20 sommets en faisant varier la densité et en arretant l'exécution au bout de 10 secondes si le résultat n'est pas trouvé. Les résultats de la figure 1 dans le dossier color montre que les algorithmes wl+jewa, wl+moms et dpll+moms voient leur temps d'exécution exploser rapidement. On remarque au passage que les instances très denses sont plus difficile et les tests montrent que certaines instances de densité >= 0.9 peuvent prendre plusieurs minutes.
+Certaines heuristiques se montrent inutilisables sur les instances de COLOR, une comparaison des combinaisons algorithme/heuristique sur une petite instance de COLOR permet de détecter ces heuristiques (fonction color1 de color.rb). L'instance choisie est le 10-coloriage d'un graphe de 20 sommets en faisant varier la densité et en arretant l'exécution au bout de 10 secondes si le résultat n'est pas trouvé. Les résultats de la courbe 9 montre que les algorithmes wl+jewa, wl+moms et dpll+moms voient leur temps d'exécution exploser rapidement. On remarque au passage que les instances très denses sont plus difficile et les tests montrent que certaines instances de densité >= 0.9 peuvent prendre plusieurs minutes.
 
 Influence des paramètres:
 -------------------------
 
-On ne garde que les heuristiques dlis et dlcs et on fait varier le nombre de sommets à densité fixée. La figure 2 montre que ces heuristiques sont très proches en terme de performances avec un léger avantage pour dlcs. L'algorithme wl se montre plus performant pour de grands graphes. On utilisera donc cette heuristique et l'algorithme wl pour mesurer l'influence des paramètres n, p et k sur le temps d'exécution.
+On ne garde que les heuristiques dlis et dlcs et on fait varier le nombre de sommets à densité fixée. La courbe 10 montre que ces heuristiques sont très proches en terme de performances avec un léger avantage pour dlcs. L'algorithme wl se montre plus performant pour de grands graphes. On utilisera donc cette heuristique et l'algorithme wl pour mesurer l'influence des paramètres n, p et k sur le temps d'exécution.
 
-La figure 3 montre que cet algorithme n'arrive pas à décider si un graphe à n sommets est n/2 coloriable si le graphe est dense (p>=0.5). La difficulté réside dans le fait que ces instances ont très souvent une réponse négative ce qui oblige l'algorithme à revenir sur ses paris très souvent.
+La courbe 11 montre que cet algorithme n'arrive pas à décider si un graphe à n sommets est n/2 coloriable si le graphe est dense (p>=0.5). La difficulté réside dans le fait que ces instances ont très souvent une réponse négative ce qui oblige l'algorithme à revenir sur ses paris très souvent.
 
 Ces résultats confirment la performance de dlis et dlcs au delà de 3-SAT grâce à une propagation rapide des contraintes.
