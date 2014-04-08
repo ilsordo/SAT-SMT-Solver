@@ -27,14 +27,14 @@ L'évaluation des performances se fait à 2 niveaux :
       * enregistrer dans des bases de données les résultats fournis par OCaml
       * permettre la manipulation des résultats obtenus (extraire des valeurs, tracer des courbes...)
   
-Différents tests ont ainsi été menés afin d'obtenir les bases de données figurant dans le dossier .... Le fichier ... joint à celles-ci renseigne sur leur contenu. Le fichier EXPERIENCE contient quant à lui une analyse détaillée des courbes figurant dans le dossier ..., construites à partir des bases de données.
+Différents tests ont ainsi été menés afin d'obtenir les bases de données figurant dans le dossier performances. Il a été nécessaire de réécrire une partie du code pour analyser colorie et tseitin, les tests pour resol sont dans le dossier performances/v1, les autres sont dans performance. Le fichier EXPERIENCE contient une analyse détaillée des courbes figurant dans le dossier performances/courbes, construites à partir des bases de données.
 
 Les paragraphes 2 et 3 ci-dessous détaillent la procédure d'utilisation des scripts Ruby. Il est nécessaire d'installer au préalable les outils suivants : 
   * ruby (version 1.9 minimum)
   * RubyGem (https://rubygems.org/)
   * pry (http://pryrepl.org/)
 
-L'ensemble des commandes détaillées paragraphes 2 et 3 nécessitent le préchargement des outils ruby mis en place, et doivent être tapées au sein de pry. Pour effectuer ces tâches préalables, se placer à la racine du projet et entrer : 
+L'ensemble des commandes détaillées aux paragraphes 2 et 3 nécessitent le préchargement des outils ruby mis en place, et doivent être tapées au sein de pry. Pour effectuer ces tâches préalables, se placer à la racine du projet et entrer : 
 
     ./test.rb 
     
@@ -57,7 +57,7 @@ La partie 3 ci-dessous explique comment utiliser une base de données (telle que
 
 A noter qu'un test (dans script.rb) peut également : 
   * charger une base de données existante et y ajouter des données.
-  * afficher directement un graphe (voir exemple1 dans script.rb qui reprend les commandes d'extractions détaillées partie 3). Dans ce cas, on peut souhaiter ne pas enregistrer les données obtenues dans une base de données. C'est le cas de exemple1 qui s'exécute via la commande : 
+  * afficher directement un graphe (voir exemple1 dans exemples.rb qui reprend les commandes d'extractions détaillées partie 3). Dans ce cas, on peut souhaiter ne pas enregistrer les données obtenues dans une base de données. C'est le cas de exemple1 qui s'exécute via la commande : 
    
     exemple1
 
@@ -65,7 +65,7 @@ A noter qu'un test (dans script.rb) peut également :
 3. Manipuler des résultats
 ==========================
 
-Considérons une base de données name.db obtenue à partir des actions décrites paragraphe 2 (les bases de données que nous avons construites figurent dans le dossier ...). On détaille ci-dessous les commandes permettant de la manipuler.
+Considérons une base de données name.db obtenue à partir des actions décrites paragraphe 2 (les bases de données que nous avons construites figurent dans le dossier performances/databases). On détaille ci-dessous les commandes permettant de la manipuler.
 
 Il faut tout d'abord charger la base de données. Pour cela, entrer : 
 
