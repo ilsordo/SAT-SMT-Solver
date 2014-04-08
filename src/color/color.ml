@@ -65,17 +65,18 @@ let print_sommet values p couleurs name id =
     Printf.fprintf p "\"%s\" [shape=circle, style=filled, fillcolor=\"%s\"]\n" (String.sub name 0 cut) (couleurs.((int_of_string (String.sub name (cut+1) (l-cut-1)))-1))
             
 let print_answer k (_,_,l) assoc p = function (***)
-  | Unsolvable -> fprintf p "Pas de coloriage à %d couleurs\n" k
+  | Unsolvable -> 
+      eprintf "s UNSATISFIABLE\n";
+      fprintf p "Pas de coloriage à %d couleurs\n" k
   | Solvable values ->
-      begin
-        let couleurs = Array.make k "" in 
-          for i=0 to k-1 do
-            couleurs.(i) <- string_of_float (float_of_int i/.(float_of_int k))^",1.0,1.0"
-          done;
-        fprintf p "graph {\n %a" print_aretes l;
-        assoc#iter (print_sommet values p couleurs);
-        fprintf p "}\n"
-     end
+      eprintf "s SATISFIABLE\n";
+      let couleurs = Array.make k "" in 
+      for i=0 to k-1 do
+        couleurs.(i) <- string_of_float (float_of_int i/.(float_of_int k))^",1.0,1.0"
+      done;
+      fprintf p "graph {\n %a" print_aretes l;
+      assoc#iter (print_sommet values p couleurs);
+      fprintf p "}\n"
       
 
 

@@ -5,67 +5,54 @@ require 'timeout'
 
 Heuristics = ["rand_rand","rand_mf","next_rand","next_mf","moms","dlis","dlcs","jewa"]
 Algos = ["wl","dpll"]
-Db_store = "data.db"
 Skeleton = "skel.p"
-Threads = 4
 
-class Result
-  attr_accessor :timers, :stats, :sat
+class Result < Hash
 
-  def initialize
-    @timers = {}
-    @stats = {}
-    @sat = nil
-  end
-
-  def is_compatible? r
-    raise ArgumentError unless r == nil or r.is_a? Result
-    r == nil or (@timers.keys.sort == r.timers.keys.sort and @stats.keys.sort == r.stats.keys.sort)
-  end 
-
-  def add r
-    raise ArgumentError unless r == nil or r.is_a? Result
-    if r then
-      @timers.keys.each { |key| @timers[key] += r.timers[key] }
-      @stats.keys.each { |key| @stats[key] += r.stats[key] }
-      @sat += r.sat
-    end
-    self
-  end
-
-  def to_s
-    "<sat=#{@sat}, timers=#{@timers}, stats=#{@stats}>"
-  end
-
-  alias inspect to_s
 end
 
 class Report
-  attr_reader :count, :result
-  
-  def initialize
-    @count = 0
-    @result = nil
+
+  def [] x
+    @data[x]
   end
 
+  def []=(x, a)
+    @data[x] = a
+  end
+
+  def keys
+    @data.keys
+  end
+
+  def initialize
+    @data = {"count" => 0}
+    @data.default = 0
+  end
+
+  def count
+    @data["count"]
+  end
+  
+  def add_count count
+    @data["count"] += count
+  end
+  
   def << result
-    raise ArgumentError unless result.is_compatible? @result
-    @result = result.add @result
-    @count += 1
+    raise ArgumentError unless result.is_a? Result and (count == 0 or (keys - ["count"]).sort == result.keys.sort)  
+    result.keys.each do |key|
+      @data[key] += result[key]
+    end
+    add_count 1
     self
   end
 
   def merge! report
-    raise ArgumentError unless report.is_a? Report
-    @count += report.count - 1
-    self << report.result
+    raise ArgumentError unless report.is_a? Report and (count == 0 or report.keys.sort == keys.sort) 
+    report.keys.each do |key|
+      @data[key] += report[key]
+    end
   end
-
-  def to_s
-    "<Report : count=#{@count}, #{@result}>"
-  end
-
-  alias inspect to_s
 end
 
 
@@ -87,27 +74,27 @@ class Database
     @mutex.unlock
   end
 
-  def record problem, report
-    raise ArgumentError unless problem and report
-    if report.result
+  def record entry, report
+    raise ArgumentError unless entry and report and report.is_a? Report
+    if report.count > 0
       @mutex.lock
-      repr = @data[@data.keys[0]]
-      if @data.key? problem then
-        @data[problem].merge! report
+      if @data.key? entry then
+        @data[entry].merge! report
       else
-        @data[problem] = report
+        @data[entry] = report.dup
       end
       @mutex.unlock
     end
+    self
   end
 
   def merge! o
     raise ArgumentError unless o.is_a? Database
-    o.data.each { |problem,report| self.record problem,report }
+    o.data.each { |entry,report| self.record entry,report }
     self
   end
 
-  # On accède aux données par h[valeur][algo]
+  # On accède aux données par h[valeur][série]
   # names : { :title => "titre", :xlabel => "x label", :ylabel => ylabel }
   def to_gnuplot (filter,skel,names)
     if data.empty?
@@ -118,8 +105,8 @@ class Database
     names = names.dup
     h = Hash::new { |hash,key| hash[key] = Hash::new 0 }
     count = Hash::new { |hash,key| hash[key] = Hash::new 0 }
-    data.each do |problem, report|
-      serie, param, valeur = filter.call(problem, report)
+    data.each do |entry, report|
+      serie, param, valeur = filter.call(entry, report)
       if serie
         h[param][serie] += valeur
         count[param][serie] += report.count
@@ -180,79 +167,121 @@ end
 
 class Problem
 
-  attr_reader :n, :l, :k, :algo, :heuristic
+  attr_reader :params
 
-  def initialize(n = 10, l = 3, k = 10, algo = "dpll", heuristic = "rand_rand")
-    @temp = nil
-    @n = n
-    @l = l
-    @k = k
-    @algo = if Algos.include? algo
-              algo 
-            else
-              raise ArgumentError 
-            end
-    @heuristic = if Heuristics.include? heuristic 
-                   heuristic
-                 else
-                   raise ArgumentError
-                 end
+  def [] x
+    @params[x]
+  end
+
+  def []=(x,a)
+    @params[x] = a
+  end
+
+  def initialize(params,gen_string,run_options)
+    raise ArgumentError unless params[:type]
+    @params = params
+    @gen_string = gen_string
+    @run_options = run_options
   end
   
   def to_s
-    "<Problem : n=#{@n}, l=#{@l}, k=#{@k}, algo=#{@algo}, heuristic=#{@heuristic}>"
+    "<Problem : #{@params}>"
   end
 
   alias inspect to_s
   
   def hash
-    to_s.hash
+    @params.hash
   end
   
   def eql? o
-    to_s.eql? o.to_s
+    @params.eql? o.params
   end
-  
+
   def gen
     temp = Tempfile.open("sat")
-    system "./gen #{@n} #{@l} #{@k} > #{temp.path}"
-    Proc::new { |timeout|
+    system ("./gen " + (@gen_string.gsub(/#\{(\w*)\}/) { |match| @params[$1.to_sym] }) + " > #{temp.path}")
+    Proc::new { |algo,heuristic,timeout = 0|
       timeout ||= 0
+      raise ArgumentError unless Algos.include? algo and Heuristics.include? heuristic
       result = Result::new
-      #puts "./main -algo #{@algo} -h #{@heuristic} #{temp.path} 2>&1"
-      IO::popen "if ! timeout #{timeout} ./main -algo #{@algo} -h #{@heuristic} #{temp.path} 2>&1; then echo \"Timeout\"; fi" do |io|
+      IO::popen "if ! timeout #{timeout} ./main -algo #{algo} -h #{heuristic} #{@run_options.gsub(/#\{(\w*)\}/) { |match| @params[$1.to_sym] }} #{temp.path} 2>&1; then echo \"Timeout\"; fi" do |io|
         io.each do |line|
           case line
           when /\[stats\] (?<stat>.+) = (?<value>\d+)/
-            result.stats[$~[:stat]] = $~[:value].to_i
+            result[$~[:stat]] = $~[:value].to_i
           when /\[timer\] (?<timer>.+) : (?<value>\d+(\.\d+)?)/
-            result.timers[$~[:timer]] = $~[:value].to_f
+            result[$~[:timer]] = $~[:value].to_f
           when /s SATISFIABLE/
-            result.sat = 1.0
+            result["sat"] = 1.0
           when /s UNSATISFIABLE/
-            result.sat = 0.0
+            result["sat"] = 0.0
           when /Timeout/
             raise Timeout::Error
           end
         end
       end
-      result
+      [({:algo => algo, :heuristic => heuristic}.merge @params) , result]
     }
   end
 end
 
-def run_test(n,l,k,a,h,sample = 1, limit = nil)
+class ProblemCnf < Problem
+  def initialize(n = 10, l = 3, k = 10)
+    super({:type => :cnf, :n => n, :l => l, :k => k}, '#{n} #{l} #{k}', "")  
+  end
+end
+
+class ProblemColor < Problem
+  def initialize(vertices = 10, p = 0.5, k = 3)
+    super({:type => :color, :vertices => vertices, :p => p, :k => k}, '-color #{vertices} #{p}', "-color #{k}")  
+  end
+  
+  def dicho(algo, heuristic) # Ne fonctionne pas :(
+    raise ArgumentError unless Algos.include? algo and Heuristics.include? heuristic
+    min = 0
+    max = @params[:vertices]
+    p = gen
+    entry = nil
+    report = Report::new
+    while min != max do
+      p min
+      p max
+      target = (min+max)/2
+      @params[:k] = target
+      entry, result = p.call(algo, heuristic)
+      p entry, result
+      report << result
+      if result["sat"] == 1
+        min, max = min, target
+      else
+        min, max = (target + 1), max
+      end
+    end
+    [entry,report]
+  end
+end
+
+class ProblemTseitin < Problem
+  def initialize(n_vars = 3, size = 10)
+    super({:type => :tseitin, :n_vars => n_vars, :size => size}, '-tseitin #{n_vars} #{size}', "-tseitin")  
+  end
+end
+
+def run_test_cnf(n,l,k,a,h,sample = 1, limit = nil)
   report = Report::new
-  p = Problem::new(n,l,k,a,h)
+  entry = nil
+  p = ProblemCnf::new(n,l,k)
   sample.times do
     begin
       puts "Running : #{p}"
-      report << p.gen.call(limit)
+      entry, result = p.gen.call(a,h,limit)
+      report << result
     rescue Timeout::Error
       puts "Timeout : #{p}"
     end
   end
-  [p,report]
+  [entry||problem,report]
 end
 
 def run_tests(n,l,k,algos,heuristics,sample=1, limit = nil,&block)
@@ -272,12 +301,13 @@ end
 
 
 
+
 # Sélectionne les données selon nlk et passe les données acceptées à une fonction qui calcule la valeur mesurée
 # Le traitement du yield doit renvoyer [série,paramètre,valeur] 
 def select_data(n,l,k,algos,h,min_count = 0, &block)
   lambda { |p,r|
     if (n==nil or n===p.n) and (l==nil or l===p.l) and (k==nil or k===p.k)
-      if (algos == nil or algos === p.algo) and (h==nil or h===p.heuristic)
+      if (algos == nil or algos.include? p.algo) and (h==nil or h.include? p.heuristic)
         if r.count >= min_count
           yield(p, r)
         end
