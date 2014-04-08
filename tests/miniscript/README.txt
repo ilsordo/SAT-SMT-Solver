@@ -3,7 +3,7 @@
 ------------------
 
 
-Les fichiers du présent dossier permettent de lancer automatiquement des batteries de tests sur les différents algorithmes et heuristiques.
+Les fichiers du présent dossier permettent de lancer rapidement des batteries de tests élémentaires sur les différents algorithmes et heuristiques.
 
 
 Mode d'emploi

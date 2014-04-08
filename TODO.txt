@@ -2,6 +2,13 @@ Timer sur zones de propagation
 
 Timer sur choix next_pari
 
+Renommer le timer "Time (s)"
+
 Dans les scripts de tests, envoyer un même fichier généré sur l'ensemble des algos+heur
 
 Stocker des jeux tests une bonne fois pour toute (la génération de (3000,1000,10000) prends 100s par ex...)
+
+Sur les tests : 
+  renommer test.rb -> run_test.rb
+  déplacer stats_databses et stats_script dans performances
+  mettre à jour les chemins nécessaires dans test.rb/base.rb

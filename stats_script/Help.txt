@@ -26,7 +26,7 @@ q
 
 # Etablir une légende
 
-names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
+name = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
 
 # Extraction de la bdd + MIN COUNT maintenant
 ## select_data(n,l,k,algo,heur)
@@ -41,7 +41,6 @@ names = {:title => "Titre", :xlabel=>"Axe x", :ylabel => "Axe y"}
 
 l = select_data(nil,3,nil,nil,nil) { |p,r|  [p.k/(p.n.to_f),r.result.timers["Time (s)"]/r.count] }
 l = select_data(nil,3,nil,nil,nil) { |p,r|  [p.k/(p.n.to_f),r.result.timers["Time (s)"]/r.count] }
-l = select_data(100,3,(100..1000),nil,"rand_rand") { |p,r| ["(#{p.n},#{p.l},#{p.k})",r.result.timers["Time (s)"]/r.count] }
 
 l = select_data(nil,4,nil,nil,nil,4) { |p,r|  ["#{p.algo}+#{p.heuristic}",p.k,r.result.stats["Conflits"]/r.count] }
 l = select_data(nil,4,nil,nil,nil,4) { |p,r|  ["#{p.algo}+#{p.heuristic}",p.k,r.result.stats["Paris"]/r.count] }
