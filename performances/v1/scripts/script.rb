@@ -37,7 +37,7 @@ def debug
   h = ["rand_rand","rand_mf"]
   n = (1..5).map {|x| 10*x}
   l = [3]
-  k = (1..5).map {|x| 10*x}
+  k = (1..2).map {|x| 10*x}
   sample = 5                    # nombres de passages (*nb de proc)
 
   Threads.times do 
@@ -55,7 +55,7 @@ def debug
 
   # puts db.data
 
-  db.to_gnuplot filter,"stats_script/skel.p",names
+  db.to_gnuplot filter,"performances/v1/scripts/skel.p",names
 end
 
 #################################

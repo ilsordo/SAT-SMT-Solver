@@ -136,3 +136,5 @@ def analyze_time_verp name
 
   db.to_gnuplot l,"stats_script/skel.p",names
 end
+
+pry

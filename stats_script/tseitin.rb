@@ -18,7 +18,7 @@ def tseitin(name,threads)
           heuristics.each do |h|
             report = Report::new
             begin
-              entry,result = proc.call(algo,h,205)
+              entry,result = proc.call(algo,305)
               report << result
               yield(entry,report) if result
             end
