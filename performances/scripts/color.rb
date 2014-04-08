@@ -65,6 +65,6 @@ def analyze_time_versus_p(name, max_time = 60)
 
   l = select_data({}) { |p, r| [p[:algo]+"+"+p[:heuristic],p[:p],r["Time (s)"]] if r["Time (s)"]/r.count<= max_time }
 
-  db.to_gnuplot l,"stats_script/skel.p",names
+  db.to_gnuplot l,names
 end
 
