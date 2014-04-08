@@ -26,10 +26,6 @@ def test1 threads
 
   db.to_gnuplot(filter,names)
 end
-  
-#################################
-# Série 1                       #
-#################################
 
 def test2(name, threads)
   db = Database::new
@@ -38,7 +34,7 @@ def test2(name, threads)
   h = ["jewa"]
   n = [80]
   l = [3,4,5]
-  k = (1..30).map {|x| 50*x}
+  k = (1..20).map {|x| 50*x}
   sample = 2                    # nombres de passages (*nb de proc)
   timeout = 600
   
@@ -48,6 +44,7 @@ def test2(name, threads)
     end
   end
 
+  # Sauvegardes périodiques
   while Thread::list.length != 1 do
     system "date -R"
     puts "Saving"
@@ -67,10 +64,10 @@ end
 
 # A lancer après test2 avec le nom de la base de données créée
 
-def analyse_test2 name
+def analyze_test2 name
   db = Database::new name
 
-  filter = select_data({},2) { |p,r| ["l = #{p[:l]}", p[:k], r["Conflits"]]}
-  names = {:title => "n = 80, algo dpll+jewa", :xlabel=>"k", :ylabel => "Conflits"}
+  filter = select_data({},2) { |p,r| ["l=#{p[:l]}", p[:k], r["Time (s)"]]}
+  names = {:title => "n = 80, algo dpll+jewa", :xlabel => "k", :ylabel => "Time (s)"}
   db.to_gnuplot(filter,names)
 end

@@ -5,10 +5,10 @@ def color1(name,threads)
   db = Database::new
 
   algos = ["dpll","wl"]
-  heuristics = ["dlis","dlcs","moms","jewa"]
+  heuristics = ["dlis","dlcs","moms","jewa","rand_mf"]
     
   def boucle(algos,heuristics,&block)
-    (0..10).each do |x|
+    (0..8).each do |x|
       timeout = {}
       5.times do 
         p = ProblemColor::new(20,x/10.0,10)
@@ -19,7 +19,7 @@ def color1(name,threads)
             report = Report::new
             begin
               raise Timeout::Error if timeout[algo+h]
-              entry,result = proc.call(algo,h,50)
+              entry,result = proc.call(algo,h,10)
               report << result
               yield(entry,report) if result
             rescue Timeout::Error
