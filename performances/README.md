@@ -36,7 +36,7 @@ Les paragraphes 2 et 3 ci-dessous détaillent la procédure d'utilisation des sc
 
 L'ensemble des commandes détaillées aux paragraphes 2 et 3 nécessitent le préchargement des outils ruby mis en place, et doivent être tapées au sein de pry. Pour effectuer ces tâches préalables, se placer à la racine du projet et entrer : 
 
-    ./tests.rb 
+    ./run_tests.rb 
     
 L'utilisateur doit alors obtenir un invite de commande débutant par : 
 

@@ -1,0 +1,76 @@
+#### Série de tests 1 (ne contient pas le temps Decision)
+
+1. phase.db
+    * algos = ["dpll"]
+    * h = ["jewa"]
+    * n = 80
+    * l = [3,4,5]
+    * k = (1..30).map {|x| 50*x}
+    * sample = 2 (*4)
+    * timeout = 600
+
+2. all1.db (quelques points pour n=300)
+    * algos = ["dpll","wl"]
+    * h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
+    * n = [100,200]
+    * l = [3,25,50,75,100]
+    * k = (1..30).map {|x| 100*x}
+    * sample = 3 (*4)
+    * timeout = 305
+
+3. sat3.db (beaucoup de points manquant à cause de dépassement timeout)
+    * algos = ["wl"]
+    * h = ["dlcs"]
+    * n = (1..20).map {|x| 50*x}
+    * l = 3
+    * k = 4.27*n
+    * sample = 2 (*4)
+    * timeout = 605
+
+4. all2.db
+    * algos = ["dpll","wl"]
+    * h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
+    * n = [3000]
+    * l = [500,1000]
+    * k = [1000,5000,10000]
+    * sample = 3 (*4)                    
+    * timeout = 305
+
+#### Série de tests 2
+
+1. small_length.db (28h de calcul)
+    * algos = ["dpll","wl"]
+    * h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
+    * n = [50,100,150,200]
+    * l = [3]
+    * k = (1..30).map {|x| 100*x}
+    * sample = 3 (*4)                    
+    * timeout = 305
+
+2. phase_transition.db
+    * algos = ["wl"]
+    * h = ["dlcs"]
+    * n = 80
+    * l = [3,4,5]
+    * k = (1..30).map {|x| 100*x}
+    * sample = 2 (*4)
+    * timeout = 605
+
+3. big_length.db  
+    * algos = ["dpll","wl"]
+    * h = ["next_rand","next_mf","rand_rand","rand_mf","dlcs","moms","dlis","jewa"]
+    * n = [2000]
+    * l = [500]
+    * k = [500,1500,2000]
+    * sample = 3 (*4)                    
+    * timeout = 305
+
+4. hard_3sat.db 
+    * algos = ["wl"]
+    * h = ["dlcs"]
+    * n = (1..40).map {|x| 25*x}
+    * l = 3
+    * k = 4.27*n
+    * sample = 3 (*4)
+    * timeout = 1200
+
