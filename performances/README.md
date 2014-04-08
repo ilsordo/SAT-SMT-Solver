@@ -47,8 +47,10 @@ Remarque :
 Il a été nécessaire de réécrire une partie du code pour analyser colorie et tseitin, les tests pour resol sont dans le dossier performances/v1 avec les scripts utilisés pour les générer. Ces bases de données ne sont pas compatibles avec les nouveaux scripts, des bases de données correspondant aux mêmes tests peuvent être générées à partir de script.rb au nouveau format pour utiliser les outils décrits dans ce fichier.
 
 
+
 2. Effectuer et enregistrer des tests
 =====================================
+
 La procédure d'exécution d'un test est :
   * Décrire le test souhaité dans le fichier script.rb. Les fonctions figurant dans le fichier exemples.rb permettent de se familiariser avec la syntaxe.
   * Exécuter les tests. Pour lancer 'test' avec enregistrement des résultats dans le fichier name.db (qui constitue la base de données) sur k threads il faut entrer la commande : 
@@ -59,9 +61,10 @@ La partie 3 ci-dessous explique comment utiliser une base de données (telle que
 
 A noter qu'un test (dans script.rb) peut également : 
   * charger une base de données existante et y ajouter des données.
-  * afficher directement un graphe (voir exemple1 dans exemples.rb qui reprend les commandes d'extractions détaillées partie 3). Dans ce cas, on peut souhaiter ne pas enregistrer les données obtenues dans une base de données. C'est le cas de exemple1 qui s'exécute via la commande : 
+  * afficher directement un graphe (voir exemple1 dans exemples.rb qui reprend les commandes d'extractions détaillées partie 3). Dans ce cas, on peut souhaiter ne pas enregistrer les données obtenues dans une base de données. C'est le cas de test1 qui s'exécute via la commande : 
    
-    exemple1
+    test1
+
 
 
 3. Manipuler des résultats
@@ -80,7 +83,7 @@ L'ensemble des données contenues dans le fichier défile dans la console (appuy
 Format des données :
 --------------------
 
-Les données sont stockées sous forme d'une table d'association dont la clé décrit une instance du problème et la valeur associée décrit le résultat. ( Note : au sein de la base de donnée on stocke la somme des résultats et le nombre d'instance qui ont été invoquées, de cette manière le programme peut automatiquement calculer la moyenne après sélection des résultats ). Si p correspond à une instance et r à un résultat on peut par exemple accéder à :
+Les données sont stockées sous forme d'une table d'association dont la clé décrit une instance du problème et la valeur associée décrit le résultat. ( Note : au sein de la base de données on stocke la somme des résultats et le nombre d'instance qui ont été invoquées, de cette manière le programme peut automatiquement calculer la moyenne après sélection des résultats ). Si p correspond à une instance et r à un résultat on peut par exemple accéder à :
 
   * p[:n] : nombre de clauses d'une instance de SAT.
   * p[:algo] : algorithme utilisé (:heuristic pour l'heuristique).
@@ -108,6 +111,7 @@ Remarque :
  
 Affichage du graphe :
 ---------------------
+
 Indiquer les titres pour les axes et le graphe grâce à la commande : 
 
     name = {:title => "Ici, le titre", :xlabel=>"Ici, l'axe x", :ylabel => "Ici, l'axe y"}
