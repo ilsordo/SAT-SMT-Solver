@@ -18,10 +18,13 @@ def tseitin(name,threads)
           heuristics.each do |h|
             report = Report::new
             begin
-              entry,result = proc.call(algo,150)
+              entry,result = proc.call(algo,h,150) #### ici
               report << result
               yield(entry,report) if result
-            end
+            rescue Timeout::Error
+              puts "Timeout : #{p}, #{algo}, #{h}"
+              timeout[algo+h] = true
+            end               
           end
         end
       end
