@@ -50,10 +50,10 @@ Il a été nécessaire de réécrire une partie du code pour analyser colorie et
 2. Effectuer et enregistrer des tests
 =====================================
 La procédure d'exécution d'un test est :
-  * Décrire le test souhaité dans le fichier script.rb. Les fonctions figurant au début du fichier stats_scripts/exemples.rb permettent de se familiariser avec la syntaxe.
+  * Décrire le test souhaité dans le fichier script.rb. Les fonctions figurant dans le fichier exemples.rb permettent de se familiariser avec la syntaxe.
   * Exécuter les tests. Pour lancer 'test' avec enregistrement des résultats dans le fichier name.db (qui constitue la base de données) sur k threads il faut entrer la commande : 
     
-    main("name.db", k)
+    test("name.db", k)
         
 La partie 3 ci-dessous explique comment utiliser une base de données (telle que name.db) pour construire des graphes.
 
