@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 
-load "performances/scripts/v1/base.rb"
+load "performances/v1/scripts/base.rb"
 
 def main
   db = Database::new

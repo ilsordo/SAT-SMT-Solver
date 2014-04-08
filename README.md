@@ -83,7 +83,7 @@ Options
 
 Affichage des messages d'aide : 
 
-    --
+    --help
     
 Fixer un algorithme de résolution : 
 
@@ -197,11 +197,11 @@ Statistiques
 
 Différents types de données peuvent être enregistrés au cours de l'algorithme.
 
-Une table de hashage permet d'associer des entiers à des strings et d'indenter ces entiers. Il suffit pour cela d'inclure la ligne suivante au sein du code : 
+Une table de hachage permet d'associer des entiers à des chaines de caractères et d'incrémenter ces entiers. Il suffit pour cela d'inclure la ligne suivante au sein du code : 
  
     stats#record s;
   
-Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'indenter l'entier associé au string s. Si s ne figure pas dans la table de hashage, il y est ajouté et se voit associer la valeur 1.
+Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'incrémenter l'entier associé au à la chaine s. Si s ne figure pas dans la table de hachage, il y est ajouté et se voit associer la valeur 1.
 
 Deux statistiques sont actuellement intégrées à notre code : 
   * nombre de conflits (provoquant un backtracking)
@@ -211,16 +211,16 @@ Timers
 ------
 
 Il est possible d'obtenir des temps d'exécution sur des portions de code.
-Un nouveau timer peut être définie et démarré de la façon suivante (au sein du code) : 
+Un nouveau timer peut être défini et démarré de la façon suivante (au sein du code) : 
 
     stats#start_timer "Time (s)";
   
-Pour arrêter le timer définie ci-dessus : 
+Pour arrêter le timer défini ci-dessus : 
 
     stats#stop_timer "Time (s)";
   
 Actuellement, trois temps sont enregistrés par défaut : 
-  - "Time (s)" : le temps utilisée pour résoudre la cnf donnée
+  - "Time (s)" : le temps utilisé pour résoudre la cnf donnée
   - "Reduction (s)" : le temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)
   - "Decision (heuristic) (s)" : le temps utilisé par les heuristiques pour décider sur quels littéraux parier
 
@@ -337,6 +337,8 @@ Nous avons choisi les associativités suivantes pour les différents opérateurs
   * /\,\/ : left associative
 
 Les priorités sont : NOT > AND > OR > IMP > EQU
+
+Exemple : a/\b => c est lu comme (a/\b) => c
   
 Le dossier src/tseitin contient l'ensemble des outils mis en place. En particulier, le fichier tseitin.ml contient l'algorithme de conversion.
 

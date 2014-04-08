@@ -19,9 +19,9 @@
 
 Nous proposons ici une analyse des temps d'exécution obtenus en lançant les 4 algorithmes (WL, DPLL, Tseitin et Colorie) et les 8 heuristiques (NEXT_RAND, NEXT_MF, RAND_RAND, RAND_MF, DLCS, MOMS, DLIS, JEWA) sur des fichiers de tests générés alétoirement. Le fichier README situé à la racine du projet détaille les processus de génération aléatoires utilisés, ainsi que les principes de fonctionnement des différents algorithmes et heuristiques.
 
-Notre analyse prendra appuie sur les courbes contenues dans le dossier ... Ces courbes sont issues des bases de données présentes dans le dossier ... Le fichier README joint/présent dans le dossier... donne de plus amples informations sur ces bases de données (comment les manipuler, comment ont-elles été obtenues...)
+Notre analyse prendra appui sur les courbes contenues dans le dossier performances/courbes. Ces courbes sont issues des bases de données présentes dans le dossier performances/databases Le fichier README dans le dossier performances donne de plus amples informations sur ces bases de données (comment les manipuler, comment elles ont été obtenues...)
 
-Nous expliquerons, partie 2, ce qu'est la phrase transition et en quoi elle a guidé nos choix de tests. Nous détaillerons ensuite partie 3 les temps de décisions obtenus par les différentes heuristiques pour choisir des littéraux sur lesquels parier. Nous analyserons alors, partie 4, les temps de résolution par heuristique. Enfin, nous nous pencherons sur les algorithmes Tseitin et Colorie, et nous étudierons leurs performances suivant les algorithmes utilisés, respectivement parties 5 et 6.
+Nous expliquerons, partie 2, ce qu'est la phase de transition et en quoi elle a guidé nos choix de tests. Nous détaillerons ensuite partie 3 les temps de décision obtenus par les différentes heuristiques pour choisir des littéraux sur lesquels parier. Nous analyserons alors, partie 4, les temps de résolution par heuristique. Enfin, nous nous pencherons sur les algorithmes Tseitin et Colorie, et nous étudierons leurs performances suivant les algorithmes utilisés, respectivement parties 5 et 6.
 
 Sauf mention contraire, les courbes qui suivent ont été obtenues à partir de 12 passages sur chaque test avec un timeout à 605s. Les points retenus sont issus de la moyenne d'au moins 6 mesures. Ainsi, un point est absent lorsque 7 mesures au moins ont provoqué un timeout.
 
@@ -76,7 +76,7 @@ DLIS (-h dlis)
   * pour WL : renvoie le littéral qui rend le plus de jumelles satisfaites
   
 JEWA (Jeroslow-Wang) (-h jewa)
-  * attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2**-|C|)
+  * attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2^-|C|)
   * renvoie le littéral avec le plus grand score
 
 
@@ -84,7 +84,7 @@ JEWA (Jeroslow-Wang) (-h jewa)
 2. Phase de transition
 ======================
 
-Une cnf est générée à partir de 3 coefficients : n (nombre de variables), l (longueur des clauses) et k (nombre de clauses). Il se pose la question suivante : qu'est-ce qu'une "bonne" cnf, c'est-à-dire une formule qui sollicitera suffisamment les algorithmes en nécessitant plusieurs paris et en provoquant de nombreux conflits. 
+Une cnf est générée à partir de 3 coefficients : n (nombre de variables), l (longueur des clauses) et k (nombre de clauses). On peut se poser la question suivante : qu'est-ce qu'une "bonne" cnf, c'est-à-dire une formule qui sollicitera suffisamment les algorithmes en nécessitant plusieurs paris et en provoquant de nombreux conflits. 
 
 Intuitivement, à n et l fixé, lorsque k est petit il y a peu de contraintes et il sera facile de prouver que la cnf est satisfiable. A l'inverse, lorsque k est élevé, les contraintes sont si nombreuses qu'il va être aisé de montrer que la cnf n'est pas satisfiable. On peut alors s'attendre à observer une "phase de transition" pour la valeur k, dans laquelle les cnf générées seront difficiles à résoudre.
 
