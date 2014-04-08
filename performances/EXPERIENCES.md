@@ -198,3 +198,4 @@ On ne garde que les heuristiques dlis et dlcs et on fait varier le nombre de som
 
 La figure 3 montre que cet algorithme n'arrive pas à décider si un graphe à n sommets est n/2 coloriable si le graphe est dense (p>=0.5). La difficulté réside dans le fait que ces instances ont très souvent une réponse négative ce qui oblige l'algorithme à revenir sur ses paris très souvent.
 
+Ces résultats confirment la performance de dlis et dlcs au delà de 3-SAT grâce à une propagation rapide des contraintes.
