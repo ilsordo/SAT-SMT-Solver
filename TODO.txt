@@ -18,3 +18,7 @@ Avant rendu :
       - ajouter les courbes 
       - ajouter les analyses
       - rétablir cnf dans v1 (base.rb)
+      
+      
+      
+dans le readme de la v1, attention aux chemins
