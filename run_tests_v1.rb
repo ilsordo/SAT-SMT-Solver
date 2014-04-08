@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 
-load "performances/scripts/v1/script.rb"
+load "performances/v1/scripts/script.rb"
 require 'pry'
 pry

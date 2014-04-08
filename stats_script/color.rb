@@ -6,13 +6,13 @@ require 'pry'
 load "stats_script/base.rb"
 
 def color1(name,threads)
-  db = Database::new
+  db = Database::new "colnew.db"
 
-  algos = ["dpll","wl"]
-  heuristics = ["dlis","jewa","dlcs"]
+  algos = ["wl"]
+  heuristics = ["dlis","dlcs"]
     
   def boucle(algos,heuristics,&block)
-    (1..1000).each do |n|
+    (101..1000).each do |n|
       (0..5).each do |x|
         timeout = {}
         (1..(n/10)).each do |k|
