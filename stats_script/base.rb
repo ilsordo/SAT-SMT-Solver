@@ -108,6 +108,7 @@ class Database
     data.each do |entry, report|
       serie, param, valeur = filter.call(entry, report)
       if serie
+        p [serie, param, valeur]
         h[param][serie] += valeur
         count[param][serie] += report.count
       end
@@ -268,21 +269,7 @@ class ProblemTseitin < Problem
   end
 end
 
-def run_test_cnf(n,l,k,a,h,sample = 1, limit = nil)
-  report = Report::new
-  entry = nil
-  p = ProblemCnf::new(n,l,k)
-  sample.times do
-    begin
-      puts "Running : #{p}"
-      entry, result = p.gen.call(a,h,limit)
-      report << result
-    rescue Timeout::Error
-      puts "Timeout : #{p}"
-    end
-  end
-  [entry||problem,report]
-end
+
 
 def run_tests(n,l,k,algos,heuristics,sample=1, limit = nil,&block)
   n.each do |n_|
@@ -304,14 +291,12 @@ end
 
 # Sélectionne les données selon nlk et passe les données acceptées à une fonction qui calcule la valeur mesurée
 # Le traitement du yield doit renvoyer [série,paramètre,valeur] 
-def select_data(n,l,k,algos,h,min_count = 0, &block)
-  lambda { |p,r|
-    if (n==nil or n===p.n) and (l==nil or l===p.l) and (k==nil or k===p.k)
-      if (algos == nil or algos.include? p.algo) and (h==nil or h.include? p.heuristic)
-        if r.count >= min_count
-          yield(p, r)
-        end
-      end
+def select_data(params,min_count = 0, &block)
+  lambda { |entry,report|
+    if report.count >= min_count and (params.all? do |param,range| (range.respond_to? "include?" and range.include? entry[param]) or range === entry[param] end)
+      yield(entry,report)
+    else
+      nil
     end
   }
 end
