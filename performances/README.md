@@ -27,7 +27,7 @@ L'évaluation des performances se fait à 2 niveaux :
       * enregistrer dans des bases de données les résultats fournis par OCaml
       * permettre la manipulation des résultats obtenus (extraire des valeurs, tracer des courbes...)
   
-Différents tests ont ainsi été menés afin d'obtenir les bases de données figurant dans le dossier performances. Il a été nécessaire de réécrire une partie du code pour analyser colorie et tseitin, les tests pour resol sont dans le dossier performances/v1, les autres sont dans performance. Le fichier EXPERIENCE contient une analyse détaillée des courbes figurant dans le dossier performances/courbes, construites à partir des bases de données.
+Différents tests ont ainsi été menés afin d'obtenir les bases de données figurant dans le dossier performances/databases. Le fichier EXPERIENCE contient une analyse détaillée des courbes figurant dans le dossier performances/courbes, construites à partir des bases de données. Les scripts se trouvent dans performances/scripts.
 
 Les paragraphes 2 et 3 ci-dessous détaillent la procédure d'utilisation des scripts Ruby. Il est nécessaire d'installer au préalable les outils suivants : 
   * ruby (version 1.9 minimum)
@@ -36,22 +36,24 @@ Les paragraphes 2 et 3 ci-dessous détaillent la procédure d'utilisation des sc
 
 L'ensemble des commandes détaillées aux paragraphes 2 et 3 nécessitent le préchargement des outils ruby mis en place, et doivent être tapées au sein de pry. Pour effectuer ces tâches préalables, se placer à la racine du projet et entrer : 
 
-    ./test.rb 
+    ./tests.rb 
     
 L'utilisateur doit alors obtenir un invite de commande débutant par : 
 
     [1] pry(main)> 
 
+Remarque :
+
+Il a été nécessaire de réécrire une partie du code pour analyser colorie et tseitin, les tests pour resol sont dans le dossier performances/v1 avec les scripts utilisés pour les générer. Ces bases de données ne sont pas compatibles avec les nouveaux scripts, des bases de données correspondant aux mêmes tests peuvent être générées à partir de script.rb au nouveau format pour utiliser les outils décrits dans ce fichier.
 
 
 2. Effectuer et enregistrer des tests
 =====================================
-
 La procédure d'exécution d'un test est :
-  * Décrire le test souhaité dans le fichier script.rb. Les fonctions figurant au début du fichier stats_scripts/exemples.rb permettent de se familiariser avec la syntaxe.
+  * Décrire le test souhaité dans le fichier script.rb. Les fonctions figurant dans le fichier exemples.rb permettent de se familiariser avec la syntaxe.
   * Exécuter les tests. Pour lancer 'test' avec enregistrement des résultats dans le fichier name.db (qui constitue la base de données) sur k threads il faut entrer la commande : 
     
-    main("name.db", k)
+    test("name.db", k)
         
 La partie 3 ci-dessous explique comment utiliser une base de données (telle que name.db) pour construire des graphes.
 
