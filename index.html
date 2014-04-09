@@ -41,17 +41,18 @@
 <a name="yassine-hamoudi" class="anchor" href="#yassine-hamoudi"><span class="octicon octicon-link"></span></a> Yassine HAMOUDI</h4>
 
 <hr><ol>
-<li>Compilation et exécution<br>
-</li>
-<li>Debuggage et exécution pas à pas</li>
+<li>Compilation et exécution</li>
+<li>Suivi de l'algorithme et debuggage</li>
+<li>Générateur</li>
 <li>Structures de données</li>
 <li>Algorithme DPLL</li>
 <li>Algorithme Watched Literals</li>
-<li>Suivi de l'algorithme</li>
-<li>Générateur</li>
-<li>Analyse des performances</li>
+<li>Algorithme Tseitin</li>
+<li>Algorithme Colorie</li>
+<li>Heuristiques</li>
+<li>Performances</li>
 </ol><hr><h1>
-<a name="1-compilation-et-ex%C3%A9cution----" class="anchor" href="#1-compilation-et-ex%C3%A9cution----"><span class="octicon octicon-link"></span></a>1. Compilation et exécution    </h1>
+<a name="1-compilation-et-ex%C3%A9cution" class="anchor" href="#1-compilation-et-ex%C3%A9cution"><span class="octicon octicon-link"></span></a>1. Compilation et exécution</h1>
 
 <p>Pour compiler, entrer : </p>
 
@@ -76,7 +77,7 @@
 
 <p>Résoudre la formule propositionnelle contenue dans le fichier ex.txt : </p>
 
-<pre><code>./tseitn ex.txt
+<pre><code>./tseitin ex.txt
 </code></pre>
 
 <h2>
@@ -105,14 +106,14 @@
 <pre><code>./gen -color n p
 </code></pre>
 
-<p>Enregistrer l'entrée générée dans un fichier ex.cnf : </p>
+<p>Enregistrer l'entrée générée dans un fichier ex.txt : </p>
 
 <pre><code>./gen -tseitin n c &gt; ex.txt
 </code></pre>
 
 <p>Résoudre l'entrée générée à la volée : </p>
 
-<pre><code>./gen -color n p | ./colorie     
+<pre><code>./gen -color n p |./colorie k
 </code></pre>
 
 <h2>
@@ -120,7 +121,7 @@
 
 <p>Affichage des messages d'aide : </p>
 
-<pre><code>--
+<pre><code>--help
 </code></pre>
 
 <p>Fixer un algorithme de résolution : </p>
@@ -130,7 +131,7 @@
 
 <p>Fixer une heuristique de résolution : </p>
 
-<pre><code>-h [dlis|...]
+<pre><code>-h [next_rand|next_mf|rand_rand|rand_mf|dlcs|moms|dlis|jewa]
 </code></pre>
 
 <p>Afficher les messages de débuggage de niveau au plus k : </p>
@@ -144,21 +145,64 @@
 <pre><code>-b k
 </code></pre>
 
-<p>Enregistrer dans le fichier f la cnf convertie à partir de l'entrée : </p>
+<p>Enregistrer dans le fichier f la cnf convertie à partir du problème donné en entrée : </p>
 
 <pre><code>-print_cnf f
 </code></pre>
 
-<p>Afficher la cnf convertie à partir de l'entrée :<br>
+<p>Afficher la cnf convertie à partir de l'entrée :
 (attention, cette option ne doit pas être exécutée avec ./colorie) </p>
 
 <pre><code>-print_cnf -
 </code></pre>
 
-<h1>
-<a name="2-suivi-de-lalgorithme-et-debuggage" class="anchor" href="#2-suivi-de-lalgorithme-et-debuggage"><span class="octicon octicon-link"></span></a>2. Suivi de l'algorithme et debuggage</h1>
+<p>Stocker les résultats d'un algorithme dans un fichier res.txt (n'enregistre ni les statistiques, ni les messages de debuggage) : </p>
 
-<p>L'ensemble des outils de debuggage et de suivi des exécutions figurent dans le fichier debug.ml. Une brève description est fournie ci-dessous.</p>
+<pre><code>./resol ex.cnf &gt; res.txt
+</code></pre>
+
+<h1>
+<a name="2-g%C3%A9n%C3%A9rateur" class="anchor" href="#2-g%C3%A9n%C3%A9rateur"><span class="octicon octicon-link"></span></a>2. Générateur</h1>
+
+<p>Le générateur permet d'obtenir des cnf, des formules propositionnelles et des graphes. Les méthodes de génération aléatoire utilisées sont décrites ci-dessous : </p>
+
+<h2>
+<a name="cnf" class="anchor" href="#cnf"><span class="octicon octicon-link"></span></a>CNF</h2>
+
+<p>Le générateur prend en entrée 3 entiers : n l k.
+Il produit une formule à n variables comportant k clauses de longueur l chacune.
+Les clauses sont choisises uniformément (on extrait les l premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.</p>
+
+<h2>
+<a name="tseitin-1" class="anchor" href="#tseitin-1"><span class="octicon octicon-link"></span></a>Tseitin</h2>
+
+<p>Le générateur prend en entrée 2 entiers : n c.
+Il produit une formule propositionnelle à n variables et c connecteurs logiques.
+Pour ce faire, l'algorithme récursif suivant est utilisé : </p>
+
+<pre><code>  TSEITIN_RANDOM(n,c)
+    Si c=0 alors
+      renvoyer une variable choisie aléatoirement entre 1 et n
+    Sinon
+      choisir aléatoirement un connecteur logique : connect
+      Si connect = ~ alors
+        renvoyer ~TSEITIN_RANDOM(n,c-1)
+      Sinon
+        renvoyer TSEITIN_RANDOM(n,(c-1)/2)connectTSEITIN_RANDOM(n,c-1-(c-1)/2)
+</code></pre>
+
+<h2>
+<a name="color" class="anchor" href="#color"><span class="octicon octicon-link"></span></a>Color</h2>
+
+<p>Le générateur prend en entrée un entier n et un flottant p (compris entre 0 et 1).
+Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d'existence p.</p>
+
+<p><em>Remarque</em> : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.</p>
+
+<h1>
+<a name="3-suivi-de-lalgorithme-et-debuggage" class="anchor" href="#3-suivi-de-lalgorithme-et-debuggage"><span class="octicon octicon-link"></span></a>3. Suivi de l'algorithme et debuggage</h1>
+
+<p>L'ensemble des outils de debuggage et de suivi des exécutions figure dans le fichier debug.ml. Une brève description est fournie ci-dessous.</p>
 
 <h2>
 <a name="messages-de-debuggage" class="anchor" href="#messages-de-debuggage"><span class="octicon octicon-link"></span></a>Messages de debuggage</h2>
@@ -169,7 +213,7 @@
 </code></pre>
 
 <p>Ici, le message de debuggage est "Propagation : setting var to b" (%d et %B sont remplacé par var et b).
-L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, plus le message de debuggage doit indiquer une information précise. Par exemple, le message suivant à la profondeur la plus faible puisqu'il indique uniquement l'algorithme utilisé : </p>
+L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, plus le message de debuggage doit indiquer une information précise. Par exemple, le message suivant a une profondeur faible car il renseigne uniquement sur l'algorithme utilisé : </p>
 
 <pre><code>debug#p 1 "Using algorithm %s and heuristic %s" config.nom_algo config.nom_heuristic;
 </code></pre>
@@ -179,7 +223,7 @@ L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, 
 <pre><code>-d k
 </code></pre>
 
-<p>Enfin, à partir d'une profondeur de debuggage 1 (-d 1), si le programme renvoie SATISFIABLE, l'assignation des variables obtenue en résultat est vérifiée sur la formule de départ et une ligne "[debug] Check : " indique si cette assignation est bien valide (true ou false).</p>
+<p><em>A noter</em> : à partir d'une profondeur de debuggage 1 (-d 1), si le programme renvoie SATISFIABLE, l'assignation des variables obtenue en résultat est vérifiée sur la formule de départ et une ligne "[debug] Check : " indique si cette assignation est bien valide (true ou false).</p>
 
 <h2>
 <a name="ex%C3%A9cution-pas-%C3%A0-pas" class="anchor" href="#ex%C3%A9cution-pas-%C3%A0-pas"><span class="octicon octicon-link"></span></a>Exécution pas à pas</h2>
@@ -189,7 +233,7 @@ L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, 
 <pre><code>debug#p 2 ~stops:true "Propagation : setting %d to %B" var b;
 </code></pre>
 
-<p>Pour afficher tous les messages de debuggage de profondeur au plus k et stopper l'algorithme à chaque message de profondeur l (l &gt;= k) rencontré, entrer l'option : </p>
+<p>Pour afficher tous les messages de debuggage de profondeur au plus k et stopper l'algorithme à chaque message de profondeur l (l &lt;= k) rencontré, entrer l'option : </p>
 
 <pre><code>-d k -b l
 </code></pre>
@@ -199,12 +243,12 @@ L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, 
 
 <p>Différents types de données peuvent être enregistrés au cours de l'algorithme.</p>
 
-<p>Une table de hashage permet d'associer des entiers à des strings et d'indenter ces entier. Il suffit pour cela d'inclure la ligne suivante au sein du code :  </p>
+<p>Une table de hachage permet d'associer des entiers à des chaines de caractères et d'incrémenter ces entiers. Il suffit pour cela d'inclure la ligne suivante au sein du code : </p>
 
 <pre><code>stats#record s;
 </code></pre>
 
-<p>Cette ligne à pour conséquence, chaque fois qu'elle est rencontrée, d'indenter l'entier associé au string s. Si s ne figure pas dans la table de hashage, il est ajouté et se voit associer la valeur 1.</p>
+<p>Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'incrémenter l'entier associé au à la chaine s. Si s ne figure pas dans la table de hachage, il y est ajouté et se voit associer la valeur 1.</p>
 
 <p>Deux statistiques sont actuellement intégrées à notre code : </p>
 
@@ -215,18 +259,24 @@ L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, 
 <a name="timers" class="anchor" href="#timers"><span class="octicon octicon-link"></span></a>Timers</h2>
 
 <p>Il est possible d'obtenir des temps d'exécution sur des portions de code.
-Un nouveau timer peut être définie et démarré de la façon suivante (au sein du code) : </p>
+Un nouveau timer peut être défini et démarré de la façon suivante (au sein du code) : </p>
 
-<pre><code>let timer = stats#get_timer "Time (s)"
+<pre><code>stats#start_timer "Time (s)";
 </code></pre>
 
-<p>Pour arrêter le timer définie ci-dessus : </p>
+<p>Pour arrêter le timer défini ci-dessus : </p>
 
-<pre><code>timer#stop;
+<pre><code>stats#stop_timer "Time (s)";
 </code></pre>
 
-<h1>
-<a name="3-structures-de-donn%C3%A9es" class="anchor" href="#3-structures-de-donn%C3%A9es"><span class="octicon octicon-link"></span></a>3. Structures de données</h1>
+<p>Actuellement, trois temps sont enregistrés par défaut : </p>
+
+<ul>
+<li>"Time (s)" : le temps utilisé pour résoudre la cnf donnée</li>
+<li>"Reduction (s)" : le temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)</li>
+<li>"Decision (heuristic) (s)" : le temps utilisé par les heuristiques pour décider sur quels littéraux parier</li>
+</ul><h1>
+<a name="4-structures-de-donn%C3%A9es" class="anchor" href="#4-structures-de-donn%C3%A9es"><span class="octicon octicon-link"></span></a>4. Structures de données</h1>
 
 <p>Les structures suivantes sont utilisées par l'algorithme :</p>
 
@@ -271,7 +321,7 @@ des clauses, une modification des listes d'occurences pour garantir la propriét
 <ul>
 <li><p>wl_pos et wl_neg : 2 vartable de clauseset permettant de savoir pour chaque littéral dans quelles clauses il apparait.</p></li>
 </ul><h1>
-<a name="4-algorithme-dpll" class="anchor" href="#4-algorithme-dpll"><span class="octicon octicon-link"></span></a>4. Algorithme DPLL</h1>
+<a name="5-algorithme-dpll" class="anchor" href="#5-algorithme-dpll"><span class="octicon octicon-link"></span></a>5. Algorithme DPLL</h1>
 
 <p>L'algorithme DPLL est implémenté comme une alternance de phases de propagation de contraintes et de paris sur des variables libres.</p>
 
@@ -281,16 +331,16 @@ des clauses, une modification des listes d'occurences pour garantir la propriét
 On évite ainsi de parcourir toutes les clauses. </p>
 
 <h2>
-<a name="pr%C3%A9traitement" class="anchor" href="#pr%C3%A9traitement"><span class="octicon octicon-link"></span></a>Prétraitement:</h2>
+<a name="pr%C3%A9traitement-" class="anchor" href="#pr%C3%A9traitement-"><span class="octicon octicon-link"></span></a>Prétraitement :</h2>
 
 <p>Le prétraitement effectué se limite à supprimer les clauses trivialement satisfiables : celles contenant x et -x.
 La première étape de propagation des contraintes n'est jamais annulée (sauf si on ne trouve pas d'assignation) et joue donc le rôle du prétraitement.</p>
 
 <h1>
-<a name="5-algorithme-watched-literals" class="anchor" href="#5-algorithme-watched-literals"><span class="octicon octicon-link"></span></a>5. Algorithme Watched Literals</h1>
+<a name="6-algorithme-watched-literals" class="anchor" href="#6-algorithme-watched-literals"><span class="octicon octicon-link"></span></a>6. Algorithme Watched Literals</h1>
 
 <h2>
-<a name="pr%C3%A9traitement-1" class="anchor" href="#pr%C3%A9traitement-1"><span class="octicon octicon-link"></span></a>Prétraitement:</h2>
+<a name="pr%C3%A9traitement--1" class="anchor" href="#pr%C3%A9traitement--1"><span class="octicon octicon-link"></span></a>Prétraitement :</h2>
 
 <p>Le prétraitement s'effectue en trois étapes : </p>
 
@@ -319,124 +369,107 @@ Lorsqu'une paire (v1,v2) est surveillée dans une clause c et que l'on vient d'a
 <li>A tout instant, chaque clause connait les 2 littéraux qui la surveillent (accès en temps constant à cette information)</li>
 <li>A tout instant, chaque littéral connait les clauses qu'il surveille</li>
 </ul><h1>
-<a name="5-algorithme-tseitin" class="anchor" href="#5-algorithme-tseitin"><span class="octicon octicon-link"></span></a>5. Algorithme Tseitin</h1>
+<a name="7-algorithme-tseitin" class="anchor" href="#7-algorithme-tseitin"><span class="octicon octicon-link"></span></a>7. Algorithme Tseitin</h1>
 
-<p>L'algorithme Tseitin permet de convertir une formule propositionnelle en une cnf.
-Le dossier src/tseitin contient l'ensemble des outils mis en place à cette fin. En particulier, le fichier tseitin.ml contient l'algorithme de conversion.</p>
+<p>L'algorithme Tseitin permet de convertir une formule propositionnelle en une cnf.</p>
 
-<p>COMPLEXITE ESPACE+TEMPS</p>
+<p>Nous avons choisi les associativités suivantes pour les différents opérateurs logiques :</p>
 
-<p>Priorités dans Tseitin : 
-  =&gt; : right associative
-  &lt;=&gt; : non associative
-  /\,\/ : left associative</p>
+<ul>
+<li>=&gt; : right associative</li>
+<li>&lt;=&gt; : non associative</li>
+<li>/\,\/ : left associative</li>
+</ul><p>Les priorités sont : NOT &gt; AND &gt; OR &gt; IMP &gt; EQU</p>
 
-<p>priorité :<br>
-    NOT &gt; AND &gt; OR &gt; IMP &gt; EQU</p>
+<p>Exemple : a/\b =&gt; c est lu comme (a/\b) =&gt; c</p>
+
+<p>Le dossier src/tseitin contient l'ensemble des outils mis en place. En particulier, le fichier tseitin.ml contient l'algorithme de conversion.</p>
+
+<p>Etant donné une formule propositionnelle p, l'algorithme Tseitin produit une cnf [p] telle que p et [p] sont équisatisfiables. La taille de [p], ainsi que le temps d'exécution de l'algorithme, sont linéaires en la taille de p.</p>
 
 <h1>
-<a name="5-algorithme-colorie" class="anchor" href="#5-algorithme-colorie"><span class="octicon octicon-link"></span></a>5. Algorithme Colorie</h1>
+<a name="8-algorithme-colorie" class="anchor" href="#8-algorithme-colorie"><span class="octicon octicon-link"></span></a>8. Algorithme Colorie</h1>
 
-<p>L'algorithme Colorie indique, pour un entier k et un graphe G, si G peut-être colorié à l'aide de k couleurs distincts.
+<p>Etant donné un entier k et un graphe G, l'algorithme Colorie indique si G peut-être colorié à l'aide de k couleurs distincts.
 Le dossier src/color contient l'ensemble des outils mis en place à cette fin.</p>
 
 <p>On rappelle ci-dessous la procédure permettant de construire une cnf indiquant si le graphe G=(V,E) peut être colorié avec k couleurs :</p>
 
 <ul>
-<li>pour chaque sommet i, on produit la clause i_1\/i_2\/...\/i_k indiquant que i doit se voir attribuer une couleur entre 1 et k</li>
-<li>pour chaque arête (i,j), pour chaque entier l entre 1 et k, on produit la clause ~i_l\/~j_l indiquant que i et j ne doivent pas avoir la même couleur.</li>
-</ul><p>COMPLEXITE ESPACE+TEMPS</p>
+<li>pour chaque sommet i, on produit la clause i_1 \/ i_2 \/ ... \/ i_k indiquant que i doit se voir attribuer une couleur entre 1 et k</li>
+<li>pour chaque arête (i,j), pour chaque entier l entre 1 et k, on produit la clause ~i_l \/ ~j_l indiquant que i et j ne doivent pas avoir la même couleur.</li>
+</ul><p>Etant donné un graphe G=(V,E) et un entier de coloriage k, la cnf produite est donc constituée de |V| clauses de longueurs k, et k*|E| clauses de longueurs 2.
+Le temps nécessaire à la production de la cnf est linéaire en la taille de la cnf produite.</p>
 
 <h1>
-<a name="6-heuristiques" class="anchor" href="#6-heuristiques"><span class="octicon octicon-link"></span></a>6. Heuristiques</h1>
+<a name="9-heuristiques" class="anchor" href="#9-heuristiques"><span class="octicon octicon-link"></span></a>9. Heuristiques</h1>
 
-<p>Les heuristiques permettent de déterminer le littéral sur lequel effectuer le prochain pari. Les différentes heuristiques implémentées sont décrites ci-dessous. Une analyse comparative de leurs performances figure.... </p>
+<p>Les heuristiques permettent de déterminer le littéral sur lequel effectuer le prochain pari. Les différentes heuristiques implémentées sont décrites ci-dessous.</p>
 
 <h2>
 <a name="heuristiques-de-choix-de-polarit%C3%A9" class="anchor" href="#heuristiques-de-choix-de-polarit%C3%A9"><span class="octicon octicon-link"></span></a>Heuristiques de choix de polarité</h2>
 
 <p>Etant donnée une variables, ces heuristiques déterminent la polarité à lui joindre (pour obtenir un littéral).</p>
 
-<p>POLARITE_RAND :
-  renvoie une polarité aléatoire (true ou false)</p>
+<p>POLARITE_RAND :</p>
 
-<p>POLARITE_MOST_FREQUENT :
-  renvoie la polarité avec laquelle la variable apparait le plus fréquemment dans la formule</p>
+<ul>
+<li>renvoie une polarité aléatoire (true ou false)</li>
+</ul><p>POLARITE_MOST_FREQUENT :</p>
 
-<h2>
+<ul>
+<li>pour DPLL : renvoie la polarité avec laquelle la variable apparait le plus fréquemment dans la formule</li>
+<li>pour WL : renvoie la polarité avec laquelle la variable est la plus surveillée dans la formule</li>
+</ul><h2>
 <a name="heuristiques-de-choix-de-variable" class="anchor" href="#heuristiques-de-choix-de-variable"><span class="octicon octicon-link"></span></a>Heuristiques de choix de variable</h2>
 
-<p>NEXT :
-  renvoie la prochaine variable non encore assignée (ce choix est déterministe et dépend de l'entier représentant chaque variable)</p>
+<p>NEXT :</p>
 
-<p>RAND : 
-  renvoie une variable aléatoire non encore assignée</p>
+<ul>
+<li>renvoie la prochaine variable non encore assignée (ce choix est déterministe et dépend de l'entier représentant chaque variable)</li>
+</ul><p>RAND : </p>
 
-<p>DLCS : 
-  renvoie la variable apparaissant le plus fréquemment dans la formule</p>
+<ul>
+<li>renvoie une variable aléatoire non encore assignée</li>
+</ul><p>DLCS : </p>
 
-<h2>
+<ul>
+<li>pour DPLL : renvoie la variable apparaissant le plus fréquemment dans la formule</li>
+<li>pour WL : renvoie la variable la plus surveillée dans la formule</li>
+</ul><h2>
 <a name="heuristiques-de-choix-de-litt%C3%A9ral" class="anchor" href="#heuristiques-de-choix-de-litt%C3%A9ral"><span class="octicon octicon-link"></span></a>Heuristiques de choix de littéral</h2>
 
-<p>On indique pour chaque heuristique l'argument permettant de l'appeler (voir section ...)</p>
+<p>On indique pour chaque heuristique l'argument permettant de l'appeler.</p>
 
-<p>Les 2 catégories d'heuristiques décrites ci-dessous peuvent être combinées pour donner lieu à 6 heuristiques de choix de littéral : </p>
+<p>Les 2 catégories d'heuristiques décrites ci-dessus peuvent être combinées pour donner lieu à 6 heuristiques de choix de littéral : </p>
 
-<p>NEXT + POLARITE_RAND          (-h next_rand)
-  NEXT + POLARITE_MOST_FREQUENT (-h next_mf)
-  RAND + POLARITE_RAND          (-h rand_rand)
-  RAND + POLARITE_MOST_FREQUENT (-h rand_mf)
-  DLCS + POLARITE_RAND          (cette option n'est pas disponible)
-  DLCS + POLARITE_MOST_FREQUENT (-h dlcs)</p>
+<ul>
+<li>NEXT + POLARITE_RAND          (-h next_rand)</li>
+<li>NEXT + POLARITE_MOST_FREQUENT (-h next_mf)</li>
+<li>RAND + POLARITE_RAND          (-h rand_rand)</li>
+<li>RAND + POLARITE_MOST_FREQUENT (-h rand_mf)</li>
+<li>DLCS + POLARITE_RAND          (cette option n'est pas disponible)</li>
+<li>DLCS + POLARITE_MOST_FREQUENT (-h dlcs)</li>
+</ul><p>On dispose également des heuristiques suivantes : </p>
 
-<p>On dispose également des heuristiques suivantes : </p>
+<p>MOMS (-h moms)</p>
 
-<p>MOMS (-h moms)
-    renvoie le littéral apparaissant le plus fréquemment dans les clauses de taille minimum</p>
+<ul>
+<li>renvoie le littéral apparaissant le plus fréquemment dans les clauses de taille minimum</li>
+</ul><p>DLIS (-h dlis)</p>
 
-<p>DLIS (-h dlis)
-    pour DPLL : renvoie le littéral qui rend le plus de clauses satisfaites
-    pour WL : renvoie le littéral qui rend le plus de jumelles satisfaites</p>
+<ul>
+<li>pour DPLL : renvoie le littéral qui rend le plus de clauses satisfaites</li>
+<li>pour WL : renvoie le littéral qui rend le plus de jumelles satisfaites</li>
+</ul><p>JEWA (Jeroslow-Wang) (-h jewa)</p>
 
-<p>JEWA (-h jewa)
-    attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2**-|C|)
-    renvoie le littéral avec le plus grand score</p>
+<ul>
+<li>attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2**-|C|)</li>
+<li>renvoie le littéral avec le plus grand score</li>
+</ul><h1>
+<a name="10-performances" class="anchor" href="#10-performances"><span class="octicon octicon-link"></span></a>10. Performances</h1>
 
-<h1>
-<a name="7-g%C3%A9n%C3%A9rateur" class="anchor" href="#7-g%C3%A9n%C3%A9rateur"><span class="octicon octicon-link"></span></a>7. Générateur</h1>
-
-<p>Le générateur permet d'obtenir des cnf, des formules propositionnelles et des graphes. Les méthodes de génération aléatoire sont décrites ci-dessous : </p>
-
-<h2>
-<a name="cnf" class="anchor" href="#cnf"><span class="octicon octicon-link"></span></a>CNF</h2>
-
-<p>Le générateur prend en entrée 3 entiers : n l k
-Il produit une formule à n variables comportant k clauses de longueur l chacune.
-Les clauses sont choisises uniformément (on extrait les l premiers éléments d'une permutation de l'ensemble des variables) et sans tautologie ni doublon de littéraux.</p>
-
-<h2>
-<a name="tseitin-1" class="anchor" href="#tseitin-1"><span class="octicon octicon-link"></span></a>Tseitin</h2>
-
-<p>Le générateur prend en entrée 2 entiers : n c
-Il produit une formule propositionnelle à n variables et c connecteurs logiques.
-Pour ce faire, l'algorithme récursif suivant est utilisé : </p>
-
-<p>TSEITIN_RANDOM(n,c)
-    Si c=0 alors
-      renvoyer une variable choisie aléatoirement entre 1 et n
-    Sinon
-      choisir aléatoirement un connecteur logique connect
-      Si connect=~ alors
-        renvoyer ~TSEITIN_RANDOM(n,c-1)
-      Sinon
-        renvoyer TSEITIN_RANDOM(n,(c-1)/2)connectTSEITIN_RANDOM(n,c-1-(c-1)/2)</p>
-
-<h2>
-<a name="color" class="anchor" href="#color"><span class="octicon octicon-link"></span></a>Color</h2>
-
-<p>Le générateur prend en entrée 1 entier n et un flottant p.
-Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d'existence p.
-Remarque : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.</p>
+<p>Une étude des performances des différents algorithmes et heuristiques figure dans le dossier "performances". Consulter le fichier README présent dans ce dossier pour de plus amples informations.</p>
         </section>
 
         <footer>
