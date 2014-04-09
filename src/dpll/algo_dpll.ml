@@ -12,8 +12,8 @@ type propagation_result = Fine of variable list | Conflict
     doit effectuer toutes les propagations possibles
       si conflit : doit annuler toutes les assignations propagées + renvoyer Conflict
       si ok : renvoie Fine l où l est l'ensemble des variables assignées *) 
-let rec constraint_propagation formule l = 
-  match formule#find_singleton with (* on cherche des clauses singletons *)
+let rec constraint_propagation formule _ =
+  let rec aux acc = function formule#find_singleton (* on cherche des clauses singletons *)
     | None ->
         begin
           match formule#find_single_polarite with (* on cherche des variables n'apparaissant qu'avec une seule polarité *)
@@ -23,7 +23,7 @@ let rec constraint_propagation formule l =
                   debug#p 3 "Propagation : singleton found : %d %B" v b;
                   debug#p 4 "Propagation : setting %d to %B" v b;
                   formule#set_val b v; (* on assigne v selon sa polarité unique *)
-                  constraint_propagation formule (v::l) (* on essaye de poursuivre la propagation *)
+                  aux (v::l) (* on essaye de poursuivre la propagation *)
                 with
                   Clause_vide -> (* on a créé une clause vide, il faut annuler toutes les assignations depuis le dernier pari *)
                     begin
@@ -37,14 +37,15 @@ let rec constraint_propagation formule l =
           debug#p 3 "Propagation : single polarity found : %d %B" v b;
           debug#p 4 "Propagation : setting %d to %B" v b;
           formule#set_val b v; (* on assigne la variable selon son apparition dans la clause singleton *)
-          constraint_propagation formule (v::l) (* on poursuit la propagation *)
+          aux (v::l) (* on poursuit la propagation *)
         with
           Clause_vide -> (* clause vide : on annule tout *)
             begin
               debug#p 3 "Propagation : empty clause found";
               List.iter (fun var -> formule#reset_val var) (v::l);
               Conflict
-            end   
+            end in
+  aux []
                 
             
 (*************)        
