@@ -74,12 +74,13 @@ object(self)
       (fun c -> 
         clauses#hide c ; 
         self#hide_occurences v c);
-    (* On supprime la négation du littéral des clauses où elle apparait, si on créé un conflit on le dit *)
-    (self#get_occurences supprimer v)#iter 
-      (fun c -> 
-        c#hide_var (not b) v;
-        if c#is_empty then 
-          raise Clause_vide)
+      (* On supprime la négation du littéral des clauses où elle
+         apparait, si on créé un conflit on le dit *)
+      (self#get_occurences supprimer v)#iter 
+        (fun c -> 
+          c#hide_var (not b) v;
+          if c#is_empty then 
+            raise Clause_vide)
 
   method private show_occurences v_ref c = (* on rend visible c dans les occurences_pos/neg des variables qu'elle contient (exceptée v_ref) *)
     c#get_vpos#iter 
@@ -121,10 +122,10 @@ object(self)
       else 
         if not (paris#mem m) then 
           if (self#get_occurences occurences_pos m)#is_empty then 
-            Some (m,false) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
+            Some (false,m) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
           else 
             if (self#get_occurences occurences_neg m)#is_empty then 
-              Some (m,true)
+              Some (true,m)
             else parcours_polar (m+1) n
         else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars

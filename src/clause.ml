@@ -116,8 +116,8 @@ object
 
   method singleton = (* renvoie Some (v,b) si la clause est un singleton ne contenant que v avec la positivité b, None sinon *)
     match (vpos#singleton, vneg#singleton) with
-      | (Singleton v, Empty) -> Some (v,true)
-      | (Empty, Singleton v) -> Some (v,false)
+      | (Singleton v, Empty) -> Some (true,v)
+      | (Empty, Singleton v) -> Some (false,v)
       | _ -> None
 
   (* ces champs ne sont utilisées que pour les watched literals *)

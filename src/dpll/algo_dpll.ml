@@ -1,51 +1,59 @@
-open Answer
-open Formule
-open Formule_dpll
+open Algo
 open Clause
 open Debug
+open Formule_dpll
 
-type propagation_result = Fine of variable list | Conflict 
+type etat = { formule : formule_dpll; tranches : tranche list }
 
-(*************)
+let name = "Dpll"
 
-(* constraint_propagation : 
-    doit effectuer toutes les propagations possibles
-      si conflit : doit annuler toutes les assignations propagées + renvoyer Conflict
-      si ok : renvoie Fine l où l est l'ensemble des variables assignées *) 
-let rec constraint_propagation formule _ =
+(***)
+let rec constraint_propagation formule =
   let rec aux acc = function formule#find_singleton (* on cherche des clauses singletons *)
     | None ->
         begin
           match formule#find_single_polarite with (* on cherche des variables n'apparaissant qu'avec une seule polarité *)
-            | None -> Fine l (* ni singleton, ni variable avec une seule polarité >> on a mené la propagation aussi loin que possible, on renvoie la liste des variables assignées depuis le dernier pari *)
-            | Some (v,b) ->   
+            | None -> acc (* ni singleton, ni variable avec une seule polarité >> on a mené la propagation aussi loin que possible, on renvoie la liste des variables assignées depuis le dernier pari *)
+            | Some (b,v) ->   
                 try
                   debug#p 3 "Propagation : singleton found : %d %B" v b;
                   debug#p 4 "Propagation : setting %d to %B" v b;
                   formule#set_val b v; (* on assigne v selon sa polarité unique *)
                   aux (v::l) (* on essaye de poursuivre la propagation *)
                 with
-                  Clause_vide -> (* on a créé une clause vide, il faut annuler toutes les assignations depuis le dernier pari *)
-                    begin
-                      debug#p 3 "Propagation : empty clause found";
-                      List.iter (fun var -> formule#reset_val var) (v::l);
-                      Conflict
-                    end
+                  Clause_vide -> Conflit (* on a créé une clause vide, il faut annuler toutes les assignations depuis le dernier pari *)
         end
-    | Some (v,b) -> (* on a trouvé une clause singleton *)
+    | Some (b,v) -> (* on a trouvé une clause singleton *)
         try
           debug#p 3 "Propagation : single polarity found : %d %B" v b;
           debug#p 4 "Propagation : setting %d to %B" v b;
           formule#set_val b v; (* on assigne la variable selon son apparition dans la clause singleton *)
-          aux (v::l) (* on poursuit la propagation *)
+          aux ((b,v)::acc) (* on poursuit la propagation *)
         with
-          Clause_vide -> (* clause vide : on annule tout *)
-            begin
-              debug#p 3 "Propagation : empty clause found";
-              List.iter (fun var -> formule#reset_val var) (v::l);
-              Conflict
-            end in
+          Clause_vide -> Conflit (* clause vide : on annule tout *) in
   aux []
+(***)
+
+let init n cnf =
+  let f = new formule_dpll in
+  f#init n cnf;
+  formule#init n cnf;
+  if formule#check_empty_clause then
+    let _ = constraint_propagation f in
+    { formule = f; tranches = [] }
+  else
+    raise Conflit
+
+let make_bet (b,v) etat =
+  begin
+    try
+      formule#set_val b var
+    with Clause_vide -> Conflit (* On a créé une clause vide en faisant le pari *)
+  end;
+  let propagation = constraint_propagation etat.formule in
+  { etat with tranches = ((b,v),propagation)::etat.tranches }
+  
+
                 
             
 (*************)        

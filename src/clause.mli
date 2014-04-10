@@ -36,7 +36,7 @@ object
   method size : int
   method is_tauto : bool
   method mem : bool -> variable -> bool
-  method singleton : (variable*bool) option
+  method singleton : literal option
   method print : out_channel -> unit -> unit
 end
 
