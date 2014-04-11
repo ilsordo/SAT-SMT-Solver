@@ -4,6 +4,7 @@ open Debug
 open Config
 open Algo
 
+
 let get_formule input = function
   | Cnf -> 
       let (n,cnf) = Cnf.parse input in 

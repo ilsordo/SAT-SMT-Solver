@@ -61,9 +61,11 @@ object(self)
           (self#get_occurences occurences_neg v)#hide c)    
 
   method set_val b v = (* on assigne la valeur b à la variable v, on cache les causes qui deviennent vraie, on cache v dans les clauses où elle est fausse *)
-    let _ = match paris#find v with
-      | None -> paris#set v b
-      | Some _ -> assert false in (* Pas de double paris *)
+    begin
+      match paris#find v with
+        | None -> paris#set v b
+        | Some _ -> assert false (* Pas de double paris *)
+    end;
     let (valider,supprimer) =
       if b then
         (occurences_pos,occurences_neg)

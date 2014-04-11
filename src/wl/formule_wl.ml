@@ -2,7 +2,7 @@ open Clause
 open Formule
 open Debug
 
-exception Found of (variable*bool)
+exception Found of literal
 
 exception WLs_found of (literal*literal)
 

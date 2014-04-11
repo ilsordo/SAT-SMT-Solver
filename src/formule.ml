@@ -5,7 +5,7 @@ module ClauseSet = Set.Make(OrderedClause)
 
 type f_repr = ClauseSet.t
 
-exception Found of (variable*bool)
+exception Found of literal
 
 exception Clause_vide
 
@@ -138,7 +138,7 @@ object (self)
       clauses#iter (fun c -> 
         match c#singleton with  
           | Some x -> 
-              raise (Found x) 
+              raise (Found x)
           | None -> ());
       None
     with 

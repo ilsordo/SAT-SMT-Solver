@@ -1,5 +1,8 @@
 open Debug
 open Printf
+open Algo
+
+module Dpll = Bind(Algo_dpll)
 
 type problem = Cnf | Color of int | Tseitin
 
@@ -19,7 +22,7 @@ let config =
     problem_type = Cnf;
     print_cnf = None;
     input = None;
-    algo = Algo_dpll.algo;
+    algo = Dpll.algo;
     nom_algo = "dpll";
     heuristic = Heuristic.(next polarite_rand);
     nom_heuristic = "next_rand"
@@ -31,8 +34,8 @@ let parse_args () =
   
   let parse_algo s =
     let algo = match s with
-      | "dpll" -> Algo_dpll.algo
-      | "wl" -> Algo_wl.algo 
+      | "dpll" -> Dpll.algo
+      | "wl" -> Dpll.algo 
       | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.algo <- algo;
     config.nom_algo <- s in

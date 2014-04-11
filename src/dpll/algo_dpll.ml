@@ -2,6 +2,7 @@ open Algo
 open Clause
 open Debug
 open Formule_dpll
+open Formule
 
 type etat = { formule : formule_dpll; tranches : tranche list }
 
@@ -9,108 +10,72 @@ let name = "Dpll"
 
 (***)
 let rec constraint_propagation formule =
-  let rec aux acc = function formule#find_singleton (* on cherche des clauses singletons *)
-    | None ->
-        begin
-          match formule#find_single_polarite with (* on cherche des variables n'apparaissant qu'avec une seule polarité *)
-            | None -> acc (* ni singleton, ni variable avec une seule polarité >> on a mené la propagation aussi loin que possible, on renvoie la liste des variables assignées depuis le dernier pari *)
-            | Some (b,v) ->   
-                try
-                  debug#p 3 "Propagation : singleton found : %d %B" v b;
-                  debug#p 4 "Propagation : setting %d to %B" v b;
-                  formule#set_val b v; (* on assigne v selon sa polarité unique *)
-                  aux (v::l) (* on essaye de poursuivre la propagation *)
-                with
-                  Clause_vide -> Conflit (* on a créé une clause vide, il faut annuler toutes les assignations depuis le dernier pari *)
-        end
-    | Some (b,v) -> (* on a trouvé une clause singleton *)
-        try
-          debug#p 3 "Propagation : single polarity found : %d %B" v b;
-          debug#p 4 "Propagation : setting %d to %B" v b;
-          formule#set_val b v; (* on assigne la variable selon son apparition dans la clause singleton *)
-          aux ((b,v)::acc) (* on poursuit la propagation *)
-        with
-          Clause_vide -> Conflit (* clause vide : on annule tout *) in
+  let rec aux acc = 
+    match formule#find_singleton with(* on cherche des clauses singletons *)
+      | None ->
+          begin
+            match formule#find_single_polarite with (* on cherche des variables n'apparaissant qu'avec une seule polarité *)
+              | None -> acc (* ni singleton, ni variable avec une seule polarité >> on a mené la propagation aussi loin que possible, on renvoie la liste des variables assignées depuis le dernier pari *)
+              | Some (b,v) ->   
+                  try
+                    debug#p 3 "Propagation : singleton found : %d %B" v b;
+                    debug#p 4 "Propagation : setting %d to %B" v b;
+                    formule#set_val b v; (* on assigne v selon sa polarité unique *)
+                    aux ((b,v)::acc) (* on essaye de poursuivre la propagation *)
+                  with
+                      Clause_vide -> raise (Conflit ((b,v)::acc)) (* on a créé une clause vide, il faut annuler toutes les assignations depuis le dernier pari *)
+          end
+      | Some (b,v) -> (* on a trouvé une clause singleton *)
+          try
+            debug#p 3 "Propagation : single polarity found : %d %B" v b;
+            debug#p 4 "Propagation : setting %d to %B" v b;
+            formule#set_val b v; (* on assigne la variable selon son apparition dans la clause singleton *)
+            aux ((b,v)::acc) (* on poursuit la propagation *)
+          with
+              Clause_vide -> raise (Conflit ((b,v)::acc)) (* clause vide : on annule tout *) in
   aux []
 (***)
 
 let init n cnf =
   let f = new formule_dpll in
   f#init n cnf;
-  formule#init n cnf;
-  if formule#check_empty_clause then
+  if f#check_empty_clause then
     let _ = constraint_propagation f in
     { formule = f; tranches = [] }
   else
-    raise Conflit
+    raise (Conflit [])
 
 let make_bet (b,v) etat =
   begin
     try
-      formule#set_val b var
-    with Clause_vide -> Conflit (* On a créé une clause vide en faisant le pari *)
+      etat.formule#set_val b v
+    with Clause_vide -> raise (Conflit [])(* On a créé une clause vide en faisant le pari *)
   end;
   let propagation = constraint_propagation etat.formule in
   { etat with tranches = ((b,v),propagation)::etat.tranches }
-  
 
-                
-            
-(*************)        
-            
-            
-(* Algo DPLL *)
-let algo next_pari n cnf = 
-  let formule = new formule_dpll in
+let undo_assignation formule (_,v) = formule#reset_val v
 
-  let try_pari var b = (* assigne b à la variable var, fait évoluer les clauses en conséquence *)
-    debug#p 2 "DPLL : trying with %d %B" var b;
-    try
-      formule#set_val b var
-    with
-        Clause_vide ->
-          assert false in
-  
-  let rec aux () =  (* essaye de poursuivre les assignations courantes jusqu'à rendre la formule vraie. Renvoie true si réussit, false si impossible *)
-    debug#p 2 "DPLL : starting propagation";
-    match constraint_propagation formule [] with (* on commence par faire les assignations nécessaires (singletons, polarité unique) *)
-      | Conflict -> 
-          stats#record "Conflits";
-          debug#p 2 ~stops:true "DPLL : conflict found";
-          false
-      |  Fine var_prop -> 
-          stats#start_timer "Decision (heuristic) (s)";
-          let l = next_pari (formule:>formule) in
-          stats#stop_timer "Decision (heuristic) (s)";
-          match l with
-            | None -> 
-                debug#p 1 "Done\n";
-                true (* plus aucun pari à faire, c'est gagné *)
-            | Some (b,var) -> 
-                stats#record "Paris";
-                try_pari var b; (* on fait un pari : true sur var *)
-                if aux () then (* on essaye de le prolonger *)
-                  true (* on a rendu la formule satisfiable *)
-                else
-                  begin
-                    formule#reset_val var; (* on doit annuler le pari *)
-                    try_pari var (not b); (* on retente un autre pari : false sur var *)
-                    if aux() then (* on essaye de le prolonger *)
-                      true (* on a rendu la formule satisfiable *)
-                    else
-                      begin
-                        debug#p 2 "DPLL : backtracking on var %d" var;
-                        List.iter (fun v -> formule#reset_val v) var_prop; (* plus d'espoir, il faut bactracker. On annule toutes les assignations faites depuis le dernier pari *)
-                        formule#reset_val var; (* on doit annuler le pari *)
-                        false
-                      end
-                  end in
-  try 
-    formule#init n cnf;
-    formule#check_empty_clause; (* Lève Clause_vide si une clause est vide *)
-    if aux () then 
-      Solvable formule#get_paris
-    else 
-      Unsolvable
-  with
-    | Clause_vide -> Unsolvable (* Clause vide dès le début *)
+let recover (pari,propagation) etat =
+  List.iter (undo_assignation etat.formule) propagation;
+  undo_assignation etat.formule pari;
+  etat
+
+let undo etat = match etat.tranches with
+  | [] -> assert false (* Je ne vois pas pourquoi cela arriverait *)
+  | (pari,propagation)::q ->
+      List.iter (undo_assignation etat.formule) propagation;
+      undo_assignation etat.formule pari;
+      { etat with tranches = q }
+
+let get_formule { formule = formule ; _ } = (formule:>formule)
+
+
+
+
+
+
+
+
+
+
