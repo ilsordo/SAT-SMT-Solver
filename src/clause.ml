@@ -11,7 +11,7 @@ module VarSet = Set.Make(OrderedVar)
 
 type c_repr = VarSet.t
 
-type classif_varset = Empty | Singleton of variable | Bigger (* un ensemble de variable est : vide || un singleton || contient 2 variables ou plus *)
+type 'a classif = Empty | Singleton of 'a | Bigger (* un ensemble de variable est : vide || un singleton || contient 2 variables ou plus *)
 
 type literal = bool * variable (* un littéral = une variable + sa positivité (+=true, -=false) *)
 
@@ -25,35 +25,44 @@ class varset =
 object (self : 'varset)
   val mutable vis = VarSet.empty (* variables visibles du varset *)
   val mutable hid = VarSet.empty (* variables cachées du varset *)
+  val mutable size = 0 (* nombre de variables visibles *)
     
   method repr = vis
 
   method hide x = (* déplace la variable x des variables visibles aux variables cachées (ssi elle est déjà visible) *)
-    if (VarSet.mem x vis) then 
+    if (VarSet.mem x vis) then
       begin
         vis <- VarSet.remove x vis;
-        hid <- VarSet.add x hid
-      end 
+        hid <- VarSet.add x hid;
+        size <- size - 1;
+      end
       
   method show x = (* déplace la variable x des variables cachées aux variables visibles (ssi elle est déjà cachée) *) 
     if (VarSet.mem x hid) then
-      begin
         hid <- VarSet.remove x hid;
-        vis <- VarSet.add x vis
+    if not (VarSet.mem x vis) then
+      begin
+        vis <- VarSet.add x vis;
+        size <- size + 1
       end
         
-  method add x = vis <- VarSet.add x vis (* ajoute x aux vars visibles *)
-     
+  method add x = 
+    if not (VarSet.mem x vis) then
+      begin
+        vis <- VarSet.add x vis; (* ajoute x aux vars visibles *)
+        size <- size + 1
+      end
+
   method mem x = VarSet.mem x vis  (* indique si la variable x est dans vis  *)
 
   method intersects (v : 'varset) = not (VarSet.is_empty (VarSet.inter vis v#repr)) (* indique si l'intersection entre vis et v est vide ou non *)
 
   method is_empty = VarSet.is_empty vis
 
-  method size = VarSet.cardinal vis
+  method size = size
 
   method singleton = (* indique si vis est vide, singleton, ou contient plus de 1 élément *)
-    match VarSet.cardinal vis with
+    match size with
       | 0 -> Empty
       | 1 -> Singleton (VarSet.choose vis)
       | _ -> Bigger
@@ -116,9 +125,10 @@ object
 
   method singleton = (* renvoie Some (v,b) si la clause est un singleton ne contenant que v avec la positivité b, None sinon *)
     match (vpos#singleton, vneg#singleton) with
-      | (Singleton v, Empty) -> Some (v,true)
-      | (Empty, Singleton v) -> Some (v,false)
-      | _ -> None
+      | (Empty, Empty) -> Empty
+      | (Singleton v, Empty) -> Singleton (v,true)
+      | (Empty, Singleton v) -> Singleton (v,false)
+      | _ -> Bigger
 
   (* ces champs ne sont utilisées que pour les watched literals *)
   val mutable wl1 : literal option = None (* premier littéral surveillé dans la clause *)

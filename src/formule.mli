@@ -5,15 +5,15 @@ exception Clause_vide
 class clauseset :
 object
   method size : int
+  method mem : clause -> bool
   method add : clause -> unit
+  method remove : clause -> unit
+  method show : clause -> unit
   method hide : clause -> unit
   method is_empty : bool
   method reset : unit
   method iter : (clause -> unit) -> unit
   method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a 
-  method mem : clause -> bool
-  method show : clause -> unit
-  method remove : clause -> unit
 end
 
 class ['a] vartable :
@@ -44,7 +44,7 @@ object
   method get_nb_occ : bool -> int -> int
   method set_val : bool -> variable -> unit
   method reset_val : variable -> unit
-  method find_singleton : (variable*bool) option
+  method find_singleton : literal option
   method check_empty_clause : unit
   method eval : bool
 end

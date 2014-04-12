@@ -2,7 +2,7 @@ type variable = int
 
 type c_repr
 
-type classif_varset = Empty | Singleton of variable | Bigger
+type 'a classif = Empty | Singleton of 'a | Bigger
 
 type literal = (bool * variable)
 
@@ -16,7 +16,7 @@ object ('a)
   method size : int
   method mem : variable -> bool
   method show : variable -> unit
-  method singleton : classif_varset
+  method singleton : variable classif
   method iter : (variable -> unit) -> unit
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a 
 end
@@ -36,7 +36,7 @@ object
   method size : int
   method is_tauto : bool
   method mem : bool -> variable -> bool
-  method singleton : (variable*bool) option
+  method singleton : literal classif
   method print : out_channel -> unit -> unit
 end
 
@@ -44,6 +44,10 @@ module OrderedClause : sig
   type t = clause
   val compare : clause -> clause -> int
 end
+
+
+
+
 
 
 

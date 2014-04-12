@@ -137,7 +137,7 @@ object (self)
     try 
       clauses#iter (fun c -> 
         match c#singleton with  
-          | Some x -> 
+          | Singleton x -> 
               raise (Found x) 
           | None -> ());
       None
