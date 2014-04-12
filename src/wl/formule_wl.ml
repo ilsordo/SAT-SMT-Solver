@@ -73,12 +73,12 @@ object(self)
     let rec prepare () = (* trouve les clauses singletons, effectue les assignations/changement de clauses qui en découlent *)
       let res = 
         try 
-          clauses#iter (fun c -> match c#singleton with Some s -> raise (Found s) | None -> ());
+          clauses#iter (fun c -> match c#singleton with Singleton s -> raise (Found s) | _ -> ());
           None
         with Found s -> Some s in
       match res with
         | None -> ()
-        | Some (v,b) ->
+        | Some (b,v) ->
             paris#set v b;
             let (valider,supprimer) =
               if b then
