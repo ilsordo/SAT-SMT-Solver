@@ -114,7 +114,7 @@ object (self)
 
   method get_paris = paris
 
-  method set_val b v = (* pari la valeur b sur la variable v *)
+  method set_val b v = (* parie la valeur b sur la variable v *)
     match paris#find v with
       | None -> paris#set v b
       | Some _ -> assert false 

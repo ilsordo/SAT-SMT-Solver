@@ -79,14 +79,19 @@ object(self)
     (self#get_occurences valider v)#iter 
       (fun c -> 
         clauses#hide c ; 
-        self#hide_occurences v c);
+        self#hide_occurences v c;
+        match c#singleton with
+          | Singleton _ -> singletons#remove c
+          | _ -> ());
       (* On supprime la négation du littéral des clauses où elle
          apparait, si on créé un conflit on le dit *)
     (self#get_occurences supprimer v)#iter 
       (fun c -> 
         c#hide_var (not b) v;
         match c#singleton with
-          | Empty -> raise Clause_vide
+          | Empty ->
+              singletons#remove c;
+              raise Clause_vide
           | Singleton _ -> singletons#add c
           | Bigger -> ())
 
@@ -115,13 +120,18 @@ object(self)
     (self#get_occurences invalider v)#iter 
       (fun c -> 
         clauses#show c;
-        self#show_occurences v c);
+        self#show_occurences v c;
+        match c#singleton with
+          | Singleton _ -> singletons#add c
+          | _ -> ());
     (* On rend visible v dans les clauses où elle était cachée car fausse *)
     (self#get_occurences restaurer v)#iter 
       (fun c ->
-        if c#is_empty then
-          singletons#add c;
-        c#show_var (not b) v) 
+        c#show_var (not b) v;
+        match c#singleton with
+          | Singleton _ -> singletons#add c
+          | Bigger -> singletons#remove c
+          | _ -> ()) 
 
   (***)
 

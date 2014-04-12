@@ -18,7 +18,7 @@ let rec constraint_propagation formule =
               | None -> acc (* ni singleton, ni variable avec une seule polarité >> on a mené la propagation aussi loin que possible, on renvoie la liste des variables assignées depuis le dernier pari *)
               | Some (b,v) ->   
                   try
-                    debug#p 3 "Propagation : singleton found : %d %B" v b;
+                    debug#p 3 "Propagation : single polarity found : %d %B" v b;
                     debug#p 4 "Propagation : setting %d to %B" v b;
                     formule#set_val b v; (* on assigne v selon sa polarité unique *)
                     aux ((b,v)::acc) (* on essaye de poursuivre la propagation *)
@@ -27,7 +27,7 @@ let rec constraint_propagation formule =
           end
       | Some (b,v) -> (* on a trouvé une clause singleton *)
           try
-            debug#p 3 "Propagation : single polarity found : %d %B" v b;
+            debug#p 3 "Propagation : singleton found : %d %B" v b;
             debug#p 4 "Propagation : setting %d to %B" v b;
             formule#set_val b v; (* on assigne la variable selon son apparition dans la clause singleton *)
             aux ((b,v)::acc) (* on poursuit la propagation *)
