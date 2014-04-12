@@ -27,7 +27,7 @@ and constraint_propagation (formule : formule_wl) (b,v) c acc =
         stats#record "Conflits";
         debug#p 2 ~stops:true "WL : Conflict : clause %d false " c#get_id;
         debug#p 4 "Propagation : cannot leave wl %B %d in clause %d" (not b) v c#get_id; 
-        raise (Conflit ((b,v)::acc)) (* Tu confirmes ? *)
+        raise (Conflit acc) (* Tu confirmes ? *)
     | WL_New (b_new, v_new) -> 
         debug#p 4 "Propagation : watched literal has moved from %B %d to %B %d in clause %d" (not b) v b_new v_new c#get_id ; 
         acc
