@@ -11,6 +11,8 @@ object(self)
   val occurences_pos : clauseset vartable = new vartable 0 (* associe à chaque variable les clauses dans lesquelles elle apparait positivement *)
   val occurences_neg : clauseset vartable = new vartable 0 (* associe à chaque variable les clauses dans lesquelles elle apparait négativement *)
 
+  val singletons = new clauseset
+
   method init n clauses_init = (* crée l'ensemble des clauses et remplie occurences_pos/neg à partir de clauses_init (int list list = liste de clauses) *)
     super#init n clauses_init;
     for i=1 to n do
@@ -28,23 +30,25 @@ object(self)
           set
       | Some set -> set in
     set#add c
-     
+      
   method private register_clause c = (* Met c dans les occurences de ses variables *)
     c#get_vpos#iter (self#add_occurence true c);
-    c#get_vneg#iter (self#add_occurence false c)
+    c#get_vneg#iter (self#add_occurence false c);
+    if c#size = 1 then
+      singletons#add c
 
   method add_clause c = (* ajoute la clause c, et met à jour occurences_pos/neg en conséquence *)
     super#add_clause c;
     self#register_clause c
-  
+      
   method get_nb_occ b x = 
     let occ = if b then occurences_pos else occurences_neg in
-      match occ#find x with
-        | None -> assert false
-        | Some occ -> occ#size
-    
+    match occ#find x with
+      | None -> assert false
+      | Some occ -> occ#size
+          
   method clause_current_size c = c#size
-  
+    
   method private get_occurences occ v =  (* Accède à l'une des occurences (occ) de la variable v, en supposant que cet ensemble a été initialisé *)
     match occ#find v with
       | None -> debug#p 1 "AAARGH %d" v;assert false (* cet ensemble aurait du être initialisé *) 
@@ -78,11 +82,13 @@ object(self)
         self#hide_occurences v c);
       (* On supprime la négation du littéral des clauses où elle
          apparait, si on créé un conflit on le dit *)
-      (self#get_occurences supprimer v)#iter 
-        (fun c -> 
-          c#hide_var (not b) v;
-          if c#is_empty then 
-            raise Clause_vide)
+    (self#get_occurences supprimer v)#iter 
+      (fun c -> 
+        c#hide_var (not b) v;
+        match c#singleton with
+          | Empty -> raise Clause_vide
+          | Singleton _ -> singletons#add c
+          | Bigger -> ())
 
   method private show_occurences v_ref c = (* on rend visible c dans les occurences_pos/neg des variables qu'elle contient (exceptée v_ref) *)
     c#get_vpos#iter 
@@ -112,10 +118,20 @@ object(self)
         self#show_occurences v c);
     (* On rend visible v dans les clauses où elle était cachée car fausse *)
     (self#get_occurences restaurer v)#iter 
-      (fun c -> 
+      (fun c ->
+        if c#is_empty then
+          singletons#add c;
         c#show_var (not b) v) 
 
-(***)
+  (***)
+
+  method find_singleton =
+    match singletons#choose with
+      | None -> None
+      | Some clause ->
+          match clause#singleton with
+            | Singleton lit -> Some lit
+            | _ -> assert false (* Un singleton qui n'est pas un singleton! *)
 
   method find_single_polarite = (* on cherche une var sans pari qui n'apparaitrait qu'avec une seule polarité *)
     let rec parcours_polar m n = 
@@ -134,3 +150,5 @@ object(self)
 
 
 end
+
+

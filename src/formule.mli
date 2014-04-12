@@ -14,6 +14,7 @@ object
   method reset : unit
   method iter : (clause -> unit) -> unit
   method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a 
+  method choose : clause option
 end
 
 class ['a] vartable :

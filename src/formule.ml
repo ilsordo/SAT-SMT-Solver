@@ -46,6 +46,10 @@ object
 
   method remove c = vis <- ClauseSet.remove c vis 
 
+  method choose =
+    try Some (ClauseSet.choose vis)
+    with Not_found -> None
+
 end
 
 (*******)
@@ -139,7 +143,7 @@ object (self)
         match c#singleton with  
           | Singleton x -> 
               raise (Found x) 
-          | None -> ());
+          | _ -> ());
       None
     with 
       | Found x -> Some x
