@@ -5,7 +5,7 @@ module ClauseSet = Set.Make(OrderedClause)
 
 type f_repr = ClauseSet.t
 
-exception Found of (variable*bool)
+exception Found of literal
 
 exception Clause_vide
 
@@ -144,7 +144,13 @@ object (self)
     with 
       | Found x -> Some x
 
-  method check_empty_clause = clauses#iter (fun c -> if c#is_empty then raise Clause_vide) (* indique s'il existe une clause vide *)
+  (* indique s'il existe une clause vide *)
+  method check_empty_clause = 
+    try
+      clauses#iter (fun c -> if c#is_empty then raise Clause_vide);
+      true
+    with
+      | Clause_vide -> false
 
   method eval = (* indique si l'ensemble des paris actuels rendent la formule vraie *)
     let aux b v =

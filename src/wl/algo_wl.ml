@@ -12,29 +12,31 @@ exception Wl_fail
       si réussit : renvoie la liste des assignations effectuées
 *)
 (* l : liste des assignations effectuées depuis le dernier pari, inclu *)
-let rec constraint_propagation (formule : Formule_wl.formule_wl) var b l =
-  debug#p 5 "Propagation : setting %d to %B" var b;
-  formule#set_val b var; (* on pari b sur var *)
-  debug#p 3 "WL : abandon watched literal %d %B required" var (not b); 
-  (formule#get_wl (not b,var))#fold  (* on parcourt  les clauses où var est surveillée et est devenue fausse, ie là où il faut surveiller un nouveau littéral *) 
-    (fun c l_next -> match (formule#update_clause c (not b,var)) with
-      | WL_Conflit -> 
-         stats#record "Conflits";
-         debug#p 2 ~stops:true "WL : Conflict : clause %d false " c#get_id;
-         debug#p 4 "Propagation : cannot leave wl %B %d in clause %d" (not b) var c#get_id; 
-         formule#reset_val var;
-         List.iter (fun v -> formule#get_paris#remove v) l_next;
-         raise Wl_fail
-      | WL_New l -> 
-          debug#p 4 "Propagation : watched literal has moved from %B %d to %B %d in clause %d" (not b) var (fst l) (snd l) c#get_id ; 
-          l_next
-      | WL_Assign (b_next,v_next) -> 
-          debug#p 4 "Propagation : setting %d to %B in clause %d is necessary (leaving %B %d impossible)" v_next b_next c#get_id (not b) var; 
-          constraint_propagation formule v_next b_next l_next
-      | WL_Nothing -> 
-          debug#p 4 "Propagation : clause %d satisfied (leaving wl %B %d unnecessary)" c#get_id (not b) var; 
-          l_next
-    ) (var::l)
+let constraint_propagation (formule : Formule_wl.formule_wl) (b,v) =
+  let rec aux (b,var) l =
+    debug#p 5 "Propagation : setting %d to %B" var b;
+    formule#set_val b var; (* on pari b sur var *)
+    debug#p 3 "WL : abandon watched literal %d %B required" var (not b); 
+    (formule#get_wl (not b,var))#fold  (* on parcourt  les clauses où var est surveillée et est devenue fausse, ie là où il faut surveiller un nouveau littéral *) 
+      (fun c l_next -> match (formule#update_clause c (not b,var)) with
+        | WL_Conflit -> 
+            stats#record "Conflits";
+            debug#p 2 ~stops:true "WL : Conflict : clause %d false " c#get_id;
+            debug#p 4 "Propagation : cannot leave wl %B %d in clause %d" (not b) var c#get_id; 
+            formule#reset_val var;
+            List.iter (fun v -> formule#get_paris#remove v) l_next;
+            raise Wl_fail
+        | WL_New l -> 
+            debug#p 4 "Propagation : watched literal has moved from %B %d to %B %d in clause %d" (not b) var (fst l) (snd l) c#get_id ; 
+            l_next
+        | WL_Assign (b_next,v_next) -> 
+            debug#p 4 "Propagation : setting %d to %B in clause %d is necessary (leaving %B %d impossible)" v_next b_next c#get_id (not b) var; 
+            aux v_next b_next l_next
+        | WL_Nothing -> 
+            debug#p 4 "Propagation : clause %d satisfied (leaving wl %B %d unnecessary)" c#get_id (not b) var; 
+            l_next
+      ) (var::l) in
+  aux tranche#pari 
 
 
 (*************)
