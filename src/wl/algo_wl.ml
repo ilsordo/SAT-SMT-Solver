@@ -10,8 +10,7 @@ let name = "Wl"
 
 (***)
 
-let rec assign (formule : formule_wl) (b,v) acc =
-  (* Fait une assignation et propage *)
+let rec assign (formule : formule_wl) (b,v) acc = (* Assigne (b,v) et propage, renvoie la liste de tous les littéraux assignés *)
   debug#p 5 "Propagation : setting %d to %B" v b;
   try
     formule#set_val b v; (* on parie b sur var *)
@@ -21,13 +20,13 @@ let rec assign (formule : formule_wl) (b,v) acc =
   with
     | Clause_vide -> raise (Conflit ((b,v)::acc))
 
-and constraint_propagation (formule : formule_wl) (b,v) c acc =
+and constraint_propagation (formule : formule_wl) (b,v) c acc = (* update des jumelles de c (suivant (b,v)), propage, renvoie les assignations effectuées *)
   match (formule#update_clause c (not b,v)) with
     | WL_Conflit ->
         stats#record "Conflits";
         debug#p 2 ~stops:true "WL : Conflict : clause %d false " c#get_id;
         debug#p 4 "Propagation : cannot leave wl %B %d in clause %d" (not b) v c#get_id; 
-        raise (Conflit acc) (* Tu confirmes ? *)
+        raise (Conflit acc)
     | WL_New (b_new, v_new) -> 
         debug#p 4 "Propagation : watched literal has moved from %B %d to %B %d in clause %d" (not b) v b_new v_new c#get_id ; 
         acc
@@ -39,7 +38,7 @@ and constraint_propagation (formule : formule_wl) (b,v) c acc =
         acc
 (***)
 
-let init n cnf =
+let init n cnf = (* initialise la formule et renvoie un état *)
   let f = new formule_wl in
   f#init n cnf;
   if f#check_empty_clause then
@@ -50,25 +49,25 @@ let init n cnf =
   else
     raise (Conflit [])
 
-let make_bet (b,v) etat =
+let make_bet (b,v) etat = (* paris (b,v), propage, renvoie l'état AVEC une nouvelle tranche *)
   begin
     try
       etat.formule#set_val b v
-    with Clause_vide -> raise (Conflit []) (* On a créé une clause vide en faisant le pari *)
+    with Clause_vide -> raise (Conflit []) (* On a créé une clause vide en faisant le pari << NON, c'est pas détecté à ce niveau *) (*** assert false  *)
   end;
   let propagation = (etat.formule#get_wl (not b,v))#fold (constraint_propagation etat.formule (b,v)) [] in
   { etat with tranches = ((b,v),propagation)::etat.tranches }
 
-let undo_assignation formule (b,v) = 
+let undo_assignation formule (b,v) = (* lève l'assignation << cette fonction est nécessaire ? *)
   debug#p 3 "Unsetting %d : %B" v b;
   formule#reset_val v
 
-let recover (pari,propagation) etat =
+let recover (pari,propagation) etat = (* annule des assignations, renvoie l'état sans le modifier *)
   List.iter (undo_assignation etat.formule) propagation;
   undo_assignation etat.formule pari;
   etat
 
-let undo etat = match etat.tranches with
+let undo etat = match etat.tranches with (* annule toutes les assignations de la dernière tranche, renvoie l'etat sans la dernière tranche *)
   | [] -> assert false (* Je ne vois pas pourquoi cela arriverait *)
   | (pari,propagation)::q ->
       List.iter (undo_assignation etat.formule) propagation;

@@ -45,6 +45,12 @@ object(self)
         (fun v res -> if self#get_pari v = None then res+1 else res)  
         0)
 
+  method get_nb_occ b x = 
+    let occ = if b then wl_pos else wl_neg in
+    match occ#find x with
+      | None -> assert false
+      | Some occ -> occ#size
+      
   (* init = prétraitement : enlève tautologies + détecte clauses singletons et fait des assignations en conséquence
      ATTENTION : init ne détecte aucune clause vide (mais peut en créer). Il faudra s'assurer de l'absence de clauses vides par la suite *)
   method init n clauses_init =
@@ -146,9 +152,7 @@ object(self)
       | Some b ->
           begin
             if (b=b0) then (* alors (b0,v0) est vrai dans c *) 
-              begin
-                WL_Nothing (* on ne peut pas déplacer la jumelle mais l'autre littéral est déjà vrai *)
-              end  
+              WL_Nothing (* on n'a rien à faire *)
             else (* (b0,v0) est faux dans c *)
               try
                 c#get_vpos#iter (fun var -> if (var<>v0 && super#get_pari var <> Some false) then raise (WL_found (true,var)) else ());
@@ -161,11 +165,7 @@ object(self)
           end
 
 
-  method get_nb_occ b x = 
-    let occ = if b then wl_pos else wl_neg in
-    match occ#find x with
-      | None -> assert false
-      | Some occ -> occ#size
+
           
 
 
