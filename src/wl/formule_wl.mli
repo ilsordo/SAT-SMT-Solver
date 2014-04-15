@@ -18,10 +18,12 @@ object
   method set_val : bool -> variable -> unit
   method reset_val : variable -> unit
   method get_nb_occ : bool -> int -> int
-  method find_singleton : literal option
+  method find_singleton : (literal*clause) option
   method check_empty_clause : bool
   method eval : bool
   method update_clause : clause -> literal -> wl_update 
+  method get_origin : variable -> clause option
+  method new_clause : clause
 end
 
 

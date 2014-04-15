@@ -1,6 +1,8 @@
 open Clause
 
-exception Clause_vide
+exception Init_empty
+
+exception Clause_vide of (literal*clause)
 
 class clauseset :
 object
@@ -35,6 +37,8 @@ class formule :
 object
   val clauses : clauseset
   val paris : bool vartable
+  val origin : clause option vartable
+  val level : int option vartable
   method init : int -> variable list list -> unit 
   method get_nb_vars : int
   method get_pari : variable -> bool option
@@ -43,11 +47,14 @@ object
   method clause_current_size : clause -> int
   method get_clauses : clauseset
   method get_nb_occ : bool -> int -> int
-  method set_val : bool -> variable -> unit
+  method set_val : bool -> variable -> clause option -> unit
   method reset_val : variable -> unit
-  method find_singleton : literal option
+  method find_singleton : (literal*clause) option
   method check_empty_clause : bool
   method eval : bool
+  method get_origin : variable -> clause option
+  method new_clause : clause
+  method get_level : variable -> int option
 end
 
 

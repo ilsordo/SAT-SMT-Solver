@@ -5,9 +5,14 @@ module ClauseSet = Set.Make(OrderedClause)
 
 type f_repr = ClauseSet.t
 
-exception Found of literal
+exception Found of (literal*clause) (***)
 
-exception Clause_vide
+exception Init_empty (***)
+
+exception Clause_vide of (literal*clause) (***)
+
+
+
 
 class clauseset =
 object
@@ -89,6 +94,8 @@ object (self)
   val x = ref 0 (* compteur de clauses, permet d'associer un identifiant unique à chaque clause *)
   val clauses = new clauseset (* ensemble des clauses de la formule, peut contenir des clauses cachées/visibles *)
   val paris : bool vartable = new vartable 0 (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
+  val origin : clause option vartable = new vartable 0
+  val level : int option = new vartable 0
 
   method private reset n = 
     x := 0;
@@ -114,16 +121,30 @@ object (self)
 
   method get_paris = paris
 
-  method set_val b v = (* parie la valeur b sur la variable v *)
-    match paris#find v with
-      | None -> paris#set v b
+  method set_val b v ?(cl=None) ?(lvl=None) = (****) (* enlever ces méthodes ? *)
+    ()
+    (*
+      match paris#find v with
+      | None -> 
+          begin
+            paris#set v b;
+            origin#set v cl;
+            level#set v lvl
+          end
       | Some _ -> assert false 
+     *)
 
-  method reset_val v = (* annule le pari sur la variable v *)
-    match paris#find v with
+  method reset_val v = (* annule le pari sur la variable v *) (****)
+    ()
+    (*match paris#find v with
       | None -> assert false
-      | Some b -> paris#remove v
-          
+      | Some b -> 
+          begin
+            paris#remove v;
+            origin#remove v;
+            level#remove v
+          end
+    *)      
   (***)
 
   method add_clause c = (* ajoute la clause c, dans les clauses et les occurences *)
@@ -137,24 +158,24 @@ object (self)
 
   (***)
 
-  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *)
+  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *) (*** cette fonction est à modif ? *)
     try 
       clauses#iter (fun c -> 
         match c#singleton with  
           | Singleton x -> 
-              raise (Found x) 
+              raise (Found (x,c)) (***) 
           | _ -> ());
       None
     with 
-      | Found x -> Some x
+      | Found (x,c) -> Some (x,c)
 
   (* indique s'il existe une clause vide *)
   method check_empty_clause = 
     try
-      clauses#iter (fun c -> if c#is_empty then raise Clause_vide);
+      clauses#iter (fun c -> if c#is_empty then raise Init_empty);
       true
     with
-      | Clause_vide -> false
+      | Init_empty -> false
 
   method eval = (* indique si l'ensemble des paris actuels rendent la formule vraie *)
     let aux b v =
@@ -171,6 +192,29 @@ object (self)
             if not b then raise Exit);
         true
     with Exit -> false
+  
+  (*  
+  method set_origin v c = (***)
+    match origin#find v with
+      | None -> origin#set v (Some c)
+      | Some _ -> assert false 
 
+  method reset_origin v = (***)
+    match origin#find v with
+      | None -> assert false
+      | Some c -> origin#remove v
+  *)   
+  
+  method get_origin v = match origin#find v with(***)
+    | None -> assert false
+    | Some c -> c
+      
+  method new_clause = (***)
+    (new clause x []) 
+    
+  method get_level v = match level#find v with(***)
+    | None -> assert false
+    | Some k -> k  
+    
 end
 

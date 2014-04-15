@@ -28,6 +28,8 @@ object (self : 'varset)
   val mutable size = 0 (* nombre de variables visibles *)
     
   method repr = vis
+  
+  method unrepr = hid (***)
 
   method hide x = (* déplace la variable x des variables visibles aux variables cachées (ssi elle est déjà visible) *)
     if (VarSet.mem x vis) then
@@ -70,6 +72,13 @@ object (self : 'varset)
   method iter f = VarSet.iter f vis 
 
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis a
+  
+  method union (vs : 'varset) v = (***)
+    vis <- VarSet.remove v (VarSet.union vis vs#repr);
+    hid <- VarSet.remove v (VarSet.union hid vs#unrepr)
+    
+  method mem_cl x = (***)
+    (VarSet.mem x vis) || (VarSet.mem x hid)
 
 end
       
@@ -151,6 +160,15 @@ object
     vpos#iter (fun v -> Printf.fprintf p "%d " v);
     vneg#iter (fun v -> Printf.fprintf p "-%d " v)
 
+  method union (c : clause) v = (***)
+    vpos#union c#get_vpos v;
+    vneg#union c#get_vneg v
+
+  method mem_cl b v = (***)
+    if b then
+      vpos#mem_cl v
+    else
+      vneg#mem_cl v
 end
 
 

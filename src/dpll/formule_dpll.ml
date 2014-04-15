@@ -31,7 +31,7 @@ object(self)
       | Some set -> set in
     set#add c
       
-  method private register_clause c = (* Met c dans les occurences de ses variables *)
+  method private register_clause c = (* Met c dans les occurences de ses variables *) (*** on n'enregistre pas les vars cachées !!!!!!! *)
     c#get_vpos#iter (self#add_occurence true c);
     c#get_vneg#iter (self#add_occurence false c);
     if c#size = 1 then
@@ -51,7 +51,7 @@ object(self)
     
   method private get_occurences occ v =  (* Accède à l'une des occurences (occ) de la variable v, en supposant que cet ensemble a été initialisé *)
     match occ#find v with
-      | None -> debug#p 1 "AAARGH %d" v;assert false (* cet ensemble aurait du être initialisé *) 
+      | None -> assert false (* cet ensemble aurait du être initialisé *) 
       | Some occurences -> occurences
 
   method private hide_occurences v_ref c =  (* Cache une clause des occurences de toutes les variables qu'elle contient, sauf v_ref *)
@@ -62,38 +62,7 @@ object(self)
     c#get_vneg#iter 
       (fun v -> 
         if v<>v_ref then 
-          (self#get_occurences occurences_neg v)#hide c)    
-
-  method set_val b v = (* on assigne la valeur b à la variable v, on cache les causes qui deviennent vraie, on cache v dans les clauses où elle est fausse *)
-    begin
-      match paris#find v with
-        | None -> paris#set v b
-        | Some _ -> assert false (* Pas de double paris *)
-    end;
-    let (valider,supprimer) =
-      if b then
-        (occurences_pos,occurences_neg)
-      else
-        (occurences_neg,occurences_pos) in
-    (* On supprime (valide) les clauses où apparait le littéral (b,v) (ces clauses sont devenues vraies), elles ne sont plus pointées que par la liste des occurences de v*)
-    (self#get_occurences valider v)#iter 
-      (fun c -> 
-        clauses#hide c ; 
-        self#hide_occurences v c;
-        match c#singleton with
-          | Singleton _ -> singletons#remove c
-          | _ -> ());
-      (* On supprime la négation du littéral des clauses où elle
-         apparait, si on créé un conflit on le dit *)
-    (self#get_occurences supprimer v)#iter 
-      (fun c -> 
-        c#hide_var (not b) v;
-        match c#singleton with
-          | Empty ->
-              singletons#remove c;
-              raise Clause_vide
-          | Singleton _ -> singletons#add c
-          | Bigger -> ())
+          (self#get_occurences occurences_neg v)#hide c)          
 
   method private show_occurences v_ref c = (* on rend visible c dans les occurences_pos/neg des variables qu'elle contient (exceptée v_ref) *)
     c#get_vpos#iter 
@@ -104,43 +73,18 @@ object(self)
       (fun v -> 
         if v<>v_ref then 
           (self#get_occurences occurences_neg v)#show c) 
-      
-  method reset_val v = (* on souhaite annuler le pari sur la variable v, et rendre visible tout ce qui a été caché par set_val ci-dessus *)
-    let b = match paris#find v with
-      | None -> assert false (* on n'annule pas un pari pas fait *)
-      | Some b -> 
-          paris#remove v ; 
-          b in
-    let (invalider,restaurer) =
-      if b then
-        (occurences_pos,occurences_neg)
-      else
-        (occurences_neg,occurences_pos) in
-    (* On rend visible les clauses qui étaient vraies grâce à v *)
-    (self#get_occurences invalider v)#iter 
-      (fun c -> 
-        clauses#show c;
-        self#show_occurences v c;
-        match c#singleton with
-          | Singleton _ -> singletons#add c
-          | _ -> ());
-    (* On rend visible v dans les clauses où elle était cachée car fausse *)
-    (self#get_occurences restaurer v)#iter 
-      (fun c ->
-        c#show_var (not b) v;
-        match c#singleton with
-          | Singleton _ -> singletons#add c
-          | Bigger -> singletons#remove c
-          | _ -> ()) 
 
   (***)
 
+  (* MAINTENANT : 
+      singleton et single_polarité renvoient Some (lit,clause)
+  *)
   method find_singleton =
     match singletons#choose with
       | None -> None
       | Some clause ->
           match clause#singleton with
-            | Singleton lit -> Some lit
+            | Singleton lit -> Some (lit,clause)
             | _ -> assert false (* Un singleton qui n'est pas un singleton! *)
 
   method find_single_polarite = (* on cherche une var sans pari qui n'apparaitrait qu'avec une seule polarité *)
@@ -150,13 +94,83 @@ object(self)
       else 
         if not (paris#mem m) then 
           if (self#get_occurences occurences_pos m)#is_empty then 
-            Some (false,m) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
+            match ((self#get_occurences occurences_neg m)#choose) with
+              | None -> assert false
+              | Some c -> Some ((false,m),c) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
           else 
             if (self#get_occurences occurences_neg m)#is_empty then 
-              Some (true,m)
+              match ((self#get_occurences occurences_pos m)#choose) with
+                | None -> assert false
+                | Some c -> Some ((true,m),c)
             else parcours_polar (m+1) n
         else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars
+
+
+  (**************************************)
+  
+  method set_val b v ?(cl=None) ?(lvl=None) = (***)
+    begin
+      match paris#find v with
+        | None -> 
+            begin
+              paris#set v b;
+              origin#set v cl; (***)
+              level#set v lvl  (***)
+            end
+        | Some _ -> assert false (* Pas de double paris *)
+    end;
+    let (valider,supprimer) =
+      if b then
+        (occurences_pos,occurences_neg)
+      else
+        (occurences_neg,occurences_pos) in
+    (self#get_occurences valider v)#iter 
+      (fun c -> 
+        clauses#hide c ; 
+        self#hide_occurences v c;
+        match c#singleton with (*ça arrive ça ?*)
+          | Singleton _ -> singletons#remove c
+          | _ -> ());
+    (self#get_occurences supprimer v)#iter 
+      (fun c -> 
+        c#hide_var (not b) v;
+        match c#singleton with
+          | Empty ->
+              singletons#remove c;
+              raise (Clause_vide ((not b,v),c)) (***) 
+          | Singleton _ -> singletons#add c
+          | Bigger -> ())
+          
+
+          
+  method reset_val v = (***)
+    let b = match paris#find v with
+      | None -> assert false
+      | Some b -> 
+          paris#remove v ; 
+          origin#remove v; (***)
+          level#remove v; (***)
+          b in
+    let (invalider,restaurer) =
+      if b then
+        (occurences_pos,occurences_neg)
+      else
+        (occurences_neg,occurences_pos) in
+    (self#get_occurences invalider v)#iter 
+      (fun c -> 
+        clauses#show c;
+        self#show_occurences v c;
+        match c#singleton with
+          | Singleton _ -> singletons#add c
+          | _ -> ());
+    (self#get_occurences restaurer v)#iter 
+      (fun c ->
+        c#show_var (not b) v;
+        match c#singleton with
+          | Singleton _ -> singletons#add c
+          | Bigger -> singletons#remove c
+          | _ -> ()) 
 
 
 end

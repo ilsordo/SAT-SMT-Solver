@@ -9,6 +9,7 @@ type literal = (bool * variable)
 class varset :
 object ('a)
   method repr : c_repr
+  method unrepr : c_repr
   method add : variable -> unit
   method hide : variable -> unit
   method intersects : 'a -> bool
@@ -19,6 +20,8 @@ object ('a)
   method singleton : variable classif
   method iter : (variable -> unit) -> unit
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a 
+  method union : 'a -> variable -> unit
+  method mem_cl : variable -> bool
 end
 
 class clause :
@@ -38,6 +41,8 @@ object
   method mem : bool -> variable -> bool
   method singleton : literal classif
   method print : out_channel -> unit -> unit
+  method union : clause -> variable -> unit
+  method mem_cl : bool -> variable -> bool
 end
 
 module OrderedClause : sig
