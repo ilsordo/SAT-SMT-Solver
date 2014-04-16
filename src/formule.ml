@@ -121,22 +121,21 @@ object (self)
 
   method get_paris = paris
 
-  method set_val b v ?(cl=None) ?(lvl=None) = (****) (* enlever ces méthodes ? *)
-    ()
-    (*
-      match paris#find v with
+  method set_val b v ?cl lvl = (****) (* enlever ces méthodes ? *)
+    match paris#find v with
       | None -> 
           begin
             paris#set v b;
-            origin#set v cl;
-            level#set v lvl
+            level#set v lvl;  (***)
+            match cl with
+              | None -> ()
+              | Some c ->
+                  origin#set v c
           end
-      | Some _ -> assert false 
-     *)
+      | Some _ -> assert false (* Pas de double paris *)
 
   method reset_val v = (* annule le pari sur la variable v *) (****)
-    ()
-    (*match paris#find v with
+    match paris#find v with
       | None -> assert false
       | Some b -> 
           begin
@@ -144,7 +143,7 @@ object (self)
             origin#remove v;
             level#remove v
           end
-    *)      
+
   (***)
 
   method add_clause c = (* ajoute la clause c, dans les clauses et les occurences *)

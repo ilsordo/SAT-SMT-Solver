@@ -96,12 +96,12 @@ object(self)
           if (self#get_occurences occurences_pos m)#is_empty then 
             match ((self#get_occurences occurences_neg m)#choose) with
               | None -> assert false
-              | Some c -> Some ((false,m),c) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
+              | Some c -> Some (false,m) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
           else 
             if (self#get_occurences occurences_neg m)#is_empty then 
               match ((self#get_occurences occurences_pos m)#choose) with
                 | None -> assert false
-                | Some c -> Some ((true,m),c)
+                | Some c -> Some (true,m)
             else parcours_polar (m+1) n
         else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars
@@ -109,7 +109,7 @@ object(self)
 
   (**************************************)
   
-  method set_val b v ?(cl=None) lvl = (***) (* cl : clause ayant provoqué l'assignation, lvl : niveau d'assignation *)
+  method set_val b v ?cl lvl = (***) (* cl : clause ayant provoqué l'assignation, lvl : niveau d'assignation *)
     begin
       match paris#find v with
         | None -> 

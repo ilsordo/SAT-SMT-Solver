@@ -21,9 +21,11 @@ let init n cnf =
   let f = new formule_dpll in
   f#init n cnf;
   f#check_empty_clause; (** peut lever Init_empty*)
-  let _ = constraint_propagation f [] in
-  { formule = f; tranches = [] ; level = 0}
-
+  try
+    let _ = constraint_propagation f [] in
+      { formule = f; tranches = [] ; level = 0}
+  with Conflit_prop -> Init_empty
+    
 let decrease_level etat = { etat with level = etat.level-1 }
 
 let increase_level etat = { etat with level = etat.level+1 }
@@ -35,16 +37,13 @@ let get_formule { formule = formule ; _ } = (formule:>formule)
 
 let undo_assignation formule (_,v) = formule#reset_val v
 
-let rec undo ?(deep=1) etat = (* faire sauter deep tranches *)
-  let undo_tranche etat = match etat.tranches with (* annule la dernière tranche et la fait sauter *)
+let rec undo etat =  match etat.tranches with (* annule la dernière tranche et la fait sauter *)
     | [] -> assert false 
     | (pari,propagation)::q ->
         List.iter (undo_assignation etat.formule) propagation;
         undo_assignation etat.formule pari;
-        decrease_level { etat with tranches = q } in
-  if deep > 0 then
-    undo (undo_tranche etat) (deep-1)
-
+        decrease_level { etat with tranches = q } 
+        
   
 (** PARIER*)
 
@@ -61,7 +60,7 @@ let make_bet (b,v) etat ?(cl=false) =
         etat.formule#set_val b v lvl
       with 
         Clause_vide (l,c) -> 
-          raise (Conflit (l,c,{ etat with tranches = ((b,v),[])::etat.tranches } ))
+          raise (Conflit (l,c,{ etat with tranches = ((b,v),[])::etat.tranches } )) (* l=(not b,v) ?*)
     end;
     try 
       let propagation = constraint_propagation etat.formule [] cl lvl in
@@ -106,7 +105,7 @@ let rec constraint_propagation etat acc ?(cl=false) =
           begin
           match formule#find_single_polarite with
               | None -> acc
-              | Some ((b,v),c) ->   
+              | Some (b,v) ->   
                   try
                     debug#p 3 "Propagation : single polarity found : %d %B" v b;
                     debug#p 4 "Propagation : setting %d to %B" v b;
@@ -184,7 +183,7 @@ let conflict_analysis etat c =
                   aux (pari,q)
               end
       | Some (b,v) -> 
-          ((b,v),snd_level c_learnt lvl,c_learnt) (*** RESULT *)
+          ((b,v),snd_level c_learnt lvl,c_learnt) (*** RESULT *) (**enregister la clause*)
     
     
     

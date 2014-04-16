@@ -47,7 +47,7 @@ object
   method clause_current_size : clause -> int
   method get_clauses : clauseset
   method get_nb_occ : bool -> int -> int
-  method set_val : bool -> variable -> clause option -> unit
+  method set_val : bool -> variable -> ?cl:clause -> int -> unit
   method reset_val : variable -> unit
   method find_singleton : (literal*clause) option
   method check_empty_clause : unit

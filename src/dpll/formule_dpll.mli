@@ -11,7 +11,7 @@ object
   method add_clause : clause -> unit
   method get_clauses : clauseset
   method get_nb_occ : bool -> int -> int 
-  method set_val : bool -> variable -> clause option -> int option -> unit
+  method set_val : bool -> variable -> ?clause option -> int option -> unit
   method reset_val : variable -> unit
   method find_singleton : (literal*clause) option
   method find_single_polarite : (literal*clause) option

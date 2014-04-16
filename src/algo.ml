@@ -45,7 +45,7 @@ end
 
 module Bind = functor(Base : Algo_base) ->
 struct
-  let algo next_pari n cnf ?(cl=false) =
+  let algo next_pari ?(cl=false) n cnf =
 
     let rec process etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
       try
@@ -60,11 +60,12 @@ struct
               debug#p 2 "Backtrack : no options left, backtracking";
               Backtrack (Base.undo etat) (* on fait sauter une deuxième tranche ? *)
           | Deep_backtrack ((b,v),k,etat) ->
-              let etat = Base.undo ~deep:(etat.level-k) etat in
-                continue_bet (b,v) etat k 
+              if etat.level = k then 
+                aux (continue_bet (b,v) etat)
+              else
+                Deep_backtrack ((b,v),k-1,Base.undo etat)
       with 
         | Conflit (l,c,etat) ->
-            begin
               debug#p 2 "Impossible bet";
               if (not cl) then
                 begin
@@ -75,9 +76,8 @@ struct
                     Backtrack etat
                 end
               else
-                let ((b,v),k,c_learnt) = conflict_analysis etat c lvl in
+                let ((b,v),k,c_learnt) = conflict_analysis etat c in (*** enlever c_learnt*)
                   Deep_backtrack ((b,v),k,etat)
-            end
                 
     and aux etat =
       debug#p 2 "Seeking next bet";
@@ -98,6 +98,7 @@ struct
       match aux etat with
         | Fine etat -> Solvable ((Base.get_formule etat)#get_paris)
         | Backtrack _ -> Unsolvable
+        
     with Init_empty -> Unsolvable (* Le prétraitement à détecté un conflit *)
 end
 
