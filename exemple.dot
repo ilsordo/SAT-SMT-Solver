@@ -1,12 +1,1 @@
-digraph G {
-        rankdir = LR
-        size ="4,4";
-
-        node[style=filled]
-        
-        conflict [label="Conflict!",shape=ellipse,fillcolor=crimson];
-        
-        node[shape=circle,fillcolor=lightseagreen];
- 
-        2 -> conflict;
- }
+digraph G{rankdir = LR;size ="4,4";node[style=filled,shape=circle];conflict [label="Conflict!",shape=ellipse,fillcolor=crimson];node[shape=circle,fillcolor=lightseagreen];2 -> conflict}
