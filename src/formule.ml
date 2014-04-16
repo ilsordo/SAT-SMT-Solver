@@ -162,20 +162,16 @@ object (self)
     try 
       clauses#iter (fun c -> 
         match c#singleton with  
-          | Singleton x -> 
-              raise (Found (x,c)) (***) 
+          | Singleton l -> 
+              raise (Found (l,c)) (***) 
           | _ -> ());
       None
     with 
-      | Found (x,c) -> Some (x,c)
+      | Found (l,c) -> Some (l,c)
 
   (* indique s'il existe une clause vide *)
   method check_empty_clause = 
-    try
-      clauses#iter (fun c -> if c#is_empty then raise Init_empty);
-      true
-    with
-      | Init_empty -> false
+    clauses#iter (fun c -> if c#is_empty then raise Init_empty);
 
   method eval = (* indique si l'ensemble des paris actuels rendent la formule vraie *)
     let aux b v =
@@ -193,17 +189,7 @@ object (self)
         true
     with Exit -> false
   
-  (*  
-  method set_origin v c = (***)
-    match origin#find v with
-      | None -> origin#set v (Some c)
-      | Some _ -> assert false 
-
-  method reset_origin v = (***)
-    match origin#find v with
-      | None -> assert false
-      | Some c -> origin#remove v
-  *)   
+  
   
   method get_origin v = match origin#find v with(***)
     | None -> assert false

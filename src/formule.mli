@@ -50,7 +50,7 @@ object
   method set_val : bool -> variable -> clause option -> unit
   method reset_val : variable -> unit
   method find_singleton : (literal*clause) option
-  method check_empty_clause : bool
+  method check_empty_clause : unit
   method eval : bool
   method get_origin : variable -> clause option
   method new_clause : clause

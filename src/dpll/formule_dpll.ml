@@ -74,7 +74,7 @@ object(self)
         if v<>v_ref then 
           (self#get_occurences occurences_neg v)#show c) 
 
-  (***)
+  (**************************************)
 
   (* MAINTENANT : 
       singleton et single_polarité renvoient Some (lit,clause)
@@ -85,9 +85,9 @@ object(self)
       | Some clause ->
           match clause#singleton with
             | Singleton lit -> Some (lit,clause)
-            | _ -> assert false (* Un singleton qui n'est pas un singleton! *)
+            | _ -> assert false
 
-  method find_single_polarite = (* on cherche une var sans pari qui n'apparaitrait qu'avec une seule polarité *)
+  method find_single_polarite =
     let rec parcours_polar m n = 
       if m>n then 
         None 
@@ -109,7 +109,7 @@ object(self)
 
   (**************************************)
   
-  method set_val b v ?(cl=None) ?(lvl=None) = (***)
+  method set_val b v ?(cl=None) lvl = (***) (* cl : clause ayant provoqué l'assignation, lvl : niveau d'assignation *)
     begin
       match paris#find v with
         | None -> 

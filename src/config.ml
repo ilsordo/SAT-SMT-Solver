@@ -3,7 +3,7 @@ open Printf
 open Algo
 
 module Dpll = Bind(Algo_dpll)
-module Wl = Bind(Algo_wl)
+(**module Wl = Bind(Algo_wl)*)
 
 type problem = Cnf | Color of int | Tseitin
 
@@ -36,7 +36,7 @@ let parse_args () =
   let parse_algo s =
     let algo = match s with
       | "dpll" -> Dpll.algo
-      | "wl" -> Wl.algo 
+      (**| "wl" -> Wl.algo *)
       | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.algo <- algo;
     config.nom_algo <- s in
