@@ -151,7 +151,16 @@ let snd_level etat c = (* 2ème niveau le plus élevé après lvl*)
     if (etat.formule#get_level v) != lvl then max (etat.formule#get_level v) k else k in
   c#get_vpos#fold_all aux (c#get_vneg#fold_all aux 0)  (* s'assurer < lvl ? *) (*** récupérer les littéraux cachés *)
     
-    
+let get_lit_conflit etat = 
+  match etat.tranches with
+    | [] -> assert false
+    | (pari,propagation)::q ->
+        match propagation with
+          begin
+            | [] -> pari
+            | (b,v)::t -> (b,v)
+          end
+          
 (* conflit déclenché en pariant le littéra de haut de tranche, dans la clause c
    en résultat : (l,k,c) où : 
       - l : littéral de + haut niveau dans la clause apprise
@@ -162,6 +171,8 @@ let conflict_analysis etat c =
   let formule = etat.formule in
   let lvl = etat.level in 
   let c_learnt = formule#new_clause in
+  let (b_conflit,v_conflit) = get_lit_conflit etat in 
+  c_learnt#union c v_conflit; (***)
   let rec aux (pari,propagation) = 
     match max_level etat c_learnt with
       | None ->
@@ -180,9 +191,13 @@ let conflict_analysis etat c =
                   aux (pari,q)
                 end
       | Some (b,v) -> 
-          formule#add_clause c_learnt; (***)
-          ((b,v),snd_level etat c_learnt) (** pas la peine de renvoyer etat ? *)
-    
+          begin
+            formule#add_clause c_learnt; (***)
+            ((b,v),snd_level etat c_learnt) (** pas la peine de renvoyer etat ? *)
+          end in
+  match etat.tranches with
+    | [] -> assert false
+    | t::q -> aux t
     
     
     
