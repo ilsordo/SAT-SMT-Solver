@@ -9,6 +9,7 @@ object
   method size : int
   method mem : clause -> bool
   method add : clause -> unit
+  method add_hid : clause -> unit
   method remove : clause -> unit
   method show : clause -> unit
   method hide : clause -> unit
@@ -37,8 +38,8 @@ class formule :
 object
   val clauses : clauseset
   val paris : bool vartable
-  val origin : clause option vartable
-  val level : int option vartable
+  val origin : clause vartable
+  val level : int vartable
   method init : int -> variable list list -> unit 
   method get_nb_vars : int
   method get_pari : variable -> bool option
@@ -54,7 +55,7 @@ object
   method eval : bool
   method get_origin : variable -> clause option
   method new_clause : clause
-  method get_level : variable -> int option
+  method get_level : variable -> int
 end
 
 

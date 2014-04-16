@@ -3,10 +3,6 @@ open Formule
 open Debug
 open Answer
 
-(* Note : Que mettre dans etat? *)
-
-exception Conflit_prop of (literal*clause*(literal list)) (***) (* permet de construire une tranche quand conflit trouvé dans prop *)
-
 type tranche = literal * literal list 
 
 type 'a result = Fine of 'a | Backtrack of 'a | Deep_backtrack of (literal*int*'a)
@@ -15,6 +11,9 @@ type t = Heuristic.t -> int -> int list list -> Answer.t
 
 let neg : literal -> literal = function (b,v) -> (not b, v)
 
+exception Conflit_prop of (clause*(literal list)) (* permet de construire une tranche quand conflit trouvé dans prop *)
+
+exception Conflit of (clause*etat)
 
 
 
@@ -22,19 +21,17 @@ module type Algo_base =
 sig
   type etat
 
-  exception Conflit of (literal*clause*etat) (***)
-
   val name : string
 
   val init : int -> int list list -> etat
 
-  val undo : ?deep:int -> etat -> etat (* défait k tranches d'assignations *)
+  val undo : etat -> etat (* défait k tranches d'assignations *)
   
-  val make_bet : literal -> etat -> bool -> etat (* fait un pari et propage *)
+  val make_bet : literal -> etat -> etat (* fait un pari et propage *)
   
-  val continue_bet : literal -> etat ->etat (* poursuit la tranche du haut*)
+  val continue_bet : literal -> etat -> etat (* poursuit la tranche du haut*)
   
-  val conflict_analysis : etat -> clause -> (literal*int*clause) (* analyse le conflit trouvé dans la clause *)
+  val conflict_analysis : etat -> clause -> (literal*int) (* analyse le conflit trouvé dans la clause *)
 
   val get_formule : etat -> formule
 end
@@ -50,7 +47,7 @@ struct
     let rec process etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
       try
         debug#p 2 "Setting %d to %B" v b;
-        let etat = Base.make_bet lit etat cl in (* lève une exception si conflit créé *)
+        let etat = Base.make_bet lit etat in (* lève une exception si conflit créé *)
         match aux etat with
           | Fine etat -> Fine etat
           | Backtrack etat when first -> (* ça arrive ça ?*)
@@ -65,9 +62,9 @@ struct
               else
                 Deep_backtrack ((b,v),k-1,Base.undo etat)
       with 
-        | Conflit (l,c,etat) ->
+        | Conflit (c,etat) ->
               debug#p 2 "Impossible bet";
-              if (not cl) then
+              if (not cl) then (* ici : du clause learning ou pas *)
                 begin
                   let etat = Base.undo etat in (* à ce niveau, on fait sauter la tranche, qui contient tous les derniers paris *)(* ici, il faut rétablir le bon level*)
                   if first then
@@ -76,7 +73,7 @@ struct
                     Backtrack etat
                 end
               else
-                let ((b,v),k,c_learnt) = conflict_analysis etat c in (*** enlever c_learnt*)
+                let ((b,v),k) = conflict_analysis etat c in
                   Deep_backtrack ((b,v),k,etat)
                 
     and aux etat =

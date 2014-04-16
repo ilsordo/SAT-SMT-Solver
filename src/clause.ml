@@ -21,6 +21,8 @@ let print_lit_wl p l = (* afficher un littéral *)
     | Some (b,var) -> Printf.sprintf "%d : %B" var b in
   Printf.fprintf p "%s" s
 
+(*******)
+
 class varset =
 object (self : 'varset)
   val mutable vis = VarSet.empty (* variables visibles du varset *)
@@ -71,13 +73,17 @@ object (self : 'varset)
       
   method iter f = VarSet.iter f vis 
 
+  method iter_hid f = VarSet.iter f hid (***)
+  
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis a
+  
+  method fold_all : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f hid (self#fold f vis a) (* fold aussi sur variables cachées *) (***)
   
   method union (vs : 'varset) v = (***)
     vis <- VarSet.remove v (VarSet.union vis vs#repr);
     hid <- VarSet.remove v (VarSet.union hid vs#unrepr)
     
-  method mem_cl x = (***)
+  method mem_all x = (* mem aussi sur vars cachées *) (***)
     (VarSet.mem x vis) || (VarSet.mem x hid)
 
 end
@@ -132,6 +138,16 @@ object
     else
       vneg#mem v
 
+  method mem_all b v = (***)
+    if b then
+      vpos#mem_all v
+    else
+      vneg#mem_all v
+      
+  method union (c : clause) v = (***)
+    vpos#union c#get_vpos v;
+    vneg#union c#get_vneg v
+     
   method singleton = (* renvoie Some (v,b) si la clause est un singleton ne contenant que v avec la positivité b, None sinon *)
     match (vpos#singleton, vneg#singleton) with
       | (Empty, Empty) -> Empty
@@ -160,15 +176,6 @@ object
     vpos#iter (fun v -> Printf.fprintf p "%d " v);
     vneg#iter (fun v -> Printf.fprintf p "-%d " v)
 
-  method union (c : clause) v = (***)
-    vpos#union c#get_vpos v;
-    vneg#union c#get_vneg v
-
-  method mem_cl b v = (***)
-    if b then
-      vpos#mem_cl v
-    else
-      vneg#mem_cl v
 end
 
 

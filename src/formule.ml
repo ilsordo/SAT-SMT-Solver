@@ -36,7 +36,9 @@ object
       end
         
   method add c = vis <- ClauseSet.add c vis (* ajouter la clause c aux clauses visibles *)
-     
+
+  method add_hid c = hid <- ClauseSet.add c hid (* ajouter la clause c aux clauses cachées *) (***)
+       
   method mem c = ClauseSet.mem c vis (* indique si c est une clause visible *)
 
   method is_empty = ClauseSet.is_empty vis (* indique s'il n'y a aucune clause visible *)
@@ -94,8 +96,8 @@ object (self)
   val x = ref 0 (* compteur de clauses, permet d'associer un identifiant unique à chaque clause *)
   val clauses = new clauseset (* ensemble des clauses de la formule, peut contenir des clauses cachées/visibles *)
   val paris : bool vartable = new vartable 0 (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
-  val origin : clause option vartable = new vartable 0
-  val level : int option = new vartable 0
+  val origin : clause vartable = new vartable 0
+  val level : int vartable = new vartable 0
 
   method private reset n = 
     x := 0;
@@ -121,12 +123,12 @@ object (self)
 
   method get_paris = paris
 
-  method set_val b v ?cl lvl = (****) (* enlever ces méthodes ? *)
+  method set_val b v ?cl lvl = (****)
     match paris#find v with
       | None -> 
           begin
             paris#set v b;
-            level#set v lvl;  (***)
+            level#set v lvl;
             match cl with
               | None -> ()
               | Some c ->
@@ -157,19 +159,18 @@ object (self)
 
   (***)
 
-  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *) (*** cette fonction est à modif ? *)
+  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *) (*** METHODE jamais utilisée *)
     try 
       clauses#iter (fun c -> 
         match c#singleton with  
           | Singleton l -> 
-              raise (Found (l,c)) (***) 
+              raise (Found (l,c)) 
           | _ -> ());
       None
     with 
       | Found (l,c) -> Some (l,c)
 
-  (* indique s'il existe une clause vide *)
-  method check_empty_clause = 
+  method check_empty_clause = (* indique s'il existe une clause vide *)
     clauses#iter (fun c -> if c#is_empty then raise Init_empty);
 
   method eval = (* indique si l'ensemble des paris actuels rendent la formule vraie *)
@@ -190,9 +191,10 @@ object (self)
   
   
   
-  method get_origin v = match origin#find v with(***)
+  method get_origin v = origin#find v (***)
+    (*match origin#find v with 
     | None -> assert false
-    | Some c -> c
+    | Some c -> c*)
       
   method new_clause = (***)
     (new clause x []) 

@@ -19,9 +19,11 @@ object ('a)
   method show : variable -> unit
   method singleton : variable classif
   method iter : (variable -> unit) -> unit
+  method iter_hid : (variable -> unit) -> unit (***)
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a 
+  method fold_all : 'a.(variable -> 'a -> 'a) -> 'a -> 'a 
   method union : 'a -> variable -> unit
-  method mem_cl : variable -> bool
+  method mem_all : variable -> bool
 end
 
 class clause :
@@ -42,7 +44,7 @@ object
   method singleton : literal classif
   method print : out_channel -> unit -> unit
   method union : clause -> variable -> unit
-  method mem_cl : bool -> variable -> bool
+  method mem_all : bool -> variable -> bool
 end
 
 module OrderedClause : sig
