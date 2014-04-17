@@ -17,6 +17,7 @@ let name = "Dpll"
   
 (***)
 
+
 let init n cnf = (*** A VERIFIER *)
   let f = new formule_dpll in
   let etat = { formule = f; tranches = [] ; level = 0} in
@@ -74,20 +75,33 @@ let make_bet (b,v) etat =
 
 (* va compléter la dernière tranche
    assigne (b,v) (ce n'est pas un pari) puis propage *)
-let continue_bet ?(init=false) (b,v) etat = 
+let continue_bet (b,v) sgt etat = 
   let lvl=etat.level in
+  if lvl=0 then
+    try
+      etat.formule#set_val b v lvl;
+      let _ = constraint_propagation etat [] in
+        etat
+    with _ -> raise Init_empty (*** message non pertinent *)
+  else    
     match etat.tranches with
       | [] -> assert false 
       | (pari,propagation)::q ->
           begin
             try
-              etat.formule#set_val b v lvl
+              if sgt then
+                etat.formule#set_val b v 0 (** ça ne devrait pas provoquer de clause vide à ce niveau*)
+              else
+                etat.formule#set_val b v lvl
             with 
               Clause_vide c -> 
-                raise (Conflit (c,{ etat with tranches = (pari,(b,v)::propagation) } ))(* not b ?*)
+                if sgt then (* enlever ce if then else si tout marche *)
+                  assert false
+                else
+                  raise (Conflit (c,{ etat with tranches = (pari,(b,v)::propagation) } ))(* not b ?*)
           end;
           try 
-            let continue_propagation = constraint_propagation etat acc in
+            let continue_propagation = constraint_propagation etat ((b,v)::propagation) in (** acc ? et b v ?*)
               { etat with tranches = (pari,continue_propagation) }
           with
             Conflit_prop (c,acc) -> 
@@ -144,13 +158,18 @@ let max_level etat c = (* None si plusieurs littéraux de c sont du niveau (pré
   with Exit -> None
   
   
-let snd_level etat c = (* 2ème niveau le plus élevé après lvl*)
+let backtrack_level etat c = (* 2ème niveau le plus élevé après lvl, lvl-1 si singleton *)
   let formule = etat.formule in
   let lvl = etat.level in
-  let aux v k =
+  let aux k v =
     if (etat.formule#get_level v) != lvl then max (etat.formule#get_level v) k else k in
-  c#get_vpos#fold_all aux (c#get_vneg#fold_all aux 0)  (* s'assurer < lvl ? *) (*** récupérer les littéraux cachés *)
-    
+  let b_level = c#get_vpos#fold_all aux (c#get_vneg#fold_all aux -1) in (* s'assurer < lvl ? *) (*** récupérer les littéraux cachés *)
+    if b_level = -1 then
+      (lvl-1,true) (* singleton *)
+    else
+      (b_level,false)
+      
+      
 let get_lit_conflit etat = 
   match etat.tranches with
     | [] -> assert false
@@ -193,7 +212,8 @@ let conflict_analysis etat c =
       | Some (b,v) -> 
           begin
             formule#add_clause c_learnt; (***)
-            ((b,v),snd_level etat c_learnt) (** pas la peine de renvoyer etat ? *)
+            let (bt_lvl,sgt)=backtrack_level etat c_learnt in (***)
+              ((b,v),bt_level,sgt) (** pas la peine de renvoyer etat ? *)
           end in
   match etat.tranches with
     | [] -> assert false

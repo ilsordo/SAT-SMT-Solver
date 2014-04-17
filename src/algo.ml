@@ -5,7 +5,7 @@ open Answer
 
 type tranche = literal * literal list 
 
-type 'a result = Fine of 'a | Backtrack of 'a | Deep_backtrack of (literal*int*'a)
+type 'a result = Fine of 'a | Backtrack of 'a | Deep_backtrack of (literal*int*bool*'a)
 
 type t = Heuristic.t -> int -> int list list -> Answer.t
 
@@ -29,9 +29,9 @@ sig
   
   val make_bet : literal -> etat -> etat (* fait un pari et propage *)
   
-  val continue_bet : literal -> etat -> etat (* poursuit la tranche du haut*)
+  val continue_bet : literal -> bool -> etat -> etat (* poursuit la tranche du haut*)
   
-  val conflict_analysis : etat -> clause -> (literal*int) (* analyse le conflit trouvé dans la clause *)
+  val conflict_analysis : etat -> clause -> (literal*int*bool) (* analyse le conflit trouvé dans la clause *)
 
   val get_formule : etat -> formule
 end
@@ -56,15 +56,15 @@ struct
           | Backtrack etat -> (* On a déjà fait le pari sur le littéral opposé, il faut remonter *)
               debug#p 2 "Backtrack : no options left, backtracking";
               Backtrack (Base.undo etat) (* on fait sauter une deuxième tranche ? *)
-          | Deep_backtrack ((b,v),k,etat) ->
+          | Deep_backtrack ((b,v),k,sgt,etat) ->
               if etat.level = k then 
-                aux (continue_bet (b,v) etat)
+                aux (continue_bet (b,v) sgt etat)
               else
-                Deep_backtrack ((b,v),k-1,Base.undo etat)
+                Deep_backtrack ((b,v),k-1,sgt,Base.undo etat)
       with 
         | Conflit (c,etat) ->
               debug#p 2 "Impossible bet";
-              (* ICI : on peut faire le clause learning en regardant la dernière tranche *)
+              (** ICI : on peut faire le clause learning en regardant la dernière tranche *)
               if (not cl) then (* ici : du clause learning ou pas *)
                 begin
                   let etat = Base.undo etat in (* à ce niveau, on fait sauter la tranche, qui contient tous les derniers paris *)(* ici, il faut rétablir le bon level*)
@@ -74,8 +74,8 @@ struct
                     Backtrack etat
                 end
               else
-                let ((b,v),k) = conflict_analysis etat c in
-                  Deep_backtrack ((b,v),k,etat)
+                let ((b,v),k,sgt) = conflict_analysis etat c in
+                  Deep_backtrack ((b,v),k,sgt,etat)
                 
     and aux etat =
       debug#p 2 "Seeking next bet";
