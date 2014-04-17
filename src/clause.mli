@@ -19,7 +19,7 @@ object ('a)
   method show : variable -> unit
   method singleton : variable classif
   method iter : (variable -> unit) -> unit
-  method iter_hid : (variable -> unit) -> unit (***)
+  method iter_hid : (variable -> unit) -> unit
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a 
   method fold_all : 'a.(variable -> 'a -> 'a) -> 'a -> 'a 
   method union : 'a -> variable -> unit

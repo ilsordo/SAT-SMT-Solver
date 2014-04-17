@@ -42,7 +42,7 @@ end
 
 module Bind = functor(Base : Algo_base) ->
 struct
-  let algo next_pari ?(cl=false) n cnf =
+  let algo next_pari ?(cl=false) n cnf = (* cl : activation du clause learning *)
 
     let rec process etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
       try
@@ -67,7 +67,7 @@ struct
               (** ICI : on peut faire le clause learning en regardant la dernière tranche *)
               if (not cl) then (* ici : du clause learning ou pas *)
                 begin
-                  let etat = Base.undo etat in (* à ce niveau, on fait sauter la tranche, qui contient tous les derniers paris *)(* ici, il faut rétablir le bon level*)
+                  let etat = Base.undo etat in (*on fait sauter la tranche qui contient tous les derniers paris *)
                   if first then
                     process etat false (neg lit)
                   else
@@ -97,7 +97,7 @@ struct
         | Fine etat -> Solvable ((Base.get_formule etat)#get_paris)
         | Backtrack _ -> Unsolvable
         
-    with Init_empty -> Unsolvable (* Le prétraitement à détecté un conflit *)
+    with Unsat -> Unsolvable (* Le prétraitement à détecté un conflit // ou Clause learning *)
 end
 
 

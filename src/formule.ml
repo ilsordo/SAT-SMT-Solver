@@ -7,9 +7,9 @@ type f_repr = ClauseSet.t
 
 exception Found of (literal*clause) (***)
 
-exception Init_empty (***)
+exception Unsat (***)
 
-exception Clause_vide of (literal*clause) (***)
+exception Empty_clause of clause (***)
 
 
 
@@ -19,7 +19,7 @@ object
   val mutable vis = ClauseSet.empty (* clauses visibles *)
   val mutable hid = ClauseSet.empty (* clauses cachées *)
 
-  method size = ClauseSet.cardinal vis
+  method size = ClauseSet.cardinal vis (** complexité ! *)
   
   method hide c = (* cacher la clause c si elle est déjà visible *)
     if (ClauseSet.mem c vis) then 
@@ -171,7 +171,7 @@ object (self)
       | Found (l,c) -> Some (l,c)
 
   method check_empty_clause = (* indique s'il existe une clause vide *)
-    clauses#iter (fun c -> if c#is_empty then raise Init_empty);
+    clauses#iter (fun c -> if c#is_empty then raise Unsat);
 
   method eval = (* indique si l'ensemble des paris actuels rendent la formule vraie *)
     let aux b v =
