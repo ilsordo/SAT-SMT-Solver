@@ -64,6 +64,7 @@ struct
       with 
         | Conflit (c,etat) ->
               debug#p 2 "Impossible bet";
+              (* ICI : on peut faire le clause learning en regardant la dernière tranche *)
               if (not cl) then (* ici : du clause learning ou pas *)
                 begin
                   let etat = Base.undo etat in (* à ce niveau, on fait sauter la tranche, qui contient tous les derniers paris *)(* ici, il faut rétablir le bon level*)
