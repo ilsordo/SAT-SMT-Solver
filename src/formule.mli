@@ -1,8 +1,8 @@
 open Clause
 
-exception Init_empty
+exception Unsat
 
-exception Clause_vide of (literal*clause)
+exception Empty_clause of clause
 
 class clauseset :
 object

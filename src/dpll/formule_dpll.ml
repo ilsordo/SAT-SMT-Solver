@@ -144,7 +144,7 @@ object(self)
         match c#singleton with
           | Empty ->
               singletons#remove c;
-              raise (Clause_vide ((not b,v),c)) (***) 
+              raise (Empty_clause c) (***) 
           | Singleton _ -> singletons#add c
           | Bigger -> ())
           

@@ -79,7 +79,7 @@ object (self : 'varset)
   
   method fold_all : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f hid (VarSet.fold f hid a) (* fold aussi sur variables cachées *) (***)
   
-  method union (vs : 'varset) v = (***)
+  method union (vs : 'varset) v = (* union avec vs, suivant v*) (***)
     vis <- VarSet.remove v (VarSet.union vis vs#repr);
     hid <- VarSet.remove v (VarSet.union hid vs#unrepr)
     
