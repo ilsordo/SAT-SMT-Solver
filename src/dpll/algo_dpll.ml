@@ -89,7 +89,7 @@ let continue_bet (b,v) sgt etat =
           begin
             try
               if sgt then
-                etat.formule#set_val b v 0 (* peut lever Empty_clause, peut-être que ça ne doit jamais arriver (d'où le assert false plus loin) ? *)
+                etat.formule#set_val b v 0 (* peut lever Empty_clause, peut-être que ça ne doit jamais arriver (car on a fait sauter au préalable la dernière tranche de paris), d'où le assert false plus loin ? *)
               else
                 etat.formule#set_val b v lvl
             with 
@@ -99,8 +99,13 @@ let continue_bet (b,v) sgt etat =
                 else
                   raise (Conflit (c,{ etat with tranches = (pari,(b,v)::propagation)::q } ))
           end;
+          let next_propagation = (***)
+            if sgt then
+              propagation
+            else
+              ((b,v)::propagation) in
           try 
-            let continue_propagation = constraint_propagation etat ((b,v)::propagation) in
+            let continue_propagation = constraint_propagation etat next_propagation in
               { etat with tranches = (pari,continue_propagation)::q }
           with
             Conflit_prop (c,acc) -> 
@@ -199,7 +204,7 @@ let conflict_analysis etat c =
                 assert false (* pari devrait être le seul littéral du niveau courant  dans c_learnt, donc max_level ne devrait pas renvoyer None *)
             | (b,v)::q -> 
                 begin
-                  if (c_learnt#mem_all (not b) v) then (** bien noter le not *)
+                  if (c_learnt#mem_all (not b) v) then (** bien remarquer le not *)
                     begin
                       match formule#get_origin v with
                         | None -> assert false
@@ -210,9 +215,10 @@ let conflict_analysis etat c =
                 end
       | Some (b,v) -> 
           begin
-            formule#add_clause c_learnt;
             let (bt_lvl,sgt)=backtrack_level etat c_learnt in
-              ((b,v),bt_level,sgt)  (** pas de not ici *)
+              if not sgt then (* on n'enregistre pas des singletons *)
+                formule#add_clause c_learnt;
+              ((b,v),bt_lvl,sgt)  (** pas de not ici *)
           end in
   match etat.tranches with
     | [] -> assert false
