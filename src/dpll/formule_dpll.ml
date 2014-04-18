@@ -39,8 +39,8 @@ object(self)
   method private register_clause c = (* Met c dans les occurences de ses variables *) (****)
     c#get_vpos#iter (self#add_occurence c true);
     c#get_vneg#iter (self#add_occurence c false);
-    c#get_vpos#iter_hid (self#add_occurence true c true); (***)
-    c#get_vneg#iter_hid (self#add_occurence true c false); (***)
+    c#get_vpos#iter_hid (self#add_occurence ~hid:true c true);
+    c#get_vneg#iter_hid (self#add_occurence ~hid:true c false);
     if c#size = 1 then
       singletons#add c
 
@@ -119,8 +119,10 @@ object(self)
         | None -> 
             begin
               paris#set v b;
-              origin#set v cl; (***)
-              level#set v lvl  (***)
+              level#set v lvl;
+              match cl with
+                | None -> ()
+                | Some cl -> origin#set v cl
             end
         | Some _ -> assert false (* Pas de double paris *)
     end;

@@ -4,18 +4,18 @@ open Algo
 
 type etat
 
-exception Conflit of (clause*etat)
+type formule
 
 val name : string
 
-val init : int -> int list list -> etat
+val init : int -> int list list -> formule
 
-val undo : etat -> etat
+val undo : formule -> etat -> etat (* défait k tranches d'assignations *)
+  
+val make_bet : formule -> literal -> etat -> etat (* fait un pari et propage *)
+  
+val continue_bet : formule -> literal -> etat -> etat (* poursuit la tranche du haut*)
+  
+val conflict_analysis : formule -> etat -> clause -> (literal*int) (* analyse le conflit trouvé dans la clause *)
 
-val make_bet : literal -> etat -> etat 
-
-val continue_bet : literal -> etat -> etat 
-
-val conflict_analysis : etat -> clause -> (literal*int) 
-
-val get_formule : etat -> formule
+val get_formule : formule -> Formule.formule

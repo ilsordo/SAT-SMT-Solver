@@ -9,7 +9,7 @@ let check n cnf = function
   | Solvable valeurs ->
       let f_verif = new formule in
       f_verif#init n cnf;
-      valeurs#iter (fun v b -> f_verif#set_val b v);
+      valeurs#iter (fun v b -> f_verif#set_val b v 0);
       debug#p 1 "Check : %B\n%!" f_verif#eval
 
 let print_valeur p v = function (* affichage d'une variable (int) et de sa valeur *)
