@@ -161,13 +161,17 @@ let max_level (formule:formule) etat (c:clause) = (* None si plusieurs littérau
   
 let backtrack_level (formule:formule) etat (c:clause) = (* 2ème niveau le plus élevé après lvl, lvl-1 si singleton *)
   let lvl = etat.level in
-  let aux v k =
-    if (formule#get_level v) <> lvl then max (formule#get_level v) k else k in
-  let b_level = c#get_vpos#fold_all aux (c#get_vneg#fold_all aux (-1)) in (* s'assurer < lvl ? *)
-    if b_level = -1 then
-      (0,true) (* singleton *)
+  let aux b v (k,sgt) =
+    let lvl_temp = formule#get_level v in
+    if (lvl_temp > k && lvl_temp <> lvl) then 
+      (lvl_temp,Some (b,v))
+    else 
+      (k,sgt) in
+  let (b_level,sgt) = c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) (-1,None)) in (* s'assurer < lvl ? *)
+    if sgt = None then
+      (0,sgt) (* singleton *)
     else
-      (b_level,false)
+      (b_level,sgt)
       
       
 let get_conflict_lit etat = (* récupère le littéral en haut de tranche, qui est le littéral d'où est parti le conflit *)
@@ -205,12 +209,16 @@ let conflict_analysis (formule:formule) etat c =
                     end;
                   aux (pari,q)
           end
-      | Some (b,v) -> 
+      | Some l -> 
           begin
             let (bt_lvl,sgt) = backtrack_level formule etat c_learnt in
-            if not sgt then (* on n'enregistre pas des singletons *)
-              formule#add_clause c_learnt;
-            ((b,v),bt_lvl,c_learnt)  (** pas de not ici *)
+              begin
+                match sgt with
+                  | Some l0 ->
+                      formule#add_clause c_learnt;
+                  | None -> () (* on n'enregistre pas des singletons *)
+              end;
+              (l,bt_lvl,c_learnt)  (** pas de not ici *)
           end in
   match etat.tranches with
     | [] -> assert false

@@ -3,7 +3,7 @@ open Printf
 open Algo
 
 module Dpll = Bind(Algo_dpll)
-(**module Wl = Bind(Algo_wl)*)
+module Wl = Bind(Algo_wl)
 
 type problem = Cnf | Color of int | Tseitin
 
@@ -15,6 +15,7 @@ type config =
       mutable algo : Algo.t;
       mutable nom_algo : string;
       mutable heuristic : Heuristic.t;
+      mutable clause_learning : bool;
       mutable nom_heuristic : string
     }
 
@@ -26,6 +27,7 @@ let config =
     algo = Dpll.algo;
     nom_algo = "dpll";
     heuristic = Heuristic.(next polarite_rand);
+    clause_learning = false;
     nom_heuristic = "next_rand"
   }
 
@@ -36,7 +38,7 @@ let parse_args () =
   let parse_algo s =
     let algo = match s with
       | "dpll" -> Dpll.algo
-      (**| "wl" -> Wl.algo *)
+      | "wl" -> Wl.algo
       | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.algo <- algo;
     config.nom_algo <- s in
@@ -65,6 +67,7 @@ let parse_args () =
   let speclist = Arg.align [
     ("-algo",     Arg.String parse_algo,                              "[dpll|wl] Algorithm");
     ("-h",        Arg.String parse_heuristic,                         "[next_rand|...] Heuristic");
+    ("-cl",       Arg.Unit (fun () -> config.clause_learning <- true)," Clause learning");
     ("-d",        Arg.Int debug#set_debug_level,                      "k Debug depth k");
     ("-b",        Arg.Int debug#set_blocking_level,                   "k Interaction depth k");
     ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),"k Color solver");

@@ -115,7 +115,6 @@ object (self)
           if (not c_new#is_tauto) then clauses#add c_new) 
       clauses_init
 
-
   (***)
 
   method get_nb_vars = nb_vars 

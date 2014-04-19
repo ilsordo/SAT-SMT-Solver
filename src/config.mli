@@ -8,6 +8,7 @@ type config =
       mutable algo : Algo.t; 
       mutable nom_algo : string;
       mutable heuristic : Heuristic.t;
+      mutable clause_learning : bool;
       mutable nom_heuristic : string
     }
 

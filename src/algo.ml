@@ -7,7 +7,7 @@ type tranche = literal * literal list
 
 type 'a result = Fine of 'a | Backtrack of 'a
 
-type t = Heuristic.t -> ?cl:bool -> int -> int list list -> Answer.t
+type t = Heuristic.t -> bool -> int -> int list list -> Answer.t
 
 let neg : literal -> literal = function (b,v) -> (not b, v)
 
@@ -47,22 +47,21 @@ end
 
 module Bind = functor(Base : Algo_base) ->
 struct
-  let algo next_pari ?(cl=true(***)) n cnf = (* cl : activation du clause learning *)
+  let algo next_pari cl n cnf = (* cl : activation du clause learning *)
 
     let rec process formule etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
       try
         debug#p 2 "Setting %d to %B" v b;
         let etat = Base.make_bet formule lit etat in (* lève une exception si conflit créé *)
-        match aux formule etat with (* lève erreur ici pour cl*)
-          | Fine etat -> Fine etat
-          | Backtrack etat when first -> (* ça arrive ça ?*)
-              debug#p 2 "Backtrack : trying negation";
-              let etat = Base.undo formule etat in
-              process formule etat false (neg lit)
-          | Backtrack etat -> (* On a déjà fait le pari sur le littéral opposé, il faut remonter *)
-              debug#p 2 "Backtrack : no options left, backtracking";
-              Backtrack (Base.undo formule etat) (* on fait sauter une deuxième tranche ? *)
-                           
+          match aux formule etat with (* lève erreur ici pour cl*)
+            | Fine etat -> Fine etat
+            | Backtrack etat when first -> (* ça arrive ça ?*)
+                debug#p 2 "Backtrack : trying negation";
+                let etat = Base.undo formule etat in
+                  process formule etat false (neg lit)
+            | Backtrack etat -> (* On a déjà fait le pari sur le littéral opposé, il faut remonter *)
+                debug#p 2 "Backtrack : no options left, backtracking";
+                Backtrack (Base.undo formule etat) (* on fait sauter une deuxième tranche ? *)                 
       with 
         | Conflit (c,etat) ->
               debug#p 2 "Impossible bet";

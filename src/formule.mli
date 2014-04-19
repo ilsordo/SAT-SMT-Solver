@@ -41,7 +41,7 @@ object
   val paris : bool vartable
   val origin : clause vartable
   val level : int vartable
-  method init : int -> variable list list -> unit 
+  method init : int -> int list list -> unit 
   method get_nb_vars : int
   method get_pari : variable -> bool option
   method get_paris : bool vartable

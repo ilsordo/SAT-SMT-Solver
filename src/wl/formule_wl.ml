@@ -85,7 +85,7 @@ object(self)
       match res with
         | None -> ()
         | Some (b,v) ->
-            paris#set v b;
+            self#set_val b v 0; (***)
             let (valider,supprimer) =
               if b then
                 (occ_pos,occ_neg)
@@ -98,7 +98,12 @@ object(self)
             prepare() in
     prepare() 
 
-
+  method set_wl l1 l2 c = 
+    (self#get_wl l1)#add c; (* l1 sait qu'il surveille c*)
+    (self#get_wl l2)#add c; (* l2 sait qu'il surveille c*)
+    c#set_wl1 l1; (* c sait qu'il est surveillé par l1*)
+    c#set_wl2 l2 (* c sait qu'il est surveillé par l2*)
+              
   (* Initialise les watched literals en en choisissant 2 par clauses. On s'assurera avant qu'aucune clause n'est singleton *)
   method init_wl =
     let pull b v temp = (* Extrait 2 éléments *)
@@ -109,11 +114,7 @@ object(self)
           ignore (c#get_vpos#fold (pull true) (c#get_vneg#fold (pull false) None));
           assert false 
         with
-          | WLs_found (l1,l2) ->
-              (self#get_wl l1)#add c; (* l1 sait qu'il surveille c*)
-              (self#get_wl l2)#add c; (* l2 sait qu'il surveille c*)
-              c#set_wl1 l1; (* c sait qu'il est surveillé par l1*)
-              c#set_wl2 l2) (* c sait qu'il est surveillé par l2*)
+          | WLs_found (l1,l2) -> self#set_wl l1 l2 c)
 
 
 
@@ -167,11 +168,6 @@ object(self)
 
 
           
-
-
-
-
-
 
 end
 
