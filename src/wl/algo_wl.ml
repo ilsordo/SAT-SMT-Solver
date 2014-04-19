@@ -92,7 +92,7 @@ let make_bet (formule:formule) (b,v) etat =
           raise (Conflit (c,{ etat with tranches = ((b,v),[])::etat.tranches } ))
     end;
     try 
-      let propagation = constraint_propagation formule (b,v)(***) etat [] in
+      let propagation = constraint_propagation formule (b,v) etat [] in (*** ICI : une diff avec DPLL *)
         { etat with tranches = ((b,v),propagation)::etat.tranches }
     with
       Conflit_prop (c,acc) -> 
@@ -110,7 +110,7 @@ let continue_bet (formule:formule) (b,v) c_learnt etat =
   if lvl=0 then
     try
       formule#set_val b v lvl; (* peut lever Empty_clause *)
-      let _ = constraint_propagation formule (b,v) (***) etat [] in (* peut lever Conflit_prop *)
+      let _ = constraint_propagation formule (b,v) etat [] in (* peut lever Conflit_prop *)  (*** ICI : une diff avec DPLL *)
         etat
     with _ -> raise Unsat (*** ou mettre Backtrack etat pour avoir recup au même niveau entre cl et non cl*)
   else    
@@ -125,7 +125,7 @@ let continue_bet (formule:formule) (b,v) c_learnt etat =
                 raise (Conflit (c,{ etat with tranches = (pari,(b,v)::propagation)::q } ))
           end;
           try 
-            let continue_propagation = constraint_propagation formule (b,v) (***) etat ((b,v)::propagation) in
+            let continue_propagation = constraint_propagation formule (b,v) etat ((b,v)::propagation) in  (*** ICI : une diff avec DPLL *)
               { etat with tranches = (pari,continue_propagation)::q }
           with
             Conflit_prop (c,acc) -> 
@@ -195,7 +195,7 @@ let conflict_analysis (formule:formule) etat c =
               | [] -> 
                   assert false (* pari devrait être le seul littéral du niveau courant  dans c_learnt, donc max_level ne devrait pas renvoyer None *)
               | (b,v)::q -> 
-                  if (c_learnt#mem_all (not b) v) then (** bien remarquer le not *)
+                  if (c_learnt#mem_all (not b) v) then
                     begin
                       match formule#get_origin v with
                         | None -> assert false
@@ -211,10 +211,10 @@ let conflict_analysis (formule:formule) etat c =
                 match sgt with
                   | Some l0 ->
                       formule#add_clause c_learnt;
-                      formule#set_wl l l0 c_learnt (********)
+                      formule#set_wl l l0 c_learnt  (*** ICI : une diff avec DPLL *)
                   | None -> () (* on n'enregistre pas des singletons *)      
               end;
-            (l,bt_lvl,c_learnt)  (** pas de not ici *)
+            (l,bt_lvl,c_learnt)
           end in
   match etat.tranches with
     | [] -> assert false
