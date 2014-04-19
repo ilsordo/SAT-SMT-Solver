@@ -1,0 +1,17 @@
+Unifier algo_dpll et algo_wl
+
+Mettre en place un check true/false dans le cas UNSAT en appelant Minisat : 
+  Le booléen suivant est vrai ssi ex.cnf est unsat : 
+    (Sys.command "minisat ex.cnf > /dev/null") = 20
+  La difficulté : envoyer ex.cnf (qui le fichier contenant la cnf)
+  
+Implémenter des heuristiques : 
+ - VSIDS
+ - Restart
+ - Vieillissage de clauses
+ 
+Remettre les stats/messages de debug/timers
+  
+Attention à la complexité des méthodes all, vérifier que utiliser de manière non abusive
+
+Revoir la découverte des sgts. Ne pas maintenir la détection des sgts dans WL ?
