@@ -12,8 +12,24 @@ let name = "Dpll"
 
 type formule = formule_dpll
 
+let init n cnf = 
+  let f = new formule_dpll in
+  let etat = { tranches = []; level = 0 } in (* On peut le jeter ou il faut le renvoyer? *)
+    f#init n cnf;
+    f#check_empty_clause; (* peut lever Unsat *)
+    try
+      let _ = constraint_propagation f etat [] in
+        f
+    with Conflit_prop _ -> raise Unsat
+    
+let decrease_level etat = { etat with level = etat.level-1 }
 
-  (** CONSTRAINT_PROPAGATION *)
+let increase_level etat = { etat with level = etat.level+1 }
+
+let get_formule (formule:formule) = (formule:>Formule.formule)
+
+
+(** CONSTRAINT_PROPAGATION *)
 
 (* propage en ajoutant à acc les littéraux assignés
    si cl est vrai, enregistre les clauses ayant provoqué chaque assignation *)
@@ -35,48 +51,13 @@ let rec constraint_propagation (formule:formule) etat acc =
           end
       | Some ((b,v),c) ->
           try
-            debug#p 3 "Propagation : singleton found : %d %B" v b;
+            debug#p 3 "Propagation : singleton found : %d %B in clause %d" v b c#get_id;
             debug#p 4 "Propagation : setting %d to %B" v b;
             formule#set_val b v ~cl:c lvl;
             constraint_propagation formule etat ((b,v)::acc)
           with
             Empty_clause c -> raise (Conflit_prop (c,(b,v)::acc))
 
-
-    
-  
-(***)
-
-
-let init n cnf = 
-  let f = new formule_dpll in
-  let etat = { tranches = []; level = 0 } in (* On peut le jeter ou il faut le renvoyer? *)
-    f#init n cnf;
-    f#check_empty_clause; (* peut lever Unsat *)
-    try
-      let _ = constraint_propagation f etat [] in
-        f
-    with Conflit_prop _ -> raise Unsat
-    
-let decrease_level etat = { etat with level = etat.level-1 }
-
-let increase_level etat = { etat with level = etat.level+1 }
-
-let get_formule (formule:formule) = (formule:>Formule.formule)
-
-
-(** Annuler des assignations *)
-
-let undo_assignation formule (_,v) = formule#reset_val v
-
-let rec undo formule etat =  match etat.tranches with (* annule la dernière tranche et la fait sauter *)
-    | [] -> assert false 
-    | (pari,propagation)::q ->
-        List.iter (undo_assignation formule) propagation;
-        undo_assignation formule pari;
-        decrease_level { etat with tranches = q } 
-        
-  
 (** PARIER*)
 
 (* pari sur (b,v) puis propage
@@ -105,7 +86,7 @@ let make_bet (formule:formule) (b,v) etat =
    assigne (b,v) (ce n'est pas un pari) puis propage
    sgt = true si b v est un singleton *)
 
-let continue_bet (formule:formule) ?(init=false) (b,v) sgt etat = 
+let continue_bet (formule:formule) (b,v) c_learnt etat = 
   let lvl=etat.level in
   if lvl=0 then
     try
@@ -119,30 +100,34 @@ let continue_bet (formule:formule) ?(init=false) (b,v) sgt etat =
       | (pari,propagation)::q ->
           begin
             try
-              if sgt then
-                formule#set_val b v 0 (* peut lever Empty_clause, peut-être que ça ne doit jamais arriver (car on a fait sauter au préalable la dernière tranche de paris), d'où le assert false plus loin ? *)
-              else
-                formule#set_val b v lvl
+              formule#set_val b v ~cl:c_learnt lvl
             with 
               Empty_clause c -> 
-                if sgt then (** enlever ce if then else si tout marche *)
-                  assert false
-                else
-                  raise (Conflit (c,{ etat with tranches = (pari,(b,v)::propagation)::q } ))
+                raise (Conflit (c,{ etat with tranches = (pari,(b,v)::propagation)::q } ))
           end;
-          let next_propagation = (***)
-            if sgt then
-              propagation
-            else
-              ((b,v)::propagation) in
           try 
-            let continue_propagation = constraint_propagation formule etat next_propagation in
+            let continue_propagation = constraint_propagation formule etat ((b,v)::propagation) in
               { etat with tranches = (pari,continue_propagation)::q }
           with
             Conflit_prop (c,acc) -> 
-              raise (Conflit (c,{ etat with tranches = (pari,acc)::etat.tranches } ))
+              raise (Conflit (c,{ etat with tranches = (pari,acc)::q } ))
 
+(** Annuler des assignations *)
 
+let undo_assignation formule (_,v) = formule#reset_val v
+
+let rec undo ?(depth=1) formule etat = 
+  if depth=0 then
+    etat
+  else 
+    match etat.tranches with (* annule la dernière tranche et la fait sauter *)
+      | [] -> assert false 
+      | (pari,propagation)::q ->
+          begin
+            List.iter (undo_assignation formule) propagation;
+            undo_assignation formule pari;
+            undo ~depth:(depth-1) formule (decrease_level { etat with tranches = q })
+          end
 
 (**CONFLICT_ANALYSIS *)
     
@@ -156,22 +141,22 @@ let max_level (formule:formule) etat (c:clause) = (* None si plusieurs littérau
         match res with
           | Some _ ->
               raise Exit 
-          | None ->
+          | None ->      
               Some (b,v)
       else
         res in
   try
-    c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) None)
+    c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) None);
   with Exit -> None
   
   
 let backtrack_level (formule:formule) etat (c:clause) = (* 2ème niveau le plus élevé après lvl, lvl-1 si singleton *)
   let lvl = etat.level in
-  let aux k v =
+  let aux v k =
     if (formule#get_level v) <> lvl then max (formule#get_level v) k else k in
   let b_level = c#get_vpos#fold_all aux (c#get_vneg#fold_all aux (-1)) in (* s'assurer < lvl ? *)
     if b_level = -1 then
-      (lvl-1,true) (* singleton *)
+      (0,true) (* singleton *)
     else
       (b_level,false)
       
@@ -193,8 +178,7 @@ let get_conflict_lit etat = (* récupère le littéral en haut de tranche, qui e
 *)
 let conflict_analysis (formule:formule) etat c =
   let c_learnt = formule#new_clause in
-  let (b_conflit,v_conflit) = get_conflict_lit etat in 
-  c_learnt#union c v_conflit;
+  c_learnt#union c;
   let rec aux (pari,propagation) = 
     match max_level formule etat c_learnt with
       | None ->
@@ -208,7 +192,7 @@ let conflict_analysis (formule:formule) etat c =
                       match formule#get_origin v with
                         | None -> assert false
                         | Some c -> 
-                            c_learnt#union c v
+                            c_learnt#union ?v_union:(Some v) c
                     end;
                   aux (pari,q)
           end
@@ -217,11 +201,11 @@ let conflict_analysis (formule:formule) etat c =
             let (bt_lvl,sgt) = backtrack_level formule etat c_learnt in
             if not sgt then (* on n'enregistre pas des singletons *)
               formule#add_clause c_learnt;
-            ((b,v),bt_lvl,sgt)  (** pas de not ici *)
+            ((b,v),bt_lvl,c_learnt)  (** pas de not ici *)
           end in
   match etat.tranches with
     | [] -> assert false
     | t::q -> aux t
     
-    
-    
+
+

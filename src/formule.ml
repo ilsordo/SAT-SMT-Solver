@@ -49,6 +49,8 @@ object
 
   method iter f = ClauseSet.iter f vis
 
+  method iter_all f = ClauseSet.iter f vis ; ClauseSet.iter f hid (*** trop complexe*)
+  
   method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> ClauseSet.fold f vis a
 
   method remove c = vis <- ClauseSet.remove c vis 

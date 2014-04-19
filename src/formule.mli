@@ -16,6 +16,7 @@ object
   method is_empty : bool
   method reset : unit
   method iter : (clause -> unit) -> unit
+  method iter_all : (clause -> unit) -> unit
   method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a 
   method choose : clause option
 end

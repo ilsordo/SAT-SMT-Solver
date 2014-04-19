@@ -22,7 +22,7 @@ object ('a)
   method iter_hid : (variable -> unit) -> unit
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a 
   method fold_all : 'a.(variable -> 'a -> 'a) -> 'a -> 'a 
-  method union : 'a -> variable -> unit
+  method union : ?v_union:variable -> 'a -> unit
   method mem_all : variable -> bool
 end
 
@@ -43,7 +43,7 @@ object
   method mem : bool -> variable -> bool
   method singleton : literal classif
   method print : out_channel -> unit -> unit
-  method union : clause -> variable -> unit
+  method union : ?v_union:variable -> clause -> unit
   method mem_all : bool -> variable -> bool
 end
 

@@ -98,14 +98,10 @@ object(self)
       else 
         if not (paris#mem m) then 
           if (self#get_occurences occurences_pos m)#is_empty then 
-            match ((self#get_occurences occurences_neg m)#choose) with
-              | None -> assert false
-              | Some c -> Some (false,m) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
+            Some (false,m) (* on peut à ce stade renvoyer une var qui n'apparaitrait dans aucune clause *)
           else 
             if (self#get_occurences occurences_neg m)#is_empty then 
-              match ((self#get_occurences occurences_pos m)#choose) with
-                | None -> assert false
-                | Some c -> Some (true,m)
+              Some (true,m)
             else parcours_polar (m+1) n
         else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars
@@ -131,14 +127,14 @@ object(self)
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
-    (self#get_occurences valider v)#iter 
+    (self#get_occurences valider v)#iter (*** iter_all *)
       (fun c -> 
         clauses#hide c ; 
         self#hide_occurences v c;
         match c#singleton with (*ça arrive ça ?*)
           | Singleton _ -> singletons#remove c
           | _ -> ());
-    (self#get_occurences supprimer v)#iter 
+    (self#get_occurences supprimer v)#iter (*** iter_all*)
       (fun c -> 
         c#hide_var (not b) v;
         match c#singleton with

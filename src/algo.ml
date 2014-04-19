@@ -5,7 +5,7 @@ open Answer
 
 type tranche = literal * literal list 
 
-type 'a result = Fine of 'a | Backtrack of 'a | Deep_backtrack of (literal*int*bool*'a)
+type 'a result = Fine of 'a | Backtrack of 'a
 
 type t = Heuristic.t -> ?cl:bool -> int -> int list list -> Answer.t
 
@@ -30,13 +30,13 @@ sig
 
   val init : int -> int list list -> formule
 
-  val undo : formule -> etat -> etat (* défait k tranches d'assignations *)
+  val undo : ?depth:int -> formule -> etat -> etat (* défait k tranches d'assignations *)
   
   val make_bet : formule -> literal -> etat -> etat (* fait un pari et propage *)
   
-  val continue_bet : formule -> ?init:bool -> literal -> bool -> etat -> etat (* poursuit la tranche du haut*)
+  val continue_bet : formule -> literal -> clause -> etat -> etat (* poursuit la tranche du haut*)
   
-  val conflict_analysis : formule -> etat -> clause -> (literal*int*bool) (* analyse le conflit trouvé dans la clause *)
+  val conflict_analysis : formule -> etat -> clause -> (literal*int*clause) (* analyse le conflit trouvé dans la clause *)
 
   val get_formule : formule -> Formule.formule
 end
@@ -47,25 +47,22 @@ end
 
 module Bind = functor(Base : Algo_base) ->
 struct
-  let algo next_pari ?(cl=false) n cnf = (* cl : activation du clause learning *)
+  let algo next_pari ?(cl=true(***)) n cnf = (* cl : activation du clause learning *)
 
     let rec process formule etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
       try
         debug#p 2 "Setting %d to %B" v b;
         let etat = Base.make_bet formule lit etat in (* lève une exception si conflit créé *)
-        match aux formule etat with
+        match aux formule etat with (* lève erreur ici pour cl*)
           | Fine etat -> Fine etat
           | Backtrack etat when first -> (* ça arrive ça ?*)
               debug#p 2 "Backtrack : trying negation";
+              let etat = Base.undo formule etat in
               process formule etat false (neg lit)
           | Backtrack etat -> (* On a déjà fait le pari sur le littéral opposé, il faut remonter *)
               debug#p 2 "Backtrack : no options left, backtracking";
               Backtrack (Base.undo formule etat) (* on fait sauter une deuxième tranche ? *)
-          | Deep_backtrack ((b,v),k,sgt,etat) ->
-              if etat.level = k then 
-                aux formule (Base.continue_bet formule (b,v) sgt etat)
-              else
-                Deep_backtrack ((b,v),k-1,sgt,Base.undo formule etat)
+                           
       with 
         | Conflit (c,etat) ->
               debug#p 2 "Impossible bet";
@@ -79,8 +76,9 @@ struct
                     Backtrack etat
                 end
               else
-                let ((b,v),k,sgt) = Base.conflict_analysis formule etat c in
-                  Deep_backtrack ((b,v),k,sgt,etat)
+                let ((b,v),k,c_learnt) = Base.conflict_analysis formule etat c in
+                let btck_etat = Base.undo ~depth:(etat.level-k) formule etat in
+                  aux formule (Base.continue_bet formule (b,v) c_learnt btck_etat)
                 
     and aux formule etat =
       debug#p 2 "Seeking next bet";
@@ -102,21 +100,8 @@ struct
       match aux formule etat with
         | Fine etat -> Solvable ((Base.get_formule formule)#get_paris)
         | Backtrack _ -> Unsolvable
-        | Deep_backtrack _ -> Unsolvable (* C'est bien ça?*)
-        
     with Unsat -> Unsolvable (* Le prétraitement à détecté un conflit // ou Clause learning *)
 end
-
-
-
-
-
-
-
-
-
-
-
 
 
 

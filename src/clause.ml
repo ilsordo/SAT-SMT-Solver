@@ -77,11 +77,16 @@ object (self : 'varset)
   
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis a
   
-  method fold_all : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f hid (VarSet.fold f hid a) (* fold aussi sur variables cachées *) (***)
+  method fold_all : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis (VarSet.fold f hid a) (* fold aussi sur variables cachées *) (***)
   
-  method union (vs : 'varset) v = (* union avec vs, suivant v*) (***)
-    vis <- VarSet.remove v (VarSet.union vis vs#repr);
-    hid <- VarSet.remove v (VarSet.union hid vs#unrepr)
+  method union ?v_union (vs : 'varset) = (* union avec vs, suivant v_union*) (***)
+    vis <- VarSet.union vis vs#repr;
+    hid <- VarSet.union hid vs#unrepr;
+    match v_union with
+      | None -> ()
+      | Some v -> 
+          vis <- VarSet.remove v vis;
+          hid <- VarSet.remove v hid
     
   method mem_all x = (* mem aussi sur vars cachées *) (***)
     (VarSet.mem x vis) || (VarSet.mem x hid)
@@ -144,9 +149,9 @@ object
     else
       vneg#mem_all v
       
-  method union (c : clause) v = (***)
-    vpos#union c#get_vpos v;
-    vneg#union c#get_vneg v
+  method union ?v_union (c : clause) = (***)
+    vpos#union ?v_union:v_union c#get_vpos;
+    vneg#union ?v_union:v_union c#get_vneg
      
   method singleton = (* renvoie Some (v,b) si la clause est un singleton ne contenant que v avec la positivité b, None sinon *)
     match (vpos#singleton, vneg#singleton) with
