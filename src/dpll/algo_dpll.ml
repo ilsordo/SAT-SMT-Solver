@@ -12,24 +12,8 @@ let name = "Dpll"
 
 type formule = formule_dpll
 
-let init n cnf = 
-  let f = new formule_dpll in
-  let etat = { tranches = []; level = 0 } in (* On peut le jeter ou il faut le renvoyer? *)
-    f#init n cnf;
-    f#check_empty_clause; (* peut lever Unsat *)
-    try
-      let _ = constraint_propagation f etat [] in
-        f
-    with Conflit_prop _ -> raise Unsat
-    
-let decrease_level etat = { etat with level = etat.level-1 }
 
-let increase_level etat = { etat with level = etat.level+1 }
-
-let get_formule (formule:formule) = (formule:>Formule.formule)
-
-
-(** CONSTRAINT_PROPAGATION *)
+  (** CONSTRAINT_PROPAGATION *)
 
 (* propage en ajoutant à acc les littéraux assignés
    si cl est vrai, enregistre les clauses ayant provoqué chaque assignation *)
@@ -58,6 +42,46 @@ let rec constraint_propagation (formule:formule) etat acc =
           with
             Empty_clause c -> raise (Conflit_prop (c,(b,v)::acc))
 
+
+    
+  
+(***)
+
+
+let init n cnf = 
+  let f = new formule_dpll in
+  let etat = { tranches = []; level = 0 } in (* On peut le jeter ou il faut le renvoyer? *)
+    f#init n cnf;
+    f#check_empty_clause; (* peut lever Unsat *)
+    try
+      let _ = constraint_propagation f etat [] in
+        f
+    with Conflit_prop _ -> raise Unsat
+    
+let decrease_level etat = { etat with level = etat.level-1 }
+
+let increase_level etat = { etat with level = etat.level+1 }
+
+let get_formule (formule:formule) = (formule:>Formule.formule)
+
+
+(** Annuler des assignations *)
+
+let undo_assignation formule (_,v) = formule#reset_val v
+
+let rec undo ?(depth=1) formule etat = 
+  if depth=0 then
+    etat
+  else 
+    match etat.tranches with (* annule la dernière tranche et la fait sauter *)
+      | [] -> assert false 
+      | (pari,propagation)::q ->
+          begin
+            List.iter (undo_assignation formule) propagation;
+            undo_assignation formule pari;
+            undo ~depth:(depth-1) formule (decrease_level { etat with tranches = q })
+          end
+  
 (** PARIER*)
 
 (* pari sur (b,v) puis propage
@@ -112,22 +136,7 @@ let continue_bet (formule:formule) (b,v) c_learnt etat =
             Conflit_prop (c,acc) -> 
               raise (Conflit (c,{ etat with tranches = (pari,acc)::q } ))
 
-(** Annuler des assignations *)
 
-let undo_assignation formule (_,v) = formule#reset_val v
-
-let rec undo ?(depth=1) formule etat = 
-  if depth=0 then
-    etat
-  else 
-    match etat.tranches with (* annule la dernière tranche et la fait sauter *)
-      | [] -> assert false 
-      | (pari,propagation)::q ->
-          begin
-            List.iter (undo_assignation formule) propagation;
-            undo_assignation formule pari;
-            undo ~depth:(depth-1) formule (decrease_level { etat with tranches = q })
-          end
 
 (**CONFLICT_ANALYSIS *)
     
@@ -207,5 +216,5 @@ let conflict_analysis (formule:formule) etat c =
     | [] -> assert false
     | t::q -> aux t
     
-
-
+    
+    
