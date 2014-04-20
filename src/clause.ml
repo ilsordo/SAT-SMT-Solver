@@ -31,7 +31,7 @@ object (self : 'varset)
     
   method repr = vis
   
-  method unrepr = hid (***)
+  method unrepr = hid
 
   method hide x = (* déplace la variable x des variables visibles aux variables cachées (ssi elle est déjà visible) *)
     if (VarSet.mem x vis) then
@@ -73,13 +73,13 @@ object (self : 'varset)
       
   method iter f = VarSet.iter f vis 
 
-  method iter_all f = VarSet.iter f vis ; VarSet.iter f hid (***)
+  method iter_all f = VarSet.iter f vis ; VarSet.iter f hid
   
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis a
   
-  method fold_all : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis (VarSet.fold f hid a) (* fold aussi sur variables cachées *) (***)
+  method fold_all : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis (VarSet.fold f hid a) (* fold aussi sur variables cachées *)
   
-  method union ?v_union (vs : 'varset) = (* union avec vs, suivant v_union*) (***)
+  method union ?v_union (vs : 'varset) = (* union avec vs, enlever v_union de la clause résultante *)
     vis <- VarSet.union vis vs#repr;
     hid <- VarSet.union hid vs#unrepr;
     match v_union with
@@ -88,17 +88,16 @@ object (self : 'varset)
           vis <- VarSet.remove v vis;
           hid <- VarSet.remove v hid
     
-  method mem_all x = (* mem aussi sur vars cachées *) (***)
+  method mem_all x = (* mem aussi sur vars cachées *)
     (VarSet.mem x vis) || (VarSet.mem x hid)
 
 end
       
 (*******)
 
-
 class clause x clause_init =
 object
-  val vpos = new varset (* grâce au varset, on va pouvoir cacher ou non des variables dans vpos. De même dans vneg *)
+  val vpos = new varset (* grâce au varset, on peut cacher ou non des variables dans vpos. De même dans vneg *)
   val vneg = new varset
   val id = incr x; !x
 
@@ -143,13 +142,13 @@ object
     else
       vneg#mem v
 
-  method mem_all b v = (***)
+  method mem_all b v =
     if b then
       vpos#mem_all v
     else
       vneg#mem_all v
       
-  method union ?v_union (c : clause) = (***)
+  method union ?v_union (c : clause) =
     vpos#union ?v_union:v_union c#get_vpos;
     vneg#union ?v_union:v_union c#get_vneg
      
@@ -177,12 +176,11 @@ object
   method print p () = (* fonction d'affichage *)
     Printf.fprintf p "Clause %d : " id;
     if (wl1,wl2) <> (None,None) then
-      Printf.fprintf p "Watched : (%a,%a) " print_lit_wl wl1 print_lit_wl wl2;
+      Printf.fprintf p "(watched : %a %a) " print_lit_wl wl1 print_lit_wl wl2;
     vpos#iter_all (fun v -> Printf.fprintf p "%d " v);
     vneg#iter_all (fun v -> Printf.fprintf p "-%d " v)
 
 end
-
 
 (*******)
 

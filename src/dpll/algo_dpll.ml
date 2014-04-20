@@ -88,7 +88,7 @@ let rec undo ?(depth=1) formule etat =
    pose la dernière tranche, quoiqu'il arrive
 *)
 let make_bet (formule:formule) (b,v) etat =
-  let etat = increase_level etat in (***)
+  let etat = increase_level etat in
   let lvl = etat.level in 
     begin
       try

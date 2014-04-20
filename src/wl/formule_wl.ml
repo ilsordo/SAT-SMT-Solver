@@ -28,31 +28,10 @@ object(self)
   val wl_pos : clauseset vartable = new vartable 0 (* pour chaque variable, les clauses où elle apparait positivement et est surveillée *)
   val wl_neg : clauseset vartable = new vartable 0 (* pour chaque variable, les clauses où elle apparait négativement et est surveillée *)
 
-  method get_wl lit = (* obtenir les clauses où le littéral lit est surveillé *)
-    if (fst lit) then
-      match wl_pos#find (snd lit) with
-        | None -> assert false (* aurait du être initialisé avant *)
-        | Some s -> s
-    else
-      match wl_neg#find (snd lit) with
-        | None -> assert false (* aurait du être initialisé avant *)
-        | Some s -> s
-
-  method clause_current_size c =
-    c#get_vpos#fold 
-      (fun v res -> if self#get_pari v = None then res+1 else res) 
-      (c#get_vneg#fold
-        (fun v res -> if self#get_pari v = None then res+1 else res)  
-        0)
-
-  method get_nb_occ b x = 
-    let occ = if b then wl_pos else wl_neg in
-    match occ#find x with
-      | None -> assert false
-      | Some occ -> occ#size
-      
+  (***)
+  
   (* init = prétraitement : enlève tautologies + détecte clauses singletons et fait des assignations en conséquence
-     ATTENTION : init ne détecte aucune clause vide (mais peut en créer). Il faudra s'assurer de l'absence de clauses vides par la suite *)
+    ATTENTION : init ne détecte aucune clause vide (mais peut en créer). Il faudra s'assurer de l'absence de clauses vides par la suite *)
   method init n clauses_init =
     for i=1 to n do (* on remplie wl_pos et wl_neg par du vide *)
       wl_pos#set i (new clauseset);
@@ -85,7 +64,7 @@ object(self)
       match res with
         | None -> ()
         | Some (b,v) ->
-            self#set_val b v 0; (***)
+            self#set_val b v 0;
             let (valider,supprimer) =
               if b then
                 (occ_pos,occ_neg)
@@ -97,13 +76,7 @@ object(self)
               (fun c -> c#hide_var (not b) v);
             prepare() in
     prepare() 
-
-  method set_wl l1 l2 c = 
-    (self#get_wl l1)#add c; (* l1 sait qu'il surveille c*)
-    (self#get_wl l2)#add c; (* l2 sait qu'il surveille c*)
-    c#set_wl1 l1; (* c sait qu'il est surveillé par l1*)
-    c#set_wl2 l2 (* c sait qu'il est surveillé par l2*)
-              
+    
   (* Initialise les watched literals en en choisissant 2 par clauses. On s'assurera avant qu'aucune clause n'est singleton *)
   method init_wl =
     let pull b v temp = (* Extrait 2 éléments *)
@@ -115,9 +88,38 @@ object(self)
           assert false 
         with
           | WLs_found (l1,l2) -> self#set_wl l1 l2 c)
+    
+  (***)
 
+  method set_wl l1 l2 c = 
+    (self#get_wl l1)#add c; (* l1 sait qu'il surveille c*)
+    (self#get_wl l2)#add c; (* l2 sait qu'il surveille c*)
+    c#set_wl1 l1; (* c sait qu'il est surveillé par l1*)
+    c#set_wl2 l2 (* c sait qu'il est surveillé par l2*)
+        
+  method get_wl lit = (* obtenir les clauses où le littéral lit est surveillé *)
+    if (fst lit) then
+      match wl_pos#find (snd lit) with
+        | None -> assert false (* aurait du être initialisé avant *)
+        | Some s -> s
+    else
+      match wl_neg#find (snd lit) with
+        | None -> assert false (* aurait du être initialisé avant *)
+        | Some s -> s
 
+  method clause_current_size c =
+    c#get_vpos#fold 
+      (fun v res -> if self#get_pari v = None then res+1 else res) 
+      (c#get_vneg#fold
+        (fun v res -> if self#get_pari v = None then res+1 else res)  
+        0)
 
+  method get_nb_occ b x = 
+    let occ = if b then wl_pos else wl_neg in
+    match occ#find x with
+      | None -> assert false
+      | Some occ -> occ#size
+      
   (********* Les 2 méthodes le plus utiles au cours de l'algo WL :   *********)
 
   method watch c l l_former = (* on veut que le littéral l surveille la clause c, et que l_former stop sa surveillance sur c *)

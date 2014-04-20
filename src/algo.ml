@@ -67,10 +67,10 @@ struct
               stats#record "Conflits";
               debug#p 2 ~stops:true  "Impossible bet : clause %d false" c#get_id;
               debug#p 2 "Conflit : %a" c#print ();
-              (** ICI : graphe/dérivation en regardant la dernière tranche // update infos sur nb de conflits/srestart/decision/vieillissement *)
-              if (not cl) then (* ici : du clause learning ou pas *)
+              (** ICI : graphe/dérivation en regardant la dernière tranche // update infos sur nb de conflits/restart/decision/vieillissement *)
+              if (not cl) then (* clause learning ou pas *)
                 begin
-                  let etat = Base.undo formule etat in (*on fait sauter la tranche, qui contient tous les derniers paris *)(* ici, il faut rétablir le bon level*)
+                  let etat = Base.undo formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *)
                   if first then
                     process formule etat false (neg lit)
                   else
@@ -89,12 +89,11 @@ struct
                 
     and aux formule etat =
       debug#p 2 "Seeking next bet";
-      stats#start_timer "Decision (heuristic) (s)";
+      stats#start_timer "Decisions (s)";
       let lit = next_pari (Base.get_formule formule) in
-      stats#stop_timer "Decision (heuristic) (s)";
+      stats#stop_timer "Decisions (s)";
       match lit with
         | None ->
-            debug#p 2 "No bets found";
             Fine etat (* plus rien à parier = c'est gagné *)
         | Some ((b,v) as lit) ->  
             stats#record "Paris";
@@ -107,7 +106,7 @@ struct
       match aux formule etat with
         | Fine etat -> Solvable ((Base.get_formule formule)#get_paris)
         | Backtrack _ -> Unsolvable
-    with Unsat -> Unsolvable (* Le prétraitement à détecté un conflit // ou Clause learning *)
+    with Unsat -> Unsolvable (* Le prétraitement à détecté un conflit, ou Clause learning est unsat*)
 end
 
 

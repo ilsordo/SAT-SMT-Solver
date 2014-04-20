@@ -119,12 +119,17 @@ object (self)
 
   method get_nb_vars = nb_vars 
 
-  method get_pari v = (* indique si v a subi un pari, et si oui lequel *)
-    paris#find v
+  method get_pari v = paris#find v (* indique si v a subi un pari, et si oui lequel *)
 
   method get_paris = paris
-
-  method set_val b v ?cl lvl = (****)
+  
+  method get_origin v = origin#find v
+    
+  method get_level v = match level#find v with
+    | None -> assert false
+    | Some k -> k  
+    
+  method set_val b v ?cl lvl = (* cl : clause ayant provoquée l'assignation, lvl : niveau d'assignation *)
     match paris#find v with
       | None -> 
           begin
@@ -137,7 +142,7 @@ object (self)
           end
       | Some _ -> assert false (* Pas de double paris *)
 
-  method reset_val v = (* annule le pari sur la variable v *) (****)
+  method reset_val v = (* annule le pari sur la variable v *)
     match paris#find v with
       | None -> assert false
       | Some b -> 
@@ -148,19 +153,20 @@ object (self)
           end
 
   (***)
-
-  method add_clause c = (* ajoute la clause c, dans les clauses et les occurences *)
-    clauses#add c
+  
+  method new_clause = new clause x [] 
+    
+  method add_clause c = clauses#add c (* ajoute la clause c, dans les clauses et les occurences *)
 
   method get_clauses = clauses (* renvoie l'ensembles des clauses de la formule *)
 
   method get_nb_occ (_:bool) (_:int) = 0 (* Non implémenté *)
   
-  method clause_current_size (_:clause) = 0
+  method clause_current_size (c:clause)= c#size
 
   (***)
 
-  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *) (*** METHODE jamais utilisée *)
+  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *) (*** METHODE jamais utilisée en l'état *)
     try 
       clauses#iter (fun c -> 
         match c#singleton with  
@@ -174,6 +180,8 @@ object (self)
   method check_empty_clause = (* indique s'il existe une clause vide *)
     clauses#iter (fun c -> if c#is_empty then raise Unsat);
 
+  (***)
+  
   method eval = (* indique si l'ensemble des paris actuels rendent la formule vraie *)
     let aux b v =
       match paris#find v with
@@ -190,19 +198,8 @@ object (self)
         true
     with Exit -> false
   
-  
-  
-  method get_origin v = origin#find v (***)
-    (*match origin#find v with 
-    | None -> assert false
-    | Some c -> c*)
-      
-  method new_clause = (***)
-    (new clause x []) 
-    
-  method get_level v = match level#find v with(***)
-    | None -> debug#p 2 "Err %d"v; assert false
-    | Some k -> k  
+ 
+
     
 end
 

@@ -15,3 +15,5 @@ Remettre les stats/messages de debug/timers
 Attention à la complexité des méthodes all, vérifier que utiliser de manière non abusive
 
 Revoir la découverte des sgts. Ne pas maintenir la détection des sgts dans WL ?
+
+Timer sur propagation

@@ -15,6 +15,8 @@ object(self)
 
   val singletons = new clauseset
 
+  (***)
+  
   method init n clauses_init = (* crée l'ensemble des clauses et remplie occurences_pos/neg à partir de clauses_init (int list list = liste de clauses) *)
     super#init n clauses_init;
     for i=1 to n do
@@ -23,6 +25,19 @@ object(self)
     done;
     clauses#iter self#register_clause
       
+  (***)
+
+  method get_nb_occ b x = 
+    let occ = if b then occurences_pos else occurences_neg in
+    match occ#find x with
+      | None -> assert false
+      | Some occ -> occ#size
+
+  method private get_occurences occ v =  (* Accède à l'une des occurences (occ) de la variable v, en supposant que cet ensemble a été initialisé *)
+    match occ#find v with
+      | None -> assert false (* cet ensemble aurait du être initialisé *) 
+      | Some occurences -> occurences
+              
   method private add_occurence c b v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
     let dest = if b then occurences_pos else occurences_neg in
     let set = match dest#find v with
@@ -32,29 +47,16 @@ object(self)
           set
       | Some set -> set in
     set#add c
-          
-  method private register_clause c = (* Met c dans les occurences de ses variables *) (****)
-    c#get_vpos#iter_all (self#add_occurence c true);
-    c#get_vneg#iter_all (self#add_occurence c false);
-    if c#size = 1 then
-      singletons#add c
 
-  method add_clause c = (* ajoute la clause c, et met à jour occurences_pos/neg en conséquence *)
-    super#add_clause c;
-    self#register_clause c
-      
-  method get_nb_occ b x = 
-    let occ = if b then occurences_pos else occurences_neg in
-    match occ#find x with
-      | None -> assert false
-      | Some occ -> occ#size
-          
-  method clause_current_size c = c#size
-    
-  method private get_occurences occ v =  (* Accède à l'une des occurences (occ) de la variable v, en supposant que cet ensemble a été initialisé *)
-    match occ#find v with
-      | None -> assert false (* cet ensemble aurait du être initialisé *) 
-      | Some occurences -> occurences
+  method private show_occurences v_ref c = (* on rend visible c dans les occurences_pos/neg des variables qu'elle contient (exceptée v_ref) *)
+    c#get_vpos#iter 
+      (fun v -> 
+        if v<>v_ref then 
+          (self#get_occurences occurences_pos v)#show c);
+    c#get_vneg#iter 
+      (fun v -> 
+        if v<>v_ref then 
+          (self#get_occurences occurences_neg v)#show c)       
 
   method private hide_occurences v_ref c =  (* Cache une clause des occurences de toutes les variables qu'elle contient, sauf v_ref *)
     c#get_vpos#iter 
@@ -66,18 +68,21 @@ object(self)
         if v<>v_ref then 
           (self#get_occurences occurences_neg v)#hide c)          
 
-  method private show_occurences v_ref c = (* on rend visible c dans les occurences_pos/neg des variables qu'elle contient (exceptée v_ref) *)
-    c#get_vpos#iter 
-      (fun v -> 
-        if v<>v_ref then 
-          (self#get_occurences occurences_pos v)#show c);
-    c#get_vneg#iter 
-      (fun v -> 
-        if v<>v_ref then 
-          (self#get_occurences occurences_neg v)#show c) 
 
-  (**************************************)
+  (***)
+  
+  method private register_clause c = (* Met c dans les occurences de ses variables *)
+    c#get_vpos#iter_all (self#add_occurence c true);
+    c#get_vneg#iter_all (self#add_occurence c false);
+    if c#size = 1 then
+      singletons#add c
 
+  method add_clause c = (* ajoute la clause c, et met à jour occurences_pos/neg en conséquence *)
+    super#add_clause c;
+    self#register_clause c
+    
+  (***)
+    
   method find_singleton =
     match singletons#choose with
       | None -> None
@@ -101,10 +106,9 @@ object(self)
         else parcours_polar (m+1) n
     in parcours_polar 1 self#get_nb_vars
 
-
-  (**************************************)
+  (***)
   
-  method set_val b v ?cl lvl = (***) (* cl : clause ayant provoqué l'assignation, lvl : niveau d'assignation *)
+  method set_val b v ?cl lvl = (* cl : clause ayant provoqué l'assignation, lvl : niveau d'assignation *)
     begin
       match paris#find v with
         | None -> 
@@ -122,32 +126,30 @@ object(self)
         (occurences_pos,occurences_neg)
       else
         (occurences_neg,occurences_pos) in
-    (self#get_occurences valider v)#iter (*** iter_all *)
+    (self#get_occurences valider v)#iter
       (fun c -> 
         clauses#hide c ; 
         self#hide_occurences v c;
         match c#singleton with (*ça arrive ça ?*)
           | Singleton _ -> singletons#remove c
           | _ -> ());
-    (self#get_occurences supprimer v)#iter (*** iter_all*)
+    (self#get_occurences supprimer v)#iter
       (fun c -> 
         c#hide_var (not b) v;
         match c#singleton with
           | Empty ->
               singletons#remove c;
-              raise (Empty_clause c) (***) 
+              raise (Empty_clause c) 
           | Singleton _ -> singletons#add c
           | Bigger -> ())
           
-
-          
-  method reset_val v = (***)
+  method reset_val v = 
     let b = match paris#find v with
       | None -> assert false
       | Some b -> 
           paris#remove v ; 
-          origin#remove v; (***)
-          level#remove v; (***)
+          origin#remove v; 
+          level#remove v; 
           b in
     let (invalider,restaurer) =
       if b then
