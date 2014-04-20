@@ -51,7 +51,7 @@ struct
 
     let rec process formule etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
       try
-        debug#p 2 "Setting %d to %B" v b;
+        debug#p 2 "Setting %d to %B (level : %d)" v b (etat.level+1);
         let etat = Base.make_bet formule lit etat in (* lève une exception si conflit créé *)
           match aux formule etat with (* lève erreur ici pour cl*)
             | Fine etat -> Fine etat
@@ -64,7 +64,9 @@ struct
                 Backtrack (Base.undo formule etat) (* on fait sauter une deuxième tranche ? *)                 
       with 
         | Conflit (c,etat) ->
-              debug#p 2 "Impossible bet";
+              stats#record "Conflits";
+              debug#p 2 ~stops:true  "Impossible bet : clause %d false" c#get_id;
+              debug#p 2 "Conflit : %a" c#print ();
               (** ICI : graphe/dérivation en regardant la dernière tranche // update infos sur nb de conflits/srestart/decision/vieillissement *)
               if (not cl) then (* ici : du clause learning ou pas *)
                 begin
@@ -75,9 +77,15 @@ struct
                     Backtrack etat
                 end
               else
-                let ((b,v),k,c_learnt) = Base.conflict_analysis formule etat c in
-                let btck_etat = Base.undo ~depth:(etat.level-k) formule etat in
-                  aux formule (Base.continue_bet formule (b,v) c_learnt btck_etat)
+                begin
+                  stats#start_timer "Clause learning (s)";
+                  let ((b,v),k,c_learnt) = Base.conflict_analysis formule etat c in
+                  debug#p 2 "%a" c_learnt#print ();
+                  stats#stop_timer "Clause learning (s)";
+                  debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
+                  let btck_etat = Base.undo ~depth:(etat.level-k) formule etat in
+                    aux formule (Base.continue_bet formule (b,v) c_learnt btck_etat)
+                end
                 
     and aux formule etat =
       debug#p 2 "Seeking next bet";
@@ -90,7 +98,7 @@ struct
             Fine etat (* plus rien à parier = c'est gagné *)
         | Some ((b,v) as lit) ->  
             stats#record "Paris";
-            debug#p 2 "Next bet = %d %B" v b;
+            debug#p 2 "Next bet : %d %B" v b;
             process formule etat true lit in
 
     try

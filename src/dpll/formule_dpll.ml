@@ -23,7 +23,7 @@ object(self)
     done;
     clauses#iter self#register_clause
       
-  method private add_occurence ?(hid=false) c b v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
+  method private add_occurence c b v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
     let dest = if b then occurences_pos else occurences_neg in
     let set = match dest#find v with
       | None -> 
@@ -31,16 +31,11 @@ object(self)
           dest#set v set;
           set
       | Some set -> set in
-    if hid then
-      set#add_hid c (* si hid est vrai, on cache c directement *) (***)
-    else
-      set#add c
+    set#add c
           
   method private register_clause c = (* Met c dans les occurences de ses variables *) (****)
-    c#get_vpos#iter (self#add_occurence c true);
-    c#get_vneg#iter (self#add_occurence c false);
-    c#get_vpos#iter_hid (self#add_occurence ~hid:true c true);
-    c#get_vneg#iter_hid (self#add_occurence ~hid:true c false);
+    c#get_vpos#iter_all (self#add_occurence c true);
+    c#get_vneg#iter_all (self#add_occurence c false);
     if c#size = 1 then
       singletons#add c
 

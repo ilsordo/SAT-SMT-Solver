@@ -7,6 +7,8 @@ type pol = Formule.formule -> Clause.variable -> bool
 
 (*** Heuristiques de choix de polarité ***)
 
+let polarite_next _ _ = true (* prochaine polarite = true *)
+
 let polarite_rand _ _ = Random.bool() (* prochaine polarite = booleen aleatoire *)
 
 let polarite_most_frequent formule x = (* prochaine polarite = celle qui permet de rendre le plus de clauses vraies (via x) *)

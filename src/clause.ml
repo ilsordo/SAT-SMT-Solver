@@ -73,7 +73,7 @@ object (self : 'varset)
       
   method iter f = VarSet.iter f vis 
 
-  method iter_hid f = VarSet.iter f hid (***)
+  method iter_all f = VarSet.iter f vis ; VarSet.iter f hid (***)
   
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis a
   
@@ -174,12 +174,12 @@ object
   method set_wl2 l = (* placer le littéral l sous surveillance, dans wl2 *)
     wl2 <- Some l
 
-  method print p () = (* fonction d'affichage des WL *)
+  method print p () = (* fonction d'affichage *)
     Printf.fprintf p "Clause %d : " id;
     if (wl1,wl2) <> (None,None) then
-      Printf.fprintf p "Watched : (%a,%a)\n" print_lit_wl wl1 print_lit_wl wl2;
-    vpos#iter (fun v -> Printf.fprintf p "%d " v);
-    vneg#iter (fun v -> Printf.fprintf p "-%d " v)
+      Printf.fprintf p "Watched : (%a,%a) " print_lit_wl wl1 print_lit_wl wl2;
+    vpos#iter_all (fun v -> Printf.fprintf p "%d " v);
+    vneg#iter_all (fun v -> Printf.fprintf p "-%d " v)
 
 end
 

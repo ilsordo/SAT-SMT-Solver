@@ -36,7 +36,7 @@ let rec constraint_propagation (formule:formule) etat acc =
       | Some ((b,v),c) ->
           try
             debug#p 3 "Propagation : singleton found : %d %B in clause %d" v b c#get_id;
-            debug#p 4 "Propagation : setting %d to %B" v b;
+            debug#p 4 "Propagation : setting %d to %B (origin : clause %d)" v b c#get_id;
             formule#set_val b v ~cl:c lvl;
             constraint_propagation formule etat ((b,v)::acc)
           with
@@ -117,7 +117,7 @@ let continue_bet (formule:formule) (b,v) c_learnt etat =
       formule#set_val b v lvl; (* peut lever Empty_clause *)
       let _ = constraint_propagation formule etat [] in (* peut lever Conflit_prop *)
         etat
-    with _ -> raise Unsat (*** ou mettre Backtrack etat pour avoir recup au même niveau entre cl et non cl*)
+    with _ -> raise Unsat
   else    
     match etat.tranches with
       | [] -> assert false 
@@ -200,7 +200,7 @@ let conflict_analysis (formule:formule) etat c =
               | [] -> 
                   assert false (* pari devrait être le seul littéral du niveau courant  dans c_learnt, donc max_level ne devrait pas renvoyer None *)
               | (b,v)::q -> 
-                  if (c_learnt#mem_all (not b) v) then (** bien remarquer le not *)
+                  if (c_learnt#mem_all (not b) v) then
                     begin
                       match formule#get_origin v with
                         | None -> assert false
@@ -215,10 +215,10 @@ let conflict_analysis (formule:formule) etat c =
               begin
                 match sgt with
                   | Some l0 ->
-                      formule#add_clause c_learnt;
+                      formule#add_clause c_learnt
                   | None -> () (* on n'enregistre pas des singletons *)
               end;
-              (l,bt_lvl,c_learnt)  (** pas de not ici *)
+              (l,bt_lvl,c_learnt)
           end in
   match etat.tranches with
     | [] -> assert false

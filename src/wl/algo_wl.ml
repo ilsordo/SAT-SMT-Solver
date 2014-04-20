@@ -13,10 +13,10 @@ type formule = formule_wl
 let constraint_propagation (formule : formule) (b,v) etat acc = (* Assigne (b,v) et propage, renvoie la liste de tous les littéraux assignés *)
   let lvl = etat.level in
   let rec assign (b,v) c acc = 
-    debug#p 5 "Propagation : setting %d to %B" v b;
     try
+      debug#p 4 "Propagation : setting %d to %B (origin : clause %d)" v b c#get_id;
       formule#set_val b v ~cl:c lvl; (* on parie b sur var *)
-      debug#p 3 "WL : Moving old wl's on (%B,%d)" (not b) v;
+      debug#p 3 "Propagation : Moving old wl's on (%B,%d)" (not b) v;
       (* on parcourt  les clauses où var est surveillée et est devenue fausse, ie là où il faut surveiller un nouveau littéral *) 
       (formule#get_wl (not b,v))#fold (propagate (b,v)) ((b,v)::acc)
     with
@@ -24,18 +24,16 @@ let constraint_propagation (formule : formule) (b,v) etat acc = (* Assigne (b,v)
   and propagate (b,v) c acc = (* update des jumelles de c (suivant (b,v)), propage, renvoie les assignations effectuées *)
     match (formule#update_clause c (not b,v)) with
       | WL_Conflit ->
-          stats#record "Conflits";
-          debug#p 2 ~stops:true "WL : Conflict : clause %d false " c#get_id;
-          debug#p 4 "Propagation : cannot leave wl %B %d in clause %d" (not b) v c#get_id; 
+          debug#p 3 "Propagation : cannot leave wl %B %d in clause %d" (not b) v c#get_id; 
           raise (Conflit_prop (c,acc))
       | WL_New (b_new, v_new) -> 
-          debug#p 4 "Propagation : watched literal has moved from %B %d to %B %d in clause %d" (not b) v b_new v_new c#get_id ; 
+          debug#p 3 "Propagation : watched literal has moved from %B %d to %B %d in clause %d" (not b) v b_new v_new c#get_id ; 
           acc
       | WL_Assign (b_next,v_next) -> 
-          debug#p 4 "Propagation : setting %d to %B in clause %d is necessary (leaving %B %d impossible)" v_next b_next c#get_id (not b) v; 
+          debug#p 3 "Propagation : setting %d to %B in clause %d is necessary (leaving %B %d impossible)" v_next b_next c#get_id (not b) v; 
           assign (b_next,v_next) c acc
       | WL_Nothing -> 
-          debug#p 4 "Propagation : clause %d satisfied (leaving wl %B %d unnecessary)" c#get_id (not b) v; 
+          debug#p 3 "Propagation : clause %d satisfied (leaving wl %B %d unnecessary)" c#get_id (not b) v; 
           acc
   in
     (formule#get_wl (not b,v))#fold (propagate (b,v)) acc
@@ -112,7 +110,7 @@ let continue_bet (formule:formule) (b,v) c_learnt etat =
       formule#set_val b v lvl; (* peut lever Empty_clause *)
       let _ = constraint_propagation formule (b,v) etat [] in (* peut lever Conflit_prop *)  (*** ICI : une diff avec DPLL *)
         etat
-    with _ -> raise Unsat (*** ou mettre Backtrack etat pour avoir recup au même niveau entre cl et non cl*)
+    with _ -> raise Unsat
   else    
     match etat.tranches with
       | [] -> assert false 

@@ -201,7 +201,7 @@ object (self)
     (new clause x []) 
     
   method get_level v = match level#find v with(***)
-    | None -> assert false
+    | None -> debug#p 2 "Err %d"v; assert false
     | Some k -> k  
     
 end

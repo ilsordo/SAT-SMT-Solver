@@ -26,9 +26,9 @@ let config =
     input = None;
     algo = Dpll.algo;
     nom_algo = "dpll";
-    heuristic = Heuristic.(next polarite_rand);
+    heuristic = Heuristic.(next polarite_next);
     clause_learning = false;
-    nom_heuristic = "next_rand"
+    nom_heuristic = "next_next"
   }
 
 (* Utilise le module Arg pour modifier l'environnement config *)
@@ -45,6 +45,7 @@ let parse_args () =
 
   let parse_heuristic s =
     let heuristic = match s with
+      | "next_next" -> Heuristic.(next polarite_next)
       | "next_rand" -> Heuristic.(next polarite_rand)
       | "next_mf" -> Heuristic.(next polarite_most_frequent)
       | "rand_rand" -> Heuristic.(rand polarite_rand)
