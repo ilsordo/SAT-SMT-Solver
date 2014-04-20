@@ -5,11 +5,11 @@ module ClauseSet = Set.Make(OrderedClause)
 
 type f_repr = ClauseSet.t
 
-exception Found of (literal*clause) (***)
+exception Found of (literal*clause)
 
-exception Unsat (***)
+exception Unsat
 
-exception Empty_clause of clause (***)
+exception Empty_clause of clause
 
 
 
@@ -18,26 +18,33 @@ class clauseset =
 object
   val mutable vis = ClauseSet.empty (* clauses visibles *)
   val mutable hid = ClauseSet.empty (* clauses cachées *)
-
-  method size = ClauseSet.cardinal vis (** complexité ! *)
+  val mutable size = 0 (* nombre de clauses visibles *)
+  
+  method size = size
   
   method hide c = (* cacher la clause c si elle est déjà visible *)
-    if (ClauseSet.mem c vis) then 
+    (** if (ClauseSet.mem c vis) then*) (** on ne met pas cette condition pour gagner en complexité *)
       begin
         vis <- ClauseSet.remove c vis;
-        hid <- ClauseSet.add c hid
+        hid <- ClauseSet.add c hid;
+        size <- size-1
       end 
       
   method show c = (* montrer la clause c, si elle est déjà cachée *)
-    if (ClauseSet.mem c hid) then
+    (** if (ClauseSet.mem c hid) then*) (** on ne met pas cette condition pour gagner en complexité *)
       begin
         hid <- ClauseSet.remove c hid;
-        vis <- ClauseSet.add c vis
+        vis <- ClauseSet.add c vis;
+        size <- size+1
       end
         
-  method add c = vis <- ClauseSet.add c vis (* ajouter la clause c aux clauses visibles *)
-
-  method add_hid c = hid <- ClauseSet.add c hid (* ajouter la clause c aux clauses cachées *) (***)
+  method add c = 
+    (** if not (ClauseSet.mem c vis) then *) (** on ne met pas cette condition pour gagner en complexité *)
+    vis <- ClauseSet.add c vis; (* ajouter la clause c aux clauses visibles *)
+    size <- size+1
+      
+  method add_hid c = (* ajouter la clause c aux clauses cachées *)
+    hid <- ClauseSet.add c hid 
        
   method mem c = ClauseSet.mem c vis (* indique si c est une clause visible *)
 
@@ -46,14 +53,17 @@ object
   method reset = 
     vis <- ClauseSet.empty;
     hid <- ClauseSet.empty
+    (* +reset de size ? *)
 
   method iter f = ClauseSet.iter f vis
 
-  method iter_all f = ClauseSet.iter f vis ; ClauseSet.iter f hid (*** trop complexe*)
+  method iter_all f = ClauseSet.iter f vis ; ClauseSet.iter f hid
   
   method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> ClauseSet.fold f vis a
 
-  method remove c = vis <- ClauseSet.remove c vis 
+  method remove c = 
+    vis <- ClauseSet.remove c vis;
+    size <- size -1
 
   method choose =
     try Some (ClauseSet.choose vis)
@@ -88,9 +98,7 @@ object (self)
 
 end
 
-
 (********)
-
 
 class formule =
 object (self)
@@ -98,8 +106,8 @@ object (self)
   val x = ref 0 (* compteur de clauses, permet d'associer un identifiant unique à chaque clause *)
   val clauses = new clauseset (* ensemble des clauses de la formule, peut contenir des clauses cachées/visibles *)
   val paris : bool vartable = new vartable 0 (* associe à chaque variable un pari : None si aucun, Some b si pari b *)
-  val origin : clause vartable = new vartable 0
-  val level : int vartable = new vartable 0
+  val origin : clause vartable = new vartable 0 (* clause à l'origine de l'assignation de la var. None si var non assignée, ou si pas de clause d'origine *)
+  val level : int vartable = new vartable 0 (* niveau d'assignation (0 : prétraitement, 1 : ...) *)
 
   method private reset n = 
     x := 0;
@@ -144,7 +152,7 @@ object (self)
 
   method reset_val v = (* annule le pari sur la variable v *)
     match paris#find v with
-      | None -> assert false
+      | None -> assert false (* on ne peut pas annuler un pari non fait *)
       | Some b -> 
           begin
             paris#remove v;

@@ -8,13 +8,13 @@ val name : string
 
 val init : int -> int list list -> formule
 
-val undo : ?depth:int -> formule -> etat -> etat (* défait k tranches d'assignations *)
+val undo : ?depth:int -> formule -> etat -> etat
   
-val make_bet : formule -> literal -> etat -> etat (* fait un pari et propage *)
+val make_bet : formule -> literal -> etat -> etat
 
-val continue_bet : formule -> literal -> clause -> etat -> etat (* poursuit la tranche du haut*)
+val continue_bet : formule -> literal -> clause -> etat -> etat
 
-val conflict_analysis : formule -> etat -> clause -> (literal*int*clause) (* analyse le conflit trouvé dans la clause *)
+val conflict_analysis : formule -> etat -> clause -> (literal*int*clause)
 
 val get_formule : formule -> Formule.formule
 

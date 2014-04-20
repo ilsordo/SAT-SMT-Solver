@@ -68,7 +68,6 @@ object(self)
         if v<>v_ref then 
           (self#get_occurences occurences_neg v)#hide c)          
 
-
   (***)
   
   method private register_clause c = (* Met c dans les occurences de ses variables *)

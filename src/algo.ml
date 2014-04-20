@@ -28,9 +28,9 @@ sig
 
   val name : string
 
-  val init : int -> int list list -> formule
+  val init : int -> int list list -> formule (* construction de la formule, prétraitement *)
 
-  val undo : ?depth:int -> formule -> etat -> etat (* défait k tranches d'assignations *)
+  val undo : ?depth:int -> formule -> etat -> etat (* défait depth tranches d'assignations *)
   
   val make_bet : formule -> literal -> etat -> etat (* fait un pari et propage *)
   
@@ -66,7 +66,6 @@ struct
         | Conflit (c,etat) ->
               stats#record "Conflits";
               debug#p 2 ~stops:true  "Impossible bet : clause %d false" c#get_id;
-              debug#p 2 "Conflit : %a" c#print ();
               (** ICI : graphe/dérivation en regardant la dernière tranche // update infos sur nb de conflits/restart/decision/vieillissement *)
               if (not cl) then (* clause learning ou pas *)
                 begin
@@ -80,7 +79,7 @@ struct
                 begin
                   stats#start_timer "Clause learning (s)";
                   let ((b,v),k,c_learnt) = Base.conflict_analysis formule etat c in
-                  debug#p 2 "%a" c_learnt#print ();
+                  debug#p 2 "Learnt %a" c_learnt#print ();
                   stats#stop_timer "Clause learning (s)";
                   debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
                   let btck_etat = Base.undo ~depth:(etat.level-k) formule etat in

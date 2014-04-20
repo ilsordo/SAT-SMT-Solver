@@ -136,7 +136,6 @@ object(self)
         (self#get_wl l_former)#remove c (* l_former sait qu'il ne surveille plus c *)
       end
 
-
   method update_clause c wl = (* on doit quitter la surveillance du littéral wl dans la clause c car un pari vient de le rendre faux // on présuppose wl faux dans c *)
     let (wl1,wl2) = c#get_wl in (* on récupère les deux littéraux actuellement surveillés dans c *)
     let (b0,v0) = if wl=wl1 then wl2 else wl1 in (* le littéral qu'on veut conserver *)
@@ -172,7 +171,6 @@ object(self)
           
 
 end
-
 
 
 

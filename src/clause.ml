@@ -34,24 +34,24 @@ object (self : 'varset)
   method unrepr = hid
 
   method hide x = (* déplace la variable x des variables visibles aux variables cachées (ssi elle est déjà visible) *)
-    if (VarSet.mem x vis) then
+    (**if (VarSet.mem x vis) then*) (** on peut éviter ce test et les suivants *)
       begin
         vis <- VarSet.remove x vis;
         hid <- VarSet.add x hid;
-        size <- size - 1;
+        size <- size - 1
       end
       
   method show x = (* déplace la variable x des variables cachées aux variables visibles (ssi elle est déjà cachée) *) 
-    if (VarSet.mem x hid) then
+   (**if (VarSet.mem x hid) then*)
         hid <- VarSet.remove x hid;
-    if not (VarSet.mem x vis) then
+   (**if not (VarSet.mem x vis) then*)
       begin
         vis <- VarSet.add x vis;
         size <- size + 1
       end
         
   method add x = 
-    if not (VarSet.mem x vis) then
+    (**if not (VarSet.mem x vis) then*)
       begin
         vis <- VarSet.add x vis; (* ajoute x aux vars visibles *)
         size <- size + 1
@@ -59,7 +59,7 @@ object (self : 'varset)
 
   method mem x = VarSet.mem x vis  (* indique si la variable x est dans vis  *)
 
-  method intersects (v : 'varset) = not (VarSet.is_empty (VarSet.inter vis v#repr)) (* indique si l'intersection entre vis et v est vide ou non *)
+  method intersects (v : 'varset) = not (VarSet.is_empty (VarSet.inter vis v#repr)) (* indique si l'intersection entre vis et v est vide *)
 
   method is_empty = VarSet.is_empty vis
 
@@ -148,7 +148,7 @@ object
     else
       vneg#mem_all v
       
-  method union ?v_union (c : clause) =
+  method union ?v_union (c : clause) = (* union avec la clause, enlever v_union *)
     vpos#union ?v_union:v_union c#get_vpos;
     vneg#union ?v_union:v_union c#get_vneg
      
@@ -172,6 +172,8 @@ object
 
   method set_wl2 l = (* placer le littéral l sous surveillance, dans wl2 *)
     wl2 <- Some l
+    
+  (***)
 
   method print p () = (* fonction d'affichage *)
     Printf.fprintf p "Clause %d : " id;

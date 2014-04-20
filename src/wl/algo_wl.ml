@@ -10,7 +10,7 @@ type formule = formule_wl
 
 (** CONSTRAINT_PROPAGATION *)
        
-let constraint_propagation (formule : formule) (b,v) etat acc = (* Assigne (b,v) et propage, renvoie la liste de tous les littéraux assignés *)
+let constraint_propagation (formule : formule) (b,v) etat acc = (* propage en partant de (b,v), renvoie la liste de tous les littéraux assignés *)
   let lvl = etat.level in
   let rec assign (b,v) c acc = 
     try

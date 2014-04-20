@@ -12,8 +12,7 @@ let name = "Dpll"
 
 type formule = formule_dpll
 
-
-  (** CONSTRAINT_PROPAGATION *)
+(** CONSTRAINT_PROPAGATION *)
 
 (* propage en ajoutant à acc les littéraux assignés
    si cl est vrai, enregistre les clauses ayant provoqué chaque assignation *)
@@ -22,7 +21,7 @@ let rec constraint_propagation (formule:formule) etat acc =
     match formule#find_singleton with 
       | None ->
           begin
-          match formule#find_single_polarite with
+            match formule#find_single_polarite with
               | None -> acc
               | Some (b,v) ->   
                   try
@@ -42,19 +41,15 @@ let rec constraint_propagation (formule:formule) etat acc =
           with
             Empty_clause c -> raise (Conflit_prop (c,(b,v)::acc))
 
-
-    
-  
 (***)
-
 
 let init n cnf = 
   let f = new formule_dpll in
-  let etat = { tranches = []; level = 0 } in (* On peut le jeter ou il faut le renvoyer? *)
+  let etat = { tranches = []; level = 0 } in
     f#init n cnf;
     f#check_empty_clause; (* peut lever Unsat *)
     try
-      let _ = constraint_propagation f etat [] in
+      let _ = constraint_propagation f etat [] in (* propagation initiale *)
         f
     with Conflit_prop _ -> raise Unsat
     
@@ -64,12 +59,11 @@ let increase_level etat = { etat with level = etat.level+1 }
 
 let get_formule (formule:formule) = (formule:>Formule.formule)
 
-
 (** Annuler des assignations *)
 
 let undo_assignation formule (_,v) = formule#reset_val v
 
-let rec undo ?(depth=1) formule etat = 
+let rec undo ?(depth=1) formule etat = (* depth : nb de tranches à faire sauter *)
   if depth=0 then
     etat
   else 
@@ -109,7 +103,6 @@ let make_bet (formule:formule) (b,v) etat =
 (* va compléter la dernière tranche
    assigne (b,v) (ce n'est pas un pari) puis propage
    sgt = true si b v est un singleton *)
-
 let continue_bet (formule:formule) (b,v) c_learnt etat = 
   let lvl=etat.level in
   if lvl=0 then
@@ -136,8 +129,6 @@ let continue_bet (formule:formule) (b,v) c_learnt etat =
             Conflit_prop (c,acc) -> 
               raise (Conflit (c,{ etat with tranches = (pari,acc)::q } ))
 
-
-
 (**CONFLICT_ANALYSIS *)
     
 let max_level (formule:formule) etat (c:clause) = (* None si plusieurs littéraux de c sont du niveau (présupposé max) lvl, Some (b,v) si un seul *)
@@ -158,7 +149,6 @@ let max_level (formule:formule) etat (c:clause) = (* None si plusieurs littérau
     c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) None);
   with Exit -> None
   
-  
 let backtrack_level (formule:formule) etat (c:clause) = (* 2ème niveau le plus élevé après lvl, lvl-1 si singleton *)
   let lvl = etat.level in
   let aux b v (k,sgt) =
@@ -171,8 +161,7 @@ let backtrack_level (formule:formule) etat (c:clause) = (* 2ème niveau le plus 
     if sgt = None then
       (0,sgt) (* singleton *)
     else
-      (b_level,sgt)
-      
+      (b_level,sgt)    
       
 let get_conflict_lit etat = (* récupère le littéral en haut de tranche, qui est le littéral d'où est parti le conflit *)
   match etat.tranches with
