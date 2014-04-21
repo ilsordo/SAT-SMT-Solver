@@ -110,7 +110,7 @@ struct
               undo ~depth:(depth-1) formule (decrease_level { etat with tranches = q })
             end
 
-(** Conflict analysis *)
+  (** Conflict analysis *)
 
   let max_level (formule:formule) etat (c:clause) = (* None si plusieurs littéraux de c sont du niveau (présupposé max) lvl, Some (b,v) si un seul *)
     let lvl = etat.level in
