@@ -44,7 +44,7 @@ object (self : 'varset)
   method show x = (* déplace la variable x des variables cachées aux variables visibles (ssi elle est déjà cachée) *) 
    (**if (VarSet.mem x hid) then*)
         hid <- VarSet.remove x hid;
-   (**if not (VarSet.mem x vis) then*)
+   if not (VarSet.mem x vis) then(** pourquoi avoir besoin de cette condition ?*)
       begin
         vis <- VarSet.add x vis;
         size <- size + 1
