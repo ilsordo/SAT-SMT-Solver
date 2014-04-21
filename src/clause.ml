@@ -34,7 +34,7 @@ object (self : 'varset)
   method unrepr = hid
 
   method hide x = (* déplace la variable x des variables visibles aux variables cachées (ssi elle est déjà visible) *)
-    (**if (VarSet.mem x vis) then*) (** on peut éviter ce test et les suivants *)
+    if (VarSet.mem x vis) then (** on peut éviter ce test et les suivants ? *)
       begin
         vis <- VarSet.remove x vis;
         hid <- VarSet.add x hid;
@@ -42,16 +42,16 @@ object (self : 'varset)
       end
       
   method show x = (* déplace la variable x des variables cachées aux variables visibles (ssi elle est déjà cachée) *) 
-   (**if (VarSet.mem x hid) then*)
-        hid <- VarSet.remove x hid;
-   if not (VarSet.mem x vis) then(** pourquoi avoir besoin de cette condition ?*)
-      begin
-        vis <- VarSet.add x vis;
-        size <- size + 1
-      end
+   if (VarSet.mem x hid) then 
+     hid <- VarSet.remove x hid;
+   if not (VarSet.mem x vis) then
+     begin
+       vis <- VarSet.add x vis;
+       size <- size + 1
+     end
         
   method add x = 
-    (**if not (VarSet.mem x vis) then*)
+    if not (VarSet.mem x vis) then
       begin
         vis <- VarSet.add x vis; (* ajoute x aux vars visibles *)
         size <- size + 1
