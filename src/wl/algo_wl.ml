@@ -9,6 +9,7 @@ let name = "Wl"
 type formule = formule_wl
        
 let constraint_propagation (formule : formule) (b,v) etat acc = (* propage en partant de (b,v), renvoie la liste de tous les littéraux assignés *)
+  stats#start_timer "Prop (s)";
   let lvl = etat.level in
   let rec assign (b,v) c acc = 
     try
