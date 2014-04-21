@@ -97,19 +97,25 @@ struct
 
   let undo_assignation formule (_,v) = formule#reset_val v
 
-  let rec undo ?(depth=1) (formule:formule) etat = 
-    if depth=0 then
-      etat
-    else 
-      match etat.tranches with (* annule la dernière tranche et la fait sauter *)
-        | [] -> assert false 
-        | (pari,propagation)::q ->
-            begin
-              List.iter (undo_assignation formule) propagation;
-              undo_assignation formule pari;
-              undo ~depth:(depth-1) formule (decrease_level { etat with tranches = q })
-            end
-
+  let undo ?(depth=1) (formule:formule) etat = (** A VERIFIER *)
+    stats#start_timer "Bactrack (s)"; (***)
+    let rec aux depth etat =
+      if depth=0 then
+        etat
+      else 
+        match etat.tranches with (* annule la dernière tranche et la fait sauter *)
+          | [] -> assert false 
+          | (pari,propagation)::q ->
+              begin
+                List.iter (undo_assignation formule) propagation;
+                undo_assignation formule pari;
+                aux (depth-1) (decrease_level { etat with tranches = q })
+              end
+    in
+      let res = aux depth etat in
+      stats#stop_timer "Bactrack (s)"; (***)
+      res
+      
   (** Conflict analysis *)
 
   let max_level (formule:formule) etat (c:clause) = (* None si plusieurs littéraux de c sont du niveau (présupposé max) lvl, Some (b,v) si un seul *)
