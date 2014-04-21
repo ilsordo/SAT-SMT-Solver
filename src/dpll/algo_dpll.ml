@@ -4,10 +4,6 @@ open Debug
 open Formule_dpll
 open Formule
 
-(** la règle pour le level c'est : 
-      seul undo peut le diminuer
-      seul make_bet peut l'augmenter *)
-
 let name = "Dpll"
 
 type formule = formule_dpll
