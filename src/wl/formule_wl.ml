@@ -157,8 +157,8 @@ object(self)
               WL_Nothing (* on n'a rien à faire *)
             else (* (b0,v0) est faux dans c *)
               try
-                c#get_vpos#iter (fun var -> if (var<>v0 && super#get_pari var <> Some false) then raise (WL_found (true,var)) else ());
-                c#get_vneg#iter (fun var -> if (var<>v0 && super#get_pari var <> Some true) then raise (WL_found (false,var)) else ());
+                c#get_vpos#iter (fun var -> if (super#get_pari var <> Some false) then raise (WL_found (true,var)) else ());
+                c#get_vneg#iter (fun var -> if (super#get_pari var <> Some true) then raise (WL_found (false,var)) else ());
                 WL_Conflit (* on ne peut pas déplacer la jumelle et l'autre littéral est faux*)
               with
                 | WL_found l -> 
