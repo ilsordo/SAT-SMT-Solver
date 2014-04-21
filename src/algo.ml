@@ -14,6 +14,7 @@ let neg : literal -> literal = function (b,v) -> (not b, v)
 type etat = {
   tranches : tranche list;
   level : int
+  (*vsids : int vartable*) (***) 
 }
 
 exception Conflit_prop of (clause*(literal list)) (* permet de construire une tranche quand conflit trouvé dans prop *)
