@@ -123,18 +123,13 @@ object(self)
   (********* Les 2 méthodes le plus utiles au cours de l'algo WL :   *********)
 
   method watch c l l_former = (* on veut que le littéral l surveille la clause c, et que l_former stop sa surveillance sur c *)
+    (self#get_wl l_former)#remove c; (* l_former sait qu'il ne surveille plus c *)
     (self#get_wl l)#add c; (* l sait qu'il surveille c *)
     let (wl1,wl2) = c#get_wl in
     if l_former = wl1 then
-      begin
-        c#set_wl1 l; (* c sait qu'il est surveillé par l *)
-        (self#get_wl l_former)#remove c (* l_former sait qu'il ne surveille plus c *)
-      end
+        c#set_wl1 l (* c sait qu'il est surveillé par l *)
     else
-      begin
-        c#set_wl2 l; (* c sait qu'il est surveillé par l *)
-        (self#get_wl l_former)#remove c (* l_former sait qu'il ne surveille plus c *)
-      end
+        c#set_wl2 l (* c sait qu'il est surveillé par l *)
 
   method update_clause c wl = (* on doit quitter la surveillance du littéral wl dans la clause c car un pari vient de le rendre faux // on présuppose wl faux dans c *)
     let (wl1,wl2) = c#get_wl in (* on récupère les deux littéraux actuellement surveillés dans c *)

@@ -17,3 +17,5 @@ Attention à la complexité des méthodes all, vérifier que utiliser de manièr
 Revoir la découverte des sgts. Ne pas maintenir la détection des sgts dans WL ?
 
 Timer sur propagation
+
+Ajouter une heuristique de décision qui laisse l'utilisateur choisir le littéral sur lequel parier

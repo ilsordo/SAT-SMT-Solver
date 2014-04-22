@@ -57,6 +57,7 @@ object
   method get_origin : variable -> clause option
   method new_clause : clause
   method get_level : variable -> int
+  method watch : clause -> literal -> literal -> unit (***)
 end
 
 
