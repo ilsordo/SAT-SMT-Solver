@@ -1,1 +1,42 @@
-digraph G{rankdir = LR;size ="4,4";node[style=filled,shape=circle];conflict [label="Conflict!",shape=ellipse,fillcolor=crimson];node[shape=circle,fillcolor=lightseagreen];2 -> conflict}
+digraph G{
+rankdir = LR;
+node[style=filled,shape=circle];
+conflict [label="Conflict!",shape=ellipse,fillcolor=crimson];
+-8 -> conflict
+-12 -> conflict
+-18 -> conflict
+-18 [fillcolor=lightseagreen]
+1 -> -18
+9 -> -18
+9 [fillcolor=lightseagreen]
+17 -> 9
+19 -> 9
+-12 [fillcolor=lightseagreen]
+1 -> -12
+17 -> -12
+17 [fillcolor=lightseagreen]
+-13 -> 17
+10 -> 17
+-13 [fillcolor=lightseagreen]
+-11 -> -13
+1 -> -13
+-16 [fillcolor=lightseagreen]
+-8 -> -16
+20 -> -16
+-8 [fillcolor=lightseagreen]
+1 -> -8
+10 -> -8
+10 [fillcolor=lightseagreen]
+7 -> 10
+20 -> 10
+7 [fillcolor=lightseagreen]
+1 -> 7
+20 -> 7
+1 [fillcolor=lightseagreen]
+-11 -> 1
+20 -> 1
+-11 [fillcolor=lightseagreen]
+19 -> -11
+20 -> -11
+}
+

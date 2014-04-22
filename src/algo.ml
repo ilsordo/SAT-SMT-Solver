@@ -2,6 +2,7 @@ open Clause
 open Formule
 open Debug
 open Answer
+open Interaction
 
 type tranche = literal * literal list 
 
@@ -137,7 +138,7 @@ struct
     with Exit -> None
   
   
-  let backtrack_level (formule:formule) etat (c:clause) = (* 2ème niveau le plus élevé après lvl, lvl-1 si singleton *)
+  let backtrack_level (formule:formule) etat (c:clause) = (* 2ème niveau le plus élevé après lvl, 0 si singleton *)
     let lvl = etat.level in
     let aux b v (k,sgt) =
       let lvl_temp = formule#get_level v in
@@ -224,7 +225,8 @@ struct
       with 
         | Conflit (c,etat) ->
             stats#record "Conflits";
-            debug#p 2 ~stops:true  "Impossible bet : clause %d false" c#get_id;
+            debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
+            Printf.fprintf (open_out "example.dot") "%a%!" (print_graph (formule:>Formule.formule) (List.hd etat.tranches) etat.level) c;
             (** ICI : graphe/dérivation en regardant la dernière tranche // update infos sur nb de conflits/restart/decision/vieillissement *)
             if (not cl) then (* clause learning ou pas *)
               begin
