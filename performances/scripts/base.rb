@@ -233,7 +233,7 @@ end
 
 class ProblemColor < Problem
   def initialize(vertices = 10, p = 0.5, k = 3)
-    super({:type => :color, :vertices => vertices, :p => p, :k => k}, '-color #{vertices} #{p}', "-color #{k}")  
+    super({:type => :color, :vertices => vertices, :p => p, :k => k}, '-color #{vertices} #{p}', '-color #{k}')  
   end
   
   def dicho(algo, heuristic) # Ne fonctionne pas :(
@@ -310,6 +310,3 @@ def select_data(constraints,min_count = 0, &block)
     end
   }
 end
-
-  
-
