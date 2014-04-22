@@ -63,7 +63,7 @@ object
 
   method remove c = 
     vis <- ClauseSet.remove c vis;
-    size <- size -1
+    size <- size -1 (** ici un test pour s'assurer qu'on remove bien ?*)
 
   method choose =
     try Some (ClauseSet.choose vis)
@@ -206,6 +206,7 @@ object (self)
         true
     with Exit -> false
   
+    method watch (_:clause) (_:literal) (_:literal) = () (***)
  
 
     
