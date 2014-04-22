@@ -306,7 +306,7 @@ struct
       if (!nb_conf mod 1000 = 0) then (*********)
         begin
           stats#start_timer "Shaking (s)";(*********)        
-          shake_up formule; (*********)
+          (*shake_up formule;*) (*********)
           stats#stop_timer "Shaking (s)"(*********)
         end;
       match lit with
