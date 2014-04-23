@@ -42,8 +42,7 @@ object (self : 'varset)
       end
       
   method show x = (* déplace la variable x des variables cachées aux variables visibles (ssi elle est déjà cachée) *) 
-   if (VarSet.mem x hid) then 
-     hid <- VarSet.remove x hid;
+   hid <- VarSet.remove x hid;
    if not (VarSet.mem x vis) then
      begin
        vis <- VarSet.add x vis;
@@ -73,7 +72,7 @@ object (self : 'varset)
       
   method iter f = VarSet.iter f vis 
 
-  method iter_all f = VarSet.iter f vis ; VarSet.iter f hid
+  method iter_all f = VarSet.iter f vis ; VarSet.iter f hid (* iter aussi sur les vars cachées *)
   
   method fold : 'a.(variable -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> VarSet.fold f vis a
   
@@ -175,7 +174,7 @@ object
     
   (***)
 
-  method print p () = (* fonction d'affichage *)
+  method print p () = (* fonction d'affichage de clause *)
     Printf.fprintf p "Clause %d : " id;
     if (wl1,wl2) <> (None,None) then
       Printf.fprintf p "(watched : %a %a) " print_lit_wl wl1 print_lit_wl wl2;

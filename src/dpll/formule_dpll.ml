@@ -129,7 +129,7 @@ object(self)
       (fun c -> 
         clauses#hide c ; 
         self#hide_occurences v c;
-        match c#singleton with (*ça arrive ça ?*)
+        match c#singleton with
           | Singleton _ -> singletons#remove c
           | _ -> ());
     (self#get_occurences supprimer v)#iter
@@ -159,16 +159,17 @@ object(self)
       (fun c -> 
         clauses#show c;
         self#show_occurences v c;
-        match c#singleton with
+        match c#singleton with  (** Zone à risques *)
           | Singleton _ -> singletons#add c
+          | Bigger -> if (singletons#mem c) then singletons#remove c
           | _ -> ());
     (self#get_occurences restaurer v)#iter 
       (fun c ->
         c#show_var (not b) v;
         match c#singleton with
-          | Singleton _ -> singletons#add c
-          | Bigger -> singletons#remove c
-          | _ -> ()) 
+          | Singleton _ ->  if not (singletons#mem c) then singletons#add c
+          | Bigger -> if (singletons#mem c) then singletons#remove c
+          | _ -> assert false )
 
 
 end

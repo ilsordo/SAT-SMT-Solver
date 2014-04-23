@@ -9,7 +9,7 @@ let name = "Dpll"
 type formule = formule_dpll
 
 (* propage en ajoutant à acc les littéraux assignés
-   si cl est vrai, enregistre les clauses ayant provoqué chaque assignation *)
+   lit est un argument ignoré *)
 let rec constraint_propagation (formule:formule) lit etat acc =
   stats#start_timer "Propagation (s)"; (***)
   let lvl = etat.level in
@@ -18,32 +18,32 @@ let rec constraint_propagation (formule:formule) lit etat acc =
       | None ->
           begin
             match formule#find_single_polarite with
-              | None -> acc
-              | Some (b,v) ->   
+              | None -> acc (* propagation terminée *)
+              | Some (b,v) -> (* single polarité trouvée *)  
                   try
                     debug#p 3 "Propagation : single polarity found : %d %B" v b;
                     debug#p 4 "Propagation : setting %d to %B" v b;
-                    formule#set_val b v lvl;
+                    formule#set_val b v lvl; (* on assigne, peut lever Empty_clause *)
                     propagate ((b,v)::acc) (* on empile et on poursuit *)
                   with                 
-                    Empty_clause c -> 
-                      stats#stop_timer "Propagation (s)"; (***) 
+                    Empty_clause c -> (* conflit *)
+                      stats#stop_timer "Propagation (s)"; 
                       raise (Conflit_prop (c,(b,v)::acc)) 
           end
-      | Some ((b,v),c) ->
+      | Some ((b,v),c) -> (* singleton trouvé *)
           try
             debug#p 3 "Propagation : singleton found : %d %B in clause %d" v b c#get_id;
             debug#p 4 "Propagation : setting %d to %B (origin : clause %d)" v b c#get_id;
             formule#set_val b v ~cl:c lvl;
-            propagate ((b,v)::acc)
+            propagate ((b,v)::acc) (* on empile et on poursuit *)
           with
             Empty_clause c -> 
-              stats#stop_timer "Propagation (s)"; (***) 
+              stats#stop_timer "Propagation (s)"; 
               raise (Conflit_prop (c,(b,v)::acc))
   in
     let res = propagate acc in
-    stats#stop_timer "Propagation (s)"; (***) 
-    res (** complexité de sauver res pour l'envoyer juste après ? *)
+    stats#stop_timer "Propagation (s)";
+    res
      
 let init n cnf = 
   let f = new formule_dpll in

@@ -23,31 +23,32 @@ object
   method size = size
   
   method hide c = (* cacher la clause c si elle est déjà visible *)
-    (** if (ClauseSet.mem c vis) then*) (** on ne met pas cette condition pour gagner en complexité *)
-      begin
-        vis <- ClauseSet.remove c vis;
-        hid <- ClauseSet.add c hid;
-        size <- size-1
-      end 
+    (*if not (ClauseSet.mem c vis) then assert false;*) (** Zone a risque*)
+    vis <- ClauseSet.remove c vis;
+    hid <- ClauseSet.add c hid;
+    size <- size-1
+
       
   method show c = (* montrer la clause c, si elle est déjà cachée *)
-    (** if (ClauseSet.mem c hid) then*) (** on ne met pas cette condition pour gagner en complexité *)
-      begin
-        hid <- ClauseSet.remove c hid;
-        vis <- ClauseSet.add c vis;
-        size <- size+1
-      end
+    (*if (not (ClauseSet.mem c hid)) || (ClauseSet.mem c vis) then assert false;*) (** Zone a risque*)
+    hid <- ClauseSet.remove c hid;
+    vis <- ClauseSet.add c vis;
+    size <- size+1
         
-  method add c =
-    if not (ClauseSet.mem c vis) then (** on ne met pas cette condition pour gagner en complexité *)
-      begin
-        vis <- ClauseSet.add c vis; (* ajouter la clause c aux clauses visibles *)
-        size <- size+1
-      end
+  method add c = 
+    (*if (ClauseSet.mem c vis) || (ClauseSet.mem c hid)  then assert false;*) (** Zone a risque*)
+    vis <- ClauseSet.add c vis; (* ajouter la clause c aux clauses visibles *)
+    size <- size+1
       
   method add_hid c = (* ajouter la clause c aux clauses cachées *)
+    (*if (ClauseSet.mem c vis) || (ClauseSet.mem c hid) then assert false;*) (** Zone a risque*)
     hid <- ClauseSet.add c hid 
-       
+
+  method remove c = 
+    (*if not (ClauseSet.mem c vis) then assert false;*) (** Zone a risque*)
+    vis <- ClauseSet.remove c vis;
+    size <- size - 1
+           
   method mem c = ClauseSet.mem c vis (* indique si c est une clause visible *)
 
   method is_empty = ClauseSet.is_empty vis (* indique s'il n'y a aucune clause visible *)
@@ -62,11 +63,7 @@ object
   method iter_all f = ClauseSet.iter f vis ; ClauseSet.iter f hid
   
   method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> ClauseSet.fold f vis a
-
-  method remove c = 
-    vis <- ClauseSet.remove c vis;
-    size <- size -1 (** ici un test pour s'assurer qu'on remove bien ?*)
-
+    
   method choose =
     try Some (ClauseSet.choose vis)
     with Not_found -> None
@@ -176,7 +173,7 @@ object (self)
 
   (***)
 
-  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *) (*** METHODE jamais utilisée en l'état *)
+  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *) (*** METHODE jamais utilisée en l'état ? *)
     try 
       clauses#iter (fun c -> 
         match c#singleton with  
@@ -208,8 +205,7 @@ object (self)
         true
     with Exit -> false
   
-    method watch (_:clause) (_:literal) (_:literal) = () (***)
- 
+  method watch (_:clause) (_:literal) (_:literal) = () (* non implémenté, uniquement pour wl*)
 
     
 end
