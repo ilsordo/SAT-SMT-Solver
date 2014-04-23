@@ -1,3 +1,6 @@
+open Clause
+open Formule
+
 type tranche = literal * literal list 
 
 type etat = {

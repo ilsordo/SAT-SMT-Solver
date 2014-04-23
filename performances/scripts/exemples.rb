@@ -27,30 +27,24 @@ def test1 threads
   db.to_gnuplot(filter,names)
 end
 
+
+# Avec et sans cl!
 def test2(name, threads)
   db = Database::new
 
   algos = ["dpll"]
   h = ["jewa"]
   n = [80]
-  l = [3,4,5]
+  l = [3]
   k = (1..20).map {|x| 50*x}
+  cl = [true,false]
   sample = 2                    # nombres de passages (*nb de proc)
-  timeout = 600
+  timeout = nil
   
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
+      run_tests_cnf(n,l,k,algos,h,cl,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
     end
-  end
-
-  # Sauvegardes périodiques
-  while Thread::list.length != 1 do
-    system "date -R"
-    puts "Saving"
-    db.save name
-    puts "Done"
-    sleep 60 
   end
 
   (Thread::list - [Thread::current]).each do |t|
@@ -67,7 +61,7 @@ end
 def analyze_test2 name
   db = Database::new name
 
-  filter = select_data({},2) { |p,r| ["l=#{p[:l]}", p[:k], r["Time (s)"]]}
-  names = {:title => "n = 80, algo dpll+jewa", :xlabel => "k", :ylabel => "Time (s)"}
+  filter = select_data({:l => 3},2) { |p,r| ["Cl:#{p[:cl]}", p[:k], r["Total execution (s)"]]}
+  names = {:title => "n = 80, l = 3, algo dpll+jewa", :xlabel => "k", :ylabel => "Time (s)"}
   db.to_gnuplot(filter,names)
 end

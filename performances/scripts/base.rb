@@ -200,12 +200,13 @@ class Problem
   def gen
     temp = Tempfile.open("sat")
     system ("./gen " + (@gen_string.gsub(/#\{(\w*)\}/) { |match| @params[$1.to_sym] }) + " > #{temp.path}")
-    Proc::new { |algo,heuristic,timeout = 0|
+    Proc::new { |algo,heuristic,timeout = 0,cl = false|
       timeout ||= 0
       raise ArgumentError unless Algos.include? algo and Heuristics.include? heuristic
       result = Result::new
-      IO::popen "if ! timeout #{timeout} ./main -algo #{algo} -h #{heuristic} #{@run_options.gsub(/#\{(\w*)\}/) { |match| @params[$1.to_sym] }} #{temp.path} 2>&1; then echo \"Timeout\"; fi" do |io|
+      IO::popen "if ! timeout #{timeout} ./main #{if cl then '-cl' end} -algo #{algo} -h #{heuristic} #{@run_options.gsub(/#\{(\w*)\}/) { |match| @params[$1.to_sym] }} #{temp.path} 2>&1; then echo \"Timeout\"; fi" do |io|
         io.each do |line|
+          # p line;
           case line
           when /\[stats\] (?<stat>.+) = (?<value>\d+)/
             result[$~[:stat]] = $~[:value].to_i
@@ -220,7 +221,7 @@ class Problem
           end
         end
       end
-      [({:algo => algo, :heuristic => heuristic}.merge @params) , result]
+      [({:algo => algo, :heuristic => heuristic, :cl => cl}.merge @params) , result]
     }
   end
 end
@@ -236,7 +237,7 @@ class ProblemColor < Problem
     super({:type => :color, :vertices => vertices, :p => p, :k => k}, '-color #{vertices} #{p}', '-color #{k}')  
   end
   
-  def dicho(algo, heuristic) # Ne fonctionne pas :(
+  def dicho(algo, heuristic)
     raise ArgumentError unless Algos.include? algo and Heuristics.include? heuristic
     min = 0
     max = @params[:vertices]
@@ -268,7 +269,7 @@ class ProblemTseitin < Problem
 end
 
 
-def run_tests_cnf(n,l,k,algos,heuristics,sample=1, limit = nil,&block)
+def run_tests_cnf(n,l,k,algos,heuristics,cl = [false], sample=1, limit = nil,&block)
   limit ||= 0
   n.each do |n_|
     l.each do |l_|
@@ -279,14 +280,16 @@ def run_tests_cnf(n,l,k,algos,heuristics,sample=1, limit = nil,&block)
           proc = p.gen
           algos.each do |a_|
             heuristics.each do |h_|
-              report = Report::new
-              begin
-                entry,result = proc.call(a_,h_,limit)
-                report << result
-                yield(entry,report) if result
-              rescue Timeout::Error
-                puts "Timeout : #{p}, #{a_}, #{h_}"
-              end 
+              cl.each do |cl_|
+                report = Report::new
+                begin
+                  entry,result = proc.call(a_,h_,limit,cl_)
+                  report << result
+                  yield(entry,report) if result
+                rescue Timeout::Error
+                  puts "Timeout : #{p}, #{a_}, #{h_}, cl : #{cl_}"
+                end 
+              end
             end
           end
         end

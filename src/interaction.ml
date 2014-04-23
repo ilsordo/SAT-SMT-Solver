@@ -9,10 +9,6 @@ type interaction =
   | I of (int -> out_channel -> bool)
   | S of (string -> out_channel -> bool)
 
-class repl =
-object
-  val mutable step = 
-end
 
 let str_of_lit (b,v) =
   (if b then "" else "-")^(string_of_int v)
@@ -94,9 +90,10 @@ let print_graph (formule:formule) (pari,assignations) level p clause =
   explore false assignations;
   fprintf p "%s[fillcolor=chartreuse]\n}\n%!" (str_of_lit pari)
         
-
+(*
 ['g',`Unit (fun () -> draw_graph ... ), "Affiche le graphe"]
 
 (c,form,doc) when c = char ->
 match form with
   | Unit of fun -> 
+*)

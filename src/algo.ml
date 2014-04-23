@@ -250,9 +250,9 @@ struct
             nb_conf := 1+ !nb_conf ; (*********)
             stats#record "Conflits";
             debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
-            let file = open_out "example.dot" in
+            (*let file = open_out "example.dot" in
             Printf.fprintf file "%a%!" (print_graph (formule:>Formule.formule) (List.hd etat.tranches) etat.level) c;
-            close_out file;
+            close_out file;*)
             (** ICI : graphe/dérivation en regardant la dernière tranche // update infos sur nb de conflits/restart/decision/vieillissement *)
             if (not cl) then (* clause learning ou pas *)
               begin
