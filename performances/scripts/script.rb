@@ -8,17 +8,17 @@
 def phase(name, threads)
   db = Database::new
 
-  algos = ["dpll"]
-  h = ["jewa"]
+  algos = ["wl"]
+  h = ["dlcs"]
   n = (80..80).map {|x| 1*x}
   l = [3,4,5]
-  k = (1..30).map {|x| 50*x}
+  k = (1..5).map {|x| 50*x}
   sample = 2                    # nombres de passages (*nb de proc)
-  timeout = 600
+  timeout = 6
   
   threads.times do 
     Thread::new do
-      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}  # and problem ?
+      run_tests_cnf(n,l,k,algos,h,sample,timeout) { |problem, report| db.record(problem, report) if report}
     end
   end
 
@@ -27,7 +27,7 @@ def phase(name, threads)
     puts "Saving"
     db.save name
     puts "Done"
-    sleep 60 
+    sleep 6
   end
 
   (Thread::list - [Thread::current]).each do |t|

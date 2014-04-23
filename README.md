@@ -9,18 +9,20 @@ http://nagaaym.github.io/projet2 (non à jour)
 ******************************************************************************
 
 1. Compilation et exécution
-2. Suivi de l'algorithme et debuggage
-3. Générateur
-4. Structures de données
-5. Algorithme DPLL
-6. Algorithme Watched Literals
-7. Algorithme Tseitin
-8. Algorithme Colorie
-9. Heuristiques
-10. Performances
+2. Améliorations
+3. Suivi de l'algorithme et debuggage
+4. Générateur
+5. Structures de données
+6. Algorithme DPLL
+7. Algorithme Watched Literals
+8. Algorithme Tseitin
+9. Algorithme Colorie
+10. Heuristiques
+11. Clause learning
+12. Performances
 
 ******************************************************************************
- 
+
 
 
 1. Compilation et exécution
@@ -41,6 +43,13 @@ Exécuter WL sur le fichier ex.cnf :
 
     ./resol-wl ex.cnf 
 
+Clause Learning
+---------------
+
+Pour activer le clause learning, ajouter l'option : 
+
+    -cl
+    
 Tseitin
 -------
 
@@ -117,7 +126,24 @@ Stocker les résultats d'un algorithme dans un fichier res.txt (n'enregistre ni 
 
 
 
-2. Générateur
+2. Améliorations
+================
+
+Principales améliorations par rapport au rendu précédent : 
+  - Implémentation du clause learning pour DPLL et WL
+  - Amélioration de l'interaction, avec notamment la possibilité d'afficher le graphe des conflits et la preuve par résolution
+  - Unification des algorithmes DPLL et WL au sein de algo.ml (désormais, à quelques lignes près, seule la propagation de contrainte (cf algo_dpll.ml et algo_wl.ml) diffère entre WL et DPLL)
+  - Maintient en permanence de la taille des set manipulés (la fonction cardinal du module set ne s'exécute pas en temps constant)
+  
+Améliorations futures :
+  - implémentation d'heuristiques de restart (des heuristiques avec période de restart constante, ou basée sur la suite de Luby, ont déjà était testées)
+  - implémentation d'heuristiques de vieillissement de clauses, et de minimisation des clauses apprises
+  - implémentation de l'heuristique de décision VSIDS
+  - implémentation d'une heuristique expérimentale sur WL
+
+
+  
+3. Générateur
 =============
 
 Le générateur permet d'obtenir des cnf, des formules propositionnelles et des graphes. Les méthodes de génération aléatoire utilisées sont décrites ci-dessous : 
@@ -158,7 +184,7 @@ Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d
 
 
 
-3. Suivi de l'algorithme et debuggage
+4. Suivi de l'algorithme et debuggage
 =====================================
 
 L'ensemble des outils de debuggage et de suivi des exécutions figure dans le fichier debug.ml. Une brève description est fournie ci-dessous.
@@ -219,14 +245,17 @@ Pour arrêter le timer défini ci-dessus :
 
     stats#stop_timer "Time (s)";
   
-Actuellement, trois temps sont enregistrés par défaut : 
-  - "Time (s)" : le temps utilisé pour résoudre la cnf donnée
-  - "Reduction (s)" : le temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)
-  - "Decision (heuristic) (s)" : le temps utilisé par les heuristiques pour décider sur quels littéraux parier
+Actuellement, six temps sont enregistrés par défaut : 
+  - "Total exécution (s)" : temps total nécessaire à la résolution de la cnf donnée
+  - "Reduction (s)" : temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)
+  - "Decisions (s)" : temps utilisé par les heuristiques pour décider sur quels littéraux parier
+  - "Propagation (s)" : temps passé à propager des paris
+  - "Bactrack (s)" : temps passé à annuler des paris et les assignations résultantes
+  - "Clause learning (s)" : temps nécessaire au calcul des clauses à apprendre (uniquement lorsque clause learning activé)
 
 
 
-4. Structures de données
+5. Structures de données
 ========================
 
 Les structures suivantes sont utilisées par l'algorithme :
@@ -277,7 +306,7 @@ formule_wl.ml:
 
 
 
-5. Algorithme DPLL
+6. Algorithme DPLL
 ==================
 
 L'algorithme DPLL est implémenté comme une alternance de phases de propagation de contraintes et de paris sur des variables libres.
@@ -295,7 +324,7 @@ La première étape de propagation des contraintes n'est jamais annulée (sauf s
 
 
 
-6. Algorithme Watched Literals
+7. Algorithme Watched Literals
 ==============================
 
 Prétraitement :
@@ -326,7 +355,7 @@ Les différents opérations menées prennent appuies sur les deux faits suivants
 
 
 
-7. Algorithme Tseitin
+8. Algorithme Tseitin
 =====================
 
 L'algorithme Tseitin permet de convertir une formule propositionnelle en une cnf.
@@ -346,7 +375,7 @@ Etant donné une formule propositionnelle p, l'algorithme Tseitin produit une cn
 
   
 
-8. Algorithme Colorie
+9. Algorithme Colorie
 =====================
 
 Etant donné un entier k et un graphe G, l'algorithme Colorie indique si G peut-être colorié à l'aide de k couleurs distincts.
@@ -361,7 +390,7 @@ Le temps nécessaire à la production de la cnf est linéaire en la taille de la
 
 
 
-9. Heuristiques
+10. Heuristiques
 ===============
 
 Les heuristiques permettent de déterminer le littéral sur lequel effectuer le prochain pari. Les différentes heuristiques implémentées sont décrites ci-dessous.
@@ -420,7 +449,48 @@ JEWA (Jeroslow-Wang) (-h jewa)
 
 
 
-10. Performances
+12. Clause learning
+===================
+
+L'implémentation du clause learning a nécessité l'ajout de 4 informations.
+
+Le niveau d'assignation de chaque variable
+------------------------------------------
+
+A chaque variable assignée est associé le niveau auquel à eu lieu l'assignation. Le niveau 0 correspond aux assignations inévitables (propagation initiale, apprentissage de clauses singletons...). Chaque pari, et les assignations qui en découlent, constituent un nouveau niveau. Voir le champ "level" dans l'objet formule (formule.ml).
+
+Les clauses à l'origine des assignations
+----------------------------------------
+
+Lorsqu'une clause c contient un seul littéral l non faux (et non assignée), on assigne l et on enregistre c comme étant la clause à l'origine de l'assignation de l. Les littéraux assignés du fait d'un pari ou d'une polarité simple non pas de clause d'origine. Voir le champ "origin" dans l'objet formule (formule.ml).
+
+La pile des assignations
+------------------------
+
+On appelle "tranche" un littéral parié et l'ensemble des littéraux assignés en conséquence. La pile des tranches constitue un historique complet de l'ensemble des assignations effectuées. Elle permet d'effectuer le bactracking. Voir les types "tranche" et "etat" (dans algo_base.ml).
+
+L'état
+------
+
+L'état regroupe le niveau d'assignation courant et la pile des assignations. Voir le type "etat" (dans algo_base.ml).
+
+
+L'implémentation de l'algorithme de clause learning prend appui sur les fonctions suivantes (cf algo.ml) : 
+
+  - conflict_analysis : produit la clause à apprendre en cas de conflit et fournit les informations nécessaires au bactrack
+  - undo : permet de défaire plusieurs niveaux d'assignations
+  - continue_bet : permet de poursuivre un tranche d'assignations suite à un bactrack non chronologique
+
+L'ajout de clauses n'a pas posé de problèmes particuliers. Nous avons utilisé la méthode add_clause présente dans formule_dpll.ml et formule_wl.ml (héritée de formule.ml) qui était déjà utilisée pour construire la formule de départ. Deux remarques peuvent être faites sur l'ajout de clauses : 
+  - lorsqu'un clause singleton doit être apprise, on backtrack jusqu'au niveau 0 afin d'effectuer l'assignation dictée par cette clause puis propager. La clause n'est pas ajoutée.
+  - dans l'algorithme WL, lorsque l'on doit apprendre un clause c comportant au moins 2 littéraux, on pose les jumelles sur 2 littéraux dont les niveaux d'assignation sont les plus élevés (à noter qu'il existe un unique littéral de plus haut niveau, mais qu'il peut y en avoir plusieurs au 2ème niveau le plus élevé)
+
+
+La distinction principale entre DPLL et WL réside dans les fonctions de propagations qui leurs sont propres (voir algo_dpll.ml et algo_wl.ml). Nous sommes toutefois parvenus à produire un algorithme générale commun à DPLL et WL, avec ou sans clause learning. Voir la fonction algo figurant dans algo.ml.
+
+
+
+11. Performances
 ================
 
 Une étude des performances des différents algorithmes et heuristiques figure dans le dossier "performances". Consulter le fichier README présent dans ce dossier pour de plus amples informations.

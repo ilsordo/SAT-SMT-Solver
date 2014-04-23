@@ -175,62 +175,11 @@ struct
     match etat.tranches with
       | [] -> assert false
       | t::q -> aux t
-      
-      
-      
-  let shake_up formule  =
-    let replace_wl c b v (l0,l1) = (* si (b,v) est vrai et est plus vieux et différent que l0 ou l1, alors prend sa place *)
-      match formule#get_pari v with  (* (b,v) est vrai *)
-        | Some b_pari when b_pari=b -> 
-           begin
-             let k = formule#get_level v in
-             if (snd l0 = v || snd l1 = v) then
-               (l0,l1)
-             else
-               match (formule#get_pari (snd l0),formule#get_pari (snd l1)) with
-                 |(Some b0,Some b1) -> 
-                    let (k0,k1) = (formule#get_level (snd l0),formule#get_level (snd l1)) in
-                    let (l_max,bet_max,l_min,bet_min) = if k0>k1 then (l0,b0,l1,b1) else (l1,b1,l0,b0) in
-                    if ( fst l_max <> bet_max ) then 
-                      ((b,v),l_min) 
-                    else if ( fst l_min <> bet_min ) then
-                      ((b,v),l_max)
-                    else if k < formule#get_level (snd l_max) then
-                      ((b,v),l_min) 
-                    else
-                      (l0,l1)
-                 |(Some b0,None) ->
-                    if (b0 <> fst l0 || formule#get_level (snd l0) > k) then
-                      ((b,v),l1)
-                    else
-                      (l0,(b,v)) 
-                 |(None,Some b1) ->
-                    if (b1 <> fst l1 || formule#get_level (snd l1) > k) then
-                      (l0,(b,v))
-                    else
-                      ((b,v),l1) 
-                 |(None,None) -> 
-                    ((b,v),l1)                
-           end         
-        | _ -> (l0,l1)
-    in            
-    formule#get_clauses#iter
-      (fun (c:clause) ->
-          let (l0,l1) = c#get_wl in
-          let (l2,l3) = c#get_vneg#fold (replace_wl c false) (c#get_vpos#fold (replace_wl c true) (l0,l1)) in
-         if not ((snd l0,snd l1)=(snd l2,snd l3) || (snd l0,snd l1)=(snd l3,snd l2)) then
-              if (snd l2 = snd l0 || snd l2 = snd l1) then
-                (formule#watch c l3 l1;
-                formule#watch c l2 l0)
-              else
-                formule#watch c l2 l0;              
-                formule#watch c l3 l1)
 
 
   (** Algo **)
 
   let algo (next_pari : Heuristic.t) cl n cnf = (* cl : activation du clause learning *)
-  let nb_conf = ref 0 in (*********)
 
     let rec process formule etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
       try
@@ -247,13 +196,11 @@ struct
               Backtrack (undo formule etat)
       with 
         | Conflit (c,etat) ->
-            nb_conf := 1+ !nb_conf ; (*********)
             stats#record "Conflits";
             debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
             (*let file = open_out "example.dot" in
             Printf.fprintf file "%a%!" (print_graph (formule:>Formule.formule) (List.hd etat.tranches) etat.level) c;
             close_out file;*)
-            (** ICI : graphe/dérivation en regardant la dernière tranche // update infos sur nb de conflits/restart/decision/vieillissement *)
             if (not cl) then (* clause learning ou pas *)
               begin
                 let etat = undo formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *)
@@ -278,13 +225,6 @@ struct
       stats#start_timer "Decisions (s)";
       let lit = next_pari (formule:>Formule.formule) in (* choisir un littéral sur lequel parier *)
       stats#stop_timer "Decisions (s)";
-      (***********)
-      (*if (!nb_conf mod 10000 = 0) then
-        begin
-          stats#start_timer "Shaking (s)";
-          shake_up formule;
-          stats#stop_timer "Shaking (s)"
-        end;*)
       match lit with
         | None ->
             Fine etat (* plus rien à parier = c'est gagné *)

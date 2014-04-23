@@ -8,5 +8,6 @@ load "performances/scripts/script.rb"
 load "performances/scripts/exemples.rb"
 load "performances/scripts/tseitin.rb"
 load "performances/scripts/color.rb"
+load "performances/scripts/clauselearning.rb"
 require 'pry'
 pry

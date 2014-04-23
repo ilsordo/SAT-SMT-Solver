@@ -1,3 +1,31 @@
+
+Le plus important (cf rendu) : 
+------------------------------
+
+* Dérouler un exemple pédagogique du clause learning, via l'interaction
+* "Indiquer si la construction de la preuve par résolution parcourt bien l'ensemble des noeuds de l'ensemble UIP choisi"
+* Finir interaction
+* Ajouter des infos sur l'apprentissage de clauses : 
+    - tous les k bctrcks, taille moyenne des clauses ajoutées
+    - pourcentage de bctrcks à dist => 1
+    - nb de clauses singletons apprises
+    - niveau auquel s'effectue le bctrck (via un debug)
+* Finir Readme
+* Analyse des tests
+
+
+Memo :
+------
+
+* Rétablir base.rb ?
+* Div par r.count
+* Enlever tests morts, fichiers morts à la racine
+* Enlever/ajouter les assert false de sécurité << tester avant rend
+
+
+Pour plus tard :
+---------------
+
 Mettre en place un check true/false dans le cas UNSAT en appelant Minisat : 
   Le booléen suivant est vrai ssi ex.cnf est unsat : 
     (Sys.command "minisat ex.cnf > /dev/null") = 20
@@ -6,16 +34,8 @@ Mettre en place un check true/false dans le cas UNSAT en appelant Minisat :
 Implémenter des heuristiques : 
  - VSIDS
  - Restart
- - Vieillissage de clauses
+ - Vieillissement de clauses
  
-Remettre les stats/messages de debug/timers
-
 Revoir la découverte des sgts. Ne pas maintenir la détection des sgts dans WL ?
 
-Timer sur propagation
-
 Ajouter une heuristique de décision qui laisse l'utilisateur choisir le littéral sur lequel parier
-
-Enlever/ajouter les assert false de sécurité
-
-Enlever tests morts, fichiers morts à la racine
