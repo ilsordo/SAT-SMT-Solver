@@ -173,7 +173,7 @@ object (self)
 
   (***)
 
-  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *) (*** METHODE jamais utilisée en l'état *)
+  method find_singleton = (* renvoie un littéral formant une clause singleton, s'il en existe un *) (*** METHODE jamais utilisée en l'état ? *)
     try 
       clauses#iter (fun c -> 
         match c#singleton with  
@@ -205,8 +205,7 @@ object (self)
         true
     with Exit -> false
   
-    method watch (_:clause) (_:literal) (_:literal) = () (***)
- 
+  method watch (_:clause) (_:literal) (_:literal) = () (* non implémenté, uniquement pour wl*)
 
     
 end

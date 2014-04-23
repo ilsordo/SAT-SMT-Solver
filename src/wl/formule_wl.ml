@@ -107,7 +107,7 @@ object(self)
         | None -> assert false (* aurait du être initialisé avant *)
         | Some s -> s
 
-  method clause_current_size c =
+  method clause_current_size c = (* nb de vars non assignées *)
     c#get_vpos#fold 
       (fun v res -> if self#get_pari v = None then res+1 else res) 
       (c#get_vneg#fold
