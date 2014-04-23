@@ -89,8 +89,8 @@ type interaction =
   | I of (int -> bool)
   | S of (string -> bool)
 
-class repl =
-  let next = ref (Some 1) in
+class repl step =
+  let next = ref step in
 object    
   val base_handlers = [
     ('c', U (fun () -> next := Some 1; false), "Continue");
@@ -136,6 +136,7 @@ object
       ::('v',U print_values,"Print current values")
       ::base_handlers in
     fprintf p "Conflict on clause %d :\n" clause#get_id;
+    print_handlers handlers;
     let rec find_command char = function
       | [] -> None
       | (c,interaction,_)::_ when c = char -> Some interaction
@@ -143,7 +144,7 @@ object
     let rec loop = function
       | false -> fprintf p "Resuming execution\n"
       | true ->
-          fprintf p ">%!";
+          fprintf p "> %!";
           let line = input_line stdin in
           if String.length line > 0 then
             match find_command line.[0] handlers with
