@@ -3,8 +3,7 @@ open Formule
 open Debug
 open Answer
 open Interaction
-
-type tranche = literal * literal list 
+open Algo_base
 
 type 'a result = Fine of 'a | Backtrack of 'a
 
@@ -12,32 +11,7 @@ type t = Heuristic.t -> bool -> int -> int list list -> Answer.t
 
 let neg : literal -> literal = function (b,v) -> (not b, v)
 
-type etat = {
-  tranches : tranche list; (* piles des assignations. Une tranche = un pari + liste des assignations qui en découlent *)
-  level : int (* niveau d'assignations courant (0 : prétraitement, 1 : premier pari, ...) *)
-}
-
-exception Conflit_prop of (clause*(literal list)) (* permet de construire une tranche quand conflit trouvé dans prop *)
-
-exception Conflit of (clause*etat) (* indique conflit trouvé dans clause *)
-
-
-
-module type Algo_base =
-sig
-  type formule = private #formule 
-
-  val name : string (* nom de l'algo *)
-
-  val init : int -> int list list -> formule (* construction de la formule, prétraitement *)
-
-  val constraint_propagation : formule -> literal -> etat -> literal list -> literal list (* fonction de propagation *)
-
-  val set_wls : formule -> clause -> literal -> literal -> unit (* utile uniquement pour WL. Pose des jumelles. *)
-
-end
-
-
+exception Conflit of (clause*etat)
 
 module Bind = functor(Base : Algo_base) ->
 struct
@@ -281,7 +255,10 @@ struct
             nb_conf := 1+ !nb_conf ; (*********)
             stats#record "Conflits";
             debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
-            (*Printf.fprintf (open_out "example.dot") "%a%!" (print_graph (formule:>Formule.formule) (List.hd etat.tranches) etat.level) c;*) (**********************)
+            (*let file = open_out "example.dot" in
+            Printf.fprintf file "%a%!" (print_graph (formule:>Formule.formule) (List.hd etat.tranches) etat.level) c;
+            close_out file;*)
+            (** ICI : graphe/dérivation en regardant la dernière tranche // update infos sur nb de conflits/restart/decision/vieillissement *)
             if (not cl) then (* clause learning ou pas *)
               begin
                 let etat = undo formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *)

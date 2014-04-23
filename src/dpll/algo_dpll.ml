@@ -3,6 +3,7 @@ open Clause
 open Debug
 open Formule_dpll
 open Formule
+open Algo_base
 
 let name = "Dpll"
 

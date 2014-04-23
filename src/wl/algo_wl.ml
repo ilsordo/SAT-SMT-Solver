@@ -3,6 +3,7 @@ open Clause
 open Debug
 open Formule_wl
 open Formule
+open Algo_base
 
 let name = "Wl"
 
