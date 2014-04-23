@@ -244,13 +244,18 @@ struct
       (fun (c:clause) ->
           let (l0,l1) = c#get_wl in
           let (l2,l3) = c#get_vneg#fold (replace_wl c false) (c#get_vpos#fold (replace_wl c true) (l0,l1)) in
-         if not ((snd l0,snd l1)=(snd l2,snd l3) || (snd l0,snd l1)=(snd l3,snd l2)) then
-              if (snd l2 = snd l0 || snd l2 = snd l1) then
-                (formule#watch c l3 l1;
-                formule#watch c l2 l0)
+            if not ((snd l0,snd l1)=(snd l2,snd l3) || (snd l0,snd l1)=(snd l3,snd l2)) then
+              if snd l2 = snd l0 then 
+                formule#watch c l3 l1
+              else if snd l2 = snd l1 then
+                formule#watch c l3 l0
+              else if snd l3 = snd l0 then 
+                formule#watch c l2 l1
+              else if snd l3 = snd l1 then
+                formule#watch c l2 l0
               else
-                formule#watch c l2 l0;              
-                formule#watch c l3 l1)
+                (formule#watch c l3 l1;
+                formule#watch c l2 l0))
 
 
   (** Algo **)

@@ -18,7 +18,7 @@ L'évaluation des performances se fait à 2 niveaux :
   - au sein du code OCaml : différentes statistiques sont enregistrées et renvoyées à la fin de l'exécution du programme. Il s'agit de : 
       * nombre de conflits (provoquant un backtracking)
       * nombre de paris effectués
-      * "Time (s)" : le temps utilisée pour résoudre la cnf donnée
+      * "Time (s)" : le temps utilisé pour résoudre la cnf donnée
       * "Reduction (s)" : le temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)
       * "Decision (heuristic) (s)" : le temps utilisé par les heuristiques pour décider sur quels littéraux parier
 

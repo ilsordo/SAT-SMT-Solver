@@ -16,6 +16,8 @@ Timer sur propagation
 
 Ajouter une heuristique de décision qui laisse l'utilisateur choisir le littéral sur lequel parier
 
-Enlever/ajouter les assert false de sécurité
+Enlever/ajouter les assert false de sécurité << tester avant rendu
 
 Enlever tests morts, fichiers morts à la racine
+
+Mettre à jour les readme (notamment pour expériences)
