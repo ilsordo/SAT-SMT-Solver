@@ -18,10 +18,13 @@ L'évaluation des performances se fait à 2 niveaux :
   - au sein du code OCaml : différentes statistiques sont enregistrées et renvoyées à la fin de l'exécution du programme. Il s'agit de : 
       * nombre de conflits (provoquant un backtracking)
       * nombre de paris effectués
-      * "Time (s)" : le temps utilisé pour résoudre la cnf donnée
-      * "Reduction (s)" : le temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)
-      * "Decision (heuristic) (s)" : le temps utilisé par les heuristiques pour décider sur quels littéraux parier
-
+      * "Total exécution (s)" (ou "Time (s)" dans certaines bdd): temps total nécessaire à la résolution de la cnf donnée
+      * "Reduction (s)" : temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)
+      * "Decisions (s)" (ou "Decision (heuristic) (s)" dans certaines bdd): temps utilisé par les heuristiques pour décider sur quels littéraux parier
+      * "Propagation (s)" : temps passé à propager des paris
+      * "Bactrack (s)" : temps passé à annuler des paris et les assignations résultantes
+      * "Clause learning (s)" : temps nécessaire au calcul des clauses à apprendre (uniquement lorsque clause learning activé)
+  
   - au sein d'un script Ruby chargé de :
       * lancer des tests
       * enregistrer dans des bases de données les résultats fournis par OCaml
@@ -87,6 +90,7 @@ Les données sont stockées sous forme d'une table d'association dont la clé d�
 
   * p[:n] : nombre de clauses d'une instance de SAT.
   * p[:algo] : algorithme utilisé (:heuristic pour l'heuristique).
+  * p[:cl] : clause learning ou non
   * r.count : nombre d'exécutions de l'instance.
   * r["Time (s)"] : temps d'exécution (on peut remplacer "Time (s)" par chacune des statistiques renvoyées en fin d'exécution de *resol*, par exemple "Conflits")
     
