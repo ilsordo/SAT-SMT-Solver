@@ -4,21 +4,14 @@ open Printf
 open Debug
 open Algo_base
 
-type interaction =
-  | U of (out_channel -> bool)
-  | I of (int -> out_channel -> bool)
-  | S of (string -> out_channel -> bool)
-
-
 let str_of_lit (b,v) =
   (if b then "" else "-")^(string_of_int v)
 
-let print_valeurs p (formule:formule) =
-  fprintf p "Valeurs assignées :\n";
+let print_values p (formule:formule) =
+  fprintf p "Current values (level) :\n";
   formule#get_paris#iter (fun v b -> fprintf p "%d -> %B (%d)\n" v b (formule#get_level v)) 
 
-(* Il faudrait connaitre état ... on verra plus tard *)
-let print_graph (formule:formule) (pari,assignations) level p clause =
+let print_graph (formule:formule) (pari,assignations) level clause p =
   (* Indique si une variable (le literal associé) a été vu et si sa cause a été élucidée ainsi que son nom*)
   let seen = new vartable 0 in
 
@@ -84,16 +77,109 @@ let print_graph (formule:formule) (pari,assignations) level p clause =
                 follow_lit lit false;
                 uip_found in
         explore found q in
-  debug#p 2 "Clause conflit : %a\nPari : %s\n%a" clause#print () (str_of_lit pari) print_valeurs formule;
+  debug#p 2 "Clause conflit : %a\nPari : %s\n%a" clause#print () (str_of_lit pari) print_values formule;
   fprintf p "digraph G{\nrankdir = LR;\nnode[style=filled,shape=circle];\nconflict [label=\"Conflict!\",shape=ellipse,fillcolor=crimson];\n";
   explore_clause "conflict" true clause;
   explore false assignations;
   fprintf p "%s[fillcolor=chartreuse]\n}\n%!" (str_of_lit pari)
         
-(*
-['g',`Unit (fun () -> draw_graph ... ), "Affiche le graphe"]
 
-(c,form,doc) when c = char ->
-match form with
-  | Unit of fun -> 
-*)
+type interaction =
+  | U of (unit -> bool)
+  | I of (int -> bool)
+  | S of (string -> bool)
+
+class repl =
+  let next = ref (Some 1) in
+object    
+  val base_handlers = [
+    ('c', U (fun () -> next := Some 1; false), "Continue");
+    ('s', I (fun x -> next := Some x; false), "Skip k conflicts");
+    ('t', U (fun () -> next := None; false), "Finish execution")]
+
+  method is_ready = 
+    match !next with
+      | Some 1 ->
+          true
+      | Some x -> 
+          next := Some (x-1);
+          false
+      | None ->
+          false
+
+  method start formule etat (clause:clause) p =
+    let rec print_handlers = function
+      | [] -> ()
+      | (name,_,doc)::q -> 
+          fprintf p "%c\t%s\n" name doc;
+          print_handlers q in
+    let print_graph = match etat.tranches with
+      | [] -> assert false
+      | tranche::_ -> 
+          fun file ->
+            try
+              let out = open_out file in
+              print_graph formule tranche etat.level clause out;
+              true
+            with 
+                Sys_error s -> 
+                  fprintf p "Error : %s\n" s;
+                  true in
+    let print_resolution _ =
+      true in
+    let print_values () =
+      print_values p formule;
+      true in
+    let handlers =
+      ('g',S print_graph,"Print conflict graph to file")
+      ::('r',S print_resolution,"Print derivation to file")
+      ::('v',U print_values,"Print current values")
+      ::base_handlers in
+    fprintf p "Conflict on clause %d :\n" clause#get_id;
+    let rec find_command char = function
+      | [] -> None
+      | (c,interaction,_)::_ when c = char -> Some interaction
+      | _::q -> find_command char q in
+    let rec loop = function
+      | false -> fprintf p "Resuming execution\n"
+      | true ->
+          fprintf p ">%!";
+          let line = input_line stdin in
+          if String.length line > 0 then
+            match find_command line.[0] handlers with
+              | None -> 
+                  fprintf p "Unknown command : %c\n" line.[0]
+              | Some interaction -> 
+                  let continue = 
+                    try 
+                      match interaction with
+                        | U f -> f()
+                        | I f -> Scanf.sscanf line "%_c %d" f
+                        | S f -> Scanf.sscanf line "%_c %s" f
+                    with
+                        Scanf.Scan_failure s ->
+                          fprintf p "Wrong argument\n";
+                          true in
+                  loop continue in
+    loop true
+    
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
