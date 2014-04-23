@@ -38,10 +38,12 @@ object
         size <- size+1
       end
         
-  method add c = 
-    (** if not (ClauseSet.mem c vis) then *) (** on ne met pas cette condition pour gagner en complexité *)
-    vis <- ClauseSet.add c vis; (* ajouter la clause c aux clauses visibles *)
-    size <- size+1
+  method add c =
+    if not (ClauseSet.mem c vis) then (** on ne met pas cette condition pour gagner en complexité *)
+      begin
+        vis <- ClauseSet.add c vis; (* ajouter la clause c aux clauses visibles *)
+        size <- size+1
+      end
       
   method add_hid c = (* ajouter la clause c aux clauses cachées *)
     hid <- ClauseSet.add c hid 

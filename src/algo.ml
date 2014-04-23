@@ -3,8 +3,7 @@ open Formule
 open Debug
 open Answer
 open Interaction
-
-type tranche = literal * literal list 
+open Algo_base
 
 type 'a result = Fine of 'a | Backtrack of 'a
 
@@ -12,33 +11,7 @@ type t = Heuristic.t -> bool -> int -> int list list -> Answer.t
 
 let neg : literal -> literal = function (b,v) -> (not b, v)
 
-type etat = {
-  tranches : tranche list;
-  level : int
-  (*vsids : int vartable*) (***) 
-}
-
-exception Conflit_prop of (clause*(literal list)) (* permet de construire une tranche quand conflit trouvé dans prop *)
-
 exception Conflit of (clause*etat)
-
-
-
-module type Algo_base =
-sig
-  type formule = private #formule (* J'ai trouvé! *)
-
-  val name : string
-
-  val init : int -> int list list -> formule (* construction de la formule, prétraitement *)
-
-  val constraint_propagation : formule -> literal -> etat -> literal list -> literal list
-
-  val set_wls : formule -> clause -> literal -> literal -> unit (* Nom pas très générique mais compréhensible *)
-
-end
-
-
 
 module Bind = functor(Base : Algo_base) ->
 struct
@@ -278,7 +251,9 @@ struct
             nb_conf := 1+ !nb_conf ; (*********)
             stats#record "Conflits";
             debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
-            Printf.fprintf (open_out "example.dot") "%a%!" (print_graph (formule:>Formule.formule) (List.hd etat.tranches) etat.level) c;
+            let file = open_out "example.dot" in
+            Printf.fprintf file "%a%!" (print_graph (formule:>Formule.formule) (List.hd etat.tranches) etat.level) c;
+            close_out file;
             (** ICI : graphe/dérivation en regardant la dernière tranche // update infos sur nb de conflits/restart/decision/vieillissement *)
             if (not cl) then (* clause learning ou pas *)
               begin
@@ -305,12 +280,12 @@ struct
       let lit = next_pari (formule:>Formule.formule) in
       stats#stop_timer "Decisions (s)";
       (** ICI, tous les x conflits *)
-      if (!nb_conf mod 1000 = 0) then (*********)
+      (*if (!nb_conf mod 1000 = 0) then (*********)
         begin
           stats#start_timer "Shaking (s)";(*********)        
-          (*shake_up formule;*) (*********)
+          shake_up formule; (*********)
           stats#stop_timer "Shaking (s)"(*********)
-        end;
+        end;*)
       match lit with
         | None ->
             Fine etat (* plus rien à parier = c'est gagné *)
