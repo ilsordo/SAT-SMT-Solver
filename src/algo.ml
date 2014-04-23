@@ -98,7 +98,7 @@ struct
 
   let undo_assignation formule (_,v) = formule#reset_val v
 
-  let undo ?(depth=1) (formule:formule) etat = (** A VERIFIER *)
+  let undo ?(depth=1) (formule:formule) etat =
     stats#start_timer "Bactrack (s)"; (***)
     let rec aux depth etat =
       if depth=0 then
@@ -246,7 +246,7 @@ struct
       (fun (c:clause) ->
           let (l0,l1) = c#get_wl in
           let (l2,l3) = c#get_vneg#fold (replace_wl c false) (c#get_vpos#fold (replace_wl c true) (l0,l1)) in
-            if not ((snd l0,snd l1)=(snd l2,snd l3) || (snd l0,snd l1)=(snd l3,snd l2)) then
+         if not ((snd l0,snd l1)=(snd l2,snd l3) || (snd l0,snd l1)=(snd l3,snd l2)) then
               if (snd l2 = snd l0 || snd l2 = snd l1) then
                 (formule#watch c l3 l1;
                 formule#watch c l2 l0)
@@ -278,7 +278,7 @@ struct
             nb_conf := 1+ !nb_conf ; (*********)
             stats#record "Conflits";
             debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
-            Printf.fprintf (open_out "example.dot") "%a%!" (print_graph (formule:>Formule.formule) (List.hd etat.tranches) etat.level) c;
+            (*Printf.fprintf (open_out "example.dot") "%a%!" (print_graph (formule:>Formule.formule) (List.hd etat.tranches) etat.level) c;*) (**********************)
             (** ICI : graphe/dérivation en regardant la dernière tranche // update infos sur nb de conflits/restart/decision/vieillissement *)
             if (not cl) then (* clause learning ou pas *)
               begin
@@ -305,12 +305,12 @@ struct
       let lit = next_pari (formule:>Formule.formule) in
       stats#stop_timer "Decisions (s)";
       (** ICI, tous les x conflits *)
-      if (!nb_conf mod 1000 = 0) then (*********)
+      (*if (!nb_conf mod 10000 = 0) then
         begin
-          stats#start_timer "Shaking (s)";(*********)        
-          (*shake_up formule;*) (*********)
-          stats#stop_timer "Shaking (s)"(*********)
-        end;
+          stats#start_timer "Shaking (s)";
+          shake_up formule;
+          stats#stop_timer "Shaking (s)"
+        end;*)
       match lit with
         | None ->
             Fine etat (* plus rien à parier = c'est gagné *)
