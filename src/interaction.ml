@@ -8,38 +8,43 @@ let str_of_lit (b,v) =
 
 let print_valeurs p (formule:formule) =
   fprintf p "Valeurs assignées :\n";
-  formule#get_paris#iter (fun v b -> fprintf p "%d -> %s (%d)\n" v (if b then "True" else "False") (formule#get_level v)) 
+  formule#get_paris#iter (fun v b -> fprintf p "%d -> %B (%d)\n" v b (formule#get_level v)) 
 
 (* Il faudrait connaitre état ... on verra plus tard *)
 let print_graph (formule:formule) (pari,assignations) level p clause =
   (* Indique si une variable (le literal associé) a été vu et si sa cause a été élucidée ainsi que son nom*)
   let seen = new vartable 0 in
 
-  let process conseq b v =
+  let process conseq needed b v =
     if str_of_lit (b,v) <> conseq then
       let tag = str_of_lit (not b,v) in
       let l = formule#get_level v in
       if l = level then
         begin
-          if seen#mem v = false then 
-            seen#set v (false,tag);
+          if needed then 
+            seen#set v (false,tag) (* Il faudra en trouver la cause *) 
+          else
+            seen#set v(true,tag); (* On fait comme si on connaissait déjà la cause *)
           fprintf p "%s -> %s\n" tag conseq
         end
       else
         fprintf p "%s -> %s\n" tag conseq in
 
-  let explore_clause conseq clause =
-    debug#p 2 "Entrée par %s dans la clause : \n%a" conseq clause#print ();
-    clause#get_vpos#iter_all (process conseq true);
-    clause#get_vneg#iter_all (process conseq false) in
+  let explore_clause conseq needed clause =
+    debug#p 2 "Entrée par %s dans la clause : \n%a\n Needed : %B" conseq clause#print () needed;
+    clause#get_vpos#iter_all (process conseq needed true);
+    clause#get_vneg#iter_all (process conseq needed false) in
 
   let follow_lit (b,v) =
     fprintf p "%s [fillcolor=lightseagreen]\n" (str_of_lit (b,v));
-    seen#set v (true,str_of_lit (not b, v));
     match formule#get_origin v with
-      | None -> assert false (* Tout le monde a une cause *)
-      | Some clause -> 
-          explore_clause (str_of_lit (b,v)) clause in
+      | None -> assert false (* Tout le monde a une cause dans la tranche *)
+      | Some clause ->
+          let needed = match seen#find v with
+            | Some (false,_) -> true
+            | _ -> false in
+          explore_clause (str_of_lit (b,v)) needed clause;
+          seen#set v (true,str_of_lit (not b, v)); in
 
   let is_uip () =
     debug#p 2 "Analyse de l'uip:\n";
@@ -53,7 +58,7 @@ let print_graph (formule:formule) (pari,assignations) level p clause =
     | lit::q ->
         let found = if not uip_found then
             match is_uip() with
-              | Some tag -> 
+              | Some tag ->
                   fprintf p "%s [fillcolor=gold]\n" tag;
                   true
               | None -> 
@@ -64,7 +69,7 @@ let print_graph (formule:formule) (pari,assignations) level p clause =
         explore found q in
   debug#p 2 "Clause conflit : %a\nPari : %s\n%a" clause#print () (str_of_lit pari) print_valeurs formule;
   fprintf p "digraph G{\nrankdir = LR;\nnode[style=filled,shape=circle];\nconflict [label=\"Conflict!\",shape=ellipse,fillcolor=crimson];\n";
-  explore_clause "conflict" clause;
+  explore_clause "conflict" true clause;
   explore false assignations;
   fprintf p "%s[fillcolor=chartreuse]\n}\n%!" (str_of_lit pari)
         
