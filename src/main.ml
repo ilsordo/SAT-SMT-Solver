@@ -46,7 +46,7 @@ let main () =
             | Some assoc -> fprintf p "c Réduction :\n%a\n%t%!" print_cnf (n,cnf) assoc#print_reduction
   end;
   stats#start_timer "Total execution (s)";
-  let answer = config.algo config.heuristic config.clause_learning n cnf in
+  let answer = config.algo config.heuristic config.clause_learning config.interaction n cnf in
   stats#stop_timer "Total execution (s)";
   printf "%a\n%!" print_answer (answer,assoc);
   debug#p 0 " Stats :\n%t%!" stats#print;

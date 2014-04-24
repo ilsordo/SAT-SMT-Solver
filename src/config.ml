@@ -15,8 +15,9 @@ type config =
       mutable algo : Algo.t;
       mutable nom_algo : string;
       mutable heuristic : Heuristic.t;
+      mutable nom_heuristic : string;
       mutable clause_learning : bool;
-      mutable nom_heuristic : string
+      mutable interaction : bool
     }
 
 let config = 
@@ -27,8 +28,9 @@ let config =
     algo = Dpll.algo;
     nom_algo = "dpll";
     heuristic = Heuristic.(next polarite_next);
+    nom_heuristic = "next_next";
     clause_learning = false;
-    nom_heuristic = "next_next"
+    interaction = false 
   }
 
 (* Utilise le module Arg pour modifier l'environnement config *)
@@ -74,6 +76,7 @@ let parse_args () =
     ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),"k Color solver");
     ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- Tseitin)," Tseitin solver");
     ("-print_cnf",Arg.String parse_output,                            "[f|-] Prints reduction to f (- = stdout)");
+    ("-i",        Arg.Unit (fun () -> config.interaction <- true),    " Interaction")
   ] in
   
   Arg.parse speclist (fun s -> config.input <- Some s) use_msg
