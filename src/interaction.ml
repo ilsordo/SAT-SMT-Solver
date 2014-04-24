@@ -95,7 +95,8 @@ let print_resolution (formule:formule) (pari,assignations) level clause =
     if (b,v) = lit then
       (curr,lower)
     else
-      (curr,lower) in
+      if formule#get_level v = level then
+        (str_of_lit (b,v)
   ()
 
 type interaction =
@@ -132,7 +133,7 @@ object
       | tranche::_ -> 
           fun file ->
             try
-              let out = open_out file in
+              let out = open_out (file^".dot") in
               print_graph formule tranche etat.level clause out;
               true
             with 

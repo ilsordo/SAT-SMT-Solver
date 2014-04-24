@@ -1,0 +1,7 @@
+#/bin/bash
+
+if pdflatex -halt-on-error $1
+then
+  rm $1.aux $1.log texput.log
+  evince $1.pdf 
+fi
