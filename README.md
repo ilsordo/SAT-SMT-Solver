@@ -229,11 +229,13 @@ Une table de hachage permet d'associer des entiers à des chaines de caractères
  
     stats#record s;
   
-Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'incrémenter l'entier associé au à la chaine s. Si s ne figure pas dans la table de hachage, il y est ajouté et se voit associer la valeur 1.
+Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'incrémenter l'entier associé à la chaine s. Si s ne figure pas dans la table de hachage, il y est ajouté et se voit associer la valeur 1.
 
-Deux statistiques sont actuellement intégrées à notre code : 
+Quatre statistiques sont actuellement intégrées à notre code : 
   * nombre de conflits (provoquant un backtracking)
   * nombre de paris effectués
+  * nombre de singletons appris lors du clause learning
+  * nombre de clauses (non singletons) apprises lors du clause learning
 
 Timers
 ------

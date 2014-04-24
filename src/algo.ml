@@ -167,8 +167,11 @@ struct
                 match sgt with (* None si singleton ! *)
                   | Some l0 ->
                       formule#add_clause c_learnt;
-                      set_wls formule c_learnt l l0
-                  | None -> () (* on n'enregistre pas des singletons *)      
+                      set_wls formule c_learnt l l0;
+                      stats#record "Learnt clauses"
+                  | None -> 
+                      stats#record "Learnt singletons";
+                      () (* on n'enregistre pas des singletons *)      
               end;
               (l,bt_lvl,c_learnt)
             end in

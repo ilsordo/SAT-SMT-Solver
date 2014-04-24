@@ -12,17 +12,17 @@ Le plus important (cf rendu) :
     - niveau auquel s'effectue le bctrck (via un debug)
 * Finir Readme
 * Analyse des tests
+* updat dans readme des stats enregistrées
 
 
 Memo :
 ------
 
-
-
 * Enlever tests morts, fichiers morts à la racine
 * Enlever/ajouter les assert false de sécurité << tester avant rend
 * decommenter inter, enlever shake
 * bactrack
+* stats activées par défaut
 
 
 Pour plus tard :
