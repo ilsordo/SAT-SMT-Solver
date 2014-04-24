@@ -15,7 +15,7 @@ let print_graph (formule:formule) (pari,assignations) level clause p =
   (* Indique si une variable (le literal associé) a été vu et si sa cause a été élucidée ainsi que son nom*)
   let seen = new vartable 0 in
 
-  let process conseq needed b v =
+  let process conseq uip_found needed b v =
     if str_of_lit (b,v) <> conseq then
       let tag = str_of_lit (not b,v) in
       let l = formule#get_level v in
@@ -29,18 +29,21 @@ let print_graph (formule:formule) (pari,assignations) level clause p =
           fprintf p "%s -> %s\n" tag conseq
         end
       else
-        fprintf p "%s -> %s\n" tag conseq in
+        if uip_found then
+          fprintf p "%s -> %s\n" tag conseq
+        else
+          fprintf p "subgraph cluster_0{%s}\n%s -> %s\n" tag tag conseq in
 
-  let explore_clause conseq needed clause =
+  let explore_clause conseq uip_found needed clause =
     debug#p 2 "Entrée par %s dans la clause : \n%a\n Needed : %B" conseq clause#print () needed;
-    clause#get_vpos#iter_all (process conseq needed true);
-    clause#get_vneg#iter_all (process conseq needed false) in
+    clause#get_vpos#iter_all (process conseq uip_found needed true);
+    clause#get_vneg#iter_all (process conseq uip_found needed false) in
 
-  let follow_lit (b,v) needed =
+  let follow_lit (b,v) uip_found needed =
     match formule#get_origin v with
       | None -> assert false (* Tout le monde a une cause dans la tranche *)
       | Some clause ->
-          explore_clause (str_of_lit (b,v)) needed clause;
+          explore_clause (str_of_lit (b,v)) uip_found needed clause;
           seen#set v (true,str_of_lit (not b, v)); in
 
   let is_uip () =
@@ -51,6 +54,8 @@ let print_graph (formule:formule) (pari,assignations) level clause p =
   in
 
   let rec explore uip_found = function
+    | [] when not uip_found ->
+        fprintf p "subgraph cluster_0{%s [penwidth=3,color=goldenrod]}\n" (str_of_lit pari)
     | [] -> ()
     | (b,v) as lit::q ->
         let found =
@@ -60,29 +65,38 @@ let print_graph (formule:formule) (pari,assignations) level clause p =
                   if not uip_found then
                     match is_uip() with
                       | Some tag when tag = my_tag -> (* UIP *)
-                          fprintf p "%s [fillcolor=gold]\n" tag;
+                          fprintf p "subgraph cluster_0{%s [penwidth=3,color=goldenrod]}\n" tag;
                           true
                       | _ -> (* Post-UIP *)
-                          fprintf p "%s [fillcolor=purple]\n" my_tag;
+                          fprintf p "%s [fillcolor=lightseagreen]\n" my_tag;
                           false
                   else
                     begin (* Pre-UIP *)
                       fprintf p "%s [fillcolor=lightseagreen]\n" my_tag;
                       true
                     end in
-                follow_lit lit true;
+                follow_lit lit found true;
                 found
             | _ -> (* Unrelated *)
-                fprintf p "%s [fillcolor=lightsalmon4]\n" (str_of_lit lit);
-                follow_lit lit false;
+                (*fprintf p "%s [fillcolor=lightseagreen,style=dotted]\n" (str_of_lit lit);
+                follow_lit lit false;*)
                 uip_found in
         explore found q in
   debug#p 2 "Clause conflit : %a\nPari : %s\n%a" clause#print () (str_of_lit pari) print_values formule;
-  fprintf p "digraph G{\nrankdir = LR;\nnode[style=filled,shape=circle];\nconflict [label=\"Conflict!\",shape=ellipse,fillcolor=crimson];\n";
-  explore_clause "conflict" true clause;
+  fprintf p "digraph G{\nrankdir = LR;\nnode[style=filled,shape=circle,width=1];\nsubgraph cluster_0{style=dashed;label=\"Clause\"};\nconflict [label=\"Conflict!\",shape=ellipse,fillcolor=crimson];\n";
+  explore_clause "conflict" false true clause;
   explore false assignations;
   fprintf p "%s[fillcolor=chartreuse]\n}\n%!" (str_of_lit pari)
-        
+   
+
+let print_resolution (formule:formule) (pari,assignations) level clause =
+  
+  let split_clause lit b v (curr,lower) =
+    if (b,v) = lit then
+      (curr,lower)
+    else
+      (curr,lower) in
+  ()
 
 type interaction =
   | U of (unit -> bool)
@@ -165,22 +179,3 @@ object
     loop true
     
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

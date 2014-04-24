@@ -71,7 +71,7 @@ struct
 
   (* annule les depth dernières tranches *)
   let undo ?(depth=1) (formule:formule) etat = 
-    stats#start_timer "Bactrack (s)";
+    stats#start_timer "Backtrack (s)";
     let rec aux depth etat =
       if depth=0 then
         etat
@@ -86,7 +86,7 @@ struct
               end
     in
       let res = aux depth etat in
-      stats#stop_timer "Bactrack (s)";
+      stats#stop_timer "Backtrack (s)";
       res
       
   (** Conflict analysis *)
