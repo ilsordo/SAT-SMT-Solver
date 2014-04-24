@@ -197,8 +197,8 @@ struct
         | Conflit (c,etat) ->
             stats#record "Conflits";
             debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
-            (*if repl#is_ready then
-              repl#start (formule:>Formule.formule) etat c stdout;*)
+            if repl#is_ready then
+              repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* clause learning ou pas *)
               begin
                 let etat = undo formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *)
