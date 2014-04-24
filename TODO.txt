@@ -17,10 +17,12 @@ Le plus important (cf rendu) :
 Memo :
 ------
 
-* Rétablir base.rb ?
-* Div par r.count -> Non! ( je ne crois pas du moins )
+
+
 * Enlever tests morts, fichiers morts à la racine
 * Enlever/ajouter les assert false de sécurité << tester avant rend
+* decommenter inter, enlever shake
+* bactrack
 
 
 Pour plus tard :

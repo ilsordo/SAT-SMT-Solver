@@ -252,7 +252,7 @@ Actuellement, six temps sont enregistrés par défaut :
   - "Reduction (s)" : temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)
   - "Decisions (s)" : temps utilisé par les heuristiques pour décider sur quels littéraux parier
   - "Propagation (s)" : temps passé à propager des paris
-  - "Bactrack (s)" : temps passé à annuler des paris et les assignations résultantes
+  - "Backtrack (s)" : temps passé à annuler des paris et les assignations résultantes
   - "Clause learning (s)" : temps nécessaire au calcul des clauses à apprendre (uniquement lorsque clause learning activé)
 
 
@@ -474,7 +474,7 @@ Lorsqu'une clause c contient un seul littéral l non faux (et non assigné), on 
 La pile des assignations
 ------------------------
 
-On appelle "tranche" un littéral parié et l'ensemble des littéraux assignés en conséquence. La pile des tranches constitue un historique complet de l'ensemble des assignations effectuées. Elle permet d'effectuer le bactracking. Voir les types "tranche" et "etat" (dans algo_base.ml).
+On appelle "tranche" un littéral parié et l'ensemble des littéraux assignés en conséquence. La pile des tranches constitue un historique complet de l'ensemble des assignations effectuées. Elle permet d'effectuer le backtracking. Voir les types "tranche" et "etat" (dans algo_base.ml).
 
 L'état
 ------
@@ -484,9 +484,9 @@ L'état regroupe le niveau d'assignation courant et la pile des assignations. Vo
 
 L'implémentation de l'algorithme de clause learning prend appui sur les fonctions suivantes (cf algo.ml) : 
 
-  - conflict_analysis : produit la clause à apprendre en cas de conflit et fournit les informations nécessaires au bactrack
+  - conflict_analysis : produit la clause à apprendre en cas de conflit et fournit les informations nécessaires au backtrack
   - undo : permet de défaire plusieurs niveaux d'assignations
-  - continue_bet : permet de poursuivre un tranche d'assignations suite à un bactrack non chronologique
+  - continue_bet : permet de poursuivre un tranche d'assignations suite à un backtrack non chronologique
 
 L'ajout de clauses n'a pas posé de problèmes particuliers. Nous avons utilisé la méthode add_clause présente dans formule_dpll.ml et formule_wl.ml (héritée de formule.ml) qui était déjà utilisée pour construire la formule de départ. Deux remarques peuvent être faites sur l'ajout de clauses : 
   - lorsqu'un clause singleton doit être apprise, on backtrack jusqu'au niveau 0 afin d'effectuer l'assignation dictée par cette clause puis propager. La clause n'est pas ajoutée.

@@ -22,7 +22,7 @@ L'évaluation des performances se fait à 2 niveaux :
       * "Reduction (s)" : temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)
       * "Decisions (s)" (ou "Decision (heuristic) (s)" dans certaines bdd): temps utilisé par les heuristiques pour décider sur quels littéraux parier
       * "Propagation (s)" : temps passé à propager des paris
-      * "Bactrack (s)" : temps passé à annuler des paris et les assignations résultantes
+      * "Backtrack (s)" : temps passé à annuler des paris et les assignations résultantes
       * "Clause learning (s)" : temps nécessaire au calcul des clauses à apprendre (uniquement lorsque clause learning activé)
   
   - au sein d'un script Ruby chargé de :
