@@ -180,6 +180,7 @@ struct
   (** Algo **)
 
   let algo (next_pari : Heuristic.t) cl n cnf = (* cl : activation du clause learning *)
+    let repl = new repl (Some 1) in
 
     let rec process formule etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
       try
@@ -198,9 +199,8 @@ struct
         | Conflit (c,etat) ->
             stats#record "Conflits";
             debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
-            (*let file = open_out "example.dot" in
-            Printf.fprintf file "%a%!" (print_graph (formule:>Formule.formule) (List.hd etat.tranches) etat.level) c;
-            close_out file;*)
+            if repl#is_ready then
+              repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* clause learning ou pas *)
               begin
                 let etat = undo formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *)
