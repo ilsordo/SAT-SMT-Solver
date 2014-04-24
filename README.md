@@ -541,18 +541,18 @@ Afficher l'assignation courante des variables (assignation conflictuelle) et les
     
 Enregistrer dans le fichier res.dot le graphe des conflits : 
 
-    g res.dot
+    g res
     
 Enregistrer dans le fichier res.tex la preuve par résolution de la clause à apprendre (clause learning) : 
 
-    r res.tex
+    r res
 
 Graphe de conflits
 ------------------       
 
 La commande g res permet d'enregistrer dans le fichier res.dot le graphe des conflits. Pour afficher le graphe, entrer la commande : 
 
-    dot -Tpng res.dot -o graph.png;eog graph.png
+    ./print_graph res
 
 Légende : 
   * noeuds en gris : littéraux assignés à des niveaux antérieurs au niveau de décision courant
@@ -565,7 +565,9 @@ Légende :
 Preuve par résolution
 ---------------------
 
-La commande r res permet d'enregistrer dans le fichier res.tex la preuve par résolution qui détermine la clause à ajouter.
+La commande r res permet d'enregistrer dans le fichier res.tex la preuve par résolution qui détermine la clause à ajouter. Pour afficher la preuve, entrer la commande : 
+
+    ./print_resol res 
 
 Exemple
 -------
@@ -580,15 +582,13 @@ L'exécution se stoppe avec un conflit détecté dans la clause 41 (-7 8 3).
 
 On entre la commande v pour afficher l'assignation courante des variables. On constate que la clause 41 est bien fausse, et que les 3 variables qui la composent ont été assignées au niveau de décision courant (niveau 4).
 
-On enregistre le graphe des conflits correspondants dans le fichier conf.dot en entrant : g conf. On affiche ensuite ce graphe en entrant la commande : dot -Tpng conf.dot -o graph.png;eog graph.png (dans un terminal à part). On constate que la clause à ajouter est la clause -8 20 2. Le littéral -8 est l'unique littéral de cette clause assigné au niveau de décision courant. Les littéraux 2 et 20 ont été assignés à des niveaux antérieurs. L'option v nous indique que 2 a été assigné au niveau 0 (assignation nécessaire) et 20 au niveau 1.
+On enregistre le graphe des conflits correspondants dans le fichier conf.dot en entrant : g conf. On affiche ensuite ce graphe en entrant la commande : ./print_graph conf (dans un terminal à part). On constate que la clause à ajouter est la clause -8 20 2. Le littéral -8 est l'unique littéral de cette clause assigné au niveau de décision courant. Les littéraux 2 et 20 ont été assignés à des niveaux antérieurs. L'option v nous indique que 2 a été assigné au niveau 0 (assignation nécessaire) et 20 au niveau 1.
 
 On reprend l'exécution de l'algorithme en entrant la commande s 4 afin de reprendre la main 4 conflits plus tard.
 
 Un conflit est détecté dans la clause 34 (-20 7 -10).
 
-On enregistre les graphes des conflits dans conf.dot : g conf. Puis on l'affiche : dot -Tpng conf.dot -o graph.png;eog graph.png. On constate que la clause à ajouter est 20 19 -17. Par ailleurs, cette clause intègre le littéral assigné au niveau courant (-17).
-
-On décide d'enregistrer la peuve par résolution correspondante dans un fichier res.tex. Pour cela, on entre la commande : r res.
+On enregistre les graphes des conflits dans conf.dot : g conf. Puis on l'affiche : ./print_graph conf. On constate que la clause à ajouter est 20 19 -17. Par ailleurs, cette clause intègre le littéral assigné au niveau courant (-17).
 
 On termine l'exécution sans reprendre la main, en entrant la commande t.
 
