@@ -90,14 +90,8 @@ let print_graph (formule:formule) (pari,assignations) level clause p =
    
 
 let print_resolution (formule:formule) (pari,assignations) level clause =
-  
-  let split_clause lit b v (curr,lower) =
-    if (b,v) = lit then
-      (curr,lower)
-    else
-      if formule#get_level v = level then
-        (str_of_lit (b,v)
   ()
+ 
 
 type interaction =
   | U of (unit -> bool)
