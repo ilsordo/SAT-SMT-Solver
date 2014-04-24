@@ -172,8 +172,11 @@ object
                         | I f -> Scanf.sscanf line "%_c %d" f
                         | S f -> Scanf.sscanf line "%_c %s" f
                     with
-                        Scanf.Scan_failure s ->
+                      | Scanf.Scan_failure s ->
                           fprintf p "Wrong argument\n";
+                          true
+                      | End_of_file ->
+                          fprintf p "Argument required\n";
                           true in
                   loop continue in
     loop true

@@ -7,7 +7,7 @@ open Algo_base
 
 type 'a result = Fine of 'a | Backtrack of 'a
 
-type t = Heuristic.t -> bool -> int -> int list list -> Answer.t
+type t = Heuristic.t -> bool -> bool -> int -> int list list -> Answer.t
 
 let neg : literal -> literal = function (b,v) -> (not b, v)
 
@@ -179,7 +179,7 @@ struct
 
   (** Algo **)
 
-  let algo (next_pari : Heuristic.t) cl n cnf = (* cl : activation du clause learning *)
+  let algo (next_pari : Heuristic.t) cl interaction n cnf = (* cl : activation du clause learning *)
     let repl = new repl (Some 1) in
 
     let rec process formule etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
@@ -199,7 +199,7 @@ struct
         | Conflit (c,etat) ->
             stats#record "Conflits";
             debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
-            if repl#is_ready then
+            if interaction && repl#is_ready then
               repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* clause learning ou pas *)
               begin
