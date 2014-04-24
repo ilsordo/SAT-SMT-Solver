@@ -40,7 +40,7 @@ struct
         Conflit_prop (c,acc) -> (* conflit dans la propagation *)
           raise (Conflit (c,{ etat with tranches = ((b,v),acc)::etat.tranches } ))
 
-  (* Compléte la dernière tranche, assigne (b,v) (ce n'est pas un pari) puis propage. c_learnt : clause apprise ayant provoqué le bactrack qui a appelé continue_bet *)
+  (* Compléte la dernière tranche, assigne (b,v) (ce n'est pas un pari) puis propage. c_learnt : clause apprise ayant provoqué le backtrack qui a appelé continue_bet *)
   let continue_bet (formule:formule) (b,v) c_learnt etat = 
     let lvl=etat.level in
     if lvl=0 then (* niveau 0 : tout conflit indiquerait que la formule est non sat *)
@@ -207,7 +207,7 @@ struct
                 if first then
                   process formule etat false (neg lit) (* on essaye de retourner la pièce *)
                 else
-                  Backtrack etat (* sinon on bactrack *)
+                  Backtrack etat (* sinon on backtrack *)
               end
             else (* du clause learning *)
               begin
@@ -216,7 +216,7 @@ struct
                 debug#p 2 "Learnt %a" c_learnt#print ();
                 stats#stop_timer "Clause learning (s)";
                 debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
-                let btck_etat = undo ~depth:(etat.level-k) formule etat in (* bactrack non chronologique <--- c'est ici que le clause learning bactrack *)
+                let btck_etat = undo ~depth:(etat.level-k) formule etat in (* backtrack non chronologique <--- c'est ici que le clause learning backtrack *)
                 aux formule (continue_bet formule (b,v) c_learnt btck_etat) (* on poursuit *)
               end
                 

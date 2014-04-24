@@ -14,7 +14,7 @@ set style data linespoints
 
 set pointsize 1
 
-# set datafile missing "0"
+set datafile missing "0"
 
 plot for [i=2:#{ncols}] "#{data}" using (column(i)):xticlabels(1) title columnheader(i)
 
