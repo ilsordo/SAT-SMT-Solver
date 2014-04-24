@@ -1,0 +1,25 @@
+digraph G{
+rankdir = LR;
+node[style=filled,shape=circle,width=1];
+subgraph cluster_0{style=dashed;label="Clause"};
+conflict [label="Conflict!",shape=ellipse,fillcolor=crimson];
+-3 -> conflict
+-8 -> conflict
+7 -> conflict
+-3 [fillcolor=lightseagreen]
+subgraph cluster_0{2}
+2 -> -3
+7 -> -3
+7 [fillcolor=lightseagreen]
+10 -> 7
+subgraph cluster_0{20}
+20 -> 7
+10 [fillcolor=lightseagreen]
+-8 -> 10
+subgraph cluster_0{2}
+2 -> 10
+subgraph cluster_0{-8 [penwidth=3,color=goldenrod]}
+17 -> -8
+19 -> -8
+17[fillcolor=chartreuse]
+}
