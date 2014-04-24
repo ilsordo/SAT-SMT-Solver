@@ -19,7 +19,8 @@ http://nagaaym.github.io/projet2 (non à jour)
 9. Algorithme Colorie
 10. Heuristiques
 11. Clause learning
-12. Performances
+12. Interaction
+13. Performances
 
 ******************************************************************************
 
@@ -133,7 +134,8 @@ Principales améliorations par rapport au rendu précédent :
   - Implémentation du clause learning pour DPLL et WL
   - Amélioration de l'interaction, avec notamment la possibilité d'afficher le graphe des conflits et la preuve par résolution
   - Unification des algorithmes DPLL et WL au sein de algo.ml (désormais, à quelques lignes près, seule la propagation de contrainte (cf algo_dpll.ml et algo_wl.ml) diffère entre WL et DPLL)
-  - Maintient en permanence de la taille des set manipulés (la fonction cardinal du module set ne s'exécute pas en temps constant)
+  - Maintient en permanence de la taille des set manipulés (la fonction cardinal du module set ne s'exécutait pas en temps constant)
+  - Les parties 1, 11 et 12 du présent README ont été mises à jour. Un fichier EXPERIENCES_2.md a été ajouté dans le dossier performances
   
 Améliorations futures :
   - implémentation d'heuristiques de restart (des heuristiques avec période de restart constante, ou basée sur la suite de Luby, ont déjà était testées)
@@ -295,9 +297,10 @@ formule_dpll.ml:
 * occurences : 2 vartable de clauseset permettant de savoir où apparait chaque variable selon sa positivité.
                Si aucun pari n'est fait sur la variable ils contiennent la liste des clauses visibles où elle apparait.
                Si un pari a été fait ils contiennent la liste de clauses cachées qu'il faudra restaurer en cas de backtrack.
+* level : une vartable d'entiers indiquant pour chaque variable le niveau auquelle elle été assignée
+* origin : une vartable de clauses indiquant la clause ayant provoqué l'assignation de la variable, lorsque c'est possible
 
-Les assignations de valeur dans la formule se traduisent en un passage des clauses validées par le littéral dans la partie cachée
-des clauses, une modification des listes d'occurences pour garantir la propriété citée précédemment et une assignation dans les clauses. 
+Les assignations de valeur dans la formule se traduisent en un passage des clauses validées par le littéral dans la partie cachée des clauses, une modification des listes d'occurences pour garantir la propriété citée précédemment et une assignation dans les clauses. 
 
 formule_wl.ml:
 ----------------
@@ -400,6 +403,9 @@ Heuristiques de choix de polarité
 
 Etant donnée une variables, ces heuristiques déterminent la polarité à lui joindre (pour obtenir un littéral).
 
+POLARITE_NEXT :
+  * renvoie la polarité true
+
 POLARITE_RAND :
   * renvoie une polarité aléatoire (true ou false)
 
@@ -425,8 +431,9 @@ Heuristiques de choix de littéral
 
 On indique pour chaque heuristique l'argument permettant de l'appeler.
 
-Les 2 catégories d'heuristiques décrites ci-dessus peuvent être combinées pour donner lieu à 6 heuristiques de choix de littéral : 
+Les 2 catégories d'heuristiques décrites ci-dessus peuvent être combinées pour donner lieu à 7 heuristiques de choix de littéral : 
 
+  * NEXT + POLARITE_NEXT          (-h next_next)
   * NEXT + POLARITE_RAND          (-h next_rand)
   * NEXT + POLARITE_MOST_FREQUENT (-h next_mf)
   * RAND + POLARITE_RAND          (-h rand_rand)
@@ -452,7 +459,7 @@ JEWA (Jeroslow-Wang) (-h jewa)
 12. Clause learning
 ===================
 
-L'implémentation du clause learning a nécessité l'ajout de 4 informations.
+L'implémentation du clause learning a nécessité l'ajout de 4 informations :
 
 Le niveau d'assignation de chaque variable
 ------------------------------------------
@@ -462,7 +469,7 @@ A chaque variable assignée est associé le niveau auquel à eu lieu l'assignati
 Les clauses à l'origine des assignations
 ----------------------------------------
 
-Lorsqu'une clause c contient un seul littéral l non faux (et non assignée), on assigne l et on enregistre c comme étant la clause à l'origine de l'assignation de l. Les littéraux assignés du fait d'un pari ou d'une polarité simple non pas de clause d'origine. Voir le champ "origin" dans l'objet formule (formule.ml).
+Lorsqu'une clause c contient un seul littéral l non faux (et non assigné), on assigne l et on enregistre c comme étant la clause à l'origine de l'assignation de l. Les littéraux assignés du fait d'un pari ou d'une polarité simple n'ont pas de clause d'origine. Voir le champ "origin" dans l'objet formule (formule.ml).
 
 La pile des assignations
 ------------------------
@@ -483,11 +490,15 @@ L'implémentation de l'algorithme de clause learning prend appui sur les fonctio
 
 L'ajout de clauses n'a pas posé de problèmes particuliers. Nous avons utilisé la méthode add_clause présente dans formule_dpll.ml et formule_wl.ml (héritée de formule.ml) qui était déjà utilisée pour construire la formule de départ. Deux remarques peuvent être faites sur l'ajout de clauses : 
   - lorsqu'un clause singleton doit être apprise, on backtrack jusqu'au niveau 0 afin d'effectuer l'assignation dictée par cette clause puis propager. La clause n'est pas ajoutée.
-  - dans l'algorithme WL, lorsque l'on doit apprendre un clause c comportant au moins 2 littéraux, on pose les jumelles sur 2 littéraux dont les niveaux d'assignation sont les plus élevés (à noter qu'il existe un unique littéral de plus haut niveau, mais qu'il peut y en avoir plusieurs au 2ème niveau le plus élevé)
+  - dans l'algorithme WL, lorsque l'on doit apprendre un clause c comportant au moins 2 littéraux, on pose les jumelles sur 2 littéraux dont les niveaux d'assignation sont les plus élevés (à noter qu'il existe un unique littéral de plus haut niveau, mais qu'il peut y en avoir plusieurs au 2ème niveau le plus élevé).
 
 
 La distinction principale entre DPLL et WL réside dans les fonctions de propagations qui leurs sont propres (voir algo_dpll.ml et algo_wl.ml). Nous sommes toutefois parvenus à produire un algorithme générale commun à DPLL et WL, avec ou sans clause learning. Voir la fonction algo figurant dans algo.ml.
 
+
+
+12. Interaction
+===============
 
 
 11. Performances
