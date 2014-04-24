@@ -1,0 +1,16 @@
+Extractions utilisées pour le rendu 3 :
+  
+filter = select_data({:n => 200, :k => 500..1500},3) { |p,r| ["#{p[:algo]}+#{p[:heuristic]}+CL:#{p[:cl]}", p[:k], r["Total execution (s)"]/r.count]}
+name = {:title => "Temps d'exécution en fonction du nombre de clauses (200 variables, formules 3-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Temps d'exécution total (s)"}
+
+Propagation
+filter = select_data({:n => 200, :k => 500..1500, :heuristic => ["moms","dlcs"]}) { |p,r| ["#{p[:algo]}+#{p[:heuristic]}+CL:#{p[:cl]}", p[:k], r["Propagation (s)"]/r.count]}
+name = {:title => "Temps de propagation en fonction du nombre de clauses (200 variables, formules 3-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Temps de propagation (s)"}
+
+Backtrack
+filter = select_data({:n => 200, :k => 500..1500, :heuristic => ["moms","dlcs"]}) { |p,r| ["#{p[:algo]}+#{p[:heuristic]}+CL:#{p[:cl]}", p[:k], r["Bactrack (s)"]/r.count]}
+name = {:title => "Temps de backtracking en fonction du nombre de clauses (200 variables, formules 3-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Temps de backtracking (s)"}
+
+Conflits
+filter = select_data({:n => 200, :k => 500..1500, :heuristic => ["jewa","dlcs"]},3) { |p,r| ["#{p[:algo]}+#{p[:heuristic]}+CL:#{p[:cl]}", p[:k], r["Conflits"]/r.count]}
+name = {:title => "Nombre de conflits en moyenne en fonction du nombre de clauses (200 variables, formules 3-SAT)", :xlabel=>"Nombre de clauses", :ylabel => "Nombre de conflits"}
