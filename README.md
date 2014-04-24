@@ -64,7 +64,16 @@ Colorie
 Essayer un coloriage à k couleur du graphe ex.col : 
 
     ./colorie k ex.col 
+
+Interaction
+-----------
+
+Pour activer le mode interactif, ajouter l'option : 
+
+    -i
     
+Se référer à la partie 12 pour une documentation plus détaillée du mode interactif
+        
 Générateur
 ----------
 
@@ -130,7 +139,7 @@ Stocker les résultats d'un algorithme dans un fichier res.txt (n'enregistre ni 
 2. Améliorations
 ================
 
-Principales améliorations par rapport au rendu précédent : 
+Principales améliorations depuis le rendu précédant : 
   - Implémentation du clause learning pour DPLL et WL
   - Amélioration de l'interaction, avec notamment la possibilité d'afficher le graphe des conflits et la preuve par résolution
   - Unification des algorithmes DPLL et WL au sein de algo.ml (désormais, à quelques lignes près, seule la propagation de contrainte (cf algo_dpll.ml et algo_wl.ml) diffère entre WL et DPLL)
@@ -299,7 +308,7 @@ formule_dpll.ml:
 * occurences : 2 vartable de clauseset permettant de savoir où apparait chaque variable selon sa positivité.
                Si aucun pari n'est fait sur la variable ils contiennent la liste des clauses visibles où elle apparait.
                Si un pari a été fait ils contiennent la liste de clauses cachées qu'il faudra restaurer en cas de backtrack.
-* level : une vartable d'entiers indiquant pour chaque variable le niveau auquelle elle été assignée
+* level : une vartable d'entiers indiquant pour chaque variable le niveau auquel elle été assignée
 * origin : une vartable de clauses indiquant la clause ayant provoqué l'assignation de la variable, lorsque c'est possible
 
 Les assignations de valeur dans la formule se traduisent en un passage des clauses validées par le littéral dans la partie cachée des clauses, une modification des listes d'occurences pour garantir la propriété citée précédemment et une assignation dans les clauses. 
@@ -466,7 +475,7 @@ L'implémentation du clause learning a nécessité l'ajout de 4 informations :
 Le niveau d'assignation de chaque variable
 ------------------------------------------
 
-A chaque variable assignée est associé le niveau auquel à eu lieu l'assignation. Le niveau 0 correspond aux assignations inévitables (propagation initiale, apprentissage de clauses singletons...). Chaque pari, et les assignations qui en découlent, constituent un nouveau niveau. Voir le champ "level" dans l'objet formule (formule.ml).
+A chaque variable assignée est associé le niveau auquel a eu lieu l'assignation. Le niveau 0 correspond aux assignations inévitables (propagation initiale, apprentissage de clauses singletons...). Chaque pari, et les assignations qui en découlent, constituent un nouveau niveau. Voir le champ "level" dans l'objet formule (formule.ml).
 
 Les clauses à l'origine des assignations
 ----------------------------------------
@@ -483,6 +492,7 @@ L'état
 
 L'état regroupe le niveau d'assignation courant et la pile des assignations. Voir le type "etat" (dans algo_base.ml).
 
+****
 
 L'implémentation de l'algorithme de clause learning prend appui sur les fonctions suivantes (cf algo.ml) : 
 
