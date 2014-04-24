@@ -100,11 +100,11 @@ let print_resolution (formule:formule) (pari,assignations) level clause p =
     else
       fprintf p "\\varf{%d}" v in
 
-  (*let print_raw_clause p = function
+  let print_raw_clause p = function
     | [] -> assert false (* Que fait une clause vide ici? *)
     | t::q ->
-    print_lit p t;
-    List.iter (fun lit -> fprintf p "\\lor %a" print_lit lit) q in*)
+        print_lit p t;
+        List.iter (fun lit -> fprintf p "\\lor %a" print_lit lit) q in
 
   let print_split_clause p (lower,curr,join) =
     let started =
@@ -166,7 +166,7 @@ let print_resolution (formule:formule) (pari,assignations) level clause p =
 
   let rec find_next curr = function
     | [] -> assert false
-    | (b,v)::q when List.mem (b, v) curr -> ((b,v),q)
+    | (b,v)::q when List.mem (not b, v) curr -> ((b,v),q)
     | _::q -> find_next curr q in
   
 
@@ -182,7 +182,6 @@ let print_resolution (formule:formule) (pari,assignations) level clause p =
           let (join,remaining) = find_next curr' remaining in
           let conclusion = (lower',List.filter ((<>) join ) curr',join) in (* Join the Empire? *)
           build_proof (Resol(proof,conclusion,(lower',curr',(not b, v)),clause#get_id)) conclusion remaining in
-  debug#p 0 "%d" level;
   fprintf p "
 \\documentclass{article}
 \\usepackage{mathpartir}
@@ -196,6 +195,7 @@ let print_resolution (formule:formule) (pari,assignations) level clause p =
 \\begin{document}
 Preuve de résolution :";
   let (lower,curr) = split_clause (false,0) clause in
+  debug#p 0 "curr : %a" print_raw_clause curr;
   let (join,remaining) = find_next curr assignations in
   let init = (lower,List.filter ((<>) join ) curr,join) in
   build_proof (Base(init,clause#get_id)) init remaining;
