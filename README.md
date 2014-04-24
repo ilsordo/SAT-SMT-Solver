@@ -467,7 +467,7 @@ JEWA (Jeroslow-Wang) (-h jewa)
 
 
 
-12. Clause learning
+11. Clause learning
 ===================
 
 L'implémentation du clause learning a nécessité l'ajout de 4 informations :
@@ -500,20 +500,101 @@ L'implémentation de l'algorithme de clause learning prend appui sur les fonctio
   - undo : permet de défaire plusieurs niveaux d'assignations
   - continue_bet : permet de poursuivre un tranche d'assignations suite à un backtrack non chronologique
 
-L'ajout de clauses n'a pas posé de problèmes particuliers. Nous avons utilisé la méthode add_clause présente dans formule_dpll.ml et formule_wl.ml (héritée de formule.ml) qui était déjà utilisée pour construire la formule de départ. Deux remarques peuvent être faites sur l'ajout de clauses : 
+L'ajout de clauses en cours d'exécution n'a pas posé de problèmes particuliers. Nous avons utilisé la méthode add_clause présente dans formule_dpll.ml et formule_wl.ml (héritée de formule.ml) qui était déjà utilisée pour construire la formule de départ. Deux remarques peuvent être faites sur l'ajout de clauses : 
   - lorsqu'un clause singleton doit être apprise, on backtrack jusqu'au niveau 0 afin d'effectuer l'assignation dictée par cette clause puis propager. La clause n'est pas ajoutée.
   - dans l'algorithme WL, lorsque l'on doit apprendre un clause c comportant au moins 2 littéraux, on pose les jumelles sur 2 littéraux dont les niveaux d'assignation sont les plus élevés (à noter qu'il existe un unique littéral de plus haut niveau, mais qu'il peut y en avoir plusieurs au 2ème niveau le plus élevé).
 
 
-La distinction principale entre DPLL et WL réside dans les fonctions de propagations qui leurs sont propres (voir algo_dpll.ml et algo_wl.ml). Nous sommes toutefois parvenus à produire un algorithme générale commun à DPLL et WL, avec ou sans clause learning. Voir la fonction algo figurant dans algo.ml.
+La distinction principale entre DPLL et WL réside dans les fonctions de propagations qui leurs sont propres (voir algo_dpll.ml et algo_wl.ml). Nous sommes parvenus à produire un algorithme générale commun à DPLL et WL, avec ou sans clause learning. Voir la fonction algo figurant dans algo.ml.
 
 
 
 12. Interaction
 ===============
 
+Le mode interactif permet de stopper l'algorithme au cours de son exécution et d'obtenir différentes informations sur l'état courant.
 
-11. Performances
+Pour activer le mode interactif, ajouter l'option : 
+
+    -i
+
+Options
+-------
+
+L'interaction stoppe l'algorithme à chaque conflit rencontré. Différentes options sont alors proposées à l'utilisateur :
+  
+Reprendre l'exécution jusqu'au prochain conflit : 
+
+    c
+    
+Reprendre l'exécution et stopper k conflits plus loin : 
+
+    s k
+   
+Terminer l'exécution : 
+
+    t
+   
+Afficher l'assignation courante des variables (assignation conflictuelle) et les niveaux auquels elles ont été assignées :
+  
+    v
+    
+Enregistrer dans le fichier res.dot le graphe des conflits : 
+
+    g res.dot
+    
+Enregistrer dans le fichier res.tex la preuve par résolution de la clause à apprendre (clause learning) : 
+
+    r res.tex
+
+Graphe de conflits
+------------------       
+
+La commande g res permet d'enregistrer dans le fichier res.dot le graphe des conflits. Pour afficher le graphe, entrer la commande : 
+
+    dot -Tpng res.dot -o graph.png;eog graph.png
+
+Légende : 
+  * noeuds en gris : littéraux assignés à des niveaux antérieurs au niveau de décision courant
+  * noeuds en vert : littéral parié au niveau de décision courant
+  * noeuds en bleu : littéraux assignés au niveau de décision courant
+  * noeuds en orange : unique littéral de la clause apprise assigné au niveau de décision courant
+  * noeud vert entouré en orange : littéral parié au niveau de décision courant et unique littéral de la clause apprise assigné au niveau de décision courant
+  * zone entourée par des pointillées : ensemble des littéraux de la clause à apprendre
+
+Preuve par résolution
+---------------------
+
+La commande r res permet d'enregistrer dans le fichier res.tex la preuve par résolution qui détermine la clause à ajouter.
+
+Exemple
+-------
+
+Nous donnons ci-dessous un exemple d'utilisation du mode interactif. Nous allons utiliser le fichier ex4.cnf présent dans le dossier tests/cnf avec l'algorithme DPLL (heuristique NEXT_NEXT par défaut : parier true sur le littéral de numéro le plus élevé).
+
+On lance l'exécution avec activation du mode interactif : 
+
+  ./resol tests/cnf/ex4.cnf -i
+
+L'exécution se stoppe avec un conflit détecté dans la clause 41 (-7 8 3).
+
+On entre la commande v pour afficher l'assignation courante des variables. On constate que la clause 41 est bien fausse, et que les 3 variables qui la composent ont été assignées au niveau de décision courant (niveau 4).
+
+On enregistre le graphe des conflits correspondants dans le fichier conf.dot en entrant : g conf. On affiche ensuite ce graphe en entrant la commande : dot -Tpng conf.dot -o graph.png;eog graph.png (dans un terminal à part). On constate que la clause à ajouter est la clause -8 20 2. Le littéral -8 est l'unique littéral de cette clause assigné au niveau de décision courant. Les littéraux 2 et 20 ont été assignés à des niveaux antérieurs. L'option v nous indique que 2 a été assigné au niveau 0 (assignation nécessaire) et 20 au niveau 1.
+
+On reprend l'exécution de l'algorithme en entrant la commande s 4 afin de reprendre la main 4 conflits plus tard.
+
+Un conflit est détecté dans la clause 34 (-20 7 -10).
+
+On enregistre les graphes des conflits dans conf.dot : g conf. Puis on l'affiche : dot -Tpng conf.dot -o graph.png;eog graph.png. On constate que la clause à ajouter est 20 19 -17. Par ailleurs, cette clause intègre le littéral assigné au niveau courant (-17).
+
+On décide d'enregistrer la peuve par résolution correspondante dans un fichier res.tex. Pour cela, on entre la commande : r res.
+
+On termine l'exécution sans reprendre la main, en entrant la commande t.
+
+
+
+13. Performances
 ================
 
 Une étude des performances des différents algorithmes et heuristiques figure dans le dossier "performances". Consulter le fichier README présent dans ce dossier pour de plus amples informations.
