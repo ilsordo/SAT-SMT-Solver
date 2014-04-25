@@ -114,3 +114,39 @@ def analyze_cl name
   names = {:title => "n = 80, l = 3, algo dpll+jewa", :xlabel => "k", :ylabel => "Time (s)"}
   db.to_gnuplot(filter,names)
 end
+
+
+
+def perf(name, threads)
+  db = Database::new
+
+  couples = [["dpll","jewa"]]
+  n = [200]
+  l = [3]
+  k = [900]
+  cl = [false]
+  sample = 5                   
+  timeout = 300
+  
+  threads.times do 
+    Thread::new do
+      run_tests_cnf(n,l,k,couples,cl,sample,timeout) { |problem, report| db.record(problem, report) if report}
+    end
+  end
+
+  while Thread::list.length != 1 do
+    system "date -R"
+    puts "Saving"
+    db.save name
+    puts "Done"
+    sleep 30
+  end
+  
+  (Thread::list - [Thread::current]).each do |t|
+    t.join
+  end
+
+  puts "Saving"
+  db.save name
+  puts "Done"
+end

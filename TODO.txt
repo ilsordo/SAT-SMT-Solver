@@ -1,0 +1,28 @@
+
+Le plus important (cf rendu) : 
+------------------------------
+
+
+* "Indiquer si la construction de la preuve par résolution parcourt bien l'ensemble des noeuds de l'ensemble UIP choisi"
+* Finir partie Interaction dans Readme (preuve par résolution)
+* Pourquoi ajout auto d'un extension dans interaction ?
+
+
+Memo :
+------
+
+* Enlever tests morts, fichiers morts à la racine
+
+
+
+Pour plus tard :
+---------------
+
+Mettre en place un check true/false dans le cas UNSAT en appelant Minisat : 
+  Le booléen suivant est vrai ssi ex.cnf est unsat : 
+    (Sys.command "minisat ex.cnf > /dev/null") = 20
+  La difficulté : envoyer ex.cnf (fichier contenant la cnf)
+ 
+Revoir la découverte des sgts. Ne pas maintenir la détection des sgts dans WL ?
+
+Ajouter une heuristique de décision qui laisse l'utilisateur choisir le littéral sur lequel parier

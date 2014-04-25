@@ -3,7 +3,7 @@ open Debug
 
 module ClauseSet = Set.Make(OrderedClause)
 
-type f_repr = ClauseSet.t
+
 
 exception Found of (literal*clause)
 
@@ -15,58 +15,53 @@ exception Empty_clause of clause
 
 
 class clauseset =
-object
-  val mutable vis = ClauseSet.empty (* clauses visibles *)
-  val mutable hid = ClauseSet.empty (* clauses cachées *)
-  val mutable size = 0 (* nombre de clauses visibles *)
+object (self)
+  val vis : (int,clause) Hashtbl.t = Hashtbl.create 1000
+  val hid : (int,clause) Hashtbl.t = Hashtbl.create 1000
   
-  method size = size
+  method size = Hashtbl.length vis
   
   method hide c = (* cacher la clause c si elle est déjà visible *)
     (*if not (ClauseSet.mem c vis) then assert false;*) (** Zone a risque*)
-    vis <- ClauseSet.remove c vis;
-    hid <- ClauseSet.add c hid;
-    size <- size-1
-
+    Hashtbl.remove vis c#get_id;
+    Hashtbl.replace hid c#get_id c
       
   method show c = (* montrer la clause c, si elle est déjà cachée *)
     (*if (not (ClauseSet.mem c hid)) || (ClauseSet.mem c vis) then assert false;*) (** Zone a risque*)
-    hid <- ClauseSet.remove c hid;
-    vis <- ClauseSet.add c vis;
-    size <- size+1
+    Hashtbl.remove hid c#get_id;
+    Hashtbl.replace vis c#get_id c
         
   method add c = 
     (*if (ClauseSet.mem c vis) || (ClauseSet.mem c hid)  then assert false;*) (** Zone a risque*)
-    vis <- ClauseSet.add c vis; (* ajouter la clause c aux clauses visibles *)
-    size <- size+1
+    Hashtbl.replace vis c#get_id c
       
   method add_hid c = (* ajouter la clause c aux clauses cachées *)
     (*if (ClauseSet.mem c vis) || (ClauseSet.mem c hid) then assert false;*) (** Zone a risque*)
-    hid <- ClauseSet.add c hid 
+    Hashtbl.replace hid c#get_id c
 
-  method remove c = 
+  method remove (c:clause) = 
     (*if not (ClauseSet.mem c vis) then assert false;*) (** Zone a risque*)
-    vis <- ClauseSet.remove c vis;
-    size <- size - 1
+    Hashtbl.remove vis c#get_id
            
-  method mem c = ClauseSet.mem c vis (* indique si c est une clause visible *)
+  method mem (c:clause) = Hashtbl.mem vis c#get_id
 
-  method is_empty = ClauseSet.is_empty vis (* indique s'il n'y a aucune clause visible *)
+  method is_empty = Hashtbl.length vis = 0 (* indique s'il n'y a aucune clause visible *)
 
   method reset = 
-    vis <- ClauseSet.empty;
-    hid <- ClauseSet.empty
-    (* +reset de size ? *)
+    Hashtbl.clear vis;
+    Hashtbl.clear hid
 
-  method iter f = ClauseSet.iter f vis
+  method iter f = Hashtbl.iter (fun k -> fun c -> f c) vis
 
-  method iter_all f = ClauseSet.iter f vis ; ClauseSet.iter f hid
+  method iter_all f = Hashtbl.iter (fun k -> fun c -> f c) vis ; Hashtbl.iter (fun k -> fun c -> f c) hid
   
-  method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> ClauseSet.fold f vis a
+  method fold : 'a.(clause -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> Hashtbl.fold (fun b -> fun c -> fun d -> f c d) vis a
     
   method choose =
-    try Some (ClauseSet.choose vis)
-    with Not_found -> None
+    try 
+      Hashtbl.iter (fun k -> fun c -> raise (Found((true,0),c)) ) vis;
+      None;
+    with Found(_,c) -> Some c
 
 end
 

@@ -269,7 +269,7 @@ class ProblemTseitin < Problem
 end
 
 
-def run_tests_cnf(n,l,k,couples,cl = [false], sample=1, limit = nil,&block)
+def run_tests_cnf(n,l,k,algos,heuristics,cl = [false], sample=1, limit = nil,&block)
   limit ||= 0
   n.each do |n_|
     l.each do |l_|
@@ -278,7 +278,8 @@ def run_tests_cnf(n,l,k,couples,cl = [false], sample=1, limit = nil,&block)
           p = ProblemCnf::new(n_,l_,k_)
           puts p
           proc = p.gen
-            couples.each do |a_,h_|
+          algos.each do |a_|
+            heuristics.each do |h_|
               cl.each do |cl_|
                 report = Report::new
                 begin
@@ -288,6 +289,7 @@ def run_tests_cnf(n,l,k,couples,cl = [false], sample=1, limit = nil,&block)
                 rescue Timeout::Error
                   puts "Timeout : #{p}, #{a_}, #{h_}, cl : #{cl_}"
                 end 
+              end
             end
           end
         end
