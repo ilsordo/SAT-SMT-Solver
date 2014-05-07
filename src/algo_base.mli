@@ -1,7 +1,7 @@
 open Clause
 open Formule
 
-type tranche = literal * literal list 
+type tranche = bool*literal * literal list 
 
 type etat = {
   tranches : tranche list;
@@ -12,7 +12,7 @@ exception Conflit_prop of (clause*(literal list)) (* permet de construire une tr
 
 module type Algo_base =
 sig
-  type formule = private #formule (* J'ai trouvé! *)
+  type formule = private #formule
 
   val name : string
 
