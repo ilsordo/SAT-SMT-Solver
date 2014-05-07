@@ -1,10 +1,12 @@
 open Algo_base
 
-type t = Heuristic.t -> bool -> bool -> int -> int list list -> Answer.t
+type param = Heuristic.t -> bool -> bool -> int -> int list list
+
+type t = 
 
 module Bind : functor (Base : Algo_base) -> 
 sig
-  val algo : t 
+  val algo : param -> t 
 end
 
 

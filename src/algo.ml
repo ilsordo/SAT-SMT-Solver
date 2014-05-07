@@ -188,16 +188,16 @@ struct
     let rec process formule etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
       try
         debug#p 2 "Setting %d to %B (level : %d)" v b (etat.level+1);
-        let etat = make_bet formule lit etat in (* fait un pari et propage, lève une exception si conflit créé *)
+        let etat = make_bet formule lit first etat in (* fait un pari et propage, lève une exception si conflit créé *)
         match aux formule etat with (* on essaye de prolonger l'assignation courante avec d'autres paris *)
-          | Fine etat -> Fine etat
           | Backtrack etat when first -> (* retourner la pièce *)
               debug#p 2 "Backtrack : trying negation";
               let etat = undo formule etat in
-              process formule etat false (neg lit)
+              (etat, Backtrack (fun etat -> process formule etat false (neg lit)))
           | Backtrack etat -> (* On a déjà fait le pari sur le littéral opposé, il faut remonter *)
               debug#p 2 "Backtrack : no options left, backtracking";
-              Backtrack (undo formule etat)
+              let etat = undo formule etat in
+              (etat, Backtrack (fun etat ->)
       with 
         | Conflit (c,etat) ->
             stats#record "Conflits";
