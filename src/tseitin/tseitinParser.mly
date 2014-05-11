@@ -26,7 +26,7 @@ main:
 
   formule:	
 | LPAREN formule RPAREN                   { $2 }
-| VAR                                     { Var($1) }
+| VAR                                     { Atom($1) }
 | formule AND formule                     { And($1,$3) }	
 | formule OR formule                      { Or($1,$3) }													
 | formule IMP formule                     { Imp($1,$3) }
