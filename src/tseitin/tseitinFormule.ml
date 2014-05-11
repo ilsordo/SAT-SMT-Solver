@@ -1,4 +1,4 @@
 open Formula
 
-type t = Formula.(string formula)
+type t = string formula
 
