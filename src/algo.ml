@@ -4,6 +4,7 @@ open Debug
 open Answer
 open Interaction
 open Algo_base
+open Conflict_analysis
 
 type 'a result = Fine of 'a | Backtrack of 'a (** plus utilisé *)
 
@@ -18,27 +19,22 @@ struct
 
   include Base
 
-  let decrease_level etat = { etat with level = etat.level-1 }
-
-  let increase_level etat = { etat with level = etat.level+1 }
-
   (* Parie sur (b,v) puis propage. Pose la dernière tranche qui en résulte, quoiqu'il arrive *)
   let make_bet (formule:formule) (b,v) first etat =
-    let etat = increase_level etat in (* on augmente le level *)
-    let lvl = etat.level in 
+    let level = etat.lvl in 
     begin
       try
         formule#set_val b v lvl (* on fait le pari *)
       with 
           Empty_clause c -> (* conflit suite à pari *)
-            raise (Conflit (c,{ etat with tranches = (first,(b,v),[])::etat.tranches } )) (* on prend soin d'empiler la dernière tranche *)
+            raise (Conflit (c,{ etat with level = lvl + 1; tranches = (first,(b,v),[])::etat.tranches } )) (* on prend soin d'empiler la dernière tranche *)
     end;
     try 
       let propagation = constraint_propagation formule (b,v) etat [] in (* on propage *)
-      { etat with tranches = (first,(b,v),propagation)::etat.tranches } (* on renvoie l'état avec la dernière tranche ajoutée *)
+      { etat with level = lvl + 1; tranches = (first,(b,v),propagation)::etat.tranches } (* on renvoie l'état avec la dernière tranche ajoutée *)
     with
         Conflit_prop (c,acc) -> (* conflit dans la propagation *)
-          raise (Conflit (c,{ etat with tranches = (first,(b,v),acc)::etat.tranches } ))
+          raise (Conflit (c,{ etat with level = lvl + 1; tranches = (first,(b,v),acc)::etat.tranches } ))
 
   (* Compléte la dernière tranche, assigne (b,v) (ce n'est pas un pari) puis propage. c_learnt : clause apprise ayant provoqué le backtrack qui a appelé continue_bet *)
   let continue_bet (formule:formule) (b,v) c_learnt etat = 
@@ -48,7 +44,8 @@ struct
         formule#set_val b v lvl; (* peut lever Empty_clause *)
         let _ = constraint_propagation formule (b,v) etat [] in (* peut lever Conflit_prop *)
         etat
-      with _ -> raise Unsat (** Ici : le clause learning détecte que la formule est insatisfiable *)
+      with 
+        | Empty_clause | Conflit_prop -> raise Unsat (** Ici : le clause learning détecte que la formule est insatisfiable *)
     else    
       match etat.tranches with
         | [] -> assert false 
@@ -58,14 +55,14 @@ struct
                 formule#set_val b v ~cl:c_learnt lvl
               with 
                   Empty_clause c -> 
-                    raise (Conflit (c,{ etat with tranches = (first,pari,(b,v)::propagation)::q } ))
+                    raise (Conflit (c,{ etat with level = lvl + 1; tranches = (first,pari,(b,v)::propagation)::q } ))
             end;
             try 
               let continue_propagation = constraint_propagation formule (b,v) etat ((b,v)::propagation) in (* on poursuit l'assignation sur la dernière tranche *)
-              { etat with tranches = (first,pari,continue_propagation)::q }
+              { etat with level = level + 1; tranches = (first,pari,continue_propagation)::q }
             with
                 Conflit_prop (c,acc) -> 
-                  raise (Conflit (c,{ etat with tranches = (first,pari,acc)::q } ))
+                  raise (Conflit (c,{ etat with level = level + 1; tranches = (first,pari,acc)::q } ))
   
   let undo_tranche formule etat = 
     let undo_assignation formule (_,v) = formule#reset_val v in
@@ -74,7 +71,7 @@ struct
         | (first,pari,propagation)::q ->
             List.iter (undo_assignation formule) propagation;
             undo_assignation formule pari;
-            decrease_level { etat with tranches = q } (** maintenant le niveau est diminué ici *)
+            { etat with level = etat.level - 1; tranches = q } (** maintenant le niveau est diminué ici *)
   
   let undo depth (formule:formule) etat = 
     let rec aux dpth etat =
@@ -101,96 +98,6 @@ struct
       stats#stop_timer "Backtrack (s)";
       res
       
-  (** Conflict analysis *)
-
-  (* None si plusieurs littéraux de c sont du niveau (présupposé max) lvl, Some (b,v) si un seul *)
-  let max_level (formule:formule) etat (c:clause) = 
-    let lvl = etat.level in
-    let aux b v (res:literal option) =
-      if (formule#get_level v) > lvl then
-        assert false
-      else 
-        if (formule#get_level v) = lvl then 
-          match res with
-            | Some _ ->
-                raise Exit 
-            | None ->      
-                Some (b,v)
-        else
-          res in
-    try
-      c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) None);
-    with Exit -> None
-  
-  (* couple : (2ème niveau le plus élevé après lvl, x) où x=None si clause singleton, Some l si l est un des littéraux du 2ème plus haut niveau *)
-  let backtrack_level (formule:formule) etat (c:clause) = 
-    let lvl = etat.level in
-    let aux b v (k,sgt) =
-      let lvl_temp = formule#get_level v in
-      if (lvl_temp > k && lvl_temp <> lvl) then 
-        (lvl_temp,Some (b,v))
-      else 
-        (k,sgt) in
-    let (b_level,sgt) = c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) (-1,None)) in (* s'assurer < lvl ? *)
-    if sgt = None then
-      (0,sgt) (* singleton *)
-    else
-      (b_level,sgt)
-  
-  (* récupère le littéral en haut de tranche = littéral d'où est parti le conflit *)    
-  let get_conflict_lit etat = 
-    match etat.tranches with
-      | [] -> assert false
-      | (_,pari,propagation)::q ->
-          match propagation with
-            | [] -> pari
-            | (b,v)::t -> (b,v)
-          
-(* conflit déclenché en pariant le littéral de haut de tranche, dans la clause c
-   en résultat : (l,k,c) où : 
-      - l : littéral de + haut niveau dans la clause apprise
-      - k : niveau auquel backtracker
-      - c : clause apprise
-*)
-  let conflict_analysis (formule:formule) etat c =
-    let c_learnt = formule#new_clause in
-    c_learnt#union c; (* initialement, la clause à apprendre est la clause où est apparu le conflit *)
-    let rec aux (first,pari,propagation) = 
-      match max_level formule etat c_learnt with
-        | None -> (* tant qu'il y a plusieurs littéraux du niveau max dans c_learnt... *)
-            begin
-              match propagation with
-                | [] -> 
-                    assert false (* pari devrait être le seul littéral du niveau courant dans c_learnt, donc max_level ne devrait pas renvoyer None *)
-                | (b,v)::q -> 
-                    if (c_learnt#mem_all (not b) v) then (* si c_learnt contient v *)
-                      begin
-                        match formule#get_origin v with
-                          | None -> assert false
-                          | Some c -> 
-                              c_learnt#union ?v_union:(Some v) c (* on fusionne c_learnt avec la clause à l'origine de l'assignation de v *)
-                      end;
-                    aux (first,pari,q)
-            end
-        | Some l -> (* la clause peut être apprise : elle ne contient plus qu'un seul littéral du niveau max *)
-            begin
-              let (bt_lvl,sgt) = backtrack_level formule etat c_learnt in
-              begin
-                match sgt with (* None si singleton ! *)
-                  | Some l0 ->
-                      formule#add_clause c_learnt;
-                      set_wls formule c_learnt l l0;
-                      stats#record "Learnt clauses"
-                  | None -> 
-                      stats#record "Learnt singletons";
-                      () (* on n'enregistre pas des singletons *)      
-              end;
-              (l,bt_lvl,c_learnt)
-            end in
-    match etat.tranches with
-      | [] -> assert false
-      | t::q -> aux t
-
 
   (** Algo **)
 
@@ -201,7 +108,7 @@ struct
       try
         debug#p 2 "Setting %d to %B (level : %d)" v b (etat.level+1);
         let etat = make_bet formule lit first etat in (* fait un pari et propage, lève une exception si conflit créé *)
-          aux formule etat (* on essaye de prolonger l'assignation courante avec d'autres paris *)
+          bet formule etat (* on essaye de prolonger l'assignation courante avec d'autres paris *)
       with 
         | Conflit (c,etat) ->
             stats#record "Conflits";
@@ -220,10 +127,10 @@ struct
                 stats#stop_timer "Clause learning (s)";
                 debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
                 let (_,btck_etat) = undo (Some (etat.level-k)) formule etat in (* backtrack non chronologique <--- c'est ici que le clause learning backtrack *)
-                aux formule (continue_bet formule (b,v) c_learnt btck_etat) (* on poursuit *) (** ICI : Unsat du cl *)
+                bet formule (continue_bet formule (b,v) c_learnt btck_etat) (* on poursuit *) (** ICI : Unsat du cl *)
               end
                 
-    and aux formule etat =
+    and bet formule etat =
       debug#p 2 "Seeking next bet";
       stats#start_timer "Decisions (s)";
       let lit = next_pari (formule:>Formule.formule) in (* choisir un littéral sur lequel parier *)
@@ -239,7 +146,7 @@ struct
     try
       let formule = init n cnf in
       let etat = { tranches = []; level = 0 } in
-        aux formule etat
+        bet formule etat
     with Unsat -> Unsolvable (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *)
 
 end
