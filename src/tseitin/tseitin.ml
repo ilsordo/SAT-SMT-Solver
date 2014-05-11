@@ -1,5 +1,6 @@
 open Reduction
 open TseitinFormule
+open Formula
 open Answer
 open Printf
 
