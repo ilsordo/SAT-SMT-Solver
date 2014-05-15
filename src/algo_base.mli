@@ -16,7 +16,7 @@ sig
 
   val name : string
 
-  (* val pure_prop : bool *)
+  val pure_prop : bool
 
   val init : int -> int list list -> formule (* construction de la formule, prétraitement *)
 

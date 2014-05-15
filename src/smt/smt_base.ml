@@ -27,4 +27,6 @@ sig
   val backtrack : atom reduction -> literal list -> etat -> etat
 
   val print_etat : atom reduction -> out_channel -> etat -> unit
+
+  val pure_prop : bool
 end
