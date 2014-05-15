@@ -144,7 +144,6 @@ struct
 
     and backtrack formule etat clause =
       let c = formule#new_clause clause in
-      
     in 
     try
       let (formule,prop_init) = Base.init n cnf in
