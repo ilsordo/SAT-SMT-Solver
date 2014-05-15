@@ -10,12 +10,12 @@ type t = Heuristic.t -> bool -> bool -> int -> int list list -> Answer.t
 
 let neg : literal -> literal = function (b,v) -> (not b, v)
 
+let (@) l1 l2 = List.(rev_append (rev l1) l2)
+
 exception Conflit of (clause*etat)
 
 module Bind = functor(Base : Algo_base) ->
 struct
-
-  open Base
 
   (* Parie sur (b,v) puis propage. Pose la dernière tranche qui en résulte, quoiqu'il arrive *)
   let make_bet (formule:formule) (b,v) first etat =
@@ -128,26 +128,41 @@ struct
                 bet formule (continue_bet formule (b,v) c_learnt btck_etat) (* on poursuit *) (** ICI : Unsat du cl *)
               end
                 
-    and bet formule etat =
+    and bet formule etat () =
       debug#p 2 "Seeking next bet";
       stats#start_timer "Decisions (s)";
       let lit = next_pari (formule:>Formule.formule) in (* choisir un littéral sur lequel parier *)
       stats#stop_timer "Decisions (s)";
       match lit with
         | None ->
-            Solvable (formule#get_paris) (* plus rien à parier = c'est gagné *)
+            No_bet (* plus rien à parier = c'est gagné *)
         | Some ((b,v) as lit) ->  
             stats#record "Paris";
             debug#p 2 "Next bet : %d %B" v b;
-            process formule etat true lit in (* on assigne (b,v) et on propage *)
+            process formule etat true lit (* on assigne (b,v) et on propage *)
+    
 
+    and backtrack formule etat clause =
+      let c = formule#new_clause clause in
+      
+    in 
     try
-      let formule = init n cnf in
+      let (formule,prop_init) = Base.init n cnf in
       let etat = { tranches = []; level = 0 } in
-        bet formule etat
-    with Unsat -> Unsolvable (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *)
+      Fine (prop_init, bet formule etat)
+    with Unsat -> Contradiction (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *)
 
 end
+
+
+
+
+
+
+
+
+
+
 
 
 
