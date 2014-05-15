@@ -10,14 +10,14 @@ let backtrack_analysis (formule:formule) etat (c:clause) =
   let aux b v classif = 
     let lvl = formule#get_level v in
     match classif with
-      | Empty -> Singleton ((b,v),lvl)      
-      | Singleton (l,lvl_max) when lvl = lvl_max -> Top_level_crowded (l,(b,v),lvl)
-      | Singleton (l,lvl_max) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l,lvl_max)
-      | Singleton (l,lvl_max) -> Top_level_singleton (l,lvl_max,(b,v),lvl)            
-      | Top_level_crowded (l1,l2,lvl_max) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l1,lvl_max)
-      | Top_level_crowded (l1,l2,lvl_max) -> Top_level_crowded (l1,l2,lvl_max)   
-      | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl = lvl_max -> Top_level_crowded (l1,(b,v),lvl_next)
-      | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l1,lvl_max)
+      | Empty -> Singleton ((b,v),lvl)      
+      | Singleton (l,lvl_max) when lvl = lvl_max -> Top_level_crowded (l,(b,v),lvl)
+      | Singleton (l,lvl_max) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l,lvl_max)
+      | Singleton (l,lvl_max) -> Top_level_singleton (l,lvl_max,(b,v),lvl)            
+      | Top_level_crowded (l1,l2,lvl_max) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l1,lvl_max)
+      | Top_level_crowded (l1,l2,lvl_max) -> Top_level_crowded (l1,l2,lvl_max)   
+      | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl = lvl_max -> Top_level_crowded (l1,(b,v),lvl_next)
+      | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l1,lvl_max)
       | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl > lvl_next -> Top_level_singleton (l1,lvl_max,(b,v),lvl)
       | Top_level_singleton (l1,lvl_max,l2,lvl_next) -> Top_level_singleton (l1,lvl_max,l2,lvl_next)   
   in      

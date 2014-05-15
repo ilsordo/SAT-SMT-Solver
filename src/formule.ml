@@ -7,12 +7,7 @@ type f_repr = ClauseSet.t
 
 exception Found of (literal*clause)
 
-exception Unsat
-
 exception Empty_clause of clause
-
-
-
 
 class clauseset =
 object
@@ -185,7 +180,7 @@ object (self)
       | Found (l,c) -> Some (l,c)
 
   method check_empty_clause = (* indique s'il existe une clause vide *)
-    clauses#iter (fun c -> if c#is_empty then raise Unsat);
+    clauses#iter (fun c -> if c#is_empty then raise (Empty_clause c));
 
   (***)
   
@@ -209,4 +204,3 @@ object (self)
 
     
 end
-
