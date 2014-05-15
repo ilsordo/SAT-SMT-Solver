@@ -1,13 +1,13 @@
 open Reduction
 open TseitinFormule
+open Formula
 open Answer
 open Printf
 
 type t = TseitinFormule.t
 
-
 let rec print_formule p = function
-  | Var v -> Printf.fprintf p "%s" v
+  | Atom v -> Printf.fprintf p "%s" v
   | Not f -> Printf.fprintf p "Not(%a)" print_formule f
   | And(f,g) -> Printf.fprintf p "(%a)/\\(%a)" print_formule f print_formule g
   | Or(f,g) -> Printf.fprintf p "(%a)\\/(%a)" print_formule f print_formule g
@@ -22,7 +22,7 @@ let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches 
     | [] -> cnf
     | (f, label)::q ->
         let cnf, formule = match f with
-          | Var v ->
+          | Atom v ->
               ((impl label v)::(impl v label)::cnf), q
           | Not f ->
               let l1 = fresh#next in

@@ -25,11 +25,11 @@ main:
   ;
   
   clause:
-| litteral clause             {$1::$2}
+| literal clause             {$1::$2}
 |                             {[]}
   ;
 
-litteral:
+literal:
 | INT                         {$1}
 | MINUS INT                   {-$2}
 

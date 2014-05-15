@@ -1,5 +1,5 @@
 %{
-open Formula
+open TseitinFormule
 %}
 
 %token <string> VAR 
