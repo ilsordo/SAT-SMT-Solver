@@ -56,8 +56,9 @@ struct
                     raise (Conflit (c,{ etat with level = lvl + 1; tranches = (first,pari,(b,v)::propagation)::q } ))
             end;
             try 
-              let continue_propagation = constraint_propagation formule (b,v) etat ((b,v)::propagation) in (* on poursuit l'assignation sur la dernière tranche *)
-              { etat with level = level + 1; tranches = (first,pari,continue_propagation)::q }
+              let continue_propagation = Base.constraint_propagation formule (b,v) etat [] in
+              let propagation = continue_propagation@((b,v)::propagation) in (* on poursuit l'assignation sur la dernière tranche *)
+              ({ etat with level = level + 1; tranches = (first,pari,propagation)::q }, continue_propagation)
             with
                 Conflit_prop (c,acc) -> 
                   raise (Conflit (c,{ etat with level = level + 1; tranches = (first,pari,acc)::q } ))
@@ -69,32 +70,36 @@ struct
         | (first,pari,propagation)::q ->
             List.iter (undo_assignation formule) propagation;
             undo_assignation formule pari;
-            { etat with level = etat.level - 1; tranches = q } (** maintenant le niveau est diminué ici *)
+            ({ etat with level = etat.level - 1; tranches = q }, pari::(rev propagation)) (** maintenant le niveau est diminué ici *)
   
-  let undo depth (formule:formule) etat acc = 
-    let rec aux t_depth etat =
+  (* C'est bon c'est logique ~ Yassine Hamoudi, Jeu 15 mai, 16:48 *)
+  let undo depth (formule:formule) etat = 
+    let rec concat acc = function
+      | [] -> acc
+      | t::q -> concat (rev_append t acc) q in
+    let rec aux t_depth etat acc =
       match t_depth with
         | None -> 
             begin
               match etat.tranches with (* annule la dernière tranche et la fait sauter *)
                 | [] -> raise Unsat (** Ici le non clause learning détecte formule insatisfiable *)
                 | (first,pari,propagation)::q ->
-                    let etat = undo_tranche formule etat in
+                    let (etat,prop) = undo_tranche formule etat in
                     if first then
-                      (Some (neg pari),etat,acc)
+                      (Some (neg pari),etat,concat [] (prop::acc))
                     else
-                      aux t_depth etat
+                      aux t_depth etat (prop::acc)
             end
         | Some k ->
             if k=0 then
-              (None,etat)
+              (None,etat,concat [] (prop::acc))
             else
-              aux (Some (k-1)) (undo_tranche formule etat) (* on n'oublie pas de diminuer le level à chaque fois *)
+              aux (Some (k-1)) (undo_tranche formule etat) (prop::ac) (* on n'oublie pas de diminuer le level à chaque fois *)
     in
-      stats#start_timer "Backtrack (s)";
-      let res = aux depth etat in
-      stats#stop_timer "Backtrack (s)";
-      res
+    stats#start_timer "Backtrack (s)";
+    let res = aux depth etat in
+    stats#stop_timer "Backtrack (s)";
+    res
       
 
   (** Algo **)
@@ -124,7 +129,7 @@ struct
                 debug#p 2 "Learnt %a" c_learnt#print ();
                 stats#stop_timer "Clause learning (s)";
                 debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
-                let (_,btck_etat) = undo (Some (etat.level-k)) formule etat in (* backtrack non chronologique <--- c'est ici que le clause learning backtrack *)
+                let (_,btck_etat,undo_list) = undo (Some (etat.level-k)) formule etat in (* backtrack non chronologique <--- c'est ici que le clause learning backtrack *)
                 bet formule (continue_bet formule (b,v) c_learnt btck_etat) (* on poursuit *) (** ICI : Unsat du cl *)
               end
                 
