@@ -1,4 +1,4 @@
-open Formula
+open Formula_tree
 open Clause
 
 exception Conflit_smt of (literal list) (* Clause à apprendre *)
@@ -16,7 +16,7 @@ sig
 
   type etat
 
-  val normalize : atom formula -> atom formula
+  val normalize : atom formula_tree -> atom formula_tree
 
   val init : atom reduction -> etat
 

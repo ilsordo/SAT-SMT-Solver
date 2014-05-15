@@ -1,11 +1,3 @@
-type 'a term =
-  | And of ('a term)*('a term) 
-  | Or of ('a term)*('a term)  
-  | Imp of ('a term)*('a term) (* implication *)
-  | Equ of ('a term)*('a term) (* équivalence *)
-  | Not of ('a term) 
-  | Atom of 'a
-
 module type Term_base =
 sig
   type atom
@@ -30,23 +22,3 @@ sig
   | EQU
   | EOF
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
