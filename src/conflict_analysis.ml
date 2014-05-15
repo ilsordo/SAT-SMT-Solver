@@ -3,6 +3,9 @@ open Formule
 open Algo_base
 open Debug
 
+type clause_classif = Empty | Singleton of literal*int | Top_level_crowded of literal*literal*int | Top_level_singleton of literal*int*literal
+
+
 
 (* None si plusieurs littéraux de c sont du niveau (présupposé max) lvl, Some (b,v) si un seul *)
 let max_level (formule:formule) etat (c:clause) = 
