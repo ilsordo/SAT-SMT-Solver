@@ -53,21 +53,3 @@ struct
             aux etat_smt next_bet period 1 []
           with
             | Conflit_smt _ -> Unsolvable
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
