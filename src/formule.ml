@@ -161,7 +161,7 @@ object (self)
 
   (***)
   
-  method new_clause = new clause x [] 
+  method new_clause contents = new clause x contents 
     
   method add_clause c = clauses#add c (* ajoute la clause c, dans les clauses et les occurences *)
 

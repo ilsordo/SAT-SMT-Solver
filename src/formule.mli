@@ -55,7 +55,7 @@ object
   method check_empty_clause : unit
   method eval : bool
   method get_origin : variable -> clause option
-  method new_clause : clause
+  method new_clause : literal list -> clause
   method get_level : variable -> int
   method watch : clause -> literal -> literal -> unit (***)
 end

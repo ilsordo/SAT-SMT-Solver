@@ -47,6 +47,21 @@ let get_conflict_lit etat =
           | [] -> pari
           | (b,v)::t -> (b,v)
           
+let learn_clause (formule:formule) etat c =
+  let (bt_lvl,sgt) = backtrack_level formule etat c_learnt in
+  begin
+    match sgt with (* None si singleton ! *)
+      | Some l0 ->
+          formule#add_clause c_learnt;
+          set_wls formule c_learnt l l0;
+          stats#record "Learnt clauses"
+      | None -> 
+          stats#record "Learnt singletons";
+          () (* on n'enregistre pas des singletons *)      
+  end;
+  (l,bt_lvl,c_learnt)
+
+
 (* conflit déclenché en pariant le littéral de haut de tranche, dans la clause c
    en résultat : (l,k,c) où : 
       - l : littéral de + haut niveau dans la clause apprise
@@ -54,7 +69,7 @@ let get_conflict_lit etat =
       - c : clause apprise
 *)
 let conflict_analysis (formule:formule) etat c =
-  let c_learnt = formule#new_clause in
+  let c_learnt = formule#new_clause [] in
   c_learnt#union c; (* initialement, la clause à apprendre est la clause où est apparu le conflit *)
   let rec aux (first,pari,propagation) = 
     match max_level formule etat c_learnt with
@@ -74,20 +89,17 @@ let conflict_analysis (formule:formule) etat c =
                   aux (first,pari,q)
           end
       | Some l -> (* la clause peut être apprise : elle ne contient plus qu'un seul littéral du niveau max *)
-          begin
-            let (bt_lvl,sgt) = backtrack_level formule etat c_learnt in
-            begin
-              match sgt with (* None si singleton ! *)
-                | Some l0 ->
-                    formule#add_clause c_learnt;
-                    set_wls formule c_learnt l l0;
-                    stats#record "Learnt clauses"
-                | None -> 
-                    stats#record "Learnt singletons";
-                    () (* on n'enregistre pas des singletons *)      
-            end;
-            (l,bt_lvl,c_learnt)
-          end in
+          learn_clause formule etat c in
   match etat.tranches with
     | [] -> assert false
     | t::q -> aux t
+        
+
+
+
+
+
+
+
+
+

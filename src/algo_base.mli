@@ -16,9 +16,7 @@ sig
 
   val name : string
 
-  val pure_prop : bool
-
-  val init : int -> int list list -> formule (* construction de la formule, prétraitement *)
+  val init : int -> int list list -> (formule*literal list) (* construction de la formule, prétraitement *)
 
   val constraint_propagation : formule -> literal -> etat -> literal list -> literal list
 
