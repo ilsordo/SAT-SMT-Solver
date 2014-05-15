@@ -69,7 +69,7 @@ struct
         | (first,pari,propagation)::q ->
             List.iter (undo_assignation formule) propagation;
             undo_assignation formule pari;
-            { etat with level = etat.level - 1; tranches = q } (** maintenant le niveau est diminué ici *)
+            { etat with level = etat.level - 1; tranches = q }
   
   let undo depth (formule:formule) etat acc = 
     let rec aux t_depth etat =
@@ -154,6 +154,10 @@ struct
     with Unsat -> Contradiction (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *)
 
 end
+
+
+
+
 
 
 
