@@ -23,31 +23,22 @@ let backtrack_analysis (formule:formule) etat (c:clause) =
   in      
     c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) Empty)
 
-  
-(* récupère le littéral en haut de tranche = littéral d'où est parti le conflit *)    
-let get_conflict_lit etat = 
-  match etat.tranches with
-    | [] -> assert false
-    | (_,pari,propagation)::q ->
-        match propagation with
-          | [] -> pari
-          | (b,v)::t -> (b,v)
-          
+    
 let learn_clause (formule:formule) etat c =
-  let (bt_lvl,sgt) = backtrack_level formule etat c_learnt in
-  begin
-    match sgt with (* None si singleton ! *)
-      | Some l0 ->
-          formule#add_clause c_learnt;
-          set_wls formule c_learnt l l0;
-          stats#record "Learnt clauses"
-      | None -> 
-          stats#record "Learnt singletons";
-          () (* on n'enregistre pas des singletons *)      
-  end;
-  (l,bt_lvl,c_learnt)
-
-
+  match backtrack_analysis formule etat c_learnt with
+    | Empty -> raise Unsat
+    | Singleton (l,lvl) ->
+        stats#record "Learnt singletons"; 
+        (Some l,0,c)
+    | Top_level_crowded (l1,l2,lvl_max) ->
+        formule#add_clause c;
+        set_wls formule c l1 l2; 
+        (None,lvl_max,c)
+    | Top_level_singleton (l1,lvl_max,l2,lvl_next) -> 
+        formule#add_clause c;
+        set_wls formule c l1 l2; 
+        (Some l1,lvl_next,c)  
+    
 (* conflit déclenché en pariant le littéral de haut de tranche, dans la clause c
    en résultat : (l,k,c) où : 
       - l : littéral de + haut niveau dans la clause apprise
@@ -57,9 +48,10 @@ let learn_clause (formule:formule) etat c =
 let conflict_analysis (formule:formule) etat c =
   let c_learnt = formule#new_clause [] in
   c_learnt#union c; (* initialement, la clause à apprendre est la clause où est apparu le conflit *)
-  let rec aux (first,pari,propagation) = 
-    match max_level formule etat c_learnt with
-      | None -> (* tant qu'il y a plusieurs littéraux du niveau max dans c_learnt... *)
+  let rec aux propagation = 
+    match backtrack_analysis formule etat c_learnt with
+      | Empty -> assert false
+      | Top_level_crowded _ -> 
           begin
             match propagation with
               | [] -> 
@@ -72,14 +64,17 @@ let conflict_analysis (formule:formule) etat c =
                         | Some c -> 
                             c_learnt#union ?v_union:(Some v) c (* on fusionne c_learnt avec la clause à l'origine de l'assignation de v *)
                     end;
-                  aux (first,pari,q)
+                  aux q
           end
-      | Some l -> (* la clause peut être apprise : elle ne contient plus qu'un seul littéral du niveau max *)
-          learn_clause formule etat c in
-  match etat.tranches with
+      | Top_level_singleton (_,_,l2,lvl_next) -> 
+          learn_clause formule etat c_learnt;
+          (l2,lvl_next,c_learnt)
+      | Singleton (l,_) -> (* lvl_max = 0 *)
+          learn_clause formule etat c_learnt;
+          (l,0,c_learnt)
+  in match etat.tranches with
     | [] -> assert false
-    | t::q -> aux t
-        
+    | (_,propagation)::q -> aux propagation
 
 
 
