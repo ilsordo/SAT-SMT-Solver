@@ -10,6 +10,8 @@ type etat = {
 
 exception Conflit_prop of (clause*(literal list)) (* permet de construire une tranche quand conflit trouvé dans prop *)
 
+exception Unsat
+
 module type Algo_base =
 sig
   type formule = private #formule

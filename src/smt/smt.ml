@@ -19,7 +19,7 @@ struct
             begin
               try
                 let etat_smt = Smt.propagate reduction acc etat_smt in
-                Sat etat_smt
+                etat_smt (** Sortie *)
               with
                 | Conflit_smt clause ->
                     let (undo_list,next_bet) = backtrack clause in
@@ -44,20 +44,19 @@ struct
         | Conflit_dpll (undo_list,next_bet) -> (* renommer ce conflit ? *) (* je suppose ici que dpll a déjà backtracké dans son coin *)
             let etat_smt = Smt.backtrack reduction undo_list etat_smt in
             aux reduction etat_smt next_bet period 0 []  
-        | No_hope -> Unsolvable in
+        | No_hope -> raise Unsat in
     
     let data = Base.normalize data in
     let (cnf_raw,next_free) = to_cnf data in
     let (cnf, reduction) = Reduction.renommer ~start:next_free cnf_raw (function _ _ _ -> ()) in
     let etat_smt = Smt.init reduction in
-    match Dpll.run heuristic reduction#count cnf with
-      | Contradiction -> Unsolvable
-      | Fine (prop_init, next_bet) ->
-          try
-            let etat_smt = Smt.propagate reduction prop_init etat_smt in
-            aux reduction etat_smt next_bet period 1 []
-          with
-            | Conflit_smt _ -> Unsolvable
+    try 
+      let (prop_init, next_bet) = Dpll.run heuristic reduction#count cnf in
+      let etat_smt = Smt.propagate reduction prop_init etat_smt in
+      aux reduction etat_smt next_bet period 1 []
+    with
+      | Conflit_smt _ 
+      | Unsat -> Unsolvable
 
 
 
