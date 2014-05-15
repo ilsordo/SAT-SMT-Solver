@@ -3,43 +3,26 @@ open Formule
 open Algo_base
 open Debug
 
-type clause_classif = Empty | Singleton of literal*int | Top_level_crowded of literal*literal*int | Top_level_singleton of literal*int*literal
+type clause_classif = Empty | Singleton of literal*int | Top_level_crowded of literal*literal*int | Top_level_singleton of literal*int*literal*int
 
 
+let backtrack_analysis (formule:formule) etat (c:clause) = 
+  let aux b v classif = 
+    let lvl = formule#get_level v in
+    match classif with
+      | Empty -> Singleton ((b,v),lvl)      
+      | Singleton (l,lvl_max) when lvl = lvl_max -> Top_level_crowded (l,(b,v),lvl)
+      | Singleton (l,lvl_max) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l,lvl_max)
+      | Singleton (l,lvl_max) -> Top_level_singleton (l,lvl_max,(b,v),lvl)            
+      | Top_level_crowded (l1,l2,lvl_max) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l1,lvl_max)
+      | Top_level_crowded (l1,l2,lvl_max) -> Top_level_crowded (l1,l2,lvl_max)   
+      | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl = lvl_max -> Top_level_crowded (l1,(b,v),lvl_next)
+      | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l1,lvl_max)
+      | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl > lvl_next -> Top_level_singleton (l1,lvl_max,(b,v),lvl)
+      | Top_level_singleton (l1,lvl_max,l2,lvl_next) -> Top_level_singleton (l1,lvl_max,l2,lvl_next)   
+  in      
+    c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) Empty)
 
-(* None si plusieurs littéraux de c sont du niveau (présupposé max) lvl, Some (b,v) si un seul *)
-let max_level (formule:formule) etat (c:clause) = 
-  let lvl = etat.level in
-  let aux b v (res:literal option) =
-    if (formule#get_level v) > lvl then
-      assert false
-    else 
-      if (formule#get_level v) = lvl then 
-        match res with
-          | Some _ ->
-              raise Exit 
-          | None ->      
-              Some (b,v)
-      else
-        res in
-  try
-    c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) None);
-  with Exit -> None
-  
-(* couple : (2ème niveau le plus élevé après lvl, x) où x=None si clause singleton, Some l si l est un des littéraux du 2ème plus haut niveau *)
-let backtrack_level (formule:formule) etat (c:clause) = 
-  let lvl = etat.level in
-  let aux b v (k,sgt) =
-    let lvl_temp = formule#get_level v in
-    if (lvl_temp > k && lvl_temp <> lvl) then 
-      (lvl_temp,Some (b,v))
-    else 
-      (k,sgt) in
-  let (b_level,sgt) = c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) (-1,None)) in (* s'assurer < lvl ? *)
-  if sgt = None then
-    (0,sgt) (* singleton *)
-  else
-    (b_level,sgt)
   
 (* récupère le littéral en haut de tranche = littéral d'où est parti le conflit *)    
 let get_conflict_lit etat = 
