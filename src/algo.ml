@@ -144,11 +144,13 @@ struct
 
     and backtrack formule etat clause =
       let c = formule#new_clause clause in
+      learn_clause formule etat c;
+      
     in 
     try
       let (formule,prop_init) = Base.init n cnf in
       let etat = { tranches = []; level = 0 } in
-      Fine (prop_init, bet formule etat)
+      (prop_init, bet formule etat)
     with Unsat -> Contradiction (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *)
 
 end
