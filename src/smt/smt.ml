@@ -41,10 +41,10 @@ struct
               end        
             else
               aux reduction etat_smt next_bet period (date+1) acc
-        | Conflit_dpll (undo_list,next_bet) -> (* renommer ce conflit ? *) (* je suppose ici que dpll a déjà backtracké dans son coin *)
+        | Conflit_dpll (undo_list,next_bet) ->s (* je suppose ici que dpll a déjà backtracké dans son coin *)
             let etat_smt = Smt.backtrack reduction undo_list etat_smt in
             aux reduction etat_smt next_bet period 0 []  
-        | No_hope -> raise Unsat in
+    in
     
     let data = Base.normalize data in
     let (cnf_raw,next_free) = to_cnf data in

@@ -29,7 +29,7 @@ struct
     end;
     try 
       let propagation = constraint_propagation formule (b,v) etat [] in (* on propage *)
-      { etat with level = lvl + 1; tranches = (first,(b,v),propagation)::etat.tranches } (* on renvoie l'état avec la dernière tranche ajoutée *)
+      ({ etat with level = lvl + 1; tranches = (first,(b,v),propagation)::etat.tranches },((b,v),propagation)) (* on renvoie l'état avec la dernière tranche ajoutée *)
     with
         Conflit_prop (c,acc) -> (* conflit dans la propagation *)
           raise (Conflit (c,{ etat with level = lvl + 1; tranches = (first,(b,v),acc)::etat.tranches } ))
@@ -71,19 +71,19 @@ struct
             undo_assignation formule pari;
             { etat with level = etat.level - 1; tranches = q } (** maintenant le niveau est diminué ici *)
   
-  let undo depth (formule:formule) etat = 
-    let rec aux dpth etat =
-      match dpth with
+  let undo depth (formule:formule) etat acc = 
+    let rec aux t_depth etat =
+      match t_depth with
         | None -> 
             begin
               match etat.tranches with (* annule la dernière tranche et la fait sauter *)
                 | [] -> raise Unsat (** Ici le non clause learning détecte formule insatisfiable *)
-                | (first,pari,_)::q ->
+                | (first,pari,propagation)::q ->
                     let etat = undo_tranche formule etat in
                     if first then
-                      (Some (neg pari),etat)
+                      (Some (neg pari),etat,acc)
                     else
-                      aux dpth etat
+                      aux t_depth etat
             end
         | Some k ->
             if k=0 then
@@ -105,8 +105,8 @@ struct
     let rec process formule etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)
       try
         debug#p 2 "Setting %d to %B (level : %d)" v b (etat.level+1);
-        let etat = make_bet formule lit first etat in (* fait un pari et propage, lève une exception si conflit créé *)
-          bet formule etat (* on essaye de prolonger l'assignation courante avec d'autres paris *)
+        let (etat,assignations) = make_bet formule lit first etat in (* fait un pari et propage, lève une exception si conflit créé *)
+          Bet_done (assignations,bet formule etat,backtrack formule etat) (* on essaye de prolonger l'assignation courante avec d'autres paris *)
       with 
         | Conflit (c,etat) ->
             stats#record "Conflits";
@@ -135,7 +135,7 @@ struct
       stats#stop_timer "Decisions (s)";
       match lit with
         | None ->
-            No_bet (* plus rien à parier = c'est gagné *)
+            No_bet (backtrack formule etat) (* plus rien à parier = c'est gagné *)
         | Some ((b,v) as lit) ->  
             stats#record "Paris";
             debug#p 2 "Next bet : %d %B" v b;
