@@ -6,8 +6,6 @@ open Interaction
 open Algo_base
 open Conflict_analysis
 
-type 'a result = Fine of 'a | Backtrack of 'a (** plus utilisé *)
-
 type t = Heuristic.t -> bool -> bool -> int -> int list list -> Answer.t
 
 let neg : literal -> literal = function (b,v) -> (not b, v)
@@ -17,7 +15,7 @@ exception Conflit of (clause*etat)
 module Bind = functor(Base : Algo_base) ->
 struct
 
-  include Base
+  open Base
 
   (* Parie sur (b,v) puis propage. Pose la dernière tranche qui en résulte, quoiqu'il arrive *)
   let make_bet (formule:formule) (b,v) first etat =
@@ -101,7 +99,7 @@ struct
 
   (** Algo **)
 
-  let algo (next_pari : Heuristic.t) cl interaction n cnf = (* cl : activation du clause learning *)
+  let run (next_pari : Heuristic.t) cl interaction n cnf = (* cl : activation du clause learning *)
     let repl = new repl (Some 1) in
 
     let rec process formule etat first ((b,v) as lit) = (* effectue un pari et propage le plus loin possible *)

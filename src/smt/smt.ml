@@ -3,12 +3,14 @@ open Clause
 open Algo
 open Smt_base
 
+type answer 
+
 module Make_smt = functor(Dpll : Algo_base) -> functor (Smt : Smt_base) ->
 struct
   
   module Reduction = Reduction(struct type t = Base.atom let print_value = print_atom end)
   
-  let algo (data : atom formula_tree) period =
+  let algo (data : atom formula_tree) heuristic period =
     
     (* Faire un pari, propager, se relever en cas de conflit *)
     let rec aux reduction etat_smt next_bet period date acc =
@@ -20,7 +22,7 @@ struct
                 Sat etat_smt
               with
                 | Conflit_smt clause ->
-                    let (undo_list,next_bet) = Dpll.backtrack clause in
+                    let (undo_list,next_bet) = backtrack clause in
                     let etat_smt = Smt.backtrack reduction undo_list etat_smt in
                     aux reduction etat_smt next_bet period 0 []
             end
@@ -33,7 +35,7 @@ struct
                   aux reduction etat_smt next_bet period (date+1) []
                 with
                   | Conflit_smt clause ->
-                      let (undo_list,next_bet) = Dpll.backtrack clause in
+                      let (undo_list,next_bet) = backtrack clause in
                       let etat_smt = Smt.backtrack reduction undo_list etat_smt in
                       aux reduction etat_smt next_bet period 0 []      
               end        
@@ -42,13 +44,13 @@ struct
         | Conflit_dpll (undo_list,next_bet) -> (* renommer ce conflit ? *) (* je suppose ici que dpll a déjà backtracké dans son coin *)
             let etat_smt = Smt.backtrack reduction undo_list etat_smt in
             aux reduction etat_smt next_bet period 0 []  
-        | Unsolvable ->  in
+        | No_hope -> Unsolvable in
     
     let data = Base.normalize data in
     let (cnf_raw,next_free) = to_cnf data in
     let (cnf, reduction) = Reduction.renommer ~start:next_free cnf_raw (function _ _ _ -> ()) in
     let etat_smt = Smt.init reduction in
-    match Dpll.run reduction#count cnf with
+    match Dpll.run heuristic reduction#count cnf with
       | Contradiction -> Unsolvable
       | Fine (prop_init, next_bet) ->
           try
