@@ -18,7 +18,7 @@ struct
         | No_bet (backtrack) ->
             begin
               try
-                let etat_smt = Smt.propagate reduction acc etat_smt in
+                let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in
                 etat_smt (** Sortie *)
               with
                 | Conflit_smt clause ->
@@ -27,11 +27,11 @@ struct
                     aux reduction etat_smt next_bet period 0 []
             end
         | Bet_done (assignations,next_bet,backtrack) -> 
-            let acc = acc@assignations in (** !! je pense que c'est dans cet ordre *)
+            let acc = assignations@acc in (** !! je pense que c'est dans cet ordre *)
             if date = period then (* c'est le moment de propager dans la théorie *)
               begin
                 try
-                  let etat_smt = Smt.propagate reduction acc etat_smt in 
+                  let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in 
                   aux reduction etat_smt next_bet period (date+1) []
                 with
                   | Conflit_smt clause ->

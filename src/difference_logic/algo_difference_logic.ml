@@ -29,13 +29,15 @@ type etat =
 let rec normalize formula = 
   let rec normalize_atom (Atom a) = match a with
     | Double(s1,s2,o,n) ->
-        match o with
-          | Great -> normalize (Atom (Double(s2,s1,Leq,-n-1))) 
-          | Less -> normalize (Atom (Double(s1,s2,Leq,n-1))) 
-          | LEq -> if s2 > s1 then Not (Atom (Double(s2,s1,Leq,n-1))) else Atom (Double(s1,s2,Leq,n))
-          | GEq -> normalize (Atom (Double(s2,s1,Leq,-n)))  
-          | Eq -> And(normalize (Atom (Double(s1,s2,Leq,n))),normalize (Atom (Double(s2,s1,Leq,-n))))
-          | Ineq -> Not(normalize (Atom (Double(s1,s2,Eq,n))))
+        begin
+          match o with
+            | Great -> normalize (Atom (Double(s2,s1,Leq,-n-1))) 
+            | Less -> normalize (Atom (Double(s1,s2,Leq,n-1))) 
+            | LEq -> if s2 > s1 then Not (Atom (Double(s2,s1,Leq,n-1))) else Atom (Double(s1,s2,Leq,n))
+            | GEq -> normalize (Atom (Double(s2,s1,Leq,-n)))  
+            | Eq -> And(normalize (Atom (Double(s1,s2,Leq,n))),normalize (Atom (Double(s2,s1,Leq,-n))))
+            | Ineq -> Not(normalize (Atom (Double(s1,s2,Eq,n))))
+        end
     | Single(s,o,n) -> normalize (Atom (Double(s1,"_zero",o,n)))
   in
     match formula with
@@ -75,14 +77,16 @@ let propagate reduc prop etat =
   let relax_edge a = (* a de type atom normalisé *)
     match a with
       | Double (s1,s2,LEq,n) ->
-          match (String_map.find s1 etat.values,String_map.find s2 etat.values) with
-            | (k1,k2) -> 
-                if k2 > k1 + n then 
-                  begin
+          begin
+            match (String_map.find s1 etat.values,String_map.find s2 etat.values) with
+              | (Some k1,Some k2) -> 
+                  if k2 > k1 + n then 
+                      begin
                     etat.values = String_map.add s2 (k1 + n) etat.graph;  
-                    etat.explain = String_map.add s2 (Double (s1,s2,LEq,n)) etat.explain;
-                  end
-            | _ -> assert false
+                      etat.explain = String_map.add s2 (Double (s1,s2,LEq,n)) etat.explain
+                    end
+              | _ -> assert false
+          end
       | _ -> assert false
   in
   
