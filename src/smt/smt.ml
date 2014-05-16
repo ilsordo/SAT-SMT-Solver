@@ -27,7 +27,7 @@ struct
                     aux reduction etat_smt next_bet period 0 []
             end
         | Bet_done (assignations,next_bet,backtrack) -> 
-            let acc = (List.rev_append assignations acc) in (* pas sur pour le rev, pas besoin du append ? *)
+            let acc = acc@assignations in (** !! *)
             if date = period then (* c'est le moment de propager dans la théorie *)
               begin
                 try
@@ -41,15 +41,15 @@ struct
               end        
             else
               aux reduction etat_smt next_bet period (date+1) acc
-        | Conflit_dpll (undo_list,next_bet) ->s (* je suppose ici que dpll a déjà backtracké dans son coin *)
+        | Conflit_dpll (undo_list,next_bet) -> (* on suppose ici que dpll a déjà backtracké dans son coin *)
             let etat_smt = Smt.backtrack reduction undo_list etat_smt in
             aux reduction etat_smt next_bet period 0 []  
     in
     
-    let data = Base.normalize data in
-    let (cnf_raw,next_free) = to_cnf data in
-    let (cnf, reduction) = Reduction.renommer ~start:next_free cnf_raw (function _ _ _ -> ()) in
-    let etat_smt = Smt.init reduction in
+    let data = Base.normalize data in (* normalisation de la formule donnée en entrée *)
+    let (cnf_raw,next_free) = to_cnf data in (* transformation en cnf *)
+    let (cnf, reduction) = Reduction.renommer ~start:next_free cnf_raw (function _ _ _ -> ()) in (* renommage pour avoir une cnf de int *)
+    let etat_smt = Smt.init reduction in (* initialisation de l'etat du smt *)
     try 
       let (prop_init, next_bet) = Dpll.run heuristic reduction#count cnf in
       let etat_smt = Smt.propagate reduction prop_init etat_smt in
