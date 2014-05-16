@@ -9,8 +9,8 @@ open Conflict_analysis
 type Backtrack = First | Var_depth of (int*literal) | Clause_depth of (int*clause) (***)
 (* indique comment backtracker : 
      First : inverser le premier first dispo
-     Var_depth(k,l) : se rendre au level k puis assigner l
-     Clause_depth(k,c) : se rendre au level k, puis dépiler le level k jusqu'avant que c ait deux littéraux non assignés, assigner le premier littéral de c rencontré
+     Var_depth(k,l) : se rendre k level plus bas puis assigner l
+     Clause_depth(k,c) : se rendre k level plus bas, puis dépiler le level k jusqu'avant que c ait deux littéraux non assignés, assigner le premier littéral de c rencontré
 *)
 
 exception End_analysis of (literal*literal list) (***)
@@ -23,11 +23,16 @@ let (@) l1 l2 = List.(rev_append (rev l1) l2)
 
 exception Conflit of (clause*etat)
 
+
+
+
 module Bind = functor(Base : Algo_base) ->
 struct
 
+  (** Bet and set *)
+
   (* Parie sur (b,v) puis propage. Pose la dernière tranche qui en résulte, quoiqu'il arrive *)
-  let make_bet (formule:formule) (b,v) first etat =
+  let make_bet (formule:formule) (b,v) first pure_prop etat =
     let level = etat.lvl in 
     begin
       try
@@ -37,19 +42,19 @@ struct
             raise (Conflit (c,{ etat with level = lvl + 1; tranches = (first,(b,v),[])::etat.tranches } )) (* on prend soin d'empiler la dernière tranche *)
     end;
     try 
-      let propagation = constraint_propagation formule (b,v) etat [] in (* on propage *)
-      ({ etat with level = lvl + 1; tranches = (first,(b,v),propagation)::etat.tranches },List.rev_append propagation [(b,v)]) (***) (* on renvoie l'état avec la dernière tranche ajoutée *)
+      let propagation = Base.constraint_propagation pure_prop formule (b,v) etat [] in (* on propage *)
+      ({ etat with level = lvl + 1; tranches = (first,(b,v),propagation)::etat.tranches }, propagation@[(b,v)]) (***) (* on renvoie l'état avec la dernière tranche ajoutée *)
     with
         Conflit_prop (c,acc) -> (* conflit dans la propagation *)
           raise (Conflit (c,{ etat with level = lvl + 1; tranches = (first,(b,v),acc)::etat.tranches } ))
 
   (* Compléte la dernière tranche, assigne (b,v) (ce n'est pas un pari) puis propage. c_learnt : clause apprise ayant provoqué le backtrack qui a appelé continue_bet *)
-  let continue_bet (formule:formule) (b,v) ?cl etat () = (** renommer cl ? *)
+  let continue_bet (formule:formule) (b,v) ?cl pure_prop etat () = (** renommer cl ? *) (* cl : on sait de quelle clause vient l'assignation de (b,v) *)
     let lvl=etat.level in
     if lvl=0 then (* niveau 0 : tout conflit indiquerait que la formule est non sat *)
       try
         formule#set_val b v lvl; (* peut lever Empty_clause *)
-        let continue_propagation = constraint_propagation formule (b,v) etat [] in (* peut lever Conflit_prop *)
+        let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [] in (* peut lever Conflit_prop *)
         (etat, List.rev_append continue_propagation [(b,v)]) (***)
       with 
         | Empty_clause | Conflit_prop -> raise Unsat (** Ici : le clause learning détecte que la formule est insatisfiable *)
@@ -65,7 +70,7 @@ struct
                     raise (Conflit (c,{ etat with level = lvl + 1; tranches = (first,pari,(b,v)::propagation)::q } ))
             end;
             try 
-              let continue_propagation = Base.constraint_propagation formule (b,v) etat [] in (** [] pour distinguer les nouveaux littéraux propagés *)
+              let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [] in (** [] pour distinguer les nouveaux littéraux propagés *)
               let propagation = continue_propagation@((b,v)::propagation) in (* on poursuit l'assignation sur la dernière tranche *) (***)
               ({ etat with level = level + 1; tranches = (first,pari,continue_propagation)::q }, List.rev_append continue_propagation [(b,v)]) (** sans (b,v) ?*)
             with
@@ -119,7 +124,7 @@ struct
     renvoie l'état
   *)
   (* C'est bon c'est logique ~ Yassine Hamoudi, Jeu 15 mai, 16:48 | 23:29 : je confirme les concaténations | 2:04 : je ne confirme plus rien *)
-  let undo depth (formule:formule) etat = 
+  let undo policy (formule:formule) etat = 
     let rec concat acc = function
       | [] -> acc
       | t::q -> concat (rev_append t acc) q in
@@ -149,22 +154,21 @@ struct
             else
               let (etat,prop) = undo_tranche formule etat in
               aux (Clause_depth(k-1,c) etat (prop::acc) (* on n'oublie pas de diminuer le level à chaque fois *)                      
-
     in
     stats#start_timer "Backtrack (s)";
-    let res = aux depth etat [] in
+    let res = aux policy etat [] in
     stats#stop_timer "Backtrack (s)";
     res
    
   (** Algo **)
 
-  let run (next_pari : Heuristic.t) cl interaction n cnf = (* cl : activation du clause learning *)
+  let run (next_pari : Heuristic.t) cl interaction pure_prop n cnf = (* cl : activation du clause learning *)
     let repl = new repl (Some 1) in
 
     let rec process formule etat ((b,v) as lit) () = (* effectue un pari et propage le plus loin possible *)
       try
         debug#p 2 "Setting %d to %B (level : %d)" v b (etat.level+1);
-        let (etat,assignations) = make_bet formule lit true etat in (* fait un pari et propage, lève une exception si conflit créé *)
+        let (etat,assignations) = make_bet formule lit true pure_prop etat in (* fait un pari et propage, lève une exception si conflit créé *) (* true = first *)
           Bet_done (assignations,bet formule etat,backtrack formule etat) (* on essaye de prolonger l'assignation courante avec d'autres paris *)
       with 
         | Conflit (c,etat) ->
@@ -199,14 +203,14 @@ struct
             debug#p 2 "Next bet : %d %B" v b;
             process formule etat lit (* on assigne (b,v) et on propage *)
     
-    and backtrack formule etat clause =
+    and backtrack formule etat clause = (***)
       let c = formule#new_clause clause in
       let (l,etat,undo_list) = undo (learn_clause formule etat c) formule etat in
         (undo_list,continue_bet formule l ~cl:c etat)
       
     in 
     try
-      let (formule,prop_init) = Base.init n cnf in (** où est fait cet init ? >> algo_dpll/wl*)
+      let (formule,prop_init) = Base.init n cnf pure_prop in (** où est fait cet init ? >> algo_dpll/wl*)
       let etat = { tranches = []; level = 0 } in
       (prop_init, bet formule etat)
     with Unsat -> Contradiction (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *) (***)

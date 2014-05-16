@@ -18,12 +18,13 @@ object(self)
   (***)
   
   method init n clauses_init = (* crée l'ensemble des clauses et remplie occurences_pos/neg à partir de clauses_init (int list list = liste de clauses) *)
-    super#init n clauses_init;
+    let _=super#init n clauses_init in
     for i=1 to n do
       occurences_pos#set i (new clauseset);
       occurences_neg#set i (new clauseset)
     done;
-    clauses#iter self#register_clause
+    clauses#iter self#register_clause;
+    []
       
   (***)
 

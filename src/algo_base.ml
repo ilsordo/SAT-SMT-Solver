@@ -18,9 +18,9 @@ sig
 
   val name : string
 
-  val init : int -> int list list -> (formule*literal list) (* construction de la formule, prétraitement *)
+  val init : int -> int list list -> bool -> (formule*literal list) (* construction de la formule, prétraitement *)
 
-  val constraint_propagation : formule -> literal -> etat -> literal list -> literal list
+  val constraint_propagation : bool -> formule -> literal -> etat -> literal list -> literal list
 
   val set_wls : formule -> clause -> literal -> literal -> unit (* Nom pas très générique mais compréhensible *)
 

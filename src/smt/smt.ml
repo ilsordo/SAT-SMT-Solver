@@ -10,7 +10,7 @@ struct
   
   module Reduction = Reduction(struct type t = Base.atom let print_value = print_atom end)
   
-  let algo (data : atom formula_tree) heuristic period =
+  let algo (data : atom formula_tree) heuristic period cl interaction =
     
     (* Faire un pari, propager, se relever en cas de conflit *)
     let rec aux reduction etat_smt next_bet period date acc =
@@ -27,7 +27,7 @@ struct
                     aux reduction etat_smt next_bet period 0 []
             end
         | Bet_done (assignations,next_bet,backtrack) -> 
-            let acc = acc@assignations in (** !! *)
+            let acc = acc@assignations in (** !! je pense que c'est dans cet ordre *)
             if date = period then (* c'est le moment de propager dans la théorie *)
               begin
                 try
@@ -51,7 +51,7 @@ struct
     let (cnf, reduction) = Reduction.renommer ~start:next_free cnf_raw (function _ _ _ -> ()) in (* renommage pour avoir une cnf de int *)
     let etat_smt = Smt.init reduction in (* initialisation de l'etat du smt *)
     try 
-      let (prop_init, next_bet) = Dpll.run heuristic reduction#count cnf in
+      let (prop_init, next_bet) = Dpll.run heuristic cl interaction Smt.pure_prop reduction#count cnf in
       let etat_smt = Smt.propagate reduction prop_init etat_smt in
       aux reduction etat_smt next_bet period 1 []
     with

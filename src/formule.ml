@@ -109,13 +109,14 @@ object (self)
     clauses#reset;
     paris#reset
     
-  method init n clauses_init = (* crée l'ensemble des clauses à partir d'une int list list (= liste de clauses) *)
+  method init n clauses_init _ = (* crée l'ensemble des clauses à partir d'une int list list (= liste de clauses) *)
     self#reset n;
     List.iter (
       fun c -> 
         let c_new = (new clause x c) in 
           if (not c_new#is_tauto) then clauses#add c_new) 
-      clauses_init
+      clauses_init;
+    []
 
   (***)
 

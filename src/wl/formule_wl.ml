@@ -37,7 +37,7 @@ object(self)
       wl_pos#set i (new clauseset);
       wl_neg#set i (new clauseset)
     done;
-    super#init n clauses_init; (* enlève les tautologies, construit les clauses *)
+    let _ = super#init n clauses_init in (* enlève les tautologies, construit les clauses *)
     let (occ_pos,occ_neg) = (new vartable n, new vartable n) in (* stockage temporaire pour chaque variable des clauses où elle apparait positivement/négativement *)
     let add_occurence dest c v = (* ajoute la clause c dans les occurences_pos ou occurences_neg de v, suivant la polarité b *)
       let set = match dest#find v with
@@ -55,14 +55,14 @@ object(self)
       match occ#find var with
         | None -> new clauseset
         | Some occurences -> occurences in
-    let rec prepare () = (* trouve les clauses singletons, effectue les assignations/changement de clauses qui en découlent *)
+    let rec prepare acc () = (* trouve les clauses singletons, effectue les assignations/changement de clauses qui en découlent *)
       let res = 
         try 
           clauses#iter (fun c -> match c#singleton with Singleton s -> raise (Found s) | _ -> ());
           None
         with Found s -> Some s in
       match res with
-        | None -> ()
+        | None -> acc
         | Some (b,v) ->
             self#set_val b v 0;
             let (valider,supprimer) =
@@ -74,8 +74,8 @@ object(self)
               (fun c -> clauses#remove c);
             (get_occurences supprimer v)#iter 
               (fun c -> c#hide_var (not b) v);
-            prepare() in
-    prepare() 
+            prepare ((b,v)::acc) () in (***)
+    prepare [] () 
     
   (* Initialise les watched literals en en choisissant 2 par clauses. On s'assurera avant qu'aucune clause n'est singleton *)
   method init_wl =
