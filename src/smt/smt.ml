@@ -48,7 +48,7 @@ struct
     
     let data = Base.normalize data in (* normalisation de la formule donnée en entrée *)
     let (cnf_raw,next_free) = to_cnf data in (* transformation en cnf *)
-    let (cnf, reduction) = Reduction.renommer ~start:next_free cnf_raw (function _ _ _ -> ()) in (* renommage pour avoir une cnf de int *)
+    let (cnf, reduction) = Reduction.renommer ~start:next_free cnf_raw (fun _ _ _ -> ()) in (* renommage pour avoir une cnf de int *)
     let etat_smt = Smt.init reduction in (* initialisation de l'etat du smt *)
     try 
       let (prop_init, next_bet) = Dpll.run heuristic cl interaction Smt.pure_prop reduction#count cnf in
@@ -58,12 +58,4 @@ struct
       | Conflit_smt _ 
       | Unsat -> Unsolvable
 
-
-
-
-
-
-
-
-
-
+end

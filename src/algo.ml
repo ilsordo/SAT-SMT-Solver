@@ -8,15 +8,16 @@ open Conflict_analysis
 
 exception End_analysis of (literal*literal list) (***)
 
-type t = Heuristic.t -> bool -> bool -> int -> int list list -> Answer.t
-
 let neg : literal -> literal = function (b,v) -> (not b, v)
 
 let (@) l1 l2 = List.(rev_append (rev l1) l2)
 
 exception Conflit of (clause*etat)
 
-
+type dpll_answer = 
+  | No_bet of (literal list -> (literal list*(unit -> dpll_answer)))
+  | Bet_done of literal list * (unit -> dpll_answer) * (literal list -> (literal list*(unit -> dpll_answer)))
+  | Conflit_dpll of literal list * (unit -> dpll_answer)
 
 
 module Bind = functor(Base : Algo_base) ->
@@ -83,21 +84,23 @@ struct
           | Some l -> 
               raise (End_analysis (l,acc))
       else
-        formule#reset_val v;
-        (stop,(b,v)::acc)
-  in match etat.tranches with 
-    | [] -> assert false
-    | (first,(b,v),propagation)::q -> (* (b,v) = pari *)
-        try
-          match List.fold_left aux (None,[]) propagation with
-            | (None,_) -> assert false
-            | (Some l,acc) ->
-                if (c_learnt#mem_all (not b) v) then
-                  raise End_analysis (l,acc)
-                else
-                  assert false
-        with
-          | End_analysis (l,acc) -> (l,acc)
+        begin
+          formule#reset_val v;
+          (stop,(b,v)::acc) 
+        end in 
+    match etat.tranches with 
+      | [] -> assert false
+      | (first,(b,v),propagation)::q -> (* (b,v) = pari *)
+          try
+            match List.fold_left (aux formule) (None,[]) propagation with
+              | (None,_) -> assert false
+              | (Some l,acc) ->
+                  if (c#mem_all (not b) v) then
+                    raise (End_analysis (l,acc))
+                  else
+                    assert false
+          with
+            | End_analysis (l,acc) -> (l,acc)
   
   
   let undo_tranche formule etat = 
@@ -107,7 +110,7 @@ struct
         | (first,pari,propagation)::q ->
             List.iter (undo_assignation formule) propagation;
             undo_assignation formule pari;
-            ({ etat with level = etat.level - 1; tranches = q }, pari::(rev propagation))
+            ({ level = etat.level - 1; tranches = q }, pari::(List.rev propagation))
   
   (*
   undo : 
@@ -119,7 +122,7 @@ struct
   let undo policy (formule:Base.formule) etat = 
     let rec concat acc = function
       | [] -> acc
-      | t::q -> concat (rev_append t acc) q in
+      | t::q -> concat (List.rev_append t acc) q in
     let rec aux policy etat acc =
       match policy with
         | First -> 
@@ -135,7 +138,7 @@ struct
             end
         | Var_depth (k,l) -> 
             if k=0 then
-              (l,etat,concat [] (prop::acc)) (***)
+              (l,etat,concat [] acc) (** Est-ce correct? (j'ai enlevé un prop pas défini)*)
             else
               let (etat,prop) = undo_tranche formule etat in
               aux (Var_depth(k-1,l)) etat (prop::acc) (* on n'oublie pas de diminuer le level à chaque fois *) 
@@ -170,7 +173,7 @@ struct
               repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* pas de clause learning *)
               let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** ICI : Unsat du non cl *)
-                (undo_list,continue_bet formule l etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
+                (undo_list,continue_bet Smt.pure_prop formule l etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
             else (* clause learning *)
               begin
                 stats#start_timer "Clause learning (s)";
