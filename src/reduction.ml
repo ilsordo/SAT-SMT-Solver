@@ -67,6 +67,8 @@ struct
         
     method iter f = Id.iter f ids
 
+    method fold f a = Id.fold f ids a
+    
     method print_answer p answer = print_answer (self:>reduction) p answer
       
     method print_reduction p = (* affiche la correspondance entre string et int *)

@@ -21,7 +21,7 @@ struct
                 let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in
                 etat_smt (** Sortie *)
               with
-                | Conflit_smt clause ->
+                | Conflit_smt (clause,etat_smt) -> (** clause * etat_smt ?? *)
                     let (undo_list,next_bet) = backtrack clause in
                     let etat_smt = Smt.backtrack reduction undo_list etat_smt in
                     aux reduction etat_smt next_bet period 0 []
@@ -34,7 +34,7 @@ struct
                   let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in 
                   aux reduction etat_smt next_bet period (date+1) []
                 with
-                  | Conflit_smt clause ->
+                  | Conflit_smt (clause,etat_smt) ->
                       let (undo_list,next_bet) = backtrack clause in
                       let etat_smt = Smt.backtrack reduction undo_list etat_smt in
                       aux reduction etat_smt next_bet period 0 []      

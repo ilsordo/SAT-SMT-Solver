@@ -14,6 +14,8 @@ object
 
   method iter : ('a -> int -> unit) -> unit
 
+  method fold : ('a -> int -> 'b -> 'b) -> 'b -> 'b
+  
   method print_answer : print_answer_t
     
   method print_reduction : out_channel -> unit

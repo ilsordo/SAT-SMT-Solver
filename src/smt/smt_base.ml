@@ -1,7 +1,7 @@
 open Formula_tree
 open Clause
 
-exception Conflit_smt of (literal list) (* Clause à apprendre *)
+exception Conflit_smt of (literal list*etat) (* Clause à apprendre *) (** à déplacer après la déf de état ci-dessous ? si impossible, je peux peut-être me passer de l'état*)
 
 module type Smt_base =
 sig
