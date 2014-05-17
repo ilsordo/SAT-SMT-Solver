@@ -16,7 +16,7 @@ let print_atom p a =
 module String_map = 
 struct
   include Map.make(sig type t = string let compare = compare end)
-  let find key map =
+  let find key map = (** enlever *)
     try Some (find key map)
     with Not_found -> None
 end
