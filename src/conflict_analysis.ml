@@ -25,7 +25,7 @@ let backtrack_analysis (formule:formule) etat (c:clause) = (* description de la 
     c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) Empty)
 
     
-let learn_clause (formule:formule) etat c =
+let learn_clause set_wls (formule:formule) etat c =
   match backtrack_analysis formule etat c with
     | Empty -> raise Unsat
     | Singleton (l,lvl) ->
@@ -46,13 +46,13 @@ let learn_clause (formule:formule) etat c =
       - k : niveau auquel backtracker
       - c : clause apprise
 *)
-let conflict_analysis (formule:formule) etat c =
+let conflict_analysis set_wls (formule:formule) etat c =
   let c_learnt = formule#new_clause [] in
   c_learnt#union c; (* initialement, la clause à apprendre est la clause où est apparu le conflit *)
   let rec aux propagation = 
     match backtrack_analysis formule etat c_learnt with
       | Empty -> assert false
-      | Top_level_crowded _ -> 
+      | Top_level_crowded _ -> 
           begin
             match propagation with
               | [] -> 
@@ -67,15 +67,15 @@ let conflict_analysis (formule:formule) etat c =
                     end;
                   aux q
           end
-      | Top_level_singleton (l1,_,_,lvl_next) -> 
-          let _ = learn_clause formule etat c_learnt in
+      | Top_level_singleton (l1,_,_,lvl_next) -> 
+          let _ = learn_clause set_wls formule etat c_learnt in
           (l1,lvl_next,c_learnt)
       | Singleton (l,_) -> (* lvl_max = 0 *)
-          let _ = learn_clause formule etat c_learnt in
+          let _ = learn_clause set_wls formule etat c_learnt in
           (l,0,c_learnt)
   in match etat.tranches with
     | [] -> assert false
-    | (_,propagation)::q -> aux propagation
+    | (_,_,propagation)::q -> aux propagation
 
 
 

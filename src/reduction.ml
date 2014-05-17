@@ -8,7 +8,7 @@ type print_answer_t = out_channel -> Answer.t -> unit
 
 type 'a super_atom = Real of 'a | Virtual of int
 
-class type ['a] reduction = ?start:int -> (reduction -> print_answer_t) ->
+class type ['a] reduction =
 object
   method max : int
     

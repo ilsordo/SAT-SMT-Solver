@@ -2,7 +2,7 @@ type print_answer_t = out_channel -> Answer.t -> unit
 
 type 'a super_atom = Real of 'a | Virtual of int
 
-class type ['a] reduction = ?start:int -> (['a] reduction -> print_answer_t) ->
+class type ['a] reduction =
 object
   method max : int
     
@@ -21,11 +21,11 @@ object
   method print_reduction : out_channel -> unit
 end
 
-module Reduction : (sig type t val print_value : t -> string end) ->
+module Reduction : functor (Base : sig type t val print_value : t -> string end) ->
 sig
-  class reduction : ['a] reduction
+  val reduction : ?start:int -> (Base.t reduction -> print_answer_t) -> Base.t reduction
 
-  val renommer : (bool*Base.t) list list -> (reduction -> print_answer_t) -> (int list list*reduction)
+  val renommer : (bool*Base.t) list list -> (Base.t reduction -> print_answer_t) -> (int list list*Base.t reduction)
 end
 
 class ['a] counter : int -> (int -> 'a) ->
