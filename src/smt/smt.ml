@@ -1,6 +1,6 @@
 open Formula_tree
 open Clause
-open Algo
+open Algo_parametric
 open Smt_base
 
 type answer 
@@ -15,7 +15,7 @@ struct
     (* Faire un pari, propager, se relever en cas de conflit *)
     let rec aux reduction etat_smt next_bet period date acc =
       match next_bet () with
-        | No_bet (backtrack) ->
+        | No_bet (_,backtrack) ->
             begin
               try
                 let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in
