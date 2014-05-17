@@ -19,7 +19,6 @@ type dpll_answer =
   | Bet_done of literal list * (unit -> dpll_answer) * (literal list -> (literal list*(unit -> dpll_answer)))
   | Conflit_dpll of literal list * (unit -> dpll_answer)
 
-
 module Bind = functor(Base : Algo_base) ->
 struct
 
@@ -173,7 +172,7 @@ struct
               repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* pas de clause learning *)
               let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** ICI : Unsat du non cl *)
-                (undo_list,continue_bet Smt.pure_prop formule l etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
+                (undo_list,continue_bet pure_prop formule l etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
             else (* clause learning *)
               begin
                 stats#start_timer "Clause learning (s)";
@@ -208,7 +207,7 @@ struct
       let (formule,prop_init) = Base.init n cnf pure_prop in
       let etat = { tranches = []; level = 0 } in
       (prop_init, bet formule etat)
-    with Unsat -> Contradiction (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *) (***)
+    with Unsat -> raise Unsat (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *) (***)
 
 end
 
