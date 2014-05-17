@@ -25,12 +25,12 @@ module Heap = Braun.Make(struct type t = (string*int) let le (s1,k1) (s2,k2) = k
 
 type etat = 
   { 
-    graph : (int*string) list String_map.t ; (* map de string vers (int*string) list *)
+    graph : (int*string) list String_map.t ;
     values : int String_map.t ; (* pi *)
-    explain : atom String_map.t ; (* map de string vers atom *)
+    next_values : int String_map.t (* pi' *)
     estimate : Heap.t ;  (* gamma *)
     estimate_static : int String_map.t (* gamma*)
-    next_values : int String_map.t (* pi' *)
+    explain : atom String_map.t ; (* chemin *)
   }
 
 exception Neg_cycle of etat
@@ -50,7 +50,7 @@ let rec normalize formula =
             | Eq -> And(normalize (Atom (Double(s1,s2,Leq,n))),normalize (Atom (Double(s2,s1,Leq,-n))))
             | Ineq -> Not(normalize (Atom (Double(s1,s2,Eq,n))))
         end
-    | Single(s,o,n) -> normalize (Atom (Double(s1,"_zero",o,n)))
+    | Single(s,o,n) -> normalize (Atom (Double(s1,"_zero",o,n))) (** bien gérer ce _zero apès... *)
   in
     match formula with
       | And (f1,f2) -> And (normalize f1,normalize f2)
@@ -68,23 +68,21 @@ let init reduc =
     { 
      graph = String_map.empty;
      values = String_map.empty; (* pi *)
-     explain = String_map.empty;
+     next_values = String_map.empty (* pi' *)    
      estimate = Heap.empty ;  (* gamma *)
-     estimate_static = int String_map.empty ; (* gamma *)
-     next_values = int String_map.empty (* pi' *)    
+     estimate_static = String_map.empty ; (* gamma *)
+     explain = String_map.empty;
     }
   in
     reduc.fold (* Atom a avec a normalisé *)
       (fun a _ etat ->
          match a with
-          | Double (s1,s2,LEq,n) ->
+          | Double (s1,s2,LEq,n) when s1 < s2 ->
              let graph = String_map.add s1 [] (String_map.add s2 [] etat.graph) in
              let values = String_map.add s1 0 (String_map.add s2 0 etat.values) in
-             (*etat.estimate = String_map.add s1 0 etat.estimate;  
-             etat.estimate = String_map.add s2 0 etat.estimate;*)
              let next_values = String_map.add s1 0 (String_map.add s2 0 etat.next_values) in
-             { etat with graph=graph ; values = values ; next_values = next_values}
-          | _ -> assert false)
+             { etat with graph = graph ; values = values ; next_values = next_values}
+          | _ -> assert false) (* ici, et pour les matching similaires qui suivent : aurait du être normalisé *)
      etat
 
 
@@ -92,7 +90,7 @@ let init reduc =
  
 let add_edge e etat = (* multi-arêtes : peut-être que c'est faux ... *)
   match e with
-    | Double(u,v,LEq,c) ->
+    | Double(u,v,LEq,c) when u < v ->
         {etat with graph = String_map.add u ((c,v)::(String_map.find u etat.graph )) etat.graph}
     | _ -> assert false
  
@@ -102,7 +100,7 @@ let remove_edge e etat =
     | (d,u)::q when u=v && d=c -> List.rev_append q acc
     | t::q -> aux v c q (t::acc) in
   match e with
-    | Double(u,v,LEq,c) ->
+    | Double(u,v,LEq,c) when u < v ->
         {etat with graph = String_map.add u (aux v c (String_map.find u etat.graph) []) etat.graph}
     | _ -> assert false    
  
@@ -126,18 +124,20 @@ let propagate_estimate s etat = (* relaxation sur arêtes adjacentes *)
             if update < 0 && t = u then (* cycle négatif *)
               raise Neg_cycle {etat with explain = String_map.add u Double(s,u,LEq,d) etat.explain}
             else if update < String_map.find t etat.estimate_static then
-              aux q { etat with estimate = Heap.replace_min(***) (t,update) etat.estimate ; estimate_static = String_map.add t update etat.estimate_static ; explain = String_map.add t Double(s,t,LEq,d) etat.explain} (** peut être à généraliser lors du non refinement *)
+              aux q { etat with estimate = Heap.insert(***) (t,update) etat.estimate ; estimate_static = String_map.add t update etat.estimate_static ; explain = String_map.add t Double(s,t,LEq,d) etat.explain} (** peut être à généraliser lors du non refinement *)
           end
         else
           aux q etat
+  in
+    aux adj etat
       
 let relax_edge a etat = (* relaxation complète d'une arête *)
   match a with
-    | Double (u,v,LEq,c) ->
+    | Double (u,v,LEq,c) when u < v ->
         begin
           let rec aux etat =
             let ((s,k),estimate) = Heap.extract_min estimate in (* ça ne doit pas raise *)
-              if k<0 then
+              if k<0 && String_map.find s estimate_static = k then (** c'est ici qu'on nettoie le heap des doublons non maj *)
                 let next_values = String_map.add s ((String_map.find s etat.values) + k) etat.next_values in
                 let estimate = Heap.insert (s,0) estimate in
                 let estimate_static = String_map.add s 0 estimate static in
@@ -151,12 +151,12 @@ let relax_edge a etat = (* relaxation complète d'une arête *)
     | _ -> assert false
 
 let explain_conflict a reduc etat =  (* construction du cycle nég, que l'on sait exister *)
-  let insert x l acc = match l with
+  let insert x l acc = match l with (* insertion sans doublons *)
     | [] -> x::acc
     | t::q -> if t=x then List.rev_append (t::q) acc else insert x q (t::acc) in
-  let rec aux u acc =
-    match String_map.find u etat.explain
-      | (Double(s,t,LEq,d) as a) when t = u ->
+  let rec aux u v acc =
+    match String_map.find v etat.explain
+      | (Double(s,t,LEq,d) as a) when t = v && s < t ->
           begin
             match reduc.get_id a with
               | None -> assert false
@@ -164,10 +164,10 @@ let explain_conflict a reduc etat =  (* construction du cycle nég, que l'on sai
                   if s = u then
                     insert l acc []
                   else
-                    aux s (insert l acc [])
+                    aux u s (insert l acc [])
       | _ assert false
   in match a with 
-    | Double (u,v,LEq,c) -> aux u []
+    | Double (u,v,LEq,c) when u < v -> aux u u []
     | _ -> assert false
   
 let propagate reduction prop etat = (* propagation tout-en-un *)
@@ -184,14 +184,13 @@ let propagate reduction prop etat = (* propagation tout-en-un *)
                   begin
                     | Empty -> assert false (* heap vide *)
                     | Neg_cycle etat ->
-                        raise Conflit_smt (explain conflit a reduction etat,etat) 
+                        raise Conflit_smt (explain_conflict a reduction etat,etat) 
                   end
         end
    
   (** mise à jour explain qd gamma refined *)
-  (** enlever arete  *)
   (** on ajoute qd les aretes *)
-  (** renvoyer -pi *)
+  (** vérifier dimin min heap *)
   
 (** Backtrack *)
   
@@ -208,7 +207,7 @@ let backtrack reduc undo_list etat =
     aux etat undo_list   
 
 
-let print_etat reduc etat = 
+let print_etat reduc etat = (** ici : renvoyer les -pi *) 
   ...
   
 let pure_prop = false
