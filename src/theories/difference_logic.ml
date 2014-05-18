@@ -71,7 +71,7 @@ let init reduc =
      explain = String_map.empty;
     }
   in
-    reduc.fold (* Atom a avec a normalisé *)
+    reduc#fold (* Atom a avec a normalisé *)
       (fun a _ etat ->
          match a with
           | Double (s1,s2,LEq,n) when s1 < s2 ->
@@ -155,7 +155,7 @@ let explain_conflict a reduc etat =  (* construction du cycle nég, que l'on sai
     match String_map.find v etat.explain
       | (Double(s,t,LEq,d) as a) when t = v && s < t ->
           begin
-            match reduc.get_id a with
+            match reduc#get_id a with
               | None -> assert false
               | Some l -> l::acc
                   if s = u then
@@ -172,7 +172,7 @@ let propagate reduction prop etat = (* propagation tout-en-un *)
     | [] -> { etat with etat.values = etat.next_values } (* on update values car no conflit *)
     | l::q ->
         begin 
-          match reduc.get_orig l with
+          match reduc#get_orig l with
             | None -> aux q etat
             | Some a -> 
                 try 
@@ -195,9 +195,9 @@ let propagate reduction prop etat = (* propagation tout-en-un *)
 let backtrack reduc undo_list etat =
   let rec aux etat = function
     | [] -> etat
-    | l::q ->
+    | (b,v)::q ->
         begin
-          match reduc.get_orig l with
+          match reduc#get_orig v with
             | None -> aux etat q
             | Some a -> aux (remove_edge a etat) q
         end in

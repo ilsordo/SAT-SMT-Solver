@@ -95,7 +95,7 @@ Enregistrer l'entrée générée dans un fichier ex.txt :
      
 Résoudre l'entrée générée à la volée : 
 
-    ./gen -color n p |./colorie k
+    ./gen -color n p | ./colorie k
                 
 Options
 -------

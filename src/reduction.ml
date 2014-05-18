@@ -39,7 +39,7 @@ struct
 
     val mutable ids : int Id.t = Id.empty (* t vers int *)
 
-    val mutable orig : Base.t Orig.t = Orig.empty (* int vers string *)
+    val mutable orig : Base.t Orig.t = Orig.empty (* int vers t *)
       
   (* Variable maximale utilisée *)
     method max = count
