@@ -1,1 +1,1 @@
-<cnf> or <color> or <dpll> or <front_end> or <gen> or <smt> or <term_parser> or <tseitin> or <wl> or <difference_logic> : include
+<cnf> or <color> or <dpll> or <front_end> or <gen> or <smt> or <term_parser> or <wl> or <theories> or <theories/data_structures> : include
