@@ -1,4 +1,5 @@
-
+open Braun_trees
+open Formula_tree
 
 type op = Great | Less | LEq | GEq | Eq | Ineq 
 
@@ -16,9 +17,9 @@ let print_atom p a =
 module String_map = 
 struct
   include Map.make(sig type t = string let compare = compare end)
-  let find key map = (** enlever *)
+  (*let find key map = 
     try Some (find key map)
-    with Not_found -> None
+    with Not_found -> None*)
 end
   
 module Heap = Braun.Make(struct type t = (string*int) let le (s1,k1) (s2,k2) = k1 <= k2 end)
@@ -186,7 +187,8 @@ let propagate reduction prop etat = (* propagation tout-en-un *)
                     | Neg_cycle etat ->
                         raise Conflit_smt (explain_conflict a reduction etat,etat) 
                   end
-        end
+        end in
+  aux prop etat
    
   (** mise à jour explain qd gamma refined *)
   (** on ajoute qd les aretes *)
@@ -202,9 +204,8 @@ let backtrack reduc undo_list etat =
           match reduc.get_orig l with
             | None -> aux etat q
             | Some a -> aux (remove_edge a etat) q
-        end
-  in
-    aux etat undo_list   
+        end in
+  aux etat undo_list   
 
 
 let print_etat reduc etat = (** ici : renvoyer les -pi *) 
