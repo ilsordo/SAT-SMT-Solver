@@ -20,11 +20,11 @@ struct
     (* Faire un pari, propager, se relever en cas de conflit *)
     let rec aux reduction etat_smt next_bet period date acc =
       match next_bet () with
-        | No_bet (_,backtrack) ->
+        | No_bet (values,backtrack) ->
             begin
               try
                 let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in
-                etat_smt (** Sortie *)
+                Solvable (values, Smt.get_answer etat reduction values)
               with
                 | Conflit_smt (clause,etat_smt) -> (** clause * etat_smt ?? *)
                     let (undo_list,next_bet) = backtrack clause in

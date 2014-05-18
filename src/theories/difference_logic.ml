@@ -1,11 +1,7 @@
 open Braun_trees
 open Formula_tree
 
-type op = Great | Less | LEq | GEq | Eq | Ineq 
-
-type atom = Double of string*string*op*int | Single of string*op*int
-
-
+type atom = Double of string*string*op*int | Single of string*op*int
 
 let parse_atom s =
   ...
@@ -40,8 +36,8 @@ exception Neg_cycle of etat
 (** Normalisation *)
 
 let rec normalize formula = 
-  let rec normalize_atom (Atom a) = match a with
-    | Double(s1,s2,o,n) ->
+  let rec normalize_atom = function
+    | Double (s1,s2,o,n) ->
         begin
           match o with
             | Great -> normalize (Atom (Double(s2,s1,Leq,-n-1))) 
@@ -49,7 +45,7 @@ let rec normalize formula =
             | LEq -> if s2 > s1 then Not (Atom (Double(s2,s1,Leq,n-1))) else Atom (Double(s1,s2,Leq,n))
             | GEq -> normalize (Atom (Double(s2,s1,Leq,-n)))  
             | Eq -> And(normalize (Atom (Double(s1,s2,Leq,n))),normalize (Atom (Double(s2,s1,Leq,-n))))
-            | Ineq -> Not(normalize (Atom (Double(s1,s2,Eq,n))))
+            | Ineq -> Not(normalize (Atom (Double(s1,s2,Eq,n))))
         end
     | Single(s,o,n) -> normalize (Atom (Double(s1,"_zero",o,n))) (** bien gérer ce _zero apès... *)
   in
@@ -59,7 +55,7 @@ let rec normalize formula =
       | Imp (f1,f2) -> Imp (normalize f1,normalize f2)
       | Equ (f1,f2) -> Equ (normalize f1,normalize f2)
       | Not f -> Not (normalize f)
-      | Atom a -> normalize_atom (Atom a) 
+      | Atom a -> normalize_atom a
   
   
 (** Initialisation *)
@@ -93,7 +89,7 @@ let add_edge e etat = (* multi-arêtes : peut-être que c'est faux ... *)
   match e with
     | Double(u,v,LEq,c) when u < v ->
         {etat with graph = String_map.add u ((c,v)::(String_map.find u etat.graph )) etat.graph}
-    | _ -> assert false
+    | _ -> assert false
  
 let remove_edge e etat = 
   let rec aux v c adj acc = match adj with
@@ -103,7 +99,7 @@ let remove_edge e etat =
   match e with
     | Double(u,v,LEq,c) when u < v ->
         {etat with graph = String_map.add u (aux v c (String_map.find u etat.graph) []) etat.graph}
-    | _ -> assert false    
+    | _ -> assert false    
  
 let init_estimate u v c etat = (* initialisation de gamma *)
   let (estimate,estimate_static) = 
@@ -149,7 +145,7 @@ let relax_edge a etat = (* relaxation complète d'une arête *)
           in            
           aux (init_estimate u v c etat)
         end
-    | _ -> assert false
+    | _ -> assert false
 
 let explain_conflict a reduc etat =  (* construction du cycle nég, que l'on sait exister *)
   let insert x l acc = match l with (* insertion sans doublons *)
@@ -161,7 +157,7 @@ let explain_conflict a reduc etat =  (* construction du cycle nég, que l'on sai
           begin
             match reduc.get_id a with
               | None -> assert false
-              | Some l -> l::acc
+              | Some l -> l::acc
                   if s = u then
                     insert l acc []
                   else
@@ -169,7 +165,7 @@ let explain_conflict a reduc etat =  (* construction du cycle nég, que l'on sai
       | _ assert false
   in match a with 
     | Double (u,v,LEq,c) when u < v -> aux u u []
-    | _ -> assert false
+    | _ -> assert false
   
 let propagate reduction prop etat = (* propagation tout-en-un *)
   let rec aux prop etat = match prop with
@@ -198,7 +194,7 @@ let propagate reduction prop etat = (* propagation tout-en-un *)
   
 let backtrack reduc undo_list etat =
   let rec aux etat = function
-    | [] -> etat
+    | [] -> etat
     | l::q ->
         begin
           match reduc.get_orig l with
@@ -208,8 +204,8 @@ let backtrack reduc undo_list etat =
   aux etat undo_list   
 
 
-let print_etat reduc etat = (** ici : renvoyer les -pi *) 
-  ...
+let get_answer reduc etat values p = (** ici : renvoyer les -pi *) 
+  
   
 let pure_prop = false
 

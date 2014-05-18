@@ -2,7 +2,7 @@ open Formule
 open Printf
 open Debug
 
-type t = Unsolvable | Solvable of bool vartable
+type t = Unsolvable | Solvable of bool vartable*(out_channel -> unit)
 
 let check n cnf = function
   | Unsolvable -> ()
@@ -12,12 +12,6 @@ let check n cnf = function
       valeurs#iter (fun v b -> f_verif#set_val b v 0);
       debug#p 1 "Check : %B\n%!" f_verif#eval
 
-let print_valeur p v = function (* affichage d'une variable (int) et de sa valeur *)
-  | true -> fprintf p "v %d\n" v
-  | false -> fprintf p "v -%d\n" v
-
 let print_answer p = function
   | Unsolvable -> fprintf p "s UNSATISFIABLE\n"
-  | Solvable values -> 
-      fprintf p "s SATISFIABLE\n";
-      values#iter (print_valeur p)
+  | Solvable (values, print_result) -> fprintf p "s SATISFIABLE\n%t%!"

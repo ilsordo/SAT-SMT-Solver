@@ -5,6 +5,9 @@ open Answer
 open Interaction
 open Algo_base
 
+let print_valeur p v = function (* affichage d'une variable (int) et de sa valeur *)
+  | true -> fprintf p "v %d\n" v
+  | false -> fprintf p "v -%d\n" v
 
 exception Conflit of (clause*etat)
 
@@ -16,7 +19,7 @@ struct
     
     let rec aux next_bet =
       match next_bet () with
-        | No_bet (values,_) -> Solvable values
+        | No_bet (values,_) -> Solvable (values,fun p -> values#iter (print_valeur p))
         | Bet_done (_,next_bet,_)
         | Conflit_dpll (_,next_bet) -> aux next_bet in
 

@@ -26,7 +26,7 @@ sig
 (* Défait les assignations, si l'une d'elle n'a pas été effectuée, ignore le littéral *)
   val backtrack : atom reduction -> literal list -> etat -> etat
 
-  val print_etat : atom reduction -> etat -> out_channel
+  val get_answer : atom reduction -> etat -> bool vartable -> out_channel -> unit
 
   val pure_prop : bool
 end
