@@ -19,3 +19,9 @@ let print_atom p a =
 
 
 *)
+
+
+
+
+
+let get_answer reduc etat result p =

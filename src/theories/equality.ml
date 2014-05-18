@@ -25,7 +25,7 @@ type etat =
 let rec normalize formula = 
   let rec normalize_atom (Atom a) = match a with
     | Eq (s1,s2) -> if s1 < s2 then Atom a else Atom (Eq (s2,s1))
-    | Ineq (s1,s2) -> if s1 < s2 then Atom a else Atom (Ineq (s2,s1)) 
+    | Ineq (s1,s2) -> Not(normalize (Atome (Eq (s1,s2)))) 
   in
     match formula with
       | And (f1,f2) -> And (normalize f1,normalize f2)
@@ -48,18 +48,22 @@ let init reduc =
 (** Propagation *)
  
 
-let propagate reduction prop etat = (* propagation tout-en-un *)
+let propagate reduction prop etat =
   let rec aux prop etat = match prop with
     | [] -> etat
-    | l::q ->
+    | (b,v)::q ->
         begin 
-          match reduc.get_orig l with
+          match reduc#get_orig v with
             | None -> aux q etat
             | Some a -> 
                 begin
                   match a with
-                    | Eq (s1,s2) -> aux q {etat with unions = UF.union s1 s2 etat.unions}
-                    | Ineq (s1,s2) -> aux q {etat with differences = String_set.add (s1,s2) etat.differences}
+                    | Eq (s1,s2) when s1 < s2-> 
+                        if b then
+                          aux q {etat with unions = UF.union s1 s2 etat.unions}
+                        else
+                          aux q {etat with differences = String_set.add (s1,s2) etat.differences}
+                    | _ -> assert false
                 end
         end in
   let unions = 
@@ -72,10 +76,13 @@ let propagate reduction prop etat = (* propagation tout-en-un *)
            match UF.explain s1 s2 unions with
              | None -> assert false
              | Some l ->
+                 let id x y = match reduction#get_id (Eq (x,y)) with
+                   | None -> assert false
+                   | Some z -> z in
                  let explain = 
                    List.fold_left
                      (fun l (s1,s2) ->
-                        if s1 < s2 then (reduction.get_id (Eq (s1,s2)))::l else (reduction.get_origin (Eq (s2,s1)))::l)
+                        if s1 < s2 then (id s1 s2)::l else (id s2 s1)::l)
                      [] l in 
                  Raise Conflit_smt (explain,{etat with unions = unions}))
       etat.unions in
@@ -87,21 +94,36 @@ let propagate reduction prop etat = (* propagation tout-en-un *)
 let backtrack reduc undo_list etat =
   let rec aux etat = function
     | [] -> etat
-    | l::q ->
+    | (b,v)::q ->
         begin
-          match reduc.get_orig l with
+          match reduc#get_orig v with
             | None -> aux etat q
             | Some a -> 
                 begin
                   match a with
-                    | Eq (s1,s2) -> aux {etat with unions = UF.undo_last s1 s2 etat.unions} q
-                    | Ineq (s1,s2) -> aux {etat with differences = String_set.remove (s1,s1) etat.differences} q
+                    | Eq (s1,s2) when s1 < s2-> 
+                        if b then
+                          aux {etat with unions = UF.undo_last s1 s2 etat.unions} q
+                        else
+                          aux {etat with differences = String_set.remove (s1,s1) etat.differences} q
+                    | _ -> assert false
                 end
         end in
-  aux etat undo_list
+  aux etat undo_list   
 
-let print_etat reduc etat = 
-  ...
+
+let get_answer reduc etat result p =
+  reduc#iter
+    (fun a v -> 
+      match values#find v with
+        | None -> assert false
+        | Some b ->
+            begin
+              match a with
+                | Eq(s1,s2) when s1 < s2 -> let ope = if b then "=" else "!=" in Printf.fprintf p "%s %s %s\n" s1 ope s2                
+                | _ -> assert false
+            end)
+
   
 let pure_prop = false
 
