@@ -1,19 +1,21 @@
 open Debug
 open Printf
 open Algo
+open Algo_base
+open Smt_base
+open Smt
 
 module Dpll = Bind(Algo_dpll)
 module Wl = Bind(Algo_wl)
 
-type problem = Cnf | Color of int | Tseitin
+type problem = Cnf | Color of int | Smt of ( module Smt_base )
 
 type config = 
     { 
       mutable problem_type : problem;
       mutable print_cnf : out_channel option;
       mutable input : string option; 
-      mutable algo : Algo.t;
-      mutable nom_algo : string;
+      mutable algo : (module Algo_base);
       mutable heuristic : Heuristic.t;
       mutable nom_heuristic : string;
       mutable clause_learning : bool;
@@ -26,7 +28,6 @@ let config =
     print_cnf = None;
     input = None;
     algo = Dpll.algo;
-    nom_algo = "dpll";
     heuristic = Heuristic.(next polarite_next);
     nom_heuristic = "next_next";
     clause_learning = false;
@@ -39,11 +40,10 @@ let parse_args () =
   
   let parse_algo s =
     let algo = match s with
-      | "dpll" -> Dpll.algo
-      | "wl" -> Wl.algo
+      | "dpll" -> ( module Dpll : Algo_base )
+      | "wl" -> ( module Dpll : Algo_base )
       | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
-    config.algo <- algo;
-    config.nom_algo <- s in
+    config.algo <- algo in
 
   let parse_heuristic s =
     let heuristic = match s with
@@ -59,6 +59,7 @@ let parse_args () =
       | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.heuristic <- heuristic;
     config.nom_heuristic <- s in
+
   let parse_output s =
     if s = "-" then
       config.print_cnf <- Some stdout
@@ -66,17 +67,22 @@ let parse_args () =
       let out = try Some (open_out s)
         with Sys_error e -> eprintf "Error : %s" e; None in
       config.print_cnf <- out in
+
+  let set_tseitin () =
+    config
   
   let speclist = Arg.align [
-    ("-algo",     Arg.String parse_algo,                              "[dpll|wl] Algorithm");
-    ("-h",        Arg.String parse_heuristic,                         "[next_rand|...] Heuristic");
-    ("-cl",       Arg.Unit (fun () -> config.clause_learning <- true)," Clause learning");
-    ("-d",        Arg.Int debug#set_debug_level,                      "k Debug depth k");
-    ("-b",        Arg.Int debug#set_blocking_level,                   "k Interaction depth k");
-    ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),"k Color solver");
-    ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- Tseitin)," Tseitin solver");
-    ("-print_cnf",Arg.String parse_output,                            "[f|-] Prints reduction to f (- = stdout)");
-    ("-i",        Arg.Unit (fun () -> config.interaction <- true),    " Interaction")
+    ("-algo",     Arg.String parse_algo,                                                      "[dpll|wl] Algorithm");
+    ("-h",        Arg.String parse_heuristic,                                                 "[next_rand|...] Heuristic");
+    ("-cl",       Arg.Unit (fun () -> config.clause_learning <- true),                        " Clause learning");
+    ("-d",        Arg.Int debug#set_debug_level,                                              "k Debug depth k");
+    ("-b",        Arg.Int debug#set_blocking_level,                                           "k Interaction depth k");
+    ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),                        "k Color solver");
+    ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- Smt (module Tseitin)),           " Tseitin solver");
+    ("-print_cnf",Arg.String parse_output,                                                    "[f|-] Prints reduction to f (- = stdout)");
+    ("-i",        Arg.Unit (fun () -> config.interaction <- true),                            " Interaction")
+    ("-diff",     Arg.Unit (fun () -> config.problem_type <- Smt (module Difference_logic)),  " Difference logic")
+
   ] in
   
   Arg.parse speclist (fun s -> config.input <- Some s) use_msg

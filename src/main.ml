@@ -4,23 +4,17 @@ open Debug
 open Config
 open Algo
 
-
 let get_formule input = function
   | Cnf -> 
       let (n,cnf) = Cnf.parse input in 
       (None,n,cnf)
-  | Tseitin ->
-      let raw = Tseitin.parse input in
-      stats#start_timer "Reduction (s)";
-      let (cnf,assoc) = Reduction.renommer (Tseitin.to_cnf raw)  (Tseitin.print_answer) in
-      stats#stop_timer "Reduction (s)";
-      (Some assoc,assoc#max,cnf)
   | Color k -> 
       let raw = Color.parse input in
       stats#start_timer "Reduction (s)";
       let (cnf,assoc) = Reduction.renommer (Color.to_cnf raw k) (Color.print_answer k raw) in
       stats#stop_timer "Reduction (s)";
       (Some assoc,assoc#max,cnf)
+  | 
 
 let print_cnf p (n,f) = 
   fprintf p "p cnf %d %d\n" n (List.length f);

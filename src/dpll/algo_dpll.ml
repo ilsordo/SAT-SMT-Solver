@@ -24,7 +24,7 @@ let rec constraint_propagation pure_prop (formule:formule) lit etat acc =
                 | Some (b,v) -> (* single polarité trouvée *)  
                     try
                       debug#p 3 "Propagation : single polarity found : %d %B" v b;
-                      debug#p 4 "Propagation : setting %d to %B" v b;
+                      debug#p 4 "Propagation :setting %d to %B" v b;
                       formule#set_val b v lvl; (* on assigne, peut lever Empty_clause *)
                       propagate ((b,v)::acc) (* on empile et on poursuit *)
                     with                 

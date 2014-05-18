@@ -10,7 +10,12 @@ struct
   
   module Reduction = Reduction(struct type t = Base.atom let print_value = print_atom end)
   
-  let algo (data : atom formula_tree) heuristic period cl interaction =
+  let reduction data =
+    let data = Base.normalize data in (* normalisation de la formule donnée en entrée *)
+    let (cnf_raw,next_free) = to_cnf data in (* transformation en cnf *)
+    Reduction.renommer ~start:next_free cnf_raw (fun _ _ _ -> ()) (* renommage pour avoir une cnf de int *)
+
+  let algo heuristic period cl interaction reduction cnf =
     
     (* Faire un pari, propager, se relever en cas de conflit *)
     let rec aux reduction etat_smt next_bet period date acc =
@@ -46,9 +51,7 @@ struct
             aux reduction etat_smt next_bet period 0 []  
     in
     
-    let data = Base.normalize data in (* normalisation de la formule donnée en entrée *)
-    let (cnf_raw,next_free) = to_cnf data in (* transformation en cnf *)
-    let (cnf, reduction) = Reduction.renommer ~start:next_free cnf_raw (fun _ _ _ -> ()) in (* renommage pour avoir une cnf de int *)
+    
     let etat_smt = Smt.init reduction in (* initialisation de l'etat du smt *)
     try 
       let (prop_init, next_bet) = Dpll.run heuristic cl interaction Smt.pure_prop reduction#count cnf in
