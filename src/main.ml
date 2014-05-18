@@ -31,8 +31,8 @@ let print_answer p (answer,assoc) =
 let main () =
   parse_args();
   let module Base_algo = ( config.algo : Algo_base ) in
-  let (assoc,n,cnf) = get_formule (get_input()) config.problem_type in
   debug#p 1 "Using algorithm %s and heuristic %s %s" Base_algo.name config.nom_heuristic (if config.clause_learning then "with clause learning" else "");
+  let (assoc,n,cnf) = get_formule (get_input()) config.problem_type in
   begin
     match config.print_cnf with 
       | None -> ()

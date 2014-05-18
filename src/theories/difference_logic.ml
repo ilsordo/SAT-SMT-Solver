@@ -1,14 +1,11 @@
 open Braun_trees
 open Formula_tree
 
-type atom = Double of string*string*op*int | Single of string*op*int
+type atom = string*string*int (s1-s2<=k)
 
 let parse_atom s =
-  ...
-  
-let print_atom p a = 
-  ...
-
+  let lex = Lexing.from_string s in
+  Diff_parser.main Diff_lexer.token lex
 
 module String_map = 
 struct

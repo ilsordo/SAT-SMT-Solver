@@ -1,17 +1,14 @@
 open Union_find
 open Formula_tree
 
-type atom = Eq of string*string | Ineq of string*string
+type atom = Eq of string*string | Ineq of string*string
 
 
 
 let parse_atom s =
-  ...
+  try
+    Scanf.sscanf s "x%d=x%d" (fun 
   
-let print_atom p a = 
-  ...
-
-
 module UF = Union_find.Make(struct type t = string let eq a b = (a = b) end)
 
 module String_set = Set.Make(struct type t = (string*string) let compare = compare)
@@ -28,7 +25,7 @@ type etat =
 let rec normalize formula = 
   let rec normalize_atom (Atom a) = match a with
     | Eq (s1,s2) -> if s1 < s2 then Atom a else Atom (Eq (s2,s1))
-    | Ineq (s1,s2) -> if s1 < s2 then Atom a else Atom (Ineq (s2,s1)) 
+    | Ineq (s1,s2) -> if s1 < s2 then Atom a else Atom (Ineq (s2,s1)) 
   in
     match formula with
       | And (f1,f2) -> And (normalize f1,normalize f2)
@@ -101,8 +98,7 @@ let backtrack reduc undo_list etat =
                     | Ineq (s1,s2) -> aux {etat with differences = String_set.remove (s1,s1) etat.differences} q
                 end
         end in
-  aux etat undo_list   
-
+  aux etat undo_list
 
 let print_etat reduc etat = 
   ...

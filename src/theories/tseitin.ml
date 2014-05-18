@@ -2,8 +2,6 @@
 type atom = string
 
 let parse_atom s = s
-  
-let print_atom p a = ()
 
 (* Théorie *)
 
