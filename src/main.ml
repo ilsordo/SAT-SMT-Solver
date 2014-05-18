@@ -14,7 +14,8 @@ let get_formule input = function
       let (cnf,assoc) = Reduction.renommer (Color.to_cnf raw k) (Color.print_answer k raw) in
       stats#stop_timer "Reduction (s)";
       (Some assoc,assoc#max,cnf)
-  | 
+  | Smt s ->
+     
 
 let print_cnf p (n,f) = 
   fprintf p "p cnf %d %d\n" n (List.length f);
@@ -29,8 +30,9 @@ let print_answer p (answer,assoc) =
 
 let main () =
   parse_args();
+  let module Base_algo = ( config.algo : Algo_base ) in
   let (assoc,n,cnf) = get_formule (get_input()) config.problem_type in
-  debug#p 1 "Using algorithm %s and heuristic %s %s" config.nom_algo config.nom_heuristic (if config.clause_learning then "with clause learning" else "");
+  debug#p 1 "Using algorithm %s and heuristic %s %s" Base_algo.name config.nom_heuristic (if config.clause_learning then "with clause learning" else "");
   begin
     match config.print_cnf with 
       | None -> ()

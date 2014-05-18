@@ -74,7 +74,7 @@ let propagate reduction prop etat = (* propagation tout-en-un *)
          else
            match UF.explain s1 s2 unions with
              | None -> assert false
-             | Some l ->
+             | Some l ->
                  let explain = 
                    List.fold_left
                      (fun l (s1,s2) ->
@@ -89,7 +89,7 @@ let propagate reduction prop etat = (* propagation tout-en-un *)
   
 let backtrack reduc undo_list etat =
   let rec aux etat = function
-    | [] -> etat
+    | [] -> etat
     | l::q ->
         begin
           match reduc.get_orig l with
