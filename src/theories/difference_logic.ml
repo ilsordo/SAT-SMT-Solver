@@ -204,8 +204,11 @@ let backtrack reduc undo_list etat =
   aux etat undo_list   
 
 
-let get_answer reduc etat values p = (** ici : renvoyer les -pi *) 
-  
+let get_answer reduc etat result p = (** ici : renvoyer les -pi *) 
+  String_map.iter 
+    (fun s k -> Printf.fprintf p "%s %d\n" s -k)
+    etat.values
+    
   
 let pure_prop = false
 
