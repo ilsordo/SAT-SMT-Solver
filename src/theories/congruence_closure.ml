@@ -70,7 +70,7 @@ let normalize formula = (* idem à equality *)
     | Atom a -> normalize_atom (Atom a) 
 
 
-
+(* point de non retour *)
 
 (** Transformation 1 : remplacer les termes et sous termes par des variables fraiches (inutile de le faire pour les variables) *)
 
