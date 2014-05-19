@@ -91,44 +91,5 @@ module Make(X: Ordered) = struct
     | Node (l, x, r) ->
         x, merge l r
 
-  (* from
-       Three Algorithms on Braun Trees (Functional Pearl)
-       Chris Okasaki
-       J. Functional Programming 7 (6) 661â€“666, November 1997 *)
-
-  let rec naive_size = function
-    | Leaf -> 0
-    | Node (l, _, r) -> 1 + naive_size l + naive_size r
-
-  let rec size = function
-    | Leaf -> 0
-    | Node (l, _, r) -> let m = size r in 1 + 2*m + diff m l
-
-  and diff m = function
-    | Leaf ->
-        assert (m = 0);
-        0
-    | Node (l, _, r) when m = 0 ->
-        assert (l = Leaf && r = Leaf);
-        1
-    | Node (l, _, _) when m land 1 = 1 ->
-        (* m = 2k + 1  *)
-        diff (m lsr 1) l
-    | Node (_, _, r) ->
-        (* m = 2k + 2 *)
-        diff ((m - 1) lsr 1) r
-
-  let rec copy2 m x =
-    if m = 0 then
-      Node (Leaf, x, Leaf), Leaf
-    else if m land 1 = 1 then
-      let l, r = copy2 (m lsr 1) x in
-      Node (l, x, r), Node (r, x, r)
-    else
-      let l, r = copy2 ((m - 1) lsr 1) x in
-      Node (l, x, l), Node (l, x, r)
-
-  let copy n x = snd (copy2 n x)
-
 end
 

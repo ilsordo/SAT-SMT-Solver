@@ -9,13 +9,13 @@ type etat = unit
 
 let normalize formula = formula
   
-let init reduc = () 
+let init _ = () 
   
-let propagate reduc prop etat = etat
+let propagate _ _ etat = etat
   
-let backtrack reduc undo_list etat = etat
+let backtrack _ _ etat = etat
 
-let get_answer reduc etat values p =
+let get_answer reduc _ values p =
   reduc#iter
     (fun s v -> 
       match values#find v with

@@ -46,15 +46,5 @@ module Make(X: Ordered): sig
   val extract_min: t -> X.t * t
     (* runs in O(log n) *)
 
-  val naive_size: t -> int
-    (* runs in O(n) *)
-    
-  val size: t -> int
-    (* runs in O((log n)^2) *)
-
-  val copy: int -> X.t -> t
-    (* [copy n x] returns a tree containing [n] occurrences of [x]
-       runs in O(log n) *)
-
 end
 
