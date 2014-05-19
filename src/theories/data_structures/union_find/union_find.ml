@@ -53,7 +53,7 @@ module Make(X: Equal) = struct
         if c = b then
           let parents_compress = (* on compresse tout ce qu'on a rencontré sur le chemin *)
             List.fold_left (fun p_compress d -> UF.add d c p_compress) r.parents_compress acc in
-            (Some c,{r with parents_compress = parents_compress}) 
+          (Some c,{r with parents_compress = parents_compress}) 
         else
           aux c (c::acc) (* on continue de remonter dans l'arbre *)
     in
@@ -70,7 +70,7 @@ module Make(X: Equal) = struct
             (Some a,{r with depth = UF.add a 1 r.depth ; parents = UF.add a a r.parents ; parents_compress = UF.add a a r.parents_compress})
         
         
-  let are_equal a b r = (* avec ajout de a et b si non présent *)
+  let are_equal a b r = (* avec ajout de a et b si non présents *)
     let (a0,r0) = find a r in
     let (a1,r1) = find b r0 in (* comprimés à la volée *)  
       match (a0,a1) with
