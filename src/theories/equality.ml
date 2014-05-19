@@ -122,11 +122,11 @@ let get_answer reduc etat result p =
     (fun a v -> 
       match values#find v with
         | None -> assert false
-        | Some b ->
+        | Some b ->
             begin
               match a with
-                | Eq(s1,s2) when s1 < s2 -> let ope = if b then "=" else "!=" in Printf.fprintf p "%s %s %s\n" s1 ope s2                
-                | _ -> assert false
+                | Eq(s1,s2) when s1 < s2 -> let ope = if b then "=" else "!=" in Printf.fprintf p "%s %s %s\n" s1 ope s2                
+                | _ -> assert false
             end)
 
   
