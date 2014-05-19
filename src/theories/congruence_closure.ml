@@ -22,8 +22,8 @@ module Arg_set = Set.Make(struct type t = term list let compare = compare)
 
 type etat = 
   { 
-    ack_assoc : string Fun_map.t;
-    ack_arg : Arg_set.t Arg_map.t ;
+    ack_assoc : string Fun_map.t; (* ancien nom -> nouveau nom *)
+    ack_arg : Arg_set.t Arg_map.t ; (* que des anciens noms *)
     unions : UF.t;
     differences : String_set.t
   }
@@ -37,6 +37,7 @@ notes persos
     pour l'instant : on oublie l'affichage final qu devra distinguer les termes des sous termes / égalités ajoutées
     si travail avec type atom normalisé on peut déléguer fonctions à equality.ml avec etat = { redu... sub_etat}    
 
+    attention au rev sur les listes d'args
 
                                             map
     nom de f * arg  (string * (term list)) ----> renommage (string pour Var of string)   :   permet init sans ajout de clauses (1ère passe
@@ -71,9 +72,9 @@ let normalize formula = (* idem à equality *)
 
 
 
-(** Transformation 1 *)
+(** Transformation 1 : remplacer les termes et sous termes par des variables fraiches (inutile de le faire pour les variables) *)
 
-let add_set f l ack_arg = (* ajouter l dans le set associé à s *) 
+let add_set f l ack_arg = (* ajouter l dans le set associé à f *) 
   let set =
     try
       Arg_map.find f ack_arg
@@ -81,7 +82,7 @@ let add_set f l ack_arg = (* ajouter l dans le set associé à s *)
       | Not_found -> Arg_set.empty in
   Arg_map.add f (Arg_set.add l set) ack_arg
 
-let ackerize1_term t free ack_assoc ack_arg = (* transfo sur formule sans ajout *)
+let ackerize1_term t free ack_assoc ack_arg = (* transformer un terme *)
   match t with
     | Var s -> (Var s, free, ack_assoc, ack_arg)
     | Fun (f,l) -> 
@@ -89,31 +90,31 @@ let ackerize1_term t free ack_assoc ack_arg = (* transfo sur formule sans ajout 
           (Var (Fun_map.find (f,l) ack_assoc), free, ack_assoc, ack_arg)
         with
           | Not_found -> 
-              let s = "_ack"^(string_of_int free) in
+              let s = "_ack"^(string_of_int free) in (** autre syntaxe ? *)
               let ack_assoc = Fun_map.add (f,l) s ack_assoc in
               let ack_arg = add_set f l ack_arg in
               let (l_ack,free,ack_assoc,ack_arg) = ackerize1_list l (free+1) ack_assoc ack_arg [] in
                 (Fun (s,l_ack), free, ack_assoc, ack_arg)
 
-and ackerize1_list l free ack_assoc ack_arg acc = 
+and ackerize1_list l free ack_assoc ack_arg acc = (* transformer une liste de termes *)
   match l with
-    | [] -> (acc,free,ack_assoc,ack_arg)
+    | [] -> (List.rev acc,free,ack_assoc,ack_arg) (* on retourne la liste pour remettre les arguments dans l'ordre *)
     | t::q -> 
         let (t_ack,free,ack_assoc,ack_arg) = ackerize1_term t free ack_assoc ack_arg in
           ackerize1_list q free ack_assoc ack_arg (t_ack::acc)
                   
-let ackerize1_atom a free ack_assoc ack_arg =  
+let ackerize1_atom a free ack_assoc ack_arg = (* transformer un atome *)  
   match a with                
     | Eq (t1,t2) -> 
         let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
         let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
-          (Eq(a_ack1,a_ack2),,free,ack_assoc,ack_arg)
+          (Eq(a_ack1,a_ack2),free,ack_assoc,ack_arg)
     | Ineq (t1,t2) ->
         let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
         let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
-          (Eq(a_ack1,a_ack2),,free,ack_assoc,ack_arg)
+          (Eq(a_ack1,a_ack2),free,ack_assoc,ack_arg)
           
-let ackerize1 formula = (* peut aussi produire ack_assoc et ack_arg *)
+let ackerize1 formula = (* transformer une formule, renvoyer aussi ack_assoc et ack_arg (mais pas forcèment nécessaire suivant ce qu'on souhaite print à la fin *)
   let rec aux f free ack_assoc ack_arg = match f with
     | And (f1,f2) -> 
         let (f_ack1,free,ack_assoc,ack_arg) = aux f1 free ack_assoc ack_arg in
@@ -140,18 +141,18 @@ let ackerize1 formula = (* peut aussi produire ack_assoc et ack_arg *)
   let (f_ack,_,ack_assoc,ack_arg) = aux formula 1 Fun_map.empty Arg_map.empty in
     (f_ack,ack_assoc,ack_arg)
   
-(** Transformation 2 *)
+(** Transformation 2 : ajouter des implications *)
 
 let get_var t ack_assoc = 
   match t with
     | Var s -> t
     | Fun (f,l) -> Var (Fun_map.find (f,l) ack_assoc)
 
-let flatten_ack l =  
+let rec flatten_ack l = (* transformer la liste d en conjonction d *)  
   match l with
-    | [] -> assert false (* l1 < l2 *)
+    | [] -> assert false (* l1 < l2 dans les fold de ackerize2 *)
     | [x] -> Atom x
-    | x::y::q -> And(Atom x,f_ack y::q) in
+    | x::y::q -> And(Atom x,flatten_ack y::q) in
 
 let ackerize2_pair f l1 l2 ack_assoc ack_arg =
   let rec aux l1 l2 acc = 
@@ -163,10 +164,10 @@ let ackerize2_pair f l1 l2 ack_assoc ack_arg =
           else
             aux q1 q2 (Eq(get_var t1 ack_assoc,get_var t2 ack_assoc)::acc)
       | _ -> assert false in
-  Or(Not(flatten_ack (aux l1,l2)),Atom (Eq(get_var (Fun(f,l1)),get_var (Fun(f,l2)))))
+  Or(Not(flatten_ack (aux l1 l2)),Atom (Eq(get_var (Fun(f,l1)),get_var (Fun(f,l2)))))
 
 let ackerize2 ack_assoc ack_arg =
-  flatten 
+  flatten_ack 
     (Arg_map.fold
        (fun f list_set l ->
           Arg_set.fold
@@ -177,8 +178,8 @@ let ackerize2 ack_assoc ack_arg =
                       (ackerize2_pair f l1 l2 ack_assoc ack_arg)::l
                     else
                       l)
-                 list_set)
-            l ist_set)
+                 list_set l)
+            list_set l)
        ack_arg [])
 
 
