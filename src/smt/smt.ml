@@ -3,8 +3,6 @@ open Clause
 open Algo_parametric
 open Smt_base
 
-type answer 
-
 module Make_smt = functor(Dpll : Algo_base) -> functor (Smt : Smt_base) ->
 struct
   

@@ -1,4 +1,0 @@
-open Smt_base
-
-
-

@@ -10,8 +10,6 @@ sig
 
   val parse_atom : string -> atom option
 
-  val print_atom : out_channel -> atom -> unit
-
 (* Théorie *)
 
   type etat

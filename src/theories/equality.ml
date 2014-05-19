@@ -1,17 +1,14 @@
 open Union_find
 open Formula_tree
 
-type atom = Eq of string*string | Ineq of string*string
+type atom = Eq of string*string | Ineq of string*string
 
 
 
 let parse_atom s =
-  ...
+  try
+    Scanf.sscanf s "x%d=x%d" (fun 
   
-let print_atom p a = 
-  ...
-
-
 module UF = Union_find.Make(struct type t = string let eq a b = (a = b) end)
 
 module String_set = Set.Make(struct type t = (string*string) let compare = compare)

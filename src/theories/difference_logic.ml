@@ -4,10 +4,9 @@ open Formula_tree
 type atom = Double of string*string*op*int | Single of string*op*int
 
 let parse_atom s =
-  ...
+  let lex = Lexing.from_string s in
+  Diff_parser.main Diff_lexer.token lex
   
-let print_atom p a = 
-  ...
 
 module Graph = Bellman_ford.Make(struct type t = string let eq a b = (a = b) end)
 
@@ -112,7 +111,5 @@ let get_answer _ etat _ p =
 
   
 let pure_prop = false
-
-
 
 
