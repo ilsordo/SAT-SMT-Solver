@@ -17,7 +17,11 @@
 1. Introduction
 ===============
 
-L'algorithme de Bellman-Ford incrémental est un algorithme de détection de cycles de poids négatifs dans un graphe pouvant évoluer au cours du temps. Le module joint permet le stockage interne du graphe et l'utilisation de l'algorithme via les fonctions suivantes : 
+L'algorithme de Bellman-Ford incrémental est un algorithme de détection de cycles de poids négatifs dans un graphe évolutif possédant des contrainte sur ses sommets. 
+
+Le problème considéré se formule ainsi : étant donné un graphe pondéré orienté G=(V,E) pouvant évoluer au cours du temps (ajouts/suppressions de noeuds/arêtes), associer à chaque sommet u de V une valeur pi(u) telle que pour toute arête (u,v) de E de poids w : pi(x) + w - pi(y) => 0.
+
+Le module joint permet le stockage interne du graphe et l'utilisation de l'algorithme via les fonctions suivantes : 
 
   - empty       : initialiser le module, avec un graphe vide
   - add_node    : ajouter un noeud au graphe
@@ -34,10 +38,10 @@ Les structures de données utilisées sont décrites partie 2. Les algorithmes s
 
 Six structures de données sont nécessaires aux algorithmes : 
 
-  - graph            : représentation du graphe par listes d'adjacence. Pour toute arête de a vers b de poids w, le couple (w,b) est ajoutée à la liste d'adjacence de a.
+  - graph            : représentation du graphe par listes d'adjacence. Pour toute arête de a vers b de poids w, le couple (w,b) est ajouté à la liste d'adjacence de a.
   - values           : associe à chaque noeud un potentiel rendant consistant le graphe pour les arêtes déjà relaxées.
   - next_values      : associe à chaque noeud un nouveau potentiel en construction, qui se substitue à values lorsqu'une relaxation est réussie.
-  - estimate_static  : associe à chaque noeud n une estimation de next_values(n) - values(n) si la relaxation en cours peut être menée à son terme. 
+  - estimate_static  : associe à chaque noeud n une estimation de next_values(n)-values(n) si la relaxation en cours peut être menée à son terme. 
   - estimate         : stockage de certaines valeurs de estimate_static dans un tas min (structure de Braun Trees).
   - explain          : associe à chaque noeud n l'arête suivant laquelle estimate_static(n) a été modifié. Permet de reconstruire un cycle de poids négatif lorsqu'il en existe un.
   
@@ -97,39 +101,18 @@ D'après [1] et [2], chaque opération de relaxation se fait en temps O(m + n*lo
 4. Incrémentalité
 =================
 
-values retourne...
+L'incrémentalité est l'intérêt principal des algorithmes et structures de données utilisées ici. En effet, il est possible de construire progressivement le graphe et de vérifier la présence de cycles de poids négatifs sans avoir à exécuter à chaque fois l'algorithme classique de Bellman-Ford en O(mn).
 
-est-ce vraiment bf ? prq des poids sur les sommets
-
-L'incrémentalité est l'intérêt principal des algorithmes et structures de données utilisées ici. En effet, il est possible de construire progressivement des graphes et vérifier la présence de cycles de poids négatifs sans avoir à 
+De plus, lorsqu'une relaxation échoue en découvrant un cycle de poids négatif (ligne 19), les valeurs contenues dans values sont consistantes pour toutes les arêtes relaxées, exceptée la dernière (qui a provoqué l'échec). Ainsi, un fois la dernière arête supprimée, aucune autre modification n'est à effectuer. En particulier, si d'autres arêtes sont supprimées, values n'a pas à subir de changement.
 
     
-    
-Quelques remarques : 
-  - l'algorithme présenté Fig.1 dans [1] contient une erreur (le tout premier u doit être remplacé par v) et ne détaille pas la construction de explain.
-  - 
-  - 
+5. Références
+=============
+ 
+[1] Fast and Flexible Difference Constraint Propagation for DPLL(T) (2006) by Scott Cotton, Oded Maler
+[2] Deciding separation logic formulae by SAT and incremental negative cycle elimination (2005) by Chao Wang, Franjo Ivancic, Malay Ganai, Aari Gupta   
 
-    
-          
-         
+Remarque : l'algorithme présenté Fig.1 dans [1] contient une erreur (le tout premier u doit être remplacé par v).
       
       
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-  
-  
-  
-  
-  
-  
-  
-  
+

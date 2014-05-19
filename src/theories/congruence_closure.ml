@@ -49,11 +49,9 @@ notes persos
       sur la 2ème map : 
         pour chaque nom de fonction f
           pour chaque couple (l1,l2) de term list
-            produire la conjonction grâce à ack (préecrite ppour propreté)
+            produire la conjonction grâce à ack (préecrite pour propreté)
             rechercher dans la première map le bind de f l1 et f l2
             ajouter la clause
-    
-
 *)
 
 
@@ -187,7 +185,7 @@ let ackerize2 ack_assoc ack_arg =
 
 let ackerize formula = 
   let (f_ack1,ack_assoc,ack_arg) ) = ackerize1 formula in
-  let f_ack2 = ackerize2 ack_assoc ack_arg in
+  let f_ack2 = ackerize2 ack_assoc ack_arg in (* une formule sans aucun Fun !!! *)
     (And(f_ack1,f_ack2),ack_assoc,ack_arg)
 
 
