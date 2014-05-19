@@ -28,7 +28,7 @@ let rec normalize formula =
             | Eq -> And(normalize (Atom (Double(s1,s2,Leq,n))),normalize (Atom (Double(s2,s1,Leq,-n))))
             | Ineq -> Not(normalize (Atom (Double(s1,s2,Eq,n))))
         end
-    | Single(s,o,n) -> normalize (Atom (Double(s1,"_zero",o,n))) in (** bien gérer ce _zero apès... *)
+    | Single(s,o,n) -> normalize (Atom (Double(s1,"_zero",o,n))) in (** bien gérer ce _zero après, ne pas l'afficher... *)
   match formula with
     | And (f1,f2) -> And (normalize f1,normalize f2)
     | Or (f1,f2) -> Or (normalize f1,normalize f2)
@@ -61,7 +61,7 @@ let propagate_unit (b,v) reduction etat =
                 if b then
                   Graph.relax_edge s1 s2 n (Graph.add_edge s1 s2 n)
                 else
-                  Graph.relax_edge s2 s1 (n-1) (Graph.add_edge s2 s1 (-n-1)) (***)
+                  Graph.relax_edge s2 s1 (-n-1) (Graph.add_edge s2 s1 (-n-1)) (***)
             | _ -> assert false
         end
           

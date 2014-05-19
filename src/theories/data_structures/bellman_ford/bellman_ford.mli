@@ -2,7 +2,7 @@
 module type Equal = sig
   type t 
   val eq : t -> t -> bool
-  val print : t -> out_channel -> unit
+  val print : t -> unit
 end
 
 module Make(X: Equal): sig
@@ -19,10 +19,10 @@ module Make(X: Equal): sig
   
   val remove_edge : X.t -> X.t -> int -> t -> t
   
-  val relax_edge: X.t -> X.t -> int -> t -> t 
+  val relax_edge : X.t -> X.t -> int -> t -> t 
   
   val neg_cycle : X.t -> t -> (int * X.t * X.t) list
   
-  val print_values : out_channel -> t -> unit
+  val print_values : t -> unit
   
 end

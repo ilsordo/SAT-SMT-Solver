@@ -1,10 +1,20 @@
-open Braun
+(*****************************************************************************************************************)
+(*                                                                                                               *)
+(* Bellman-Ford incrémental                                                                                      *)
+(*                                                                                                               *)
+(* Ce module fournit une structure incrémentale de graphe avec détection de cycles de poids négatifs via         *)
+(* l'algorithme de Bellman-Ford incrémental.                                                                     *)
+(*                                                                                                               *)
+(* Se référer au fichier README joint pour plus d'explications sur son fonctionnement.                           *)
+(*                                                                                                               *)
+(*****************************************************************************************************************)
 
+open Braun
 
 module type Equal = sig
   type t
   val eq : t -> t -> bool
-  val print : t -> out_channel -> unit
+ val print : t -> unit
 end
 
 module Make(X: Equal) = struct
@@ -49,19 +59,19 @@ module Make(X: Equal) = struct
 
   (*******)
     
-  let init_estimate u v d r = (* initialisation de gamma *)
+  let init_relaxation u v d r = (* initialisation de gamma *) (* seuls graphes et values ne bougent pas *)
     let update = (Node.find u r.values) + d - (Node.find v r.values) in
-    let estimate = if update < 0 then Heap.insert (update,v) Heap.empty else Heap.empty in
-    let explain = if update < 0 then Node.add v (d,u) r.explain else r.explain in (**?????*)
-    let (estimate,estimate_static) = (estimate, Node.add v update Node.empty) in (** empty maintenant *)
-    let estimate_static = 
-      Node.fold (* update sur autre que v, pas ajouté au heap car = 0 *)
-        (fun s _ estimate_static -> if s <> v then (Node.add s 0 estimate_static) else estimate_static)
-        r.values estimate_static in (** update sur v, peut être explain à maj *)
-    { r with estimate = estimate ; estimate_static = estimate_static ; explain = explain }
+      let next_values = r.values in
+      let explain = if update < 0 then Node.add v (d,u) (*r.explain*) Node.empty else (*r.explain*) Node.empty in (**?????*)
+      let estimate = if update < 0 then Heap.insert (update,v) Heap.empty else Heap.empty in
+      let estimate_static = 
+        Node.fold (* update sur autre que v, pas ajouté au heap car = 0 *)
+          (fun s _ estimate_static -> if s <> v then (Node.add s 0 estimate_static) else estimate_static)
+          r.values (Node.add v update Node.empty) in (** update sur v, peut être explain à maj *)   
+    { r with estimate = estimate ; estimate_static = estimate_static ; explain = explain ; next_values = next_values (***) }
     
     
-  let relax_adjacent s u r = (* origine de l'arête de départ *)   
+  let relax_adjacent s u r = (* relaxer les arêtes partant de s, suite à extraction de u du heap *)   
     let adj = Node.find s r.graph in
     let rec aux l r = match l with
       | [] -> r
@@ -69,11 +79,13 @@ module Make(X: Equal) = struct
           if (Node.find t r.values) = (Node.find t r.next_values) then
             begin
               let update = (Node.find s r.next_values) + c - (Node.find t r.values) in
-              if update < 0 && t = u then (* cycle négatif *)
-                raise (Neg_cycle (u,{r with explain = Node.add u (c,s) r.explain}))
-            else if update < Node.find t r.estimate_static then
-                aux q { r with estimate = Heap.insert (update,t) r.estimate ; estimate_static = Node.add t update r.estimate_static ; explain = Node.add t (c,s) r.explain}
-            else
+              if update < Node.find t r.estimate_static then
+                let explain = Node.add t (c,s) r.explain in
+                if t = u then (* cycle négatif *)
+                   raise (Neg_cycle (u,{r with explain = explain}))
+                else
+                   aux q { r with estimate = Heap.insert (update,t) r.estimate ; estimate_static = Node.add t update r.estimate_static ; explain = explain }
+              else
                 aux q r (*with explain = Node.add t (c,s) r.explain*) (**??*)
             end
           else
@@ -82,13 +94,13 @@ module Make(X: Equal) = struct
 
   
   let relax_edge u v d r = 
-    let r = init_estimate u v d r in (* gamma initialisé *)
+    let r = init_relaxation u v d r in (* gamma et autres initialisés *)
     let rec aux r =
       try
         let ((k,s),estimate) = Heap.extract_min r.estimate in (* raise si heap vide *) 
         if k = Node.find s r.estimate_static then (* c'est ici qu'on nettoie le heap des doublons non maj *)
           begin
-            assert (k < 0 && s <> u); (* on n'insert pas >=0, on détecte u direct, on ne fait que diminuer heap *)
+            assert (k < 0 && s <> u); (*** on n'insert pas >=0, on détecte u direct, on ne fait que diminuer heap *)
             let next_values = Node.add s ((Node.find s r.values) + k) r.next_values in
             let estimate_static = Node.add s 0 r.estimate_static in
             let r = relax_adjacent s u { r with next_values = next_values; estimate = estimate; estimate_static = estimate_static} in
@@ -97,7 +109,7 @@ module Make(X: Equal) = struct
         else
           aux {r with estimate = estimate }
       with
-        | Empty -> r in
+        | Empty -> { r with values = r.next_values } in (* c'est ok, on prend pi' *)
     aux r
 
 
@@ -115,10 +127,10 @@ module Make(X: Equal) = struct
 
 
 
-  let print_values p r =  (** ici : renvoyer les -pi *) 
+  let print_values r =  (** ici : renvoyer les -pi *) 
     Node.iter 
-      (fun s k -> Printf.fprintf p "%a %d\n" (X.print p s) -k)
-      etat.values
+      (fun s k -> X.print s ; print_string " : " ;print_int k;print_newline())
+      r.values
         
     
 end
