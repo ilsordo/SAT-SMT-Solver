@@ -8,7 +8,6 @@ type backtrack = First | Var_depth of (int*literal) | Clause_depth of (int*claus
      Clause_depth(k,c) : se rendre k level plus bas, puis dépiler le level k jusqu'avant que c ait deux littéraux non assignés, assigner le premier littéral de c rencontré
 *)
 
-
 type tranche = bool*literal * literal list (* littéral parié, liste des littéraux assignés en conséquence *)
 
 type etat = {
