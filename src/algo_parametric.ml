@@ -177,16 +177,16 @@ struct
               repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* pas de clause learning *)
               let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** ICI : Unsat du non cl *)
-              (undo_list,continue_bet pure_prop formule l etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
+              (undo_list,continue_bet formule l pure_prop etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
             else (* clause learning *)
               begin
                 stats#start_timer "Clause learning (s)";
-                let ((b,v),k,c_learnt) = conflict_analysis formule etat c in
+                let ((b,v),k,c_learnt) = conflict_analysis Base.set_wls formule etat c in
                 debug#p 2 "Learnt %a" c_learnt#print ();
                 stats#stop_timer "Clause learning (s)";
                 debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
-                let (_,etat,undo_list) = undo Var_depth(etat.level-k,(b,v)) formule etat in (* backtrack non chronologique <--- ici clause learning backtrack *)
-                Conflit_dpll(undo_list,continue_bet formule (b,v) ~cl:c_learnt etat) (***) (* on poursuit *) (** ICI : Unsat du cl *)
+                let (_,etat,undo_list) = undo (Var_depth(etat.level-k,(b,v))) formule etat in (* backtrack non chronologique <--- ici clause learning backtrack *)
+                Conflit_dpll (undo_list,continue_bet formule (b,v) ~cl:c_learnt pure_prop etat) (***) (* on poursuit *) (** ICI : Unsat du cl *)
               end
                 
     and bet formule etat () =
