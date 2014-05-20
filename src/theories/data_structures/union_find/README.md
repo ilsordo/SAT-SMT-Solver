@@ -40,9 +40,9 @@ La structure d'union-find habituelle est implémentée grâce aux trois structur
 Afin d'effectuer les opérations undo_last et explain, il est nécessaire d'ajouter les deux structures suivantes :
 
   - edges      : associe à chaque noeud u de parents ayant un père v l'arête (k,b,x,y) telle que
-                   * v est devenus parent de x lors de l'appel union(x,y)
-                   * l'opération union(x,y) a été la kème union effective
-                   * b est un booléen vraie ssi union(x,y) a nécessité d'augmenter depth(v)
+       * v est devenus parent de x lors de l'appel union(x,y)
+       * l'opération union(x,y) a été la kème union effective
+       * b est un booléen vraie ssi union(x,y) a nécessité d'augmenter depth(v)
   - edges_real : associe à chaque couple (x,y) figurant dans les images de edges (ie tel que (k,b,x,y) apparaît) le couple (u,v) (unique !) dont (k,b,x,y) est l'image 
 
 
