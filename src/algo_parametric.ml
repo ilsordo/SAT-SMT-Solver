@@ -13,6 +13,11 @@ let (@) l1 l2 = List.(rev_append (rev l1) l2)
 
 exception Conflit of (clause*etat)
 
+module type Algo_parametric =
+sig
+  val run : Heuristic.t -> bool -> bool -> int -> int list list -> Answer.t
+end
+
 type dpll_answer = 
   | No_bet of bool vartable * (literal list -> (literal list*(unit -> dpll_answer)))
   | Bet_done of literal list * (unit -> dpll_answer) * (literal list -> (literal list*(unit -> dpll_answer)))

@@ -1,16 +1,19 @@
-type problem = Cnf | Color of int | Tseitin
+open Smt_base
+open Algo_base
+
+type problem = Cnf | Color of int | Smt of ( module Smt_base )
 
 type config = 
     { 
       mutable problem_type : problem;
       mutable print_cnf : out_channel option;
       mutable input : string option; 
-      mutable algo : Algo.t;
-      mutable nom_algo : string;
+      mutable algo : (module Algo_base);
       mutable heuristic : Heuristic.t;
       mutable nom_heuristic : string;
       mutable clause_learning : bool;
-      mutable interaction : bool
+      mutable interaction : bool;
+      mutable smt_period : int
     }
 
 val config : config

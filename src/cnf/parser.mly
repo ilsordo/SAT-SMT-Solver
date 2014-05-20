@@ -6,7 +6,7 @@
 
 
 %start main             	
-%type <int*((int list) list)> main
+%type <int*(((bool*int) list) list)> main
 
 %%
 
@@ -30,8 +30,8 @@ main:
   ;
 
 literal:
-| INT                         {$1}
-| MINUS INT                   {-$2}
+| INT                         {(true,$1)}
+| MINUS INT                   {(false,$2)}
 
 
 

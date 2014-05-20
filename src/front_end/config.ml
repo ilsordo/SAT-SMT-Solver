@@ -19,7 +19,8 @@ type config =
       mutable heuristic : Heuristic.t;
       mutable nom_heuristic : string;
       mutable clause_learning : bool;
-      mutable interaction : bool
+      mutable interaction : bool;
+      mutable smt_period : int
     }
 
 let config = 
@@ -31,7 +32,8 @@ let config =
     heuristic = Heuristic.(next polarite_next);
     nom_heuristic = "next_next";
     clause_learning = false;
-    interaction = false 
+    interaction = false;
+    smt_period = 1
   }
 
 (* Utilise le module Arg pour modifier l'environnement config *)
@@ -77,7 +79,8 @@ let parse_args () =
     ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),                        "k Color solver");
     ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- Smt (module Tseitin)),           " Tseitin solver");
     ("-print_cnf",Arg.String parse_output,                                                    "[f|-] Prints reduction to f (- = stdout)");
-    ("-i",        Arg.Unit (fun () -> config.interaction <- true),                            " Interaction")
+    ("-i",        Arg.Unit (fun () -> config.interaction <- true),                            " Interaction");
+    ("-p",        Arg.Int (fun n -> config.smt_period <- n )                                  "n Smt update period");
     ("-diff",     Arg.Unit (fun () -> config.problem_type <- Smt (module Difference_logic)),  " Difference logic")
 
   ] in
@@ -94,3 +97,7 @@ let get_input () =
           | Sys_error e -> 
               eprintf "Impossible de lire %s:%s\n%!" Sys.argv.(1) e;
               exit 1
+
+
+
+

@@ -1,7 +1,7 @@
 
 type atom = string
 
-let parse_atom s = s
+let parse_atom s = Formula_tree.Atom s
 
 (* Théorie *)
 
