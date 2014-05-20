@@ -101,15 +101,16 @@ D'après [1] et [2], chaque opération de relaxation se fait en temps O(m + n*lo
 4. Incrémentalité
 =================
 
-L'incrémentalité est l'intérêt principal des algorithmes et structures de données utilisées ici. En effet, il est possible de construire progressivement le graphe et de vérifier la présence de cycles de poids négatifs sans avoir à exécuter à chaque fois l'algorithme classique de Bellman-Ford en O(mn).
+L'incrémentalité est l'intérêt principal des algorithmes et structures de données utilisées ici. En effet, il est possible de construire progressivement le graphe et de vérifier la présence de cycles de poids négatifs sans avoir à exécuter l'algorithme classique de Bellman-Ford en O(mn).
 
-De plus, lorsqu'une relaxation échoue en découvrant un cycle de poids négatif (ligne 19), les valeurs contenues dans values sont consistantes pour toutes les arêtes relaxées, exceptée la dernière (qui a provoqué l'échec). Ainsi, un fois la dernière arête supprimée, aucune autre modification n'est à effectuer. En particulier, si d'autres arêtes sont supprimées, values n'a pas à subir de changement.
+De plus, lorsqu'une relaxation échoue en découvrant un cycle de poids négatif (ligne 19), les valeurs contenues dans values sont consistantes pour toutes les arêtes relaxées, exceptée la dernière (qui a provoqué l'échec). Ainsi, un fois la dernière arête supprimée, aucune autre modification n'est à effectuer. En particulier, si d'autres arêtes sont supprimées, values n'a pas à subir de changement supplémentaires !
 
     
 5. Références
 =============
  
 [1] Fast and Flexible Difference Constraint Propagation for DPLL(T) (2006) by Scott Cotton, Oded Maler
+
 [2] Deciding separation logic formulae by SAT and incremental negative cycle elimination (2005) by Chao Wang, Franjo Ivancic, Malay Ganai, Aari Gupta   
 
 Remarque : l'algorithme présenté Fig.1 dans [1] contient une erreur (le tout premier u doit être remplacé par v).

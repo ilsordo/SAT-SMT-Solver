@@ -209,6 +209,6 @@ module Make(X: Equal) = struct
             let (x,y) = Edges.find (b,a) r.edges_real in
               update x y
           with
-            | Not_found -> r
+            | Not_found -> r (* ce n'est pas la dernière union effective *)
   
 end
