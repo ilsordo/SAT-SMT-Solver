@@ -40,16 +40,16 @@ La structure d'union-find habituelle est implémentée grâce aux trois structur
 Afin d'effectuer les opérations undo_last et explain, il est nécessaire d'ajouter les deux structures suivantes :
 
   - edges      : associe à chaque noeud u de parents ayant un père v l'arête (k,b,x,y) telle que
-     * v est devenus parent de x lors de l'appel union(x,y)
+     * v est devenu parent de x lors de l'appel union(x,y)
      * l'opération union(x,y) a été la kème union effective
-     * b est un booléen vraie ssi union(x,y) a nécessité d'augmenter depth(v)
+     * b est un booléen vrai ssi union(x,y) a nécessité d'augmenter depth(v)
   - edges_real : associe à chaque couple (x,y) figurant dans les images de edges (ie tel que (k,b,x,y) apparaît) le couple (u,v) (unique !) dont (k,b,x,y) est l'image 
 
 
 3. Algorithmes
 ==============
 
-Les opérations union, find et are_equal s'effectuent de manière classique, à la différence que l'on maintient les arbres compressés (parents_compress) et non compressés (parents), et que les structures edges et edges_real sont maintenues à jour.
+Les opérations union, find et are_equal s'effectuent de manière classique, à la différence que l'on conserve les arbres compressés (parents_compress) et non compressés (parents), et que les structures edges et edges_real sont maintenues à jour.
 
 L'opération explain(u,v), lorsque u et v sont dans le même ensemble, renvoie un ensemble minimal (!) d'unions (ui,vi) qui ont conduites à placer u et v dans le même ensemble. L'algorithme prend appuie sur la remarque suivante : soit p le plus petit ancêtre commun à u et v dans parents, soit (k,b,x,y) l'arête possédant le plus grand facteur k sur les chemins menant de u à p et de v à p. Alors l'ensemble des unions suivantes est correct et minimal : 
   - (x,y)
@@ -72,7 +72,7 @@ L'opération undo_last s'effectue en temps constant.
 4. Incrémentalité
 =================
 
-L'algorithme d'union-find précédemment décrit est pleinement incrémental. En particulier, l'opération de backtrack s'effectue en temps constant et ne nécessite d'effectuer de sauvegardes au cours du temps.
+L'algorithme d'union-find précédemment décrit est pleinement incrémental. En particulier, l'opération de backtrack s'effectue en temps constant et ne nécessite pas d'effectuer de sauvegardes au cours du temps.
 
 
 5. Références

@@ -41,9 +41,9 @@ Six structures de données sont nécessaires aux algorithmes :
   - graph            : représentation du graphe par listes d'adjacence. Pour toute arête de a vers b de poids w, le couple (w,b) est ajouté à la liste d'adjacence de a.
   - values           : associe à chaque noeud un potentiel rendant consistant le graphe pour les arêtes déjà relaxées.
   - next_values      : associe à chaque noeud un nouveau potentiel en construction, qui se substitue à values lorsqu'une relaxation est réussie.
-  - estimate_static  : associe à chaque noeud n une estimation de next_values(n)-values(n) si la relaxation en cours peut être menée à son terme. 
+  - estimate_static  : associe à chaque noeud u une estimation de next_values(u)-values(u) si la relaxation en cours peut être menée à son terme. 
   - estimate         : stockage de certaines valeurs de estimate_static dans un tas min (structure de Braun Trees).
-  - explain          : associe à chaque noeud n l'arête suivant laquelle estimate_static(n) a été modifié. Permet de reconstruire un cycle de poids négatif lorsqu'il en existe un.
+  - explain          : associe à chaque noeud u l'arête suivant laquelle estimate_static(u) a été modifié. Permet de reconstruire un cycle de poids négatif lorsqu'il en existe un.
   
 
 3. Algorithmes
@@ -89,18 +89,18 @@ Précisions sur les tas min utilisés
 
 Nous avons récupéré une implémentation tierce des Braun Trees afin d'avoir une structure de tas. Nous n'avons pas utilisé de tas de Fibonacci (qui ont une meilleur complexité et fournissent l'opération decrease) afin de ne pas avoir à faire appel à une structure de donnée tierce trop conséquente (l'implémentation, très élémentaire, des Braun Trees occupe une cinquantaine de lignes seulement).
 
-Les Braun Trees ne permettent pas d'effectuer l'opération de la ligne 22 (diminuer une valeur dans le tas). A la place, nous faisons une insertion classique ligne 22, et lors d'un extraction (ligne 12) la valeur extraite est comparée avec celle stockée dans estimate_static : en cas de différence, il s'agit d'une ancienne valeur rendue obsolète ligne 22, elle est donc supprimée sans analyse supplémentaire.
+Les Braun Trees ne permettent pas d'effectuer l'opération de la ligne 22 (diminuer une valeur dans le tas). A la place, nous faisons une insertion classique ligne 22, et lors d'une extraction (ligne 12) la valeur extraite est comparée avec celle stockée dans estimate_static : en cas de différence, il s'agit d'une ancienne valeur rendue obsolète ligne 22, elle est donc supprimée sans analyse supplémentaire.
     
 Complexité
 ----------
 
-D'après [1] et [2], chaque opération de relaxation se fait en temps O(m + n*log n) lorsque des tas de Fibonnaci sont utilisés. Nous pensons que les Braun Trees conduisent à une complexité en O(m*log m + n*log n)   
+D'après [1] et [2], chaque opération de relaxation se fait en temps O(m + n*log n) lorsque des tas de Fibonnaci sont utilisés. Nous pensons que les Braun Trees conduisent à une complexité en O(m*log m + n*log n).   
     
 
 4. Incrémentalité
 =================
 
-L'incrémentalité est l'intérêt principal des algorithmes et structures de données utilisées ici. En effet, il est possible de construire progressivement le graphe et de vérifier la présence de cycles de poids négatifs sans avoir à exécuter l'algorithme classique de Bellman-Ford en O(mn).
+L'incrémentalité est l'intérêt principal des algorithmes et structures de données utilisés ici. En effet, il est possible de construire progressivement le graphe et de vérifier la présence de cycles de poids négatifs sans avoir à exécuter l'algorithme classique de Bellman-Ford en O(m*n).
 
 De plus, lorsqu'une relaxation échoue en découvrant un cycle de poids négatif (ligne 19), les valeurs contenues dans values sont consistantes pour toutes les arêtes relaxées, exceptée la dernière (qui a provoqué l'échec). Ainsi, un fois la dernière arête supprimée, aucune autre modification n'est à effectuer. En particulier, si d'autres arêtes sont supprimées, values n'a pas à subir de changement supplémentaires !
 
