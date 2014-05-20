@@ -29,7 +29,7 @@ struct
   (** Bet and set *)
 
   (* Parie sur (b,v) puis propage. Pose la dernière tranche qui en résulte, quoiqu'il arrive *)
-  let make_bet (formule:Base.formule) (b,v) first pure_prop etat =
+  let make_bet (formule:Base.formule) (b,v) first pure_prop etat () =
     let etat = { etat with level = etat.level + 1 } in
     let lvl = etat.level in 
     begin
@@ -177,7 +177,7 @@ struct
               repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* pas de clause learning *)
               let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** ICI : Unsat du non cl *)
-              (undo_list,continue_bet formule l pure_prop etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
+              Conflit_dpll (undo_list,continue_bet formule l pure_prop etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
             else (* clause learning *)
               begin
                 stats#start_timer "Clause learning (s)";
