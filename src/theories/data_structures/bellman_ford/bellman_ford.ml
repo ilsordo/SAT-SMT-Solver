@@ -127,7 +127,7 @@ module Make(X: Equal) = struct
 
  let print_values p r =  (** ici : renvoyer les -pi *) 
    Node.iter 
-     (fun s k -> Printf.fprintf p "%a %d\n" (X.print p s) -k)
+     (fun s k -> Printf.fprintf p "%a %d\n" X.print s -k)
      etat.values
  
 (*
@@ -138,6 +138,11 @@ module Make(X: Equal) = struct
 *)        
     
 end
+
+
+
+
+
 
 
 

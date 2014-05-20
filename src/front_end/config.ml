@@ -67,9 +67,6 @@ let parse_args () =
       let out = try Some (open_out s)
         with Sys_error e -> eprintf "Error : %s" e; None in
       config.print_cnf <- out in
-
-  let set_tseitin () =
-    config
   
   let speclist = Arg.align [
     ("-algo",     Arg.String parse_algo,                                                      "[dpll|wl] Algorithm");

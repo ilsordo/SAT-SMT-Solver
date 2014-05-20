@@ -1,6 +1,6 @@
 open Printf
 
-exception Illegal_variable_name
+exception Illegal_variable_name of s
 
 type 'a formula_tree =
   | And of ('a formula_tree)*('a formula_tree) 
@@ -15,8 +15,6 @@ sig
   type atom
 
   val parse_atom : string -> atom option
-
-  val print_atom : out_channel -> atom -> unit
 end
 
 module type Term_parser =

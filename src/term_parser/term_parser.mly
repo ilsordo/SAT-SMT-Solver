@@ -3,6 +3,8 @@
   
   module Make_parser = functor (Base : Term_base) ->
   struct
+    
+    type atom = Term_base.atom
 %}
 
 %token <atom> VAR 

@@ -107,7 +107,7 @@ let backtrack reduction undo_list etat =
 (** Affichage du résultat *)
 
 let get_answer _ etat _ p = 
-  etat.print_values p ...
+  etat.print_values p etat
 
   
 let pure_prop = false
