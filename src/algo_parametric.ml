@@ -80,7 +80,25 @@ struct
   (** Undo *)
   
   let undo_clause formule etat (c:clause) = (* on est déjà au bon niveau *)
-    let aux formule (stop,acc) (b,v) =
+    let rec aux seen to_rem to_keep = 
+      match to_keep with
+        | [] -> (seen,to_rem,to_keep)
+        | (b,v)::q ->
+            if (c#mem_all (not b) v) then
+              begin
+                match seen with
+                  | None -> 
+                  | Some (b0,v0) -> (,q)
+              end
+            else    
+                  
+                    raise (End_analysis (l,acc))
+                  else
+                    assert false            
+  
+  
+  
+    let aux (stop,acc) (b,v) =
       if (c#mem_all (not b) v) then
         match stop with
           | None -> 
@@ -95,9 +113,9 @@ struct
         end in 
     match etat.tranches with 
       | [] -> assert false
-      | (first,(b,v),propagation)::q -> (* (b,v) = pari *)
+      | (first,(b,v),propagation)::q ->
           try
-            match List.fold_left (aux formule) (None,[]) propagation with
+            match List.fold_left aux (None,[]) propagation with
               | (None,_) -> assert false
               | (Some l,acc) ->
                   if (c#mem_all (not b) v) then
@@ -179,7 +197,7 @@ struct
             if (not cl) then (* pas de clause learning *)
               let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** ICI : Unsat du non cl *)
               let next () =
-                let (etat,propagation) = continue_bet formule (b,v) pure_prop etat in
+                let (etat,propagation) = continue_bet formule l pure_prop etat in
                 Bet_done (propagation,bet formule etat, backtrack formule etat) in
               Conflit_dpll (undo_list,next) (***) (* on essaye de retourner la plus haute pièce possible *) 
             else (* clause learning *)
@@ -189,9 +207,9 @@ struct
                 debug#p 2 "Learnt %a" c_learnt#print ();
                 stats#stop_timer "Clause learning (s)";
                 debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
-                let (_,etat,undo_list) = undo (Var_depth(etat.level-k,(b,v))) formule etat in (* backtrack non chronologique <--- ici clause learning backtrack *)
+                let (l,etat,undo_list) = undo (Var_depth(etat.level-k,(b,v))) formule etat in (* backtrack non chronologique <--- ici clause learning backtrack *)
                 let next () =
-                  let (etat,propagation) = continue_bet formule (b,v) ~cl:c_learnt pure_prop etat in
+                  let (etat,propagation) = continue_bet formule l ~cl:c_learnt pure_prop etat in
                   Bet_done (propagation,bet formule etat, backtrack formule etat) in
                 Conflit_dpll (undo_list,next) (***) (* on poursuit *) (** ICI : Unsat du cl *)
               end
