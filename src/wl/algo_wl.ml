@@ -11,7 +11,7 @@ type formule = formule_wl
   
 let set_wls formule c l l0 = formule#set_wl l l0 c
      
-let constraint_propagation _ (formule : formule) (b,v) etat acc = (* propage en partant de (b,v), renvoie la liste de tous les littéraux assignés *)
+let constraint_propagation _ (formule : formule) (b,v) etat acc = (* propage en partant de (b,v), ajoute à acc la liste de tous les littéraux assignés et la renvoie *)
   stats#start_timer "Propagation (s)";
   let lvl = etat.level in
   let rec assign (b,v) c acc = 

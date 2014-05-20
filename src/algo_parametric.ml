@@ -40,7 +40,7 @@ struct
             raise (Conflit (c,{etat with tranches = (first,(b,v),[])::etat.tranches } )) (* on prend soin d'empiler la dernière tranche *)
     end;
     try 
-      let propagation = Base.constraint_propagation pure_prop formule (b,v) etat [] in (* on propage *)
+      let propagation = Base.constraint_propagation pure_prop formule (b,v) etat [] in (* on propage *) (** ne pas mettre (b,v) dans [] *)
       ({ etat with tranches = (first,(b,v),propagation)::etat.tranches }, propagation@[(b,v)]) (***) (* on renvoie l'état avec les dernières assignations effectuées *)
     with
         Conflit_prop (c,acc) -> (* conflit dans la propagation *)
@@ -114,7 +114,7 @@ struct
         | (first,pari,propagation)::q ->
             List.iter (undo_assignation formule) propagation;
             undo_assignation formule pari;
-            ({ level = etat.level - 1; tranches = q }, pari::(List.rev propagation))
+            ({ level = etat.level - 1; tranches = q }, pari::(List.rev propagation)) (** plus récent en tête ?*)
   
   (*
   undo : 

@@ -30,7 +30,7 @@ struct
         | No_bet (values,backtrack) ->
             begin
               try
-                let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in
+                let etat_smt = Smt.propagate reduction (List.rev(***) acc) etat_smt in
                 Solvable (values, Smt.print_answer reduction etat_smt values)
               with
                 | Smt.Conflit_smt (clause,etat_smt) -> (** clause * etat_smt ?? *)
@@ -43,7 +43,7 @@ struct
             if date = period then (* c'est le moment de propager dans la théorie *)
               begin
                 try
-                  let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in 
+                  let etat_smt = Smt.propagate reduction (List.rev(***) acc) etat_smt in 
                   aux reduction etat_smt next_bet period (date+1) []
                 with
                   | Smt.Conflit_smt (clause,etat_smt) ->
