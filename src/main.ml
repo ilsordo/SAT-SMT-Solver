@@ -9,7 +9,7 @@ let print_cnf p (n,f) =
   fprintf p "p cnf %d %d\n" n (List.length f);
   List.iter (fun c -> List.iter (fprintf p "%d ") c; fprintf p "0\n") f 
 
-let run algo n cnf =
+let run algo assoc n cnf =
   begin
     match config.print_cnf with 
       | None -> ()
@@ -36,15 +36,16 @@ let main () =
           begin
             let (n,cnf) = Cnf.parse input in 
             let module A = Algo.Bind( Base_algo ) in
-            printf "%a%!" Cnf.print_answer (run A.algo n cnf)
+            printf "%a%!" Cnf.print_answer (run A.algo None n cnf)
           end      
       | Color k -> 
           let raw = Color.parse input in
+          let module Reduction = Reduction.Reduction ( struct type t = string let print_value p s = fprintf p "%s" s end ) in
           stats#start_timer "Reduction (s)";
           let (cnf,assoc) = Reduction.renommer (Color.to_cnf raw k) in
           stats#stop_timer "Reduction (s)";
           let module A = Algo.Bind( Base_algo ) in
-          printf "%a%!" (Color.print_answer k raw assoc) (run A.algo assoc#max cnf)
+          printf "%a%!" (Color.print_answer k raw assoc) (run A.algo (Some assoc) assoc#max cnf)
       | Smt s ->
           let module Base_smt = ( val s : Smt_base ) in
           let module Smt = Make_smt ( Base_smt ) ( Base_algo ) in
@@ -52,7 +53,7 @@ let main () =
             stats#start_timer "Reduction (s)";
             let (cnf,assoc) = Smt.reduce (Smt.parse input) in
             stats#stop_timer "Reduction (s)";
-            printf "%a %!" Smt.print_answer (run Smt.algo assoc#max cnf)
+            printf "%a %!" Smt.print_answer (run Smt.algo (Some assoc) assoc#max cnf)
           with
             | Formula_tree.Illegal_variable_name s ->
                 eprintf "Illegal variable name : %s\n%!" s;

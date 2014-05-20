@@ -15,7 +15,7 @@ module type Term_base =
 sig
   type atom
 
-  val parse_atom : string -> atom
+  val parse_atom : string -> atom formula_tree
 end
 
 module type Term_parser =

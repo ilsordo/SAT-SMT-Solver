@@ -1,12 +1,6 @@
 {
-  open Formula_tree
-
-  module Make_lexer = functor (Base : Term_base) -> functor (Parser : Term_parser with type atom = Base.atom) ->
-  struct
-  
+  module Parser = Term_parser.Make (Tseitin)
   open Parser
-
-  type atom = Base.atom
 }
 
 let atom_sym = ['a'-'z' 'A'-'Z' '0'-'9' ' ' '(' ')' ',' '=' '<' '>' '-'] | "<=" | ">=" | "!="
@@ -23,11 +17,7 @@ rule token = parse
   | "<=>"				        { EQU }
   | "/\\"					{ AND }
 
-  | ['a'-'z'] atom_sym* as s 	{ ATOM (Base.parse_atom s) }
+  | ['a'-'z'] atom_sym* as s 	                { ATOM s }
   
-  | eof                                         { EOF } 
+  | eof                                         { EOF }
 
-
-{
- end
-}

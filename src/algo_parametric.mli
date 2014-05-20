@@ -9,9 +9,20 @@ type dpll_answer =
   | Bet_done of literal list * (unit -> dpll_answer) * (literal list -> (literal list*(unit -> dpll_answer)))
   | Conflit_dpll of literal list * (unit -> dpll_answer)
 
-module Bind : functor(Base : Algo_base) ->
-sig
-  
-  val run : Heuristic.t -> bool -> bool -> bool -> int -> int list list -> (literal list * (unit -> dpll_answer))
 
+module type Algo_parametric =
+sig
+  val run : Heuristic.t -> bool -> bool -> bool -> int -> int list list -> (literal list*(unit -> dpll_answer))
 end
+
+module Bind : functor(Base : Algo_base) -> Algo_parametric
+
+
+
+
+
+
+
+
+
+
