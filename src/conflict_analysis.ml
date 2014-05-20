@@ -10,7 +10,7 @@ type clause_classif = Empty | Singleton of literal*int | Top_level_crowded of li
       Top_level_crowded(l1,l2,lvl) : clause contenant au moins l1 et l2 qui sont 2 littéraux de plus haut niveau lvl tous les deux
       Top_level_singleton(l1,lvl1,l2,lvl2) : clause contenant au moins l1 et l2 tels que l1 est l'unique littéral de plus haut niveau (lvl1) et l2 est un littéral du deuxième niveau le plus élevé (lvl2) *)
 
-let backtrack_analysis (formule:formule) etat (c:clause) = (* description de la clause*)
+let backtrack_analysis formule etat (c:clause) = (* description de la clause*)
   let aux b v classif = 
     let lvl = formule#get_level v in
     match classif with
@@ -28,7 +28,7 @@ let backtrack_analysis (formule:formule) etat (c:clause) = (* description de la 
     c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) Empty)
 
     
-let learn_clause set_wls (formule:formule) etat c =
+let learn_clause set_wls formule etat c =
   match backtrack_analysis formule etat c with
     | Empty -> raise Unsat (* clause vide *)
     | Singleton (l,lvl) ->
@@ -49,8 +49,8 @@ let learn_clause set_wls (formule:formule) etat c =
       - k : niveau auquel backtracker
       - c : clause apprise
 *)
-let conflict_analysis set_wls (formule:formule) etat c =
-  let c_learnt = formule#new_clause [] in
+let conflict_analysis set_wls formule etat c =
+  let c_learnt = (formule#new_clause []:clause) in
   c_learnt#union c; (* initialement, la clause à apprendre est la clause où est apparu le conflit *)
   let rec aux propagation = 
     match backtrack_analysis formule etat c_learnt with
