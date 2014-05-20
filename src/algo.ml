@@ -13,7 +13,7 @@ exception Conflit of (clause*etat)
 
 module Bind = functor(Base : Algo_base) ->
 struct
-  module Algo = Algo_parametric.Bind Base
+  module Algo = Algo_parametric.Bind ( Base )
     
   let algo (next_pari : Heuristic.t) cl interaction n cnf =
     

@@ -1,7 +1,5 @@
 open Clause
 
-exception Unsat
-
 exception Empty_clause of clause
 
 class clauseset :

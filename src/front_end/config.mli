@@ -12,7 +12,8 @@ type config =
       mutable heuristic : Heuristic.t;
       mutable nom_heuristic : string;
       mutable clause_learning : bool;
-      mutable interaction : bool
+      mutable interaction : bool;
+      mutable smt_period : int
     }
 
 val config : config

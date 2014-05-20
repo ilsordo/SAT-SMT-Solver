@@ -22,7 +22,7 @@ struct
     let (cnf_raw,next_free) = to_cnf data in (* transformation en cnf *)
     Reduction.renommer ~start:next_free cnf_raw (* renommage pour avoir une cnf de int *)
 
-  let algo heuristic period cl interaction reduction _ cnf =
+  let algo period reduction heuristic cl interaction _ cnf =
     
     (* Faire un pari, propager, se relever en cas de conflit *)
     let rec aux reduction etat_smt next_bet period date acc =

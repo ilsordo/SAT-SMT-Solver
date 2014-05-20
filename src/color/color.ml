@@ -9,11 +9,11 @@ let vertex_constraint i k = (* produit une clause (i_1,i_2...i_k) indiquant que 
     if j=0 then
       res
     else
-      aux (j-1) ((true,(string_of_int i)^"_"^(string_of_int j))::res)
+      aux (j-1) ((true,Real ((string_of_int i)^"_"^(string_of_int j)))::res)
   in aux k []
   
 let vertices_constraint n k = (* produit une _fomule_ (CNF) indiquant que chaque sommet entre 1 et n doit être colorié *)
-  let rec aux i res=
+  let rec aux i res =
     if i=0 then
       res
     else aux (i-1) ((vertex_constraint i k)::res)
@@ -25,7 +25,7 @@ let edge_constraint i j k cnf = (* produit une _formule_ (CNF) indiquant que les
     if l=0 then
       res
     else
-      aux (l-1) ([(false,(string_of_int i)^"_"^(string_of_int l));(false,(string_of_int j)^"_"^(string_of_int l))]::res)
+      aux (l-1) ([(false,Real ((string_of_int i)^"_"^(string_of_int l)));Real ((false,(string_of_int j)^"_"^(string_of_int l)))]::res)
   in aux k cnf
 
   
