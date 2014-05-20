@@ -13,15 +13,16 @@ let (@) l1 l2 = List.(rev_append (rev l1) l2)
 
 exception Conflit of (clause*etat)
 
-module type Algo_parametric =
-sig
-  val run : Heuristic.t -> bool -> bool -> int -> int list list -> Answer.t
-end
-
 type dpll_answer = 
   | No_bet of bool vartable * (literal list -> (literal list*(unit -> dpll_answer)))
   | Bet_done of literal list * (unit -> dpll_answer) * (literal list -> (literal list*(unit -> dpll_answer)))
   | Conflit_dpll of literal list * (unit -> dpll_answer)
+
+
+module type Algo_parametric =
+sig
+  val run : Heuristic.t -> bool -> bool -> bool -> int -> literal list list -> (literal list*(unit -> dpll_answer))
+end
 
 module Bind = functor(Base : Algo_base) ->
 struct
@@ -210,8 +211,11 @@ struct
               
     and backtrack formule etat clause = (***)
       let c = formule#new_clause clause in
-      let (l,etat,undo_list) = undo (learn_clause formule etat c) formule etat in
-      (undo_list,continue_bet formule l ~cl:c etat)
+      let (l,etat,undo_list) = undo (learn_clause Base.set_wls formule etat c) formule etat in
+      let next () =
+        let (etat,propagation) = continue_bet formule l ~cl:c pure_prop etat in
+        Bet_done (propagation,bet formule etat, backtrack formule etat) in
+      (undo_list,next)
         
     in 
     try
