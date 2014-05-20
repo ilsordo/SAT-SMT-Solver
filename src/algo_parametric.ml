@@ -47,7 +47,7 @@ struct
           raise (Conflit (c,{etat with tranches = (first,(b,v),acc)::etat.tranches } ))
 
   (* Compléte la dernière tranche, assigne (b,v) (ce n'est pas un pari) puis propage. c_learnt : clause apprise ayant provoqué le backtrack qui a appelé continue_bet *)
-  let continue_bet (formule:Base.formule) (b,v) ?cl pure_prop etat () = (* cl : on sait de quelle clause vient l'assignation de (b,v) *)
+  let continue_bet (formule:Base.formule) (b,v) ?cl pure_prop etat = (* cl : on sait de quelle clause vient l'assignation de (b,v) *)
     let lvl=etat.level in
     if lvl=0 then (* niveau 0 : tout conflit indiquerait que la formule est non sat *)
       try
@@ -177,7 +177,10 @@ struct
               repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* pas de clause learning *)
               let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** ICI : Unsat du non cl *)
-              (undo_list,continue_bet formule l pure_prop etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
+              let next () =
+                let (etat,propagation) = continue_bet formule (b,v) pure_prop etat in
+                Bet_done (propagation,bet formule etat, backtrack formule etat) in
+              Conflit_dpll (undo_list,next) (***) (* on essaye de retourner la plus haute pièce possible *) 
             else (* clause learning *)
               begin
                 stats#start_timer "Clause learning (s)";
@@ -186,7 +189,10 @@ struct
                 stats#stop_timer "Clause learning (s)";
                 debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
                 let (_,etat,undo_list) = undo (Var_depth(etat.level-k,(b,v))) formule etat in (* backtrack non chronologique <--- ici clause learning backtrack *)
-                Conflit_dpll (undo_list,continue_bet formule (b,v) ~cl:c_learnt pure_prop etat) (***) (* on poursuit *) (** ICI : Unsat du cl *)
+                let next () =
+                  let (etat,propagation) = continue_bet formule (b,v) ~cl:c_learnt pure_prop etat in
+                  Bet_done (propagation,bet formule etat, backtrack formule etat) in
+                Conflit_dpll (undo_list,next) (***) (* on poursuit *) (** ICI : Unsat du cl *)
               end
                 
     and bet formule etat () =
@@ -200,7 +206,7 @@ struct
         | Some ((b,v) as lit) ->  
             stats#record "Paris";
             debug#p 2 "Next bet : %d %B" v b;
-            process formule etat lit (* on assigne (b,v) et on propage *)
+            process formule etat lit ()(* on assigne (b,v) et on propage *)
               
     and backtrack formule etat clause = (***)
       let c = formule#new_clause clause in
