@@ -84,7 +84,6 @@ L'opération relax_edge est plus complexe. Elle prend appuie sur l'algorithme de
 
 L'opération neg_cycle consiste uniquement à "remonter", via explain, le cycle de poids négatif détecté ligne 19, en partant du sommet u.
 
-
 Précisions sur les tas min utilisés
 -----------------------------------
 
