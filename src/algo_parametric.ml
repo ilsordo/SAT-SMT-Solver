@@ -25,28 +25,29 @@ struct
 
   (* Parie sur (b,v) puis propage. Pose la dernière tranche qui en résulte, quoiqu'il arrive *)
   let make_bet (formule:Base.formule) (b,v) first pure_prop etat =
+    let etat = { etat with level = etat.level + 1 } in
     let lvl = etat.level in 
     begin
       try
         formule#set_val b v lvl (* on fait le pari *)
       with 
           Empty_clause c -> (* conflit suite à pari *)
-            raise (Conflit (c,{level = lvl + 1; tranches = (first,(b,v),[])::etat.tranches } )) (* on prend soin d'empiler la dernière tranche *)
+            raise (Conflit (c,{etat with tranches = (first,(b,v),[])::etat.tranches } )) (* on prend soin d'empiler la dernière tranche *)
     end;
     try 
       let propagation = Base.constraint_propagation pure_prop formule (b,v) etat [] in (* on propage *)
-      ({ level = lvl + 1; tranches = (first,(b,v),propagation)::etat.tranches }, propagation@[(b,v)]) (***) (* on renvoie l'état avec la dernière tranche ajoutée *)
+      ({ etat with tranches = (first,(b,v),propagation)::etat.tranches }, propagation@[(b,v)]) (***) (* on renvoie l'état avec les dernières assignations effectuées *)
     with
         Conflit_prop (c,acc) -> (* conflit dans la propagation *)
-          raise (Conflit (c,{ level = lvl + 1; tranches = (first,(b,v),acc)::etat.tranches } ))
+          raise (Conflit (c,{etat with tranches = (first,(b,v),acc)::etat.tranches } ))
 
   (* Compléte la dernière tranche, assigne (b,v) (ce n'est pas un pari) puis propage. c_learnt : clause apprise ayant provoqué le backtrack qui a appelé continue_bet *)
-  let continue_bet (formule:Base.formule) (b,v) ?cl pure_prop etat () = (** renommer cl ? *) (* cl : on sait de quelle clause vient l'assignation de (b,v) *)
+  let continue_bet (formule:Base.formule) (b,v) ?cl pure_prop etat () = (* cl : on sait de quelle clause vient l'assignation de (b,v) *)
     let lvl=etat.level in
     if lvl=0 then (* niveau 0 : tout conflit indiquerait que la formule est non sat *)
       try
         formule#set_val b v lvl; (* peut lever Empty_clause *)
-        let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in (* peut lever Conflit_prop *)
+        let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in (* peut lever Conflit_prop *) (** prq [(b,v)] >> pour continue_propagation *)
         (etat, continue_propagation)
       with 
         | Empty_clause _ | Conflit_prop _ -> raise Unsat (** Ici : le clause learning détecte que la formule est insatisfiable *)
@@ -56,18 +57,18 @@ struct
         | (first,pari,propagation)::q ->
             begin
               try
-                formule#set_val b v ?cl lvl (* Subtilité de syntaxe : si cl est None, l'argument est omis sinon il est passé *)
+                formule#set_val b v ?cl lvl (* Subtilité de syntaxe : si cl est None, l'argument est omis sinon il est passé *) (***)
               with 
                   Empty_clause c -> 
-                    raise (Conflit (c,{ level = lvl + 1; tranches = (first,pari,(b,v)::propagation)::q } ))
+                    raise (Conflit (c,{ etat with tranches = (first,pari,(b,v)::propagation)::q } ))
             end;
             try 
               let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in (** pas sur pour les 5 lignes suivantes *)
               let propagation = continue_propagation@propagation in (* on poursuit l'assignation sur la dernière tranche *)
-              ({ level = lvl + 1; tranches = (first,pari,propagation)::q }, continue_propagation) 
+              ({ etat with tranches = (first,pari,propagation)::q }, continue_propagation) 
             with
                 Conflit_prop (c,acc) -> 
-                  raise (Conflit (c,{ level = lvl + 1; tranches = (first,pari,acc@propagation)::q } ))
+                  raise (Conflit (c,{ etat with tranches = (first,pari,acc@propagation)::q } ))
   
   
   (** Undo *)

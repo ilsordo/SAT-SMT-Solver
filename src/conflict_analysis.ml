@@ -4,8 +4,11 @@ open Algo_base
 open Debug
 
 type clause_classif = Empty | Singleton of literal*int | Top_level_crowded of literal*literal*int | Top_level_singleton of literal*int*literal*int
-
-(* besoin des 2 littéraux dans crowded ? *)
+(* classification des clauses :
+      Empty : clause vide
+      Singleton (l,lvl) : clause singleton contenant uniquement l, qui est de niveau d'assignation lvl
+      Top_level_crowded(l1,l2,lvl) : clause contenant au moins l1 et l2 qui sont 2 littéraux de plus haut niveau lvl tous les deux
+      Top_level_singleton(l1,lvl1,l2,lvl2) : clause contenant au moins l1 et l2 tels que l1 est l'unique littéral de plus haut niveau (lvl1) et l2 est un littéral du deuxième niveau le plus élevé (lvl2) *)
 
 let backtrack_analysis (formule:formule) etat (c:clause) = (* description de la clause*)
   let aux b v classif = 
@@ -16,24 +19,24 @@ let backtrack_analysis (formule:formule) etat (c:clause) = (* description de la 
       | Singleton (l,lvl_max) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l,lvl_max)
       | Singleton (l,lvl_max) -> Top_level_singleton (l,lvl_max,(b,v),lvl)            
       | Top_level_crowded (l1,l2,lvl_max) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l1,lvl_max)
-      | Top_level_crowded (l1,l2,lvl_max) -> Top_level_crowded (l1,l2,lvl_max)   
-      | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl = lvl_max -> Top_level_crowded (l1,(b,v),lvl_next)
+      | Top_level_crowded (l1,l2,lvl_max) -> classif
+      | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl = lvl_max -> Top_level_crowded (l1,(b,v),lvl_max)
       | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl > lvl_max -> Top_level_singleton ((b,v),lvl,l1,lvl_max)
       | Top_level_singleton (l1,lvl_max,l2,lvl_next) when lvl > lvl_next -> Top_level_singleton (l1,lvl_max,(b,v),lvl)
-      | Top_level_singleton (l1,lvl_max,l2,lvl_next) -> Top_level_singleton (l1,lvl_max,l2,lvl_next)   
+      | Top_level_singleton (l1,lvl_max,l2,lvl_next) -> classif
   in      
     c#get_vpos#fold_all (aux true) (c#get_vneg#fold_all (aux false) Empty)
 
     
 let learn_clause set_wls (formule:formule) etat c =
   match backtrack_analysis formule etat c with
-    | Empty -> raise Unsat
+    | Empty -> raise Unsat (* clause vide *)
     | Singleton (l,lvl) ->
         stats#record "Learnt singletons"; 
         Var_depth (etat.level,l) (* on n'enregistre pas la clause, on backtrack jusqu'au niveau 0 = etat.level étapes de bckt à faire, on assigne l *)
     | Top_level_crowded (l1,l2,lvl_max) ->
         formule#add_clause c;
-        set_wls formule c l1 l2;
+        set_wls formule c l1 l2; (** est-ce correct ? *)
         Clause_depth (etat.level-lvl_max,c) (* on bckt au niveau lvl_max, on analyse la clause pour défaire partiellement ce niveau *)
     | Top_level_singleton (l1,lvl_max,l2,lvl_next) -> 
         formule#add_clause c;
