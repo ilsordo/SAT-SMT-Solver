@@ -5,7 +5,10 @@
 (* Ce module fournit une structure incrémentale de graphe avec détection de cycles de poids négatifs via         *)
 (* l'algorithme de Bellman-Ford incrémental.                                                                     *)
 (*                                                                                                               *)
-(* Se référer au fichier README joint pour plus d'explications sur son fonctionnement.                           *)
+(* Consulter le fichier README joint pour de plus amples informations. En particulier, les notations utilisées   *)
+(*  au cours de l'algorithme sont identiques à celles de [1] (voir Références dans README.md).                   *)
+(*                                                                                                               *)
+(* [1] Fast and Flexible Difference Constraint Propagation for DPLL(T) (2006) by Scott Cotton, Oded Maler        *)
 (*                                                                                                               *)
 (*****************************************************************************************************************)
 
@@ -25,7 +28,7 @@ module Make(X: Equal) = struct
   type t = 
     {
       graph : (int*X.t) list Node.t ; (* voisins de chaque noeud *)
-      values : int Node.t ; (* pi *)
+      values : int Node.t ; (* pi <- notation de [1], pareil dans la suite *)
       next_values : int Node.t ; (* pi' *)
       estimate : Heap.t ;  (* gamma *)
       estimate_static : int Node.t ; (* gamma avec lecture en O(1) *)
@@ -59,16 +62,16 @@ module Make(X: Equal) = struct
 
   (*******)
     
-  let init_relaxation u v d r = (* initialisation de gamma *) (* seuls graphes et values ne bougent pas *)
+  let init_relaxation u v d r = (* initialisation de gamma *)
     let update = (Node.find u r.values) + d - (Node.find v r.values) in
       let next_values = r.values in
-      let explain = if update < 0 then Node.add v (d,u) (*r.explain*) Node.empty else (*r.explain*) Node.empty in (**?????*)
+      let explain = if update < 0 then Node.add v (d,u) Node.empty else (*r.explain*) Node.empty in
       let estimate = if update < 0 then Heap.insert (update,v) Heap.empty else Heap.empty in
       let estimate_static = 
         Node.fold (* update sur autre que v, pas ajouté au heap car = 0 *)
           (fun s _ estimate_static -> if s <> v then (Node.add s 0 estimate_static) else estimate_static)
-          r.values (Node.add v update Node.empty) in (** update sur v, peut être explain à maj *)   
-    { r with estimate = estimate ; estimate_static = estimate_static ; explain = explain ; next_values = next_values (***) }
+          r.values (Node.add v update Node.empty) in
+    { r with estimate = estimate ; estimate_static = estimate_static ; explain = explain ; next_values = next_values }
     
     
   let relax_adjacent s u r = (* relaxer les arêtes partant de s, suite à extraction de u du heap *)   
@@ -86,7 +89,7 @@ module Make(X: Equal) = struct
                 else
                    aux q { r with estimate = Heap.insert (update,t) r.estimate ; estimate_static = Node.add t update r.estimate_static ; explain = explain }
               else
-                aux q r (*with explain = Node.add t (c,s) r.explain*) (**??*)
+                aux q r
             end
           else
               aux q r in
@@ -100,7 +103,7 @@ module Make(X: Equal) = struct
         let ((k,s),estimate) = Heap.extract_min r.estimate in (* raise si heap vide *) 
         if k = Node.find s r.estimate_static then (* c'est ici qu'on nettoie le heap des doublons non maj *)
           begin
-            assert (k < 0 && s <> u); (*** on n'insert pas >=0, on détecte u direct, on ne fait que diminuer heap *)
+            assert (k < 0 && s <> u); (* on n'insert pas >=0, on détecte u direct, on ne fait que diminuer heap *)
             let next_values = Node.add s ((Node.find s r.values) + k) r.next_values in
             let estimate_static = Node.add s 0 r.estimate_static in
             let r = relax_adjacent s u { r with next_values = next_values; estimate = estimate; estimate_static = estimate_static} in
@@ -109,7 +112,7 @@ module Make(X: Equal) = struct
         else
           aux {r with estimate = estimate }
       with
-        | Empty -> { r with values = r.next_values } in (* c'est ok, on prend pi' *)
+        | Empty -> { r with values = r.next_values } in (* c'est ok : on peut prendre pi' *)
     aux r
 
 

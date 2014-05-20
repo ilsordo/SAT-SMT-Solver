@@ -9,6 +9,8 @@
 (*   - backtrack(a,b) :                                                                                          *)
 (*       Lorsque (a,b) a été la dernière opérations d'union effectuée, l'annule.                                 *)
 (*                                                                                                               *)
+(* Consulter le fichier README joint pour de plus amples informations.                                           *)
+(*                                                                                                               *)
 (*****************************************************************************************************************)
 
 
@@ -161,7 +163,7 @@ module Make(X: Equal) = struct
       | _ -> assert false
       
 
-  let explain a b r =
+  let explain a b r = (* les unions ayant conduites à avoir a et b dans le même ensemble *)
     let rec aux c d =
       if c = d then
         []
@@ -201,7 +203,7 @@ module Make(X: Equal) = struct
              parents_compress = UF.add x x r.parents
            } in
     try
-      let (x,y) = Edges.find (a,b) r.edges_real in (* la dernière union a relié dans l'arbre x à y *)
+      let (x,y) = Edges.find (a,b) r.edges_real in (* la dernière union a relié x à y dans l'arbre *)
         update x y
     with
       | Not_found ->
@@ -209,6 +211,6 @@ module Make(X: Equal) = struct
             let (x,y) = Edges.find (b,a) r.edges_real in
               update x y
           with
-            | Not_found -> r
+            | Not_found -> r (* ce n'est pas la dernière union effective *)
   
 end
