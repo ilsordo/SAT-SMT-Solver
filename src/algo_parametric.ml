@@ -161,7 +161,55 @@ struct
    
   (** Algo **)
 
-  let run (next_pari : Heuristic.t) cl interaction pure_prop n n cnf pure_prop in
+  let run (next_pari : Heuristic.t) cl interaction pure_prop n cnf = (* cl : activation du clause learning *)
+    let repl = new repl (Some 1) in
+    
+    let rec process formule etat ((b,v) as lit) () = (* effectue un pari et propage le plus loin possible *)
+      try
+        debug#p 2 "Setting %d to %B (level : %d)" v b (etat.level+1);
+        let (etat,assignations) = make_bet formule lit true pure_prop etat in (* fait un pari et propage, lève une exception si conflit créé *) (* true = first *)
+        Bet_done (assignations,bet formule etat,backtrack formule etat) (* on essaye de prolonger l'assignation courante avec d'autres paris *)
+      with 
+        | Conflit (c,etat) ->
+            stats#record "Conflits";
+            debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
+            if interaction && repl#is_ready then
+              repl#start (formule:>Formule.formule) etat c stdout;
+            if (not cl) then (* pas de clause learning *)
+              let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** ICI : Unsat du non cl *)
+              (undo_list,continue_bet pure_prop formule l etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
+            else (* clause learning *)
+              begin
+                stats#start_timer "Clause learning (s)";
+                let ((b,v),k,c_learnt) = conflict_analysis formule etat c in
+                debug#p 2 "Learnt %a" c_learnt#print ();
+                stats#stop_timer "Clause learning (s)";
+                debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
+                let (_,etat,undo_list) = undo Var_depth(etat.level-k,(b,v)) formule etat in (* backtrack non chronologique <--- ici clause learning backtrack *)
+                Conflit_dpll(undo_list,continue_bet formule (b,v) ~cl:c_learnt etat) (***) (* on poursuit *) (** ICI : Unsat du cl *)
+              end
+                
+    and bet formule etat () =
+      debug#p 2 "Seeking next bet";
+      stats#start_timer "Decisions (s)";
+      let lit = next_pari (formule:>Formule.formule) in (* choisir un littéral sur lequel parier *)
+      stats#stop_timer "Decisions (s)";
+      match lit with
+        | None ->
+            No_bet (formule#get_paris,backtrack formule etat) (* plus rien à parier = c'est gagné *)
+        | Some ((b,v) as lit) ->  
+            stats#record "Paris";
+            debug#p 2 "Next bet : %d %B" v b;
+            process formule etat lit (* on assigne (b,v) et on propage *)
+              
+    and backtrack formule etat clause = (***)
+      let c = formule#new_clause clause in
+      let (l,etat,undo_list) = undo (learn_clause formule etat c) formule etat in
+      (undo_list,continue_bet formule l ~cl:c etat)
+        
+    in 
+    try
+      let (formule,prop_init) = Base.init n cnf pure_prop in
       let etat = { tranches = []; level = 0 } in
       (prop_init, bet formule etat)
     with Unsat -> raise Unsat (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *) (***)

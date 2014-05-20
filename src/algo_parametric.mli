@@ -12,7 +12,7 @@ type dpll_answer =
 
 module type Algo_parametric =
 sig
-  val run : Heuristic.t -> bool -> bool -> bool -> int -> int list list -> (literal list*(unit -> dpll_answer))
+  val run : Heuristic.t -> bool -> bool -> bool -> int -> literal list list -> (literal list*(unit -> dpll_answer))
 end
 
 module Bind : functor(Base : Algo_base) -> Algo_parametric

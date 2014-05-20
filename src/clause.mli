@@ -27,7 +27,7 @@ object ('a)
 end
 
 class clause :
-  int ref -> variable list ->
+  int ref -> literal list ->
 object
   method get_wl : literal*literal
   method set_wl1 : literal -> unit

@@ -103,12 +103,9 @@ object
   initializer (* construction d'une clause à partir d'une liste d'entier *)
     List.iter 
       (function 
-        | 0 -> assert false
-        | x -> 
-            if x>0 then 
-              vpos#add x
-            else  
-              vneg#add (-x))
+        | (_,x) when x<=0 -> assert false
+        | (true,x) -> vpos#add x
+        | (false,x) -> vneg#add x)
       clause_init
 
   method get_id = id (* à chaque clause est associé un identifiant unique, attribué par la formule contenant la clause *)
