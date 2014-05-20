@@ -17,7 +17,7 @@ open Braun
 module type Equal = sig
   type t
   val eq : t -> t -> bool
-  val print : t -> out_channel -> unit
+  val print : out_channel -> t -> unit
 end
 
 module Make(X: Equal) = struct
@@ -130,25 +130,9 @@ module Make(X: Equal) = struct
 
  let print_values p r =  (** ici : renvoyer les -pi *) 
    Node.iter 
-     (fun s k -> Printf.fprintf p "%a %d\n" X.print s -k)
-     etat.values
- 
-(*
-  let print_values r =  (** ici : renvoyer les -pi *) 
-    Node.iter 
-      (fun s k -> X.print s ; print_string " : " ;print_int k;print_newline())
-      r.values
-*)        
+     (fun s k -> Printf.fprintf p "%a %d\n" X.print s (-k))
+     r.values  
     
 end
-
-
-
-
-
-
-
-
-
 
 

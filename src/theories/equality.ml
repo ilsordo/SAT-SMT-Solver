@@ -11,7 +11,7 @@ let parse_atom s =
   
 module UF = Union_find.Make(struct type t = string let eq a b = (a = b) end)
 
-module String_set = Set.Make(struct type t = (string*string) let compare = compare)
+module String_set = Set.Make(struct type t = (string*string) let compare = compare end)
 
 type etat = 
   { 
@@ -72,13 +72,13 @@ let explain_conflict s1 s2 reduction unions = (* expliquer pourquoi s1 et s2 ne 
           let explain = 
             List.fold_left
               (fun l (s1,s2) ->
-                if s1 < s2 then (true,id s1 s2)::l else (true,id s2 s1)::l) (** attention doublons. true ? *)
+                if s1 < s2 then (true,id s1 s2)::l else (true,id s2 s1)::l) (** attention doublons << normalement non. true tout le temps ? *)
               [] l in 
           Raise Conflit_smt (explain,{etat with unions = unions})
         end
                        
 let propagate reduction prop etat =
-  let etat = List.fold_left (fun etat l -> propagate_unit l reduction etat) etat prop in (* ajouter toutes les unions et diff contenues dans prop *)
+  let etat = List.fold_left (fun etat lit -> propagate_unit lit reduction etat) etat prop in (* ajouter toutes les unions et diff contenues dans prop *)
   let unions = (* vérifier si inconsistance créée *)
     String_set.fold
       (fun (s1,s2) unions ->
@@ -109,7 +109,7 @@ let backtrack_unit (b,v) reduction etat =
         
         
 let backtrack reduc undo_list etat =
-  List.fold_left (fun etat l -> backtrack_unit l reduction etat) etat undo_list
+  List.fold_left (fun etat lit -> backtrack_unit lit reduction etat) etat undo_list
 
 
 (** Affichage du résultat *)

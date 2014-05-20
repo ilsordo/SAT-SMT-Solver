@@ -1,5 +1,5 @@
 (* 
-   Les outils ci-dessous permettent de convertir une cnf dont les variables sont des strings, en une cnf dont les variables sont des int.
+   Les outils ci-dessous permettent de convertir une cnf dont les variables sont des choses, en une cnf dont les variables sont des int.
    Ceci permet d'obtenir une cnf au format DIMACS
    On conserve par ailleurs les renommages effectués dans une table d'association, ce qui permet à l'utilisateur de les afficher (voir option -print_cnf) 
 *)

@@ -2,7 +2,7 @@
 module type Equal = sig
   type t 
   val eq : t -> t -> bool
-  val print : t -> out_channel -> unit
+  val print : out_channel -> t -> unit
 end
 
 module Make(X: Equal): sig
