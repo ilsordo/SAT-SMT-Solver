@@ -11,7 +11,7 @@ type formule = formule_dpll
 
 (* propage en ajoutant à acc les littéraux assignés
    lit est un argument ignoré *)
-let rec constraint_propagation pure_prop (formule:formule) lit etat acc =
+let rec constraint_propagation pure_prop (formule:formule) _ etat acc =
   stats#start_timer "Propagation (s)"; (***)
   let lvl = etat.level in
   let rec propagate acc =
