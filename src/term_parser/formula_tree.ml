@@ -1,6 +1,7 @@
 open Printf
+open Reduction
 
-exception Illegal_variable_name of s
+exception Illegal_variable_name of string
 
 type 'a formula_tree =
   | And of ('a formula_tree)*('a formula_tree) 
@@ -14,7 +15,7 @@ module type Term_base =
 sig
   type atom
 
-  val parse_atom : string -> atom option
+  val parse_atom : string -> atom
 end
 
 module type Term_parser =
@@ -35,15 +36,15 @@ end
 
 let rec print_formule print_atom p = function
   | Atom a -> fprintf p "%s" (print_atom a)
-  | Not f -> fprintf p "Not(%a)" print_formule f
-  | And(f,g) -> fprintf p "(%a)/\\(%a)" print_formule f print_formule g
-  | Or(f,g) -> fprintf p "(%a)\\/(%a)" print_formule f print_formule g
-  | Imp(f,g) -> fprintf p "(%a)->(%a)" print_formule f print_formule g
-  | Equ(f,g) -> fprintf p "(%a)<->(%a)" print_formule f print_formule g
+  | Not f -> fprintf p "Not(%a)" (print_formule print_atom) f
+  | And(f,g) -> fprintf p "(%a)/\\(%a)" (print_formule print_atom) f (print_formule print_atom) g
+  | Or(f,g) -> fprintf p "(%a)\\/(%a)" (print_formule print_atom) f (print_formule print_atom) g
+  | Imp(f,g) -> fprintf p "(%a)->(%a)" (print_formule print_atom) f (print_formule print_atom) g
+  | Equ(f,g) -> fprintf p "(%a)<->(%a)" (print_formule print_atom) f (print_formule print_atom) g
 
 
 let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
-  let fresh = new counter 1 (fun i -> Virtual i)) in (* générateur de variables fraiches successives *)
+  let fresh = new counter 1 (fun i -> Virtual i) in (* générateur de variables fraiches successives *)
   let impl x1 x2 = [(false,x1);(true,x2)] in (* Raccourci *)
   let rec aux cnf = function (* le label peut être imposé par un connecteur ou laissé au choix *)
     | [] -> cnf

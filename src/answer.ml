@@ -11,7 +11,3 @@ let check n cnf = function
       f_verif#init n cnf;
       valeurs#iter (fun v b -> f_verif#set_val b v 0);
       debug#p 1 "Check : %B\n%!" f_verif#eval
-
-let print_answer p = function
-  | Unsolvable -> fprintf p "s UNSATISFIABLE\n"
-  | Solvable (values, print_result) -> fprintf p "s SATISFIABLE\n%t%!"

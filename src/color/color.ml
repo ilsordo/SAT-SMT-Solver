@@ -78,7 +78,3 @@ let print_answer k (_,_,l) assoc p = function (***)
       assoc#iter (print_sommet values p couleurs);
       fprintf p "}\n"
       
-let reduction raw =
-
-
-

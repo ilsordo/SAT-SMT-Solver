@@ -9,3 +9,7 @@ let parse input =
         exit 1
 
 let to_cnf c = c
+
+let print_answer p = function
+  | Unsolvable -> fprintf p "s UNSATISFIABLE\n"
+  | Solvable (values, print_result) -> fprintf p "s SATISFIABLE\n%t%!" print_result

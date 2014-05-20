@@ -1,23 +1,27 @@
 open Formula_tree
+open Term_parser
+open Term_lexer
 open Clause
 open Algo_parametric
 open Smt_base
+open Algo_base
+open Reduction
 
 module Make_smt = functor(Dpll : Algo_base) -> functor (Smt : Smt_base) ->
 struct
   
-  module Reduction = Reduction(struct type t = Base.atom let print_value = print_atom end)
+  module Reduction = Reduction(struct type t = Smt.atom let print_value = Smt.print_atom end)
   
   let parse input = 
-    let module Parser = Make_parser ( Smt : Term_base ) in
-    let module Lexer = Make_lexer ( Smt : Term_base ) ( Parser : Term_parser ) in
+    let module Parser = Make_parser ( Smt ) in
+    let module Lexer = Make_lexer ( Smt ) ( Parser ) in
     let lex = Lexer.from_channel input in
     Parser.main Lexer.token lex
 
   let reduce data =
     let data = Base.normalize data in (* normalisation de la formule donnée en entrée *)
     let (cnf_raw,next_free) = to_cnf data in (* transformation en cnf *)
-    Reduction.renommer ~start:next_free cnf_raw (fun _ _ _ -> ()) (* renommage pour avoir une cnf de int *)
+    Reduction.renommer ~start:next_free cnf_raw (* renommage pour avoir une cnf de int *)
 
   let algo heuristic period cl interaction reduction _ cnf =
     
@@ -28,7 +32,7 @@ struct
             begin
               try
                 let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in
-                Solvable (values, Smt.get_answer etat reduction values)
+                Solvable (values, Smt.print_answer etat_smt reduction values)
               with
                 | Conflit_smt (clause,etat_smt) -> (** clause * etat_smt ?? *)
                     let (undo_list,next_bet) = backtrack clause in
@@ -64,5 +68,10 @@ struct
     with
       | Conflit_smt _ 
       | Unsat -> Unsolvable
+
+  let print_answer p = function
+    | Unsolvable -> fprintf p "s UNSATISFIABLE\n"
+    | Solvable (values, print_result) -> fprintf p "s SATISFIABLE\n%t%!" print_result
+
 
 end

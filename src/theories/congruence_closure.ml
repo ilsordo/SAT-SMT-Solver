@@ -9,10 +9,6 @@ type atom = Eq of term*term | Ineq of term*term
 let parse_atom s =
   ...
   
-let print_atom p a = 
-  ...
-  
-  
 module UF = Union_find.Make(struct type t = string let eq a b = (a = b) end)
 module String_set = Set.Make(struct type t = (string*string) let compare = compare)
 
@@ -58,7 +54,7 @@ notes persos
 let normalize formula = (* idem à equality *)
   let rec normalize_atom (Atom a) = match a with
     | Eq (t1,t2) -> if t1 < t2 then Atom a else Atom (Eq (t2,t1))
-    | Ineq (t1,t2) -> Not(normalize (Atome (Eq (t1,t2)))) in
+    | Ineq (t1,t2) -> Not(normalize (Atome (Eq (t1,t2)))) in
   match formula with
     | And (t1,t2) -> And (normalize t1,normalize t2)
     | Or (t1,t2) -> Or (normalize t1,normalize t2)
@@ -83,7 +79,7 @@ let add_set f l ack_arg = (* ajouter l dans le set associé à f *)
 let ackerize1_term t free ack_assoc ack_arg = (* transformer un terme *)
   match t with
     | Var s -> (Var s, free, ack_assoc, ack_arg)
-    | Fun (f,l) -> 
+    | Fun (f,l) -> 
         try
           (Var (Fun_map.find (f,l) ack_assoc), free, ack_assoc, ack_arg)
         with
@@ -107,7 +103,7 @@ let ackerize1_atom a free ack_assoc ack_arg = (* transformer un atome *)
         let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
         let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
           (Eq(a_ack1,a_ack2),free,ack_assoc,ack_arg)
-    | Ineq (t1,t2) ->
+    | Ineq (t1,t2) ->
         let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
         let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
           (Eq(a_ack1,a_ack2),free,ack_assoc,ack_arg)
@@ -195,6 +191,6 @@ let ackerize formula =
 
 let init reduction =
 
-let get_answer reduc etat result p =
+let print reduc etat result p =
 
 

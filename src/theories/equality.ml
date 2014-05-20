@@ -114,7 +114,7 @@ let backtrack reduc undo_list etat =
 
 (** Affichage du résultat *)
 
-let get_answer reduc etat result p =
+let print_answer reduc etat result p =
   reduc#iter
     (fun a v -> 
       match values#find v with

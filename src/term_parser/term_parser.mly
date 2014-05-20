@@ -4,10 +4,10 @@
   module Make_parser = functor (Base : Term_base) ->
   struct
     
-    type atom = Term_base.atom
+    type atom = Base.atom
 %}
 
-%token <atom> VAR 
+%token <Base.atom> VAR 
 %token LPAREN RPAREN
 %token AND OR IMP NOT EQU
 %token EOF
@@ -39,7 +39,5 @@ main:
 | NOT formule                             { Not($2) }			
   ;
   
-%{
+%%
 end
-
-%}

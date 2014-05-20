@@ -4,8 +4,6 @@
    On conserve par ailleurs les renommages effectués dans une table d'association, ce qui permet à l'utilisateur de les afficher (voir option -print_cnf) 
 *)
 
-type print_answer_t = out_channel -> Answer.t -> unit
-
 type 'a super_atom = Real of 'a | Virtual of int
 
 class type ['a] reduction =
@@ -19,14 +17,12 @@ object
   method get_orig : int -> Base.t option
 
   method iter : (Base.t -> int -> unit) -> unit
-
-  method print_answer : print_answer_t
-    
+ 
   method print_reduction : out_channel -> unit
 end
 
 
-module Reduction (Base : sig type t val print_value : t -> string end) =
+module Reduction (Base : sig type t val print_value : out_channel -> t -> unit end) =
 struct
   
   module Id = Map.Make(struct type t = Base.t let compare = compare end)
@@ -69,17 +65,15 @@ struct
 
     method fold f a = Id.fold f ids a
     
-    method print_answer p answer = print_answer (self:>reduction) p answer
-      
     method print_reduction p = (* affiche la correspondance entre string et int *)
       Printf.fprintf p "c Renommage : \n"; 
-      Id.iter (fun s n -> Printf.fprintf p "c %s  ->  %d\n" (Base.print_value s) n) ids;
+      Id.iter (fun s n -> Printf.fprintf p "c %a  ->  %d\n" Base.print_value s n) ids;
       Printf.fprintf p "\n"; 
       
   end
 
 
-  let renommer ?(start = 1) f print_answer = (* renvoie CNF avec vars normalisées + table d'association *)
+  let renommer ?(start = 1) f = (* renvoie CNF avec vars normalisées + table d'association *)
     let renommer_clause assoc =
       let signe b = 
         if b then 1 else -1 in
