@@ -7,6 +7,7 @@ struct
   type atom = Base.atom
 }
 
+let atom_sym = ['a'-'z' 'A'-'Z' '0'-'9' ' ' '(' ')' ',' '=' '<' '>' '-' "<=" ">=" "!=" ]
 
 rule token = parse
   | [' ' '\t' '\n' '\r'] 			{ token lexbuf }   
@@ -20,7 +21,7 @@ rule token = parse
   | "<=>"				        { EQU }
   | "/\\"					{ AND }
 
-  | ['a'-'z'](['0'-'9'] | ['a'-'z'])* as s 	{ ATOM (Base.parse s) }
+  | ['a'-'z'] atom_sym* as s 	{ ATOM (Base.parse s) }
   
   | eof                                         { EOF } 
 
