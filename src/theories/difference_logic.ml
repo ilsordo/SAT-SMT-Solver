@@ -8,7 +8,7 @@ let parse_atom s =
   Diff_parser.main Diff_lexer.token lex
   
 
-module Graph = Bellman_ford.Make(struct type t = string let eq a b = (a = b) end)
+module Graph = Bellman_ford.Make(struct type t = string let eq a b = (a = b) let print p k = Printf.fprintf p "%s" k end)
 
 type etat = Graph.t
 
