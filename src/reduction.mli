@@ -23,7 +23,7 @@ module Reduction : functor (Base : sig type t val print_value : out_channel -> t
 sig
   val reduction : ?start:int -> (Base.t reduction -> print_answer_t) -> Base.t reduction
 
-  val renommer : ?start:int -> (bool*Base.t super_atom) list list -> (int list list*Base.t reduction)
+  val renommer : ?start:int -> (bool*Base.t super_atom) list list -> ((bool*int) list list*Base.t reduction)
 end
 
 class ['a] counter : int -> (int -> 'a) ->

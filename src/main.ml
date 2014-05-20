@@ -9,9 +9,9 @@ open Algo_parametric
 
 let print_cnf p (n,f) = 
   fprintf p "p cnf %d %d\n" n (List.length f);
-  List.iter (fun c -> List.iter (fprintf p "%d ") c; fprintf p "0\n") f 
+  List.iter (fun c -> List.iter (fun (b,v) -> fprintf p "%s%d " (if b then "" else "-") v) c; fprintf p "0\n") f 
 
-let run (algo : Algo.t) assoc n cnf =
+let run (algo : Algo.t) assoc n (cnf: (bool*int) list list) =
   begin
     match config.print_cnf with 
       | None -> ()

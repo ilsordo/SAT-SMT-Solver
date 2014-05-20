@@ -53,7 +53,7 @@ struct
         formule#set_val b v lvl; (* peut lever Empty_clause *)
         let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in (* peut lever Conflit_prop *)
         (etat, continue_propagation)
-      with 
+      with  
         | Empty_clause _ | Conflit_prop _ -> raise Unsat (** Ici : le clause learning détecte que la formule est insatisfiable *)
     else    
       match etat.tranches with
