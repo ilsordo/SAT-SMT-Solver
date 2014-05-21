@@ -1,6 +1,7 @@
 open Union_find
 open Formula_tree
 open Clause
+open Debug
 
 (*
 type atom = Eq of string*string | Ineq of string*string
@@ -51,28 +52,32 @@ let propagate_unit (b,v) reduction etat = (* propager dans la théorie l'assigna
     | None -> etat 
     | Some (s1,s2) -> 
         if b then
-          {etat with unions = UF.union s1 s2 etat.unions}
+          (debug#p 2 "unified %s et %s" s1 s2; 
+          {etat with unions = UF.union s1 s2 etat.unions})
         else
-          {etat with differences = String_set.add (s1,s2) etat.differences}
+          (debug#p 2 "desunified %s et %s" s1 s2; 
+          {etat with differences = String_set.add (s1,s2) etat.differences})
 
 
 let explain_conflict s1 s2 reduction unions etat = (* expliquer pourquoi s1 et s2 ne sont pas dans le même ensemble *)
+debug#p 1 "cannot desunif %s et %s" s1 s2; 
   match UF.explain s1 s2 unions with
     | None -> assert false
     | Some l ->
         begin
-          let id x y = match reduction#get_id (x,y) with
-            | None -> assert false
-            | Some v -> v in
-          let explain = 
-            List.fold_left
-              (fun l (s1,s2) ->
-                if s1 < s2 then (false,id s1 s2)::l else (false,id s2 s1)::l) (** inversion des polarité !!! *)
-              [] l in 
-          if s1 < s2 then (** pas nécessaire ??? *)
-            raise (Conflit_smt ((false,id s1 s2)::explain,{etat with unions = unions}))
-          else
-            raise (Conflit_smt ((false,id s2 s1)::explain,{etat with unions = unions}))
+          let id x y = 
+            let (inf,sup) = if x < y then (x,y) else (y,x) in
+            match reduction#get_id (inf,sup) with
+              | None -> assert false
+              | Some v -> v in
+          if l = [(s1,s2)] || l = [(s2,s1)] then (*** ne devrait pas arriver, de toute façon ce n'est pas tjrs false ENLEVER CETTE ASSERT A LA FIN *)
+            assert false(*raise (Conflit_smt ([(false(****),id s1 s2)],{etat with unions = unions})) *)
+          else    
+            let explain = 
+              List.fold_left
+                (fun l (s1,s2) -> debug#p 1 "explain %s et %s" s1 s2; (false,id s1 s2)::l) (** inversion des polarité !!! *)
+                [] l in 
+            raise (Conflit_smt ((true(****),id s1 s2)::explain,{etat with unions = unions}))
         end
                        
 let propagate reduction prop etat =
@@ -80,8 +85,9 @@ let propagate reduction prop etat =
   let unions = (* vérifier si inconsistance créée *)
     String_set.fold
       (fun (s1,s2) unions ->
+         debug#p 2 "Are unif ? %s et %s" s1 s2; 
          let (b,unions) = UF.are_equal s1 s2 unions in
-         if b then
+         if not b then
            unions
          else
            explain_conflict s1 s2 reduction unions etat) (* raise Conflit_smt *)
@@ -98,7 +104,7 @@ let backtrack_unit (b,v) reduction etat =
         if b then
           {etat with unions = UF.undo_last s1 s2 etat.unions}
         else
-          {etat with differences = String_set.remove (s1,s1) etat.differences}
+          {etat with differences = String_set.remove (s1,s2) etat.differences}
         
         
 let backtrack reduc undo_list etat =

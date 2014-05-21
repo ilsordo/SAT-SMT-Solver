@@ -80,7 +80,7 @@ struct
   (** Undo *)
   
   (* tous les lit de la clause sont faux car c'est une clause à conflit *)
-  let undo_clause formule etat (c:clause) = (* on est déjà au bon niveau *)
+  let undo_clause formule etat (c:clause) = (* on est déjà au bon niveau, on sait que 2 lit aux moins de ce niveaux sont dans la clause *)
     let rec aux seen to_rem to_keep = 
       match to_keep with
         | [] -> (seen,to_rem,[])
@@ -88,13 +88,18 @@ struct
             if (c#mem_all (not b) v) then
               begin
                 match seen with
-                  | None -> aux (Some (not b,v)) ((b,v)::to_rem) q
-                  | Some (b0,v0) -> raise (End_analysis (seen,to_rem,to_keep))
+                  | None -> 
+                      formule#reset_val v;
+                      aux (Some (not b,v)) ((b,v)::to_rem) q
+                  | Some (b0,v0) -> 
+                    raise (End_analysis (seen,to_rem,to_keep))
               end
             else    
-              aux seen ((b,v)::to_rem) q in
+              (if (c#mem_all b v) then assert false;
+              formule#reset_val v;
+              aux seen ((b,v)::to_rem) q) in
     match etat.tranches with 
-      | [] -> assert false
+      | [] -> raise Unsat (********* un des unsat du smt ??? **)
       | (first,(b,v),propagation)::q ->
            try
              begin

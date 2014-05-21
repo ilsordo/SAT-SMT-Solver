@@ -77,6 +77,17 @@ let add_set f l ack_arg = (* ajouter l dans le set associé à f *)
       | Not_found -> Arg_set.empty in
   Arg_map.add f (Arg_set.add l set) ack_arg
 
+let rec term_to_string t = match t with (************ A ENLEVER, ou pas *)
+  | Var s -> s
+  | Fun(f,l) -> 
+      begin
+        match l with
+          | [] -> f^"()" 
+          | [x] -> f^"("^(term_to_string x)^")" 
+          | t::q -> f^"("^(List.fold_left (fun s arg -> (term_to_string arg)^","^s) (term_to_string t) q)^")"
+      end
+  
+  
 let rec ackerize1_term t free ack_assoc ack_arg = (* transformer un terme *)
   match t with
     | Var s -> (s, free, ack_assoc, ack_arg)
@@ -85,7 +96,7 @@ let rec ackerize1_term t free ack_assoc ack_arg = (* transformer un terme *)
           (Fun_map.find (f,l) ack_assoc, free, ack_assoc, ack_arg)
         with
           | Not_found -> 
-              let s = "_ack"^(string_of_int free) in (** autre syntaxe ? *)
+              let s = "_ack_"^(term_to_string t) in (****** avec free : (string_of_int free), possibilité d'enlever free, possibilité d'enlever _ack*)
               let ack_assoc = Fun_map.add (f,l) s ack_assoc in
               let ack_arg = add_set f l ack_arg in
               let (l_ack,free,ack_assoc,ack_arg) = ackerize1_list l (free+1) ack_assoc ack_arg [] in
