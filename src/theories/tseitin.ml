@@ -4,7 +4,8 @@ type atom = string
 
 
 
-let parse_atom s = Formula_tree.Atom s
+let parse lexbuf =
+
 
 let print_atom p s = Printf.fprintf p "%s" s
 

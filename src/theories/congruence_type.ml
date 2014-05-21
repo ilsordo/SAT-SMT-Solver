@@ -1,1 +1,1 @@
-type term = Var of string | Fun of string * (term list)
+type t = Var of string | Fun of string * t list

@@ -1,5 +1,5 @@
 {
-  open Term_parser
+  open Congruence_parser
 }
 
 rule token = parse
@@ -14,8 +14,12 @@ rule token = parse
   | "<=>"				        { EQU }
   | "/\\"					{ AND }
 
+  | '='                                         { EQ }
+  | "!="                                        { NEQ }
+
   | ['a'-'w' 'y' 'z']['a' - 'z'] as s 	        { FUN s }
   | 'x'['0'-'9']+ as s                          { VAR s }
   
   | eof                                         { EOF }
+
 

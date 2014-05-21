@@ -1,5 +1,6 @@
 open Formula_tree
 open Union_find
+open Congruence_type
 
 (*type term = Var of string | Fun of string * (term list)*)
 
@@ -9,17 +10,9 @@ type term = Congruence_type.t
 
 include Equality
 
-
-let parse lexbuf =
-  let raw = Congruence_parser.main Congruence_lexer.token lexbuf in
-  ackerize raw
-
-module UF = Union_find.Make(struct type t = string let eq a b = (a = b) end)
-module String_set = Set.Make(struct type t = (string*string) let compare = compare)
-
 module Fun_map = Map.Make(struct type t = string * (term list) let compare = compare end)
 module Arg_map = Map.Make(struct type t = string let compare = compare end)
-module Arg_set = Set.Make(struct type t = term list let compare = compare)
+module Arg_set = Set.Make(struct type t = term list let compare = compare end)
 
 
 (*
@@ -84,7 +77,7 @@ let add_set f l ack_arg = (* ajouter l dans le set associé à f *)
       | Not_found -> Arg_set.empty in
   Arg_map.add f (Arg_set.add l set) ack_arg
 
-let ackerize1_term t free ack_assoc ack_arg = (* transformer un terme *)
+let rec ackerize1_term t free ack_assoc ack_arg = (* transformer un terme *)
   match t with
     | Var s -> (s, free, ack_assoc, ack_arg)
     | Fun (f,l) -> 
@@ -116,7 +109,7 @@ let ackerize1_atom (t1,t2) free ack_assoc ack_arg = (* transformer un atome *)
       ((a_ack2,a_ack1),free,ack_assoc,ack_arg)
 
           
-let ackerize1 formula = (* transformer une formule, renvoyer aussi ack_assoc et ack_arg (mais pas forcèment nécessaire suivant ce qu'on souhaite print à la fin *)
+let ackerize1 (formula : (term*term) formula_tree) = (* transformer une formule, renvoyer aussi ack_assoc et ack_arg (mais pas forcèment nécessaire suivant ce qu'on souhaite print à la fin *)
   let rec aux f free ack_assoc ack_arg = match f with
     | And (f1,f2) -> 
         let (f_ack1,free,ack_assoc,ack_arg) = aux f1 free ack_assoc ack_arg in
@@ -136,7 +129,7 @@ let ackerize1 formula = (* transformer une formule, renvoyer aussi ack_assoc et 
           (Equ (f_ack1,f_ack2),free,ack_assoc,ack_arg)   
     | Not f ->
         let (f_ack,free,ack_assoc,ack_arg) = aux f free ack_assoc ack_arg in
-          (Not f,free,ack_assoc,ack_arg)    
+          (Not f_ack,free,ack_assoc,ack_arg)    
     | Atom a ->  
         let (a_ack,free,ack_assoc,ack_arg) = ackerize1_atom a free ack_assoc ack_arg in
           (Atom a_ack,free,ack_assoc,ack_arg) in
@@ -153,8 +146,8 @@ let get_var t ack_assoc =
 let rec flatten_ack l = (* transformer la liste d en conjonction d *)  
   match l with
     | [] -> assert false (* l1 < l2 dans les fold de ackerize2 *)
-    | [x] -> Atom x
-    | x::y::q -> And(Atom x,flatten_ack y::q) in
+    | [x] -> x
+    | x::y::q -> And(x,flatten_ack (y::q))
 
 let ackerize2_pair f l1 l2 ack_assoc ack_arg =
   let rec aux l1 l2 acc = 
@@ -164,13 +157,17 @@ let ackerize2_pair f l1 l2 ack_assoc ack_arg =
           if t1 = t2 then
             aux q1 q2 acc
           else
-            aux q1 q2 ((get_var t1 ack_assoc,get_var t2 ack_assoc)::acc)
+            let (s1,s2) = (get_var t1 ack_assoc,get_var t2 ack_assoc) in
+            if s1 < s2 then
+              aux q1 q2 ((Atom(s1, s2))::acc)
+            else
+              aux q1 q2 ((Atom (s2, s1))::acc)
       | _ -> assert false in
-  let (s1,s2) = (get_var (Fun(f,l1)),get_var (Fun(f,l2))) in
+  let (s1,s2) = (get_var (Fun(f,l1)) ack_assoc,get_var (Fun(f,l2)) ack_assoc) in
   if s1 < s2 then
-    Or(Not(flatten_ack (aux l1 l2)),Atom (s1,s2))
+    Or(Not(flatten_ack (aux l1 l2 [](**???*))),Atom (s1,s2))
   else
-    Or(Not(flatten_ack (aux l1 l2)),Atom (s2,s1))
+    Or(Not(flatten_ack (aux l1 l2 [](**???*))),Atom (s2,s1))
     
 let ackerize2 ack_assoc ack_arg =
   flatten_ack 
@@ -191,12 +188,15 @@ let ackerize2 ack_assoc ack_arg =
 
 (** Transformation de Ackermann (ouf !) *)
 
-let ackerize formula = 
-  let (f_ack1,ack_assoc,ack_arg) ) = ackerize1 formula in
+let ackerize (formula : (t*t) formula_tree) = 
+  let (f_ack1,ack_assoc,ack_arg) = ackerize1 formula in
   let f_ack2 = ackerize2 ack_assoc ack_arg in (* une formule sans aucun Fun !!! *)
     (*( *)And(f_ack1,f_ack2)(*,ack_assoc,ack_arg)*)
     
     
+let parse lexbuf =
+  let raw = Congruence_parser.main Congruence_lexer.token lexbuf in
+  ackerize raw
     
-    
+let print_atom _ _ = ()
     

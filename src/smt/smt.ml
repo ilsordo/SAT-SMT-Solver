@@ -1,5 +1,4 @@
 open Formula_tree
-open Term_lexer
 open Clause
 open Algo_parametric
 open Smt_base
@@ -24,15 +23,15 @@ struct
 
   let parse input = 
     try
-      Smt.parse lex (*Smt.parse_atom ""*)
+      let lexbuf = Lexing.from_channel input in
+      Smt.parse lexbuf
     with
-      | Term_parser.Error -> 
+      | Failure _ -> 
           Printf.eprintf "Input error\n%!";
           exit 1
   
 
   let reduce data =
-    let data = Smt.normalize data in (* normalisation de la formule donnée en entrée *)
     let (cnf_raw,next_free) = to_cnf data in (* transformation en cnf *)
     Reduction.renommer ~start:next_free cnf_raw (* renommage pour avoir une cnf de int *)
 
