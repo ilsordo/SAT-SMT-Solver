@@ -1,5 +1,5 @@
 {
-open ColorParser;;        
+  open ColorParser
 }
 
 
