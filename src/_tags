@@ -1,1 +1,1 @@
-<*> : include
+<*> or <*/*> or <*/*/*> : include

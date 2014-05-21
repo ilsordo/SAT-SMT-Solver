@@ -5,30 +5,32 @@ open Formule
 
 module type Smt_base =
 sig
-(* Langage de la théorie*)
-  type atom
 
+  type atom (* les atomes sont normalisés lors du parsing *)
+
+(* parsing des atomes de la théorie *)
   val parse : Lexing.lexbuf -> atom formula_tree
 
   val print_atom : out_channel -> atom -> unit
 
-(* Théorie *)
-
+(* état de la théorie *)
   type etat
 
-  exception Conflit_smt of (literal list*etat) (* Clause à apprendre *)
+(* clause à apprendre suite à conflit dans la théorie *)
+  exception Conflit_smt of (literal list*etat)
 
-  (*val normalize : atom formula_tree -> atom formula_tree*)
-
+(* initialiser la théorie *)
   val init : atom reduction -> etat
 
-(* Enregistre une ou plusieurs tranches de Dpll et propage selon la théorie, lève Conflit_smt *)
+(* propager dans la théorie une liste de littéraux assignés par dpll. Peut lever Conflit_smt *)
   val propagate : atom reduction -> literal list -> etat -> etat
 
-(* Défait les assignations, si l'une d'elle n'a pas été effectuée, ignore le littéral *)
+(* backtrack dans la théorie *)
   val backtrack : atom reduction -> literal list -> etat -> etat
 
+(* afficher le modèle *)
   val print_answer : atom reduction -> etat -> bool vartable -> out_channel -> unit
 
+(* activation ou non de la propagation pure *)
   val pure_prop : bool
 end

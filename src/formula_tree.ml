@@ -27,7 +27,7 @@ let rec convert parse_atom = function
   | Imp(f,g) -> Imp (convert parse_atom f, convert parse_atom g)
   | Equ(f,g) -> Equ (convert parse_atom f, convert parse_atom g)
 
-let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
+let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches // transformation de Tseitin *)
   let fresh = new counter 1 (fun i -> Virtual i) in (* générateur de variables fraiches successives *)
   let impl x1 x2 = [(false,x1);(true,x2)] in (* Raccourci *)
   let rec aux cnf = function (* le label peut être imposé par un connecteur ou laissé au choix *)
