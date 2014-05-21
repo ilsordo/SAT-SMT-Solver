@@ -93,47 +93,47 @@ struct
                       formule#reset_val v;
                       aux (Some (not b,v)) ((b,v)::to_rem) q
                   | Some (b0,v0) -> 
-                    raise (End_analysis (seen,to_rem,to_keep))
+                      raise (End_analysis (seen,to_rem,to_keep))
               end
             else    
               (if (c#mem_all b v) then assert false;
-              formule#reset_val v;
-              aux seen ((b,v)::to_rem) q) in
+               formule#reset_val v;
+               aux seen ((b,v)::to_rem) q) in
     match etat.tranches with 
       | [] -> raise Unsat (** un des unsat du smt *)
       | (first,(b,v),propagation)::q ->
-           try
-             begin
-               match aux None [] propagation with
-                 | (None,to_rem,to_keep) -> assert false
-                 | (Some l,to_rem,to_keep) ->
-                     begin 
-                       assert ((c#mem_all (not b) v) && to_keep = []);
-                       Base.set_wls formule c (b,v) l;
-                       (l,{etat with tranches = (first,(b,v),[])::q},to_rem)
-                     end
-             end
-           with  
-             | End_analysis (seen,to_rem,to_keep) ->  
-                 begin
-                   match seen with
-                     | None -> assert false
-                     | Some l -> 
-                         begin
+          try
+            begin
+              match aux None [] propagation with
+                | (None,to_rem,to_keep) -> assert false
+                | (Some l,to_rem,to_keep) ->
+                    begin 
+                      assert ((c#mem_all (not b) v) && to_keep = []);
+                      Base.set_wls formule c (b,v) l;
+                      (l,{etat with tranches = (first,(b,v),[])::q},to_rem)
+                    end
+            end
+          with  
+            | End_analysis (seen,to_rem,to_keep) ->  
+                begin
+                  match seen with
+                    | None -> assert false
+                    | Some l -> 
+                        begin
                           Base.set_wls formule c (b,v) l;
                           (l,{etat with tranches = (first,(b,v),to_keep)::q},to_rem)
-                         end
-                 end
+                        end
+                end
                  
  
   let undo_tranche formule etat = 
     let undo_assignation formule (_,v) = formule#reset_val v in
-      match etat.tranches with (* annule la dernière tranche et la fait sauter *)
-        | [] -> assert false
-        | (first,pari,propagation)::q ->
-            List.iter (undo_assignation formule) propagation;
-            undo_assignation formule pari;
-            ({ level = etat.level - 1; tranches = q }, pari::(List.rev propagation))
+    match etat.tranches with (* annule la dernière tranche et la fait sauter *)
+      | [] -> assert false
+      | (first,pari,propagation)::q ->
+          List.iter (undo_assignation formule) propagation;
+          undo_assignation formule pari;
+          ({ level = etat.level - 1; tranches = q }, pari::(List.rev propagation))
   
   (*
   undo : 
@@ -168,7 +168,7 @@ struct
         | Clause_depth (k,c) ->                
             if k=0 then
               let (l,etat,prop) = undo_clause formule etat c in
-                (l,etat,concat [] (prop::acc))
+              (l,etat,concat [] (prop::acc))
             else
               let (etat,prop) = undo_tranche formule etat in
               aux (Clause_depth(k-1,c)) etat (prop::acc) in (* on n'oublie pas de diminuer le level à chaque fois *)                      
@@ -234,7 +234,7 @@ struct
       let (l,etat,undo_list) = undo (learn_clause Base.set_wls formule etat c) formule etat in
       stats#stop_timer "DPLL backtrack (s)";
       (undo_list,process formule etat (continue_bet l ~cl:c pure_prop)) in
-        
+    
     try
       let (formule,prop_init) = Base.init n cnf pure_prop in
       let etat = { tranches = []; level = 0 } in

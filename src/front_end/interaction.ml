@@ -143,6 +143,7 @@ let print_resolution (formule:formule) (first,pari,assignations) level clause p 
     fprintf p "\\begin{mathpar}\\preuve{%d}:~%a\\end{mathpar}\n" proof_id aux proof in
   
   let split_clause ((b_join,v_join) as join) (clause:clause) =
+    debug#p 2 "Splitting clause : %a\n%!" clause#print ();
     let aux b v (lower,curr) =
       if (b,v) = join then
         (lower,curr)
