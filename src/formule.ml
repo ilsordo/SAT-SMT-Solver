@@ -18,29 +18,29 @@ object
   method size = size
   
   method hide c = (* cacher la clause c si elle est déjà visible *)
-    if not (ClauseSet.mem c vis) then assert false; (** Zone a risque*)
+    if not (not (ClauseSet.mem c vis)) then (*assert false; *)(** Zone a risque*)
     vis <- ClauseSet.remove c vis;
     hid <- ClauseSet.add c hid;
     size <- size-1
 
       
   method show c = (* montrer la clause c, si elle est déjà cachée *)
-    if (not (ClauseSet.mem c hid)) || (ClauseSet.mem c vis) then assert false; (** Zone a risque*)
+    if not ((not (ClauseSet.mem c hid)) || (ClauseSet.mem c vis)) then (*then assert false;*) (** Zone a risque*)
     hid <- ClauseSet.remove c hid;
     vis <- ClauseSet.add c vis;
     size <- size+1
         
   method add c = 
-    if (ClauseSet.mem c vis) || (ClauseSet.mem c hid)  then assert false; (** Zone a risque*)
+    if not ((ClauseSet.mem c vis) || (ClauseSet.mem c hid))  then (*then assert false;*) (** Zone a risque*)
     vis <- ClauseSet.add c vis; (* ajouter la clause c aux clauses visibles *)
     size <- size+1
       
   method add_hid c = (* ajouter la clause c aux clauses cachées *)
-    if (ClauseSet.mem c vis) || (ClauseSet.mem c hid) then assert false; (** Zone a risque*)
+    if not ((ClauseSet.mem c vis) || (ClauseSet.mem c hid)) then (*then assert false;*) (** Zone a risque*)
     hid <- ClauseSet.add c hid 
 
   method remove c =  (** Zone a risque*)
-    (*if not (ClauseSet.mem c vis) then assert false; 
+    (*if not (ClauseSet.mem c vis) (*then assert false; *)
     vis <- ClauseSet.remove c vis;
     size <- size - 1*)
     if (ClauseSet.mem c vis) then
