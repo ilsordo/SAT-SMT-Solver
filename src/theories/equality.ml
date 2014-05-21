@@ -8,7 +8,6 @@ type atom = Eq of string*string | Ineq of string*string
 type atom = string*string
 
 
-
 let parse_atom s =
   try
     Scanf.sscanf s "x%d=x%d" (fun 
