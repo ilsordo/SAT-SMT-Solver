@@ -1,30 +1,24 @@
 %{
   open Formula_tree
 
+  type base = string*string*int  
+
+  type rel =
+    | Leq of base
+    | Geq of base
+    | Lt of base
+    | Gt of base
+    | Eq of base
 
 (** Normalisation *)
 
-let rec normalize formula = 
-  let rec normalize_atom = function
-    | Double (s1,s2,o,n) ->
-        begin
-          match o with
-            | Great -> normalize (Atom (Double(s2,s1,Leq,-n-1))) 
-            | Less -> normalize (Atom (Double(s1,s2,Leq,n-1))) 
-            | LEq -> if s2 > s1 then Not (Atom (Double(s2,s1,Leq,n-1))) else Atom (Double(s1,s2,Leq,n))
-            | GEq -> normalize (Atom (Double(s2,s1,Leq,-n)))  
-            | Eq -> And(normalize (Atom (Double(s1,s2,Leq,n))),normalize (Atom (Double(s2,s1,Leq,-n))))
-            | Ineq -> Not(normalize (Atom (Double(s1,s2,Eq,n))))
-        end
-    | Single(s,o,n) -> normalize (Atom (Double(s1,"_zero",o,n))) in (** bien gérer ce _zero après, ne pas l'afficher... *)
-  match formula with
-    | And (f1,f2) -> And (normalize f1,normalize f2)
-    | Or (f1,f2) -> Or (normalize f1,normalize f2)
-    | Imp (f1,f2) -> Imp (normalize f1,normalize f2)
-    | Equ (f1,f2) -> Equ (normalize f1,normalize f2)
-    | Not f -> Not (normalize f)
-    | Atom a -> normalize_atom a
-*)  
+let rec normalize = function
+  | Leq (s1,s2,n) when s1 < s2 -> Atom (s1,s2,n)
+  | Leq (s1,s2,n) -> Not (Atom (s2,s1,-n-1))
+  | Geq (s1,s2,n) -> normalize (Leq (s2,s1,-n))
+  | Lt (s1,s2,n) -> normalize (Leq (s1,s2,n-1))
+  | Gt (s1,s2,n) -> normalize (Leq (s2,s1,-n-1))
+  | Eq (s1,s2,n) -> And (normalize (Leq (s1,s2,n)), normalize (Leq (s2,s1,-n)))
 
 %}
 
@@ -32,6 +26,7 @@ let rec normalize formula =
 %token <int> INT
 %token LPAREN RPAREN
 %token AND OR IMP NOT EQU
+%token DIFF
 %token EQ NEQ LEQ GEQ LT GT
 %token EOF
 
@@ -42,7 +37,7 @@ let rec normalize formula =
 %nonassoc NOT
 
 %start main             	
-%type <string Formula_tree.formula_tree> main
+%type <(string*string*int) Formula_tree.formula_tree> main
 
 %%
 
@@ -53,7 +48,7 @@ main:
 
   formule:	
 | LPAREN formule RPAREN                   { $2 }
-| ATOM                                    { Atom $1 }
+| atom                                    { $1 }
 | formule AND formule                     { And($1,$3) }	
 | formule OR formule                      { Or($1,$3) }													
 | formule IMP formule                     { Imp($1,$3) }
@@ -61,16 +56,19 @@ main:
 | NOT formule                             { Not($2) }			
   ;
   
+atom:
+| VAR LEQ INT     { normalize (Leq($1,"_phantom",$3)) }
+| VAR GEQ INT     { normalize (Geq($1,"_phantom",$3)) }
+| VAR LT INT      { normalize (Lt($1,"_phantom",$3)) }
+| VAR GT INT      { normalize (Gt($1,"_phantom",$3)) }
+| VAR EQ INT      { normalize (Eq($1,"_phantom",$3)) }
+| VAR NEQ INT     { Not (normalize (Eq($1,"_phantom",$3))) }
 
-
-
-
-
-
-
-
-
-
-
+| VAR DIFF VAR LEQ INT     { normalize (Leq($1,$3,$5)) }
+| VAR DIFF VAR GEQ INT     { normalize (Geq($1,$3,$5)) }
+| VAR DIFF VAR LT INT      { normalize (Lt($1,$3,$5)) }
+| VAR DIFF VAR GT INT      { normalize (Gt($1,$3,$5)) }
+| VAR DIFF VAR EQ INT      { normalize (Eq($1,$3,$5)) }
+| VAR DIFF VAR NEQ INT     { Not (normalize (Eq($1,$3,$5))) }
 
 

@@ -1,8 +1,6 @@
 {
-  open Term_parser
+  open Difference_parser
 }
-
-let atom_sym = ['a'-'z' 'A'-'Z' '0'-'9' ' ' '(' ')' ',' '=' '<' '>' '-'] | "<=" | ">=" | "!="
 
 rule token = parse
   | [' ' '\t' '\n' '\r'] 			{ token lexbuf }   
@@ -16,7 +14,16 @@ rule token = parse
   | "<=>"				        { EQU }
   | "/\\"					{ AND }
 
-  | ['a'-'z'] atom_sym* as s 	                { Printf.printf "%s parsed\n%!" s;ATOM s }
+  | '-'                                         { DIFF }
+  | '='                                         { EQ }
+  | "!="                                        { NEQ }
+  | ">="                                        { GEQ }
+  | "<="                                        { LEQ }
+  | '>'                                         { GT }
+  | '<'                                         { LT }
+
+  | '-'[ '0'-'9' ]+ as n                        { INT (int_of_string n) }
+  | ['a'-'z']['a'-'z' '0'-'9']* as s            { VAR s }
   
   | eof                                         { EOF }
 
