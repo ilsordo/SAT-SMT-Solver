@@ -41,13 +41,13 @@ struct
             raise (Conflit (c,{etat with tranches = (first,(b,v),[])::etat.tranches } )) (* on prend soin d'empiler la dernière tranche *)
     end;
     try
-      stats#start_timer "Propagation (s)";
+      stats#start_timer "DPLL propagate (s)";
       let propagation = Base.constraint_propagation pure_prop formule (b,v) etat [] in (* on propage *)
-      stats#stop_timer "Propagation (s)";
+      stats#stop_timer "DPLL propagate (s)";
       ({ etat with tranches = (first,(b,v),propagation)::etat.tranches }, propagation@[(b,v)]) (* on renvoie l'état avec les dernières assignations effectuées *)
     with
         Conflit_prop (c,acc) -> (* conflit dans la propagation *)
-          stats#stop_timer "Propagation (s)";
+          stats#stop_timer "DPLL propagate (s)";
           raise (Conflit (c,{etat with tranches = (first,(b,v),acc)::etat.tranches } ))
 
   (* Compléte la dernière tranche, assigne (b,v) (ce n'est pas un pari) puis propage. c_learnt : clause apprise ayant provoqué le backtrack qui a appelé continue_bet *)
@@ -56,13 +56,13 @@ struct
     if lvl=0 then (* niveau 0 : tout conflit indiquerait que la formule est non sat *)
       try
         formule#set_val b v lvl; (* peut lever Empty_clause *)
-        stats#start_timer "Propagation (s)";
+        stats#start_timer "DPLL propagate (s)";
         let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in (* peut lever Conflit_prop *)
-        stats#stop_timer "Propagation (s)";
+        stats#stop_timer "DPLL propagate (s)";
         (etat, continue_propagation)
       with  
         | Empty_clause _ | Conflit_prop _ -> 
-            stats#stop_timer "Propagation (s)";
+            stats#stop_timer "DPLL propagate (s)";
             raise Unsat
     else    
       match etat.tranches with
@@ -76,11 +76,14 @@ struct
                     raise (Conflit (c,{ etat with tranches = (first,pari,(b,v)::propagation)::q } ))
             end;
             try 
+              stats#start_timer "DPLL propagate (s)";
               let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in
+              stats#stop_timer "DPLL propagate (s)";
               let propagation = continue_propagation@propagation in (* on poursuit l'assignation sur la dernière tranche *)
               ({ etat with tranches = (first,pari,propagation)::q }, continue_propagation) 
             with
                 Conflit_prop (c,acc) -> 
+                  stats#stop_timer "DPLL propagate (s)";
                   raise (Conflit (c,{ etat with tranches = (first,pari,acc@propagation)::q } ))
   
   
@@ -201,7 +204,9 @@ struct
             if interaction && repl#is_ready then
               repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* pas de clause learning *)
+              stats#start_timer "DPLL backtrack (s)";
               let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** Unsat du non cl *)
+              stats#stop_timer "DPLL backtrack (s)";
               Conflit_dpll (undo_list, process formule etat (continue_bet l pure_prop)) (* on essaye de retourner la plus haute pièce possible *) 
             else (* clause learning *)
               begin
@@ -210,7 +215,9 @@ struct
                 debug#p 2 "Learnt %a" c_learnt#print ();
                 stats#stop_timer "Clause learning (s)";
                 debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
+                stats#start_timer "DPLL backtrack (s)";
                 let (l,etat,undo_list) = undo (Var_depth(etat.level-k,(b,v))) formule etat in (* backtrack non chronologique <--- ici clause learning backtrack *)
+                stats#stop_timer "DPLL backtrack (s)";
                 Conflit_dpll (undo_list,process formule etat (continue_bet l ~cl:c_learnt pure_prop))(* on poursuit *) (** unsat du cl *)
               end
                 
@@ -229,7 +236,9 @@ struct
               
     and backtrack formule etat clause =
       let c = formule#new_clause clause in
+      stats#start_timer "DPLL backtrack (s)";
       let (l,etat,undo_list) = undo (learn_clause Base.set_wls formule etat c) formule etat in
+      stats#stop_timer "DPLL backtrack (s)";
       (undo_list,process formule etat (continue_bet l ~cl:c pure_prop))
         
     in 
