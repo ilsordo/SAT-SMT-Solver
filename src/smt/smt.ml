@@ -11,11 +11,25 @@ module Make_smt = functor(Dpll : Algo_parametric) -> functor (Smt : Smt_base) ->
 struct
   
   module Reduction = Reduction(struct type t = Smt.atom let print_value = Smt.print_atom end)
-  
+  (*
   let parse input = 
-    let module Parser = Term_parser.Make ( Smt ) in
-    let lex = Lexing.from_channel input in
-    (* Parser.main Lexer.token lex *) Smt.parse_atom ""
+    try
+      let lex = Lexing.from_channel input in
+      Formula_tree.convert Smt.parse_atom (Term_parser.main Term_lexer.token lex) (*Smt.parse_atom ""*)
+    with
+      | Term_parser.Error -> 
+          Printf.eprintf "Input error\n%!";
+          exit 1
+  *)
+
+  let parse input = 
+    try
+      Smt.parse lex (*Smt.parse_atom ""*)
+    with
+      | Term_parser.Error -> 
+          Printf.eprintf "Input error\n%!";
+          exit 1
+  
 
   let reduce data =
     let data = Smt.normalize data in (* normalisation de la formule donnée en entrée *)

@@ -11,29 +11,6 @@ type 'a formula_tree =
   | Not of ('a formula_tree) 
   | Atom of 'a
 
-module type Term_base =
-sig
-  type atom
-
-  val parse_atom : string -> atom formula_tree
-end
-
-module type Term_parser =
-sig
-  type atom
-
-  type token =
-  | ATOM of atom
-  | LPAREN
-  | RPAREN
-  | AND
-  | OR
-  | IMP
-  | NOT
-  | EQU
-  | EOF
-end
-
 let rec print_formule print_atom p = function
   | Atom a -> fprintf p "%s" (print_atom a)
   | Not f -> fprintf p "Not(%a)" (print_formule print_atom) f
@@ -42,6 +19,13 @@ let rec print_formule print_atom p = function
   | Imp(f,g) -> fprintf p "(%a)->(%a)" (print_formule print_atom) f (print_formule print_atom) g
   | Equ(f,g) -> fprintf p "(%a)<->(%a)" (print_formule print_atom) f (print_formule print_atom) g
 
+let rec convert parse_atom = function
+  | Atom a -> parse_atom a
+  | Not f -> Not (convert parse_atom f)
+  | And(f,g) -> And (convert parse_atom f, convert parse_atom g)
+  | Or(f,g) -> Or (convert parse_atom f, convert parse_atom g)
+  | Imp(f,g) -> Imp (convert parse_atom f, convert parse_atom g)
+  | Equ(f,g) -> Equ (convert parse_atom f, convert parse_atom g)
 
 let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches *)
   let fresh = new counter 1 (fun i -> Virtual i) in (* générateur de variables fraiches successives *)

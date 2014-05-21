@@ -8,7 +8,7 @@ sig
 (* Langage de la théorie*)
   type atom
 
-  val parse_atom : string -> atom formula_tree
+  val parse : Lexing.lexbuf -> atom formula_tree
 
   val print_atom : out_channel -> atom -> unit
 
