@@ -29,6 +29,6 @@ sig
 
   val constraint_propagation : bool -> formule -> literal -> etat -> literal list -> literal list
 
-  val set_wls : formule -> clause -> literal -> literal -> unit (* Nom pas très générique mais compréhensible *)
+  val set_wls : formule -> clause -> literal -> literal -> unit (* poser des jumelles pour wl *)
 
 end
