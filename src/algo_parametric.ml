@@ -5,7 +5,7 @@ open Interaction
 open Algo_base
 open Conflict_analysis
 
-exception End_analysis of (literal*literal list) (***)
+exception End_analysis of (literal option*literal list*literal list)
 
 let neg : literal -> literal = function (b,v) -> (not b, v)
 
@@ -79,51 +79,41 @@ struct
   
   (** Undo *)
   
+  (* tous les lit de la clause sont faux car c'est une clause à conflit *)
   let undo_clause formule etat (c:clause) = (* on est déjà au bon niveau *)
     let rec aux seen to_rem to_keep = 
       match to_keep with
-        | [] -> (seen,to_rem,to_keep)
+        | [] -> (seen,to_rem,[])
         | (b,v)::q ->
             if (c#mem_all (not b) v) then
               begin
                 match seen with
-                  | None -> 
-                  | Some (b0,v0) -> (,q)
+                  | None -> aux (Some (not b,v)) ((b,v)::to_rem) q
+                  | Some (b0,v0) -> raise (End_analysis (seen,to_rem,to_keep))
               end
             else    
-                  
-                    raise (End_analysis (l,acc))
-                  else
-                    assert false            
-  
-  
-  
-    let aux (stop,acc) (b,v) =
-      if (c#mem_all (not b) v) then
-        match stop with
-          | None -> 
-              formule#reset_val v;
-              (Some (not b,v),(b,v)::acc)
-          | Some l -> 
-              raise (End_analysis (l,acc))
-      else
-        begin
-          formule#reset_val v;
-          (stop,(b,v)::acc) 
-        end in 
+              aux seen ((b,v)::to_rem) q in
     match etat.tranches with 
       | [] -> assert false
       | (first,(b,v),propagation)::q ->
-          try
-            match List.fold_left aux (None,[]) propagation with
-              | (None,_) -> assert false
-              | (Some l,acc) ->
-                  if (c#mem_all (not b) v) then
-                    raise (End_analysis (l,acc))
-                  else
-                    assert false
-          with
-            | End_analysis (l,acc) -> (l,acc)
+           try
+             begin
+               match aux None [] propagation with
+                 | (None,to_rem,to_keep) -> assert false
+                 | (Some l,to_rem,to_keep) ->
+                     begin 
+                       assert ((c#mem_all (not b) v) && to_keep = []);
+                       (l,{etat with tranches = (first,(b,v),[])::q},to_rem)
+                     end
+             end
+           with  
+             | End_analysis (seen,to_rem,to_keep) ->  
+                 begin
+                   match seen with
+                     | None -> assert false
+                     | Some l -> (l,{etat with tranches = (first,(b,v),to_keep)::q},to_rem)
+                 end
+                 
   
   
   let undo_tranche formule etat = 
@@ -167,7 +157,7 @@ struct
               aux (Var_depth(k-1,l)) etat (prop::acc) (* on n'oublie pas de diminuer le level à chaque fois *) 
         | Clause_depth (k,c) ->                
             if k=0 then
-              let (l,prop) = undo_clause formule etat c in
+              let (l,etat,prop) = undo_clause formule etat c in
                 (l,etat,concat [] (prop::acc)) (***)
             else
               let (etat,prop) = undo_tranche formule etat in
