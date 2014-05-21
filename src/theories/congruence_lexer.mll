@@ -10,16 +10,16 @@ rule token = parse
    
   | "\\/"               { OR }
   | '~'		        { NOT }
-  | "=>"          		{ IMP }
+  | "=>"                                        { IMP }
   | "<=>"	        { EQU }
   | "/\\"					{ AND }
 
   | '='           { EQ }
   | "!="          { NEQ }
-  | ','           { SEP }      
+  | ','                                         { SEP }      
 
-  | ['a'-'w' 'y' 'z']['a' - 'z']* as s 	        { FUN s }
-  | 'x'['0'-'9']+ as s                          { VAR s }
+  | (['a'-'z']['a'-'z' '1'-'9' '_']* as s)(' '*)'(' { FUN s }
+  | (['a'-'z']['a'-'z' '1'-'9' '_']* as s)      { VAR s }
   
   | eof                                         { EOF }
 

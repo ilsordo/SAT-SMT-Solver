@@ -39,8 +39,8 @@ main:
   
   term:
 | VAR                                     { Var $1 }
-| FUN LPAREN arg_list RPAREN              { Fun ($1,$3) }
-| FUN LPAREN RPAREN                       { Fun($1,[]) }
+| FUN arg_list RPAREN                     { Fun ($1,$2) }
+| FUN RPAREN                              { Fun($1,[]) }
 ;
   arg_list:
 | term SEP arg_list                       { $1::$3 }
