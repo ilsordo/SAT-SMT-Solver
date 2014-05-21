@@ -9,7 +9,6 @@ let parse lexbuf =
   try
     Difference_parser.main Difference_lexer.token lexbuf
   with
-    | e -> raise e
     | Failure _ | Difference_parser.Error ->
         Printf.eprintf "Input error\n%!";
         exit 1

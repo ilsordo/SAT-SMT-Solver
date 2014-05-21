@@ -5,6 +5,12 @@ type atom = string
 
 
 let parse lexbuf =
+  try
+    Tseitin_parser.main Tseitin_lexer.token lexbuf
+  with
+    | Failure _ | Tseitin_parser.Error ->
+        Printf.eprintf "Input error\n%!";
+        exit 1
 
 
 let print_atom p s = Printf.fprintf p "%s" s
