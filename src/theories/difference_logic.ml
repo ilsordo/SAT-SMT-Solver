@@ -5,19 +5,17 @@ open Clause
 type atom = string*string*int (* s1 - s2 <= n avec s1 < s2 (comparaison sur string) *)
 
 
+let print_atom p (s1,s2,n) = Printf.fprintf p "%s - %s <= %d" s1 s2 n
+
 let parse lexbuf =
   try
-    Difference_parser.main Difference_lexer.token lexbuf
+    let raw = Difference_parser.main Difference_lexer.token lexbuf in
+    print_formule print_atom stdout;
+    raw
   with
     | Failure _ | Difference_parser.Error ->
         Printf.eprintf "Input error\n%!";
         exit 1
-
-let parse_atom s =
-  let lex = Lexing.from_string s in
-  Difference_parser.main Difference_lexer.token lex
-
-let print_atom _ _ = ()
 
 module Graph = Bellman_ford.Make (struct type t = string let eq a b = (a = b) let print p k = Printf.fprintf p "%s" k end)
 
