@@ -85,8 +85,8 @@ struct
     with
       | Smt.Conflit_smt _ 
       | Unsat | Empty_clause _-> 
-        stats#record "SMT conflicts";
-        Unsolvable
+          stats#record "SMT conflicts";
+          Unsolvable
 
   let print_answer p = function
     | Unsolvable -> Printf.fprintf p "s UNSATISFIABLE\n"
