@@ -1,8 +1,9 @@
 %{
   open Formula_tree
+  open Congruence_type
 %}
 
-%token <string> ATOM
+%token <> ATOM
 %token LPAREN RPAREN
 %token AND OR IMP NOT EQU
 %token EOF
@@ -15,7 +16,7 @@
 
 
 %start main             	
-%type <string Formula_tree.formula_tree> main
+%type <Congruence_type.t Formula_tree.formula_tree> main
 
 %%
 
