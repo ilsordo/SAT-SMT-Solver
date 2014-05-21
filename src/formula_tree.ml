@@ -12,7 +12,7 @@ type 'a formula_tree =
   | Atom of 'a
 
 let rec print_formule print_atom p = function
-  | Atom a -> fprintf p "%s" (print_atom a)
+  | Atom a -> fprintf p "%a" print_atom a
   | Not f -> fprintf p "Not(%a)" (print_formule print_atom) f
   | And(f,g) -> fprintf p "(%a)/\\(%a)" (print_formule print_atom) f (print_formule print_atom) g
   | Or(f,g) -> fprintf p "(%a)\\/(%a)" (print_formule print_atom) f (print_formule print_atom) g
