@@ -61,6 +61,7 @@ struct
     let etat_smt = Smt.init reduction in (* initialisation de l'etat du smt *)
     try 
       let (prop_init, next_bet) = Dpll.run heuristic cl interaction Smt.pure_prop reduction#max cnf in
+      assert false;
       let etat_smt = Smt.propagate reduction prop_init etat_smt in
       aux reduction etat_smt next_bet period 1 []
     with

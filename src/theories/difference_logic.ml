@@ -1,6 +1,7 @@
 open Bellman_ford
 open Formula_tree
 open Clause
+open Debug
 
 type atom = string*string*int (* s1 - s2 <= n avec s1 < s2 (comparaison sur string) *)
 
@@ -41,9 +42,11 @@ let propagate_unit (b,v) reduction etat =
     | None -> etat
     | Some (s1,s2,n) -> 
         if b then
-          Graph.relax_edge s1 s2 n (Graph.add_edge s1 s2 n etat)
+          (assert false;debug#p 2 "graph %s %s %d" s1 s2 n; 
+          Graph.relax_edge s1 s2 n (Graph.add_edge s1 s2 n etat))
         else
-          Graph.relax_edge s2 s1 (-n-1) (Graph.add_edge s2 s1 (-n-1) etat) (***)
+         (assert false;debug#p 2 "graph %s %s %d" s2 s1 (-n-1); 
+          Graph.relax_edge s2 s1 (-n-1) (Graph.add_edge s2 s1 (-n-1) etat)) (***)
           
 
 let get_neg_cycle l reduction = 
