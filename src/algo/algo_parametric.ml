@@ -189,7 +189,7 @@ struct
       with 
         | Conflit (c,etat) ->
             stats#stop_timer "DPLL propagate (s)";
-            stats#record "Conflits";
+            stats#record "DPLL conflicts";
             debug#p 2 ~stops:true "Impossible bet : clause %d false" c#get_id;
             if interaction && repl#is_ready then
               repl#start (formule:>Formule.formule) etat c stdout;
@@ -203,6 +203,7 @@ struct
             else (* clause learning *)
               begin
                 stats#start_timer "Clause learning (s)";
+                stats#record "Learnt clauses";
                 let ((b,v),k,c_learnt) = conflict_analysis Base.set_wls formule etat c in
                 debug#p 2 "Learnt %a" c_learnt#print ();
                 stats#stop_timer "Clause learning (s)";
@@ -215,6 +216,7 @@ struct
                 
     and bet formule etat () =
       debug#p 2 "Seeking next bet";
+      stats#record "Paris";
       stats#start_timer "Decisions (s)";
       let lit = next_pari (formule:>Formule.formule) in (* choisir un littéral sur lequel parier *)
       stats#stop_timer "Decisions (s)";

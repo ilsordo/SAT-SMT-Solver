@@ -31,15 +31,17 @@ struct
             begin
               try
                 stats#start_timer "SMT propagate (s)";
-                let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in
+                let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in (* propagation dans la théorie *)
                 stats#stop_timer "SMT propagate (s)";
                 Solvable (values, Smt.print_answer reduction etat_smt values)
               with
                 | Smt.Conflit_smt (clause,etat_smt) ->
+                    stats#record "SMT conflicts";
+                    stats#record "Learnt clauses";
                     stats#stop_timer "SMT propagate (s)";
-                    let (undo_list,next_bet) = backtrack clause in
+                    let (undo_list,next_bet) = backtrack clause in (* backtrack dans dpll *)
                     stats#start_timer "SMT backtrack (s)";
-                    let etat_smt = Smt.backtrack reduction undo_list etat_smt in
+                    let etat_smt = Smt.backtrack reduction undo_list etat_smt in (* backtrack dans la théorie *)
                     stats#stop_timer "SMT backtrack (s)";
                     aux reduction etat_smt next_bet period 0 []
             end
@@ -49,15 +51,17 @@ struct
               begin
                 try
                   stats#start_timer "SMT propagate (s)";
-                  let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in 
+                  let etat_smt = Smt.propagate reduction (List.rev acc) etat_smt in (* propagation dans la théorie *) 
                   stats#stop_timer "SMT propagate (s)";
                   aux reduction etat_smt next_bet period (date+1) []
                 with
                   | Smt.Conflit_smt (clause,etat_smt) ->
+                      stats#record "SMT conflicts";
+                      stats#record "Learnt clauses";
                       stats#stop_timer "SMT propagate (s)";
-                      let (undo_list,next_bet) = backtrack clause in
+                      let (undo_list,next_bet) = backtrack clause in (* backtrack dans dpll *)
                       stats#start_timer "SMT backtrack (s)";
-                      let etat_smt = Smt.backtrack reduction undo_list etat_smt in
+                      let etat_smt = Smt.backtrack reduction undo_list etat_smt in (* backtrack dans la théorie *)
                       stats#stop_timer "SMT backtrack (s)";
                       aux reduction etat_smt next_bet period 0 []      
               end        
@@ -65,7 +69,7 @@ struct
               aux reduction etat_smt next_bet period (date+1) acc
         | Conflit_dpll (undo_list,next_bet) -> (* on suppose ici que dpll a déjà backtracké dans son coin *)
             stats#start_timer "SMT backtrack (s)";
-            let etat_smt = Smt.backtrack reduction undo_list etat_smt in
+            let etat_smt = Smt.backtrack reduction undo_list etat_smt in (* backtrack dans la théorie *)
             stats#stop_timer "SMT backtrack (s)";
             aux reduction etat_smt next_bet period 0 []  
     in
@@ -73,14 +77,16 @@ struct
     
     let etat_smt = Smt.init reduction in (* initialisation de l'etat du smt *)
     try 
-      let (prop_init, next_bet) = Dpll.run heuristic cl interaction Smt.pure_prop reduction#max cnf in
+      let (prop_init, next_bet) = Dpll.run heuristic cl interaction Smt.pure_prop reduction#max cnf in (* prop init dans dpll *)
       stats#start_timer "SMT propagate (s)";
-      let etat_smt = Smt.propagate reduction prop_init etat_smt in
+      let etat_smt = Smt.propagate reduction prop_init etat_smt in (* propagation dans la théorie *)
       stats#stop_timer "SMT propagate (s)";
       aux reduction etat_smt next_bet period 1 []
     with
       | Smt.Conflit_smt _ 
-      | Unsat | Empty_clause _-> Unsolvable
+      | Unsat | Empty_clause _-> 
+        stats#record "SMT conflicts";
+        Unsolvable
 
   let print_answer p = function
     | Unsolvable -> Printf.fprintf p "s UNSATISFIABLE\n"
