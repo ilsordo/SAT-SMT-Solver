@@ -6,21 +6,22 @@
 
 type 'a super_atom = Real of 'a | Virtual of int
 
-class type ['a] reduction =
-object
-  method max : int
+type 'a reduction =
+<
+  max : int;
     
-  method bind : Base.t -> int
+  bind : 'a -> int;
 
-  method get_id : Base.t -> int option
+  get_id : 'a -> int option;
 
-  method get_orig : int -> Base.t option
+  get_orig : int -> 'a option;
 
-  method iter : (Base.t -> int -> unit) -> unit
- 
-  method print_reduction : out_channel -> unit
-end
+  iter : ('a -> int -> unit) -> unit;
 
+  fold : 'b.('a -> int -> 'b -> 'b) -> 'b -> 'b;
+    
+  print_reduction : out_channel -> unit
+>
 
 module Reduction (Base : sig type t val print_value : out_channel -> t -> unit end) =
 struct
@@ -29,7 +30,7 @@ struct
   module Orig = Map.Make(struct type t = int let compare = compare end)
 
   (* Table de correspondance entre des choses et des noms de variables (int) *)
-  class reduction ?(start = 1) (print_answer : reduction  -> print_answer_t) =
+  let reduction start =
   object (self)
     val mutable count = start (* l'objet gère ses variables fraiches *)
 
@@ -38,11 +39,11 @@ struct
     val mutable orig : Base.t Orig.t = Orig.empty (* int vers t *)
       
   (* Variable maximale utilisée *)
-    method max = count
+    method max = count - 1
 
-    method private get_fresh = 
-      count;
-      count <- count + 1
+    method private get_fresh =
+      count <- count + 1;
+      count - 1
         
     method bind s = (* renvoie l'entier associé au string s. Crée un entier frais si s pas encore rencontré *)
       assert (not (Id.mem s ids)); (* Par sécurité *)
@@ -63,7 +64,7 @@ struct
         
     method iter f = Id.iter f ids
 
-    method fold f a = Id.fold f ids a
+    method fold : 'a.(Id.key -> Orig.key -> 'a -> 'a) -> 'a -> 'a = fun f -> fun a -> Id.fold f ids a
     
     method print_reduction p = (* affiche la correspondance entre string et int *)
       Printf.fprintf p "c Renommage : \n"; 
@@ -74,19 +75,16 @@ struct
 
 
   let renommer ?(start = 1) f = (* renvoie CNF avec vars normalisées + table d'association *)
-    let renommer_clause assoc =
-      let signe b = 
-        if b then 1 else -1 in
-      let assoc = new reduction ~start:start print_answer in
-      let renommer_litteral = function
-        | (b, Virtual x) -> signe b * x  
+    let assoc = reduction start in
+    let renommer_litteral = function
+        | (b, Virtual x) -> (b,x) 
         | (b, Real a) -> 
             let x = match assoc#get_id a with
               | Some x -> x
-              | None -> assoc#bind v in
-            signe b * x in
-      List.rev_map renommer_litteral in
-    (List.rev_map (renommer_clause assoc) f, assoc)
+              | None -> assoc#bind a in
+            (b, x) in
+    let renommer_clause = List.rev_map renommer_litteral in
+    (List.rev_map renommer_clause f, assoc)
 
 end
 

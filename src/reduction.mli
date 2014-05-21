@@ -1,27 +1,26 @@
-type print_answer_t = out_channel -> Answer.t -> unit
 
 type 'a super_atom = Real of 'a | Virtual of int
 
-class type ['a] reduction =
-object
-  method max : int
+type 'a reduction =
+<
+  max : int;
     
-  method bind : 'a -> int
+  bind : 'a -> int;
 
-  method get_id : 'a -> int option
+  get_id : 'a -> int option;
 
-  method get_orig : int -> 'a option
+  get_orig : int -> 'a option;
 
-  method iter : ('a -> int -> unit) -> unit
+  iter : ('a -> int -> unit) -> unit;
 
-  method fold : ('a -> int -> 'b -> 'b) -> 'b -> 'b
+  fold : 'b.('a -> int -> 'b -> 'b) -> 'b -> 'b;
     
-  method print_reduction : out_channel -> unit
-end
+  print_reduction : out_channel -> unit
+>
 
 module Reduction : functor (Base : sig type t val print_value : out_channel -> t -> unit end) ->
 sig
-  val reduction : ?start:int -> (Base.t reduction -> print_answer_t) -> Base.t reduction
+  val reduction : int -> Base.t reduction
 
   val renommer : ?start:int -> (bool*Base.t super_atom) list list -> ((bool*int) list list*Base.t reduction)
 end
