@@ -13,6 +13,8 @@
 %left AND
 %nonassoc NOT
 
+%right EQ NEQ
+
 
 %start main             	
 %type <string Formula_tree.formula_tree> main

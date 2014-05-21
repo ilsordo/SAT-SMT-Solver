@@ -16,7 +16,6 @@
 %left AND
 %nonassoc NOT
 
-
 %start main             	
 %type <(Congruence_type.t*Congruence_type.t) Formula_tree.formula_tree> main
 
@@ -41,11 +40,12 @@ main:
   term:
 | VAR                                     { Var $1 }
 | FUN LPAREN arg_list RPAREN              { Fun ($1,$3) }
+| FUN LPAREN RPAREN                       { Fun($1,[]) }
 ;
   arg_list:
 | term SEP arg_list                       { $1::$3 }
 | term                                    { [$1] }
-|                                         { [] }
+
 
 
 

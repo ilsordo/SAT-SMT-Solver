@@ -9,13 +9,14 @@ rule token = parse
   | ')'						{ RPAREN } 
    
   | "\\/"					{ OR }
-  | '~'					        { NOT }
-  | "=>"					{ IMP }
-  | "<=>"				        { EQU }
+  | '~'		        { NOT }
+  | "=>"	    		{ IMP }
+  | "<=>"	        { EQU }
   | "/\\"					{ AND }
 
-  | '='                                         { EQ }
-  | "!="                                        { NEQ }
+  | '='           { EQ }
+  | "!="          { NEQ }
+  | ','           { SEP }      
 
   | ['a'-'w' 'y' 'z']['a' - 'z']* as s 	        { FUN s }
   | 'x'['0'-'9']+ as s                          { VAR s }
