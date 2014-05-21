@@ -81,7 +81,7 @@ let parse_args () =
     ("-print_cnf",Arg.String parse_output,                                                    "[f|-] Prints reduction to f (- = stdout)");
     ("-i",        Arg.Unit (fun () -> config.interaction <- true),                            " Interaction");
     ("-p",        Arg.Int (fun n -> config.smt_period <- n ),                                  "n Smt update period");
-    ("-diff",     Arg.Unit (fun () -> config.problem_type <- Smt (module Difference_logic : Smt_base)),  " Difference logic")
+    ("-diff",     Arg.Unit (fun () -> config.problem_type <- Smt (module Difference_logic : Smt_base)),  " Difference logic");
     ("-cc",       Arg.Unit (fun () -> config.problem_type <- Smt (module Congruence_closure : Smt_base)),  " Congruence closure");
     ("-eq",       Arg.Unit (fun () -> config.problem_type <- Smt (module Equality : Smt_base)),  " Equality")
   ] in

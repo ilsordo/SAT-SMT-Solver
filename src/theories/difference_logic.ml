@@ -17,6 +17,8 @@ let parse_atom s =
   let lex = Lexing.from_string s in
   Difference_parser.main Difference_lexer.token lex
 
+let print_atom _ _ = ()
+
 module Graph = Bellman_ford.Make (struct type t = string let eq a b = (a = b) let print p k = Printf.fprintf p "%s" k end)
 
 type etat = Graph.t
@@ -25,10 +27,10 @@ exception Conflit_smt of (literal list*etat)
   
 (** Initialisation *)
 
-let init reduc = 
+let init (reduc : atom Reduction.reduction) = 
   reduc#fold
     (fun (s1,s2,n) _ etat ->
-       Graph.add_node s2 (Graph.add_node s1 etat))
+      Graph.add_node s2 (Graph.add_node s1 etat))
     Graph.empty
 
 
