@@ -96,7 +96,7 @@ let rec ackerize1_term t free ack_assoc ack_arg = (* transformer un terme *)
           (Fun_map.find (f,l) ack_assoc, free, ack_assoc, ack_arg)
         with
           | Not_found -> 
-              let s = "_ack_"^(term_to_string t) in (****** avec free : (string_of_int free), possibilité d'enlever free, possibilité d'enlever _ack*)
+              let s = (term_to_string t) in (****** avec free : (string_of_int free), possibilité d'enlever free, possibilité d'enlever _ack*)
               let ack_assoc = Fun_map.add (f,l) s ack_assoc in
               let ack_arg = add_set f l ack_arg in
               let (l_ack,free,ack_assoc,ack_arg) = ackerize1_list l (free+1) ack_assoc ack_arg [] in
