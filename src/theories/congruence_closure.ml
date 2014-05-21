@@ -200,8 +200,13 @@ let ackerize (formula : (t*t) formula_tree) =
     
     
 let parse lexbuf =
-  let raw = Congruence_parser.main Congruence_lexer.token lexbuf in
-  ackerize raw
-    
+  try
+    let raw = Congruence_parser.main Congruence_lexer.token lexbuf in
+    ackerize raw
+  with
+      | Failure _ | Congruence_parser.Error ->
+          Printf.eprintf "Input error\n%!";
+          exit 1
+
 let print_atom _ _ = ()
     
