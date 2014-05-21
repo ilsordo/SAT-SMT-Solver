@@ -3,8 +3,9 @@ open Union_find
 
 type term = Var of string | Fun of string * (term list)
 
-type atom = Eq of term*term | Ineq of term*term
+(*type atom = Eq of term*term | Ineq of term*term*)
 
+type atom = term*term
 
 let parse_atom s =
   ...
@@ -50,7 +51,7 @@ notes persos
             ajouter la clause
 *)
 
-
+(*
 let normalize formula = (* idem à equality *)
   let rec normalize_atom (Atom a) = match a with
     | Eq (t1,t2) -> if t1 < t2 then Atom a else Atom (Eq (t2,t1))
@@ -62,7 +63,7 @@ let normalize formula = (* idem à equality *)
     | Equ (t1,t2) -> Equ (normalize t1,normalize t2)
     | Not f -> Not (normalize f)
     | Atom a -> normalize_atom (Atom a) 
-
+*)
 
 (* point de non retour *)
 
@@ -99,14 +100,14 @@ and ackerize1_list l free ack_assoc ack_arg acc = (* transformer une liste de te
                   
 let ackerize1_atom a free ack_assoc ack_arg = (* transformer un atome *)  
   match a with                
-    | Eq (t1,t2) -> 
+    | (t1,t2) -> 
         let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
         let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
-          (Eq(a_ack1,a_ack2),free,ack_assoc,ack_arg)
-    | Ineq (t1,t2) ->
+          ((a_ack1,a_ack2),free,ack_assoc,ack_arg)
+    (*| Ineq (t1,t2) ->
         let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
         let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
-          (Eq(a_ack1,a_ack2),free,ack_assoc,ack_arg)
+          (Eq(a_ack1,a_ack2),free,ack_assoc,ack_arg)*)
           
 let ackerize1 formula = (* transformer une formule, renvoyer aussi ack_assoc et ack_arg (mais pas forcèment nécessaire suivant ce qu'on souhaite print à la fin *)
   let rec aux f free ack_assoc ack_arg = match f with
@@ -156,9 +157,9 @@ let ackerize2_pair f l1 l2 ack_assoc ack_arg =
           if t1 = t2 then
             aux q1 q2 acc
           else
-            aux q1 q2 (Eq(get_var t1 ack_assoc,get_var t2 ack_assoc)::acc)
+            aux q1 q2 ((get_var t1 ack_assoc,get_var t2 ack_assoc)::acc)
       | _ -> assert false in
-  Or(Not(flatten_ack (aux l1 l2)),Atom (Eq(get_var (Fun(f,l1)),get_var (Fun(f,l2)))))
+  Or(Not(flatten_ack (aux l1 l2)),Atom (get_var (Fun(f,l1)),get_var (Fun(f,l2))))
 
 let ackerize2 ack_assoc ack_arg =
   flatten_ack 

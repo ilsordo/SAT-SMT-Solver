@@ -1,7 +1,11 @@
 open Bellman_ford
 open Formula_tree
 
+(*
 type atom = Double of string*string*op*int | Single of string*op*int
+*)
+
+type atom = string*string*int (* s1 - s2 <= n avec s1 < s2 (comparation sur string) *)
 
 let parse_atom s =
   let lex = Lexing.from_string s in
@@ -14,7 +18,7 @@ type etat = Graph.t
 
 
 (** Normalisation *)
-
+(*
 let rec normalize formula = 
   let rec normalize_atom = function
     | Double (s1,s2,o,n) ->
@@ -35,16 +39,14 @@ let rec normalize formula =
     | Equ (f1,f2) -> Equ (normalize f1,normalize f2)
     | Not f -> Not (normalize f)
     | Atom a -> normalize_atom a
-  
+*)  
   
 (** Initialisation *)
 
 let init reduc = 
   reduc#fold (* Atom a avec a normalisé *)
-    (fun a _ etat ->
-       match a with
-         | Double (s1,s2,LEq,n) when s1 < s2 -> Graph.add_node s2 (Graph.add_node s1 etat)
-         | _ -> assert false)
+    (fun (s1,s2,n) _ etat ->
+       Graph.add_node s2 (Graph.add_node s1 etat))
     Graph.empty
 
 
@@ -53,23 +55,18 @@ let init reduc =
 let propagate_unit (b,v) reduction etat = 
   match reduction#get_orig v with
     | None -> etat
-    | Some a -> 
-        begin
-          match a with
-            | Double (s1,s2,LEq,n) when s1 < s2 -> 
-                if b then
-                  Graph.relax_edge s1 s2 n (Graph.add_edge s1 s2 n)
-                else
-                  Graph.relax_edge s2 s1 (-n-1) (Graph.add_edge s2 s1 (-n-1)) (***)
-            | _ -> assert false
-        end
+    | Some (s1,s2,n) -> 
+        if b then
+          Graph.relax_edge s1 s2 n (Graph.add_edge s1 s2 n)
+        else
+          Graph.relax_edge s2 s1 (-n-1) (Graph.add_edge s2 s1 (-n-1)) (***)
           
 
 let get_neg_cycle l reduction = 
   let id (k,s1,s2) =
-    match (reduction#get_id (Double (s1,s2,LEq,k)),reduction#get_id (Double (s2,s1,LEq,-(k+1)))) with
-      | (Some v,_) -> (true,v) (***)
-      | (_,Some v) -> (false,v) in
+    match (reduction#get_id (s1,s2,k),reduction#get_id (s2,s1,LEq,-(k+1))) with
+      | (Some v,_) -> (false,v) (***** inversion des args !!!*)
+      | (_,Some v) -> (true,v) in
   List.fold_left (fun res t -> (id t)::res ) [] l  (** attention doublons *)
 
 
@@ -88,16 +85,11 @@ let propagate reduction prop etat = (* propagation tout-en-un *)
 let backtrack_unit (b,v) reduction etat = 
   match reduction#get_orig v with
     | None -> etat
-    | Some a -> 
-        begin
-          match a with
-            | Double (s1,s2,LEq,n) when s1 < s2 -> 
-                if b then
-                  Graph.remove_edge s1 s2 n etat
-                else
-                  Graph.remove_edge s2 s1 -(n+1) etat (***)
-            | _ -> assert false
-        end
+    | Some (s1,s2,n) -> 
+        if b then
+          Graph.remove_edge s1 s2 n etat
+        else
+          Graph.remove_edge s2 s1 -(n+1) etat (***)
         
          
 let backtrack reduction undo_list etat =
