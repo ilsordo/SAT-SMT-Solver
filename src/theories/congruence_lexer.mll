@@ -2,8 +2,6 @@
   open Term_parser
 }
 
-let atom_sym = ['a'-'z' 'A'-'Z' '0'-'9' ' ' '(' ')' ',' '=' '<' '>' '-'] | "<=" | ">=" | "!="
-
 rule token = parse
   | [' ' '\t' '\n' '\r'] 			{ token lexbuf }   
 
@@ -16,7 +14,8 @@ rule token = parse
   | "<=>"				        { EQU }
   | "/\\"					{ AND }
 
-  | ['a'-'z'] atom_sym* as s 	                { Printf.printf "%s parsed\n%!" s;ATOM s }
+  | ['a'-'w' 'y' 'z']['a' - 'z'] as s 	        { FUN s }
+  | 'x'['0'-'9']+ as s                          { VAR s }
   
   | eof                                         { EOF }
 

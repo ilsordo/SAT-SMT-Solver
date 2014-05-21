@@ -3,9 +3,10 @@
   open Congruence_type
 %}
 
-%token <> ATOM
+%token <string> FUN VAR
 %token LPAREN RPAREN
 %token AND OR IMP NOT EQU
+%token SEP
 %token EOF
 
 %nonassoc EQU
@@ -27,7 +28,7 @@ main:
 
   formule:	
 | LPAREN formule RPAREN                   { $2 }
-| ATOM                                    { Atom $1 }
+| term                                    { Atom $1 }
 | formule AND formule                     { And($1,$3) }	
 | formule OR formule                      { Or($1,$3) }													
 | formule IMP formule                     { Imp($1,$3) }
@@ -35,6 +36,19 @@ main:
 | NOT formule                             { Not($2) }			
   ;
   
+  term:
+| VAR                                     { Var $1 }
+| FUN LPAREN arg_list RPAREN              { Fun ($1,$3) }
+;
+  arg_list:
+| term SEP arg_list                       { $1::$3 }
+| term                                    { [$1] }
+|                                         { [] }
+
+
+
+
+
 
 
 
