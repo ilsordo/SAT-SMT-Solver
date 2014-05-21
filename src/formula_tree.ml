@@ -54,6 +54,6 @@ let to_cnf t_formule = (* construit la cnf, en utilisant des variables fraiches 
         aux cnf formule in
   let label = fresh#next in
   let res = [true,label]::(aux [] [t_formule, label]) in
-  (res,fresh#count + 2 )
+  (res,fresh#count + 1 )
   
   
