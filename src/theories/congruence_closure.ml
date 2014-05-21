@@ -38,7 +38,7 @@ let rec term_to_string t = match t with
         match l with
           | [] -> f^"()" 
           | [x] -> f^"("^(term_to_string x)^")" 
-          | t::q -> f^"("^(List.fold_left (fun s arg -> (term_to_string arg)^","^s) (term_to_string t) q)^")"
+          | t::q -> f^"("^(List.fold_left (fun s arg -> s^","^(term_to_string arg)) (term_to_string t) q)^")"
       end
   
   

@@ -190,7 +190,7 @@ module Make(X: Equal) = struct
   *)    
   let undo_last a b r = 
     let update x y =
-      let ((k,height,_,_) as e) = UF.find x r.edges in
+      let (k,height,_,_) = UF.find x r.edges in
          if k <> r.next_edge -1 then (* on ne peut défaire que la dernière union *)
            assert false
          else

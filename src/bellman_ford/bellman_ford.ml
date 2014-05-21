@@ -133,7 +133,11 @@ module Make(X: Equal) = struct
    aux u []
 
  let print_values phantom p r =  (* on renvoie les -pi, saus pour phantom (variable de normalisation utilisée en dehors du module) *) 
-  let offset = Node.find phantom r.values in
+  let offset = 
+    try
+      Node.find phantom r.values 
+    with
+      | Not_found -> 0 in
    Node.iter 
      (fun s k -> if s <> phantom then Printf.fprintf p "%a %d\n" X.print s (-k+offset))
      r.values  

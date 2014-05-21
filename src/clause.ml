@@ -34,7 +34,7 @@ object (self : 'varset)
   method unrepr = hid
 
   method hide x = (* déplace la variable x des variables visibles aux variables cachées (ssi elle est déjà visible) *)
-    if (VarSet.mem x vis) then (** on peut éviter ce test et les suivants ? *)
+    if (VarSet.mem x vis) then (** on pourrait éviter ce test et les suivants... *)
       begin
         vis <- VarSet.remove x vis;
         hid <- VarSet.add x hid;
