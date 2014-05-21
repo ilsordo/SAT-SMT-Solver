@@ -35,6 +35,16 @@ let rec normalize formula =
     | Not f -> Not (normalize f)
     | Atom a -> normalize_atom (Atom a) 
 *)  
+
+let parse lexbuf =
+  try
+    Equality_parser.main Equality_lexer.token lexbuf
+  with
+    | Failure _ | Equality_parser.Error ->
+        Printf.eprintf "Input error\n%!";
+        exit 1
+
+let print_atom _ _ = ()
   
 (** Initialisation *)
 
