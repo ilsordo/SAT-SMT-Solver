@@ -26,9 +26,10 @@ struct
       let lexbuf = Lexing.from_channel input in
       Smt.parse lexbuf
     with
-      | Failure _ -> 
+      | e ->
+          raise e(*
           Printf.eprintf "Input error\n%!";
-          exit 1
+          exit 1*)
   
 
   let reduce data =
