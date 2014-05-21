@@ -11,7 +11,7 @@ let print_cnf p (n,f) =
   fprintf p "p cnf %d %d\n" n (List.length f);
   List.iter (fun c -> List.iter (fun (b,v) -> fprintf p "%s%d " (if b then "" else "-") v) c; fprintf p "0\n") f 
 
-let run (algo : Algo.t) assoc n (cnf: (bool*int) list list) =
+let run (algo : Algo.t) assoc n cnf =
   begin
     match config.print_cnf with 
       | None -> ()
@@ -23,15 +23,15 @@ let run (algo : Algo.t) assoc n (cnf: (bool*int) list list) =
   stats#start_timer "Total execution (s)";
   let answer = algo config.heuristic config.clause_learning config.interaction n cnf in
   stats#stop_timer "Total execution (s)";
-  Answer.check n cnf answer;
+  Answer.check n cnf answer; (* Tout résultat positif est vérifié *)
   answer
   
 
 let main () =
-  parse_args();
-  let module Base_algo = ( val config.algo : Algo_base ) in
+  parse_args(); (* Initialise config *)
+  let module Base_algo = ( val config.algo : Algo_base ) in (* config.algo est un module de première classe *)
   debug#p 1 "Using algorithm %s and heuristic %s %s" Base_algo.name config.nom_heuristic (if config.clause_learning then "with clause learning" else "");
-  let input = Config.get_input() in
+  let input = Config.get_input() in 
   begin
     match config.problem_type with
       | Cnf ->
@@ -40,6 +40,7 @@ let main () =
             let module A = Algo.Bind( Base_algo ) in
             printf "%a%!" Cnf.print_answer (run A.algo None n cnf)
           end      
+
       | Color k -> 
           let raw = Color.parse input in
           let module Reduction = Reduction.Reduction ( struct type t = string let print_value p s = fprintf p "%s" s end ) in
@@ -48,6 +49,7 @@ let main () =
           stats#stop_timer "Reduction (s)";
           let module A = Algo.Bind( Base_algo ) in
           printf "%a%!" (Color.print_answer k raw assoc) (run A.algo (Some assoc) assoc#max cnf)
+
       | Smt s ->
           let module Base_smt = ( val s : Smt_base ) in
           let module Smt = Make_smt ( Algo_parametric.Bind ( Base_algo ) ) ( Base_smt ) in
@@ -69,7 +71,10 @@ let _ =
     Printexc.record_backtrace true;
     main()
   with
-      Stack_overflow -> Printexc.print_backtrace stderr; flush stderr; raise Stack_overflow
+      Stack_overflow -> 
+        Printexc.print_backtrace stderr; 
+        flush stderr; 
+        raise Stack_overflow (* En cas de panique *)
 
 
 
