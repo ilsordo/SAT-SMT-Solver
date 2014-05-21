@@ -17,7 +17,7 @@ rule token = parse
   | '='                                         { EQ }
   | "!="                                        { NEQ }
 
-  | ['a'-'w' 'y' 'z']['a' - 'z'] as s 	        { FUN s }
+  | ['a'-'w' 'y' 'z']['a' - 'z']* as s 	        { FUN s }
   | 'x'['0'-'9']+ as s                          { VAR s }
   
   | eof                                         { EOF }
