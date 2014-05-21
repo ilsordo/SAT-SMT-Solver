@@ -1,11 +1,13 @@
 open Formula_tree
 open Union_find
 
-type term = Var of string | Fun of string * (term list)
+(*type term = Var of string | Fun of string * (term list)*)
 
 (*type atom = Eq of term*term | Ineq of term*term*)
 
-type atom = term*term
+type term = Congruence_type.t
+
+include Equality
 
 
 let parse lexbuf =
@@ -84,17 +86,18 @@ let add_set f l ack_arg = (* ajouter l dans le set associé à f *)
 
 let ackerize1_term t free ack_assoc ack_arg = (* transformer un terme *)
   match t with
-    | Var s -> (Var s, free, ack_assoc, ack_arg)
+    | Var s -> (s, free, ack_assoc, ack_arg)
     | Fun (f,l) -> 
         try
-          (Var (Fun_map.find (f,l) ack_assoc), free, ack_assoc, ack_arg)
+          (Fun_map.find (f,l) ack_assoc, free, ack_assoc, ack_arg)
         with
           | Not_found -> 
               let s = "_ack"^(string_of_int free) in (** autre syntaxe ? *)
               let ack_assoc = Fun_map.add (f,l) s ack_assoc in
               let ack_arg = add_set f l ack_arg in
               let (l_ack,free,ack_assoc,ack_arg) = ackerize1_list l (free+1) ack_assoc ack_arg [] in
-                (Var s(**Fun (s,l_ack)*), free, ack_assoc, ack_arg)
+                (s(**Fun (s,l_ack)*), free, ack_assoc, ack_arg)
+
 
 and ackerize1_list l free ack_assoc ack_arg acc = (* transformer une liste de termes *)
   match l with
@@ -103,12 +106,15 @@ and ackerize1_list l free ack_assoc ack_arg acc = (* transformer une liste de te
         let (t_ack,free,ack_assoc,ack_arg) = ackerize1_term t free ack_assoc ack_arg in
           ackerize1_list q free ack_assoc ack_arg (t_ack::acc)
                   
+                  
 let ackerize1_atom (t1,t2) free ack_assoc ack_arg = (* transformer un atome *)  
   let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
   let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
-  match (a_ack1,a_ack2) with
-    | (Var s1, Var s2) -> ((s1,s2),free,ack_assoc,ack_arg)
-    | _ -> assert false
+    if a_ack1 < a_ack2 then
+      ((a_ack1,a_ack2),free,ack_assoc,ack_arg)
+    else
+      ((a_ack2,a_ack1),free,ack_assoc,ack_arg)
+
           
 let ackerize1 formula = (* transformer une formule, renvoyer aussi ack_assoc et ack_arg (mais pas forcèment nécessaire suivant ce qu'on souhaite print à la fin *)
   let rec aux f free ack_assoc ack_arg = match f with
@@ -142,7 +148,7 @@ let ackerize1 formula = (* transformer une formule, renvoyer aussi ack_assoc et 
 let get_var t ack_assoc = 
   match t with
     | Var s -> s (** avant c'était t ici *)
-    | Fun (f,l) -> (**Var*) (Fun_map.find (f,l) ack_assoc)
+    | Fun (f,l) -> (**Var*) Fun_map.find (f,l) ack_assoc
 
 let rec flatten_ack l = (* transformer la liste d en conjonction d *)  
   match l with
@@ -160,8 +166,12 @@ let ackerize2_pair f l1 l2 ack_assoc ack_arg =
           else
             aux q1 q2 ((get_var t1 ack_assoc,get_var t2 ack_assoc)::acc)
       | _ -> assert false in
-  Or(Not(flatten_ack (aux l1 l2)),Atom (get_var (Fun(f,l1)),get_var (Fun(f,l2))))
-
+  let (s1,s2) = (get_var (Fun(f,l1)),get_var (Fun(f,l2))) in
+  if s1 < s2 then
+    Or(Not(flatten_ack (aux l1 l2)),Atom (s1,s2))
+  else
+    Or(Not(flatten_ack (aux l1 l2)),Atom (s2,s1))
+    
 let ackerize2 ack_assoc ack_arg =
   flatten_ack 
     (Arg_map.fold
@@ -184,6 +194,9 @@ let ackerize2 ack_assoc ack_arg =
 let ackerize formula = 
   let (f_ack1,ack_assoc,ack_arg) ) = ackerize1 formula in
   let f_ack2 = ackerize2 ack_assoc ack_arg in (* une formule sans aucun Fun !!! *)
-    (And(f_ack1,f_ack2),ack_assoc,ack_arg)
-
-include Equality
+    (*( *)And(f_ack1,f_ack2)(*,ack_assoc,ack_arg)*)
+    
+    
+    
+    
+    

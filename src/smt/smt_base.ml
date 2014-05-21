@@ -18,7 +18,7 @@ sig
 
   exception Conflit_smt of (literal list*etat) (* Clause à apprendre *)
 
-  val normalize : atom formula_tree -> atom formula_tree
+  (*val normalize : atom formula_tree -> atom formula_tree*)
 
   val init : atom reduction -> etat
 
