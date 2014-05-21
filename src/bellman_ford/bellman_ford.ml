@@ -130,7 +130,7 @@ module Make(X: Equal) = struct
 
  let print_values phantom p r =  (* on renvoie les -pi, saus pour phantom (variable de normalisation utilisée en dehors du module) *) 
    Node.iter 
-     (fun s k -> if s = phantom then Printf.fprintf p "%a %d\n" X.print s (-k))
+     (fun s k -> if s <> phantom then Printf.fprintf p "%a %d\n" X.print s (-k))
      r.values  
     
 end

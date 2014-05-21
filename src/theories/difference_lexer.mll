@@ -14,7 +14,6 @@ rule token = parse
   | "<=>"				        { EQU }
   | "/\\"					{ AND }
 
-  | '-'                                         { DIFF }
   | '='                                         { EQ }
   | "!="                                        { NEQ }
   | ">="                                        { GEQ }
@@ -22,8 +21,10 @@ rule token = parse
   | '>'                                         { GT }
   | '<'                                         { LT }
 
-  | '-'[ '0'-'9' ]+ as n                        { INT (int_of_string n) }
+  | [ '0'-'9' ]+ as n                           { INT (int_of_string n) }
   | ['a'-'z']['a'-'z' '0'-'9']* as s            { VAR s }
+
+  | '-'                                         { DIFF }
   
   | eof                                         { EOF }
 
