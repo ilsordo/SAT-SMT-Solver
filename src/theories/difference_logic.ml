@@ -56,7 +56,7 @@ let propagate_unit (b,v) reduction etat =
     | Some a -> 
         begin
           match a with
-            | Double (s1,s2,LEq,n) when s1 < s2 -> 
+            | Double (s1,s2,LEq,n) when s1 < s2 -> 
                 if b then
                   Graph.relax_edge s1 s2 n (Graph.add_edge s1 s2 n)
                 else

@@ -109,7 +109,7 @@ object (self)
     clauses#reset;
     paris#reset
     
-  method init n clauses_init (_:bool) = (* crée l'ensemble des clauses à partir d'une int list list (= liste de clauses) *)
+  method init n clauses_init = (* crée l'ensemble des clauses à partir d'une int list list (= liste de clauses) *)
     self#reset n;
     List.iter (
       fun c -> 

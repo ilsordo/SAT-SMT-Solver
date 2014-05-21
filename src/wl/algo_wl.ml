@@ -47,7 +47,7 @@ let constraint_propagation _ (formule : formule) (b,v) etat acc = (* propage en 
 
 let init n cnf pure_prop  = (* initialise la formule et renvoie un état *)
   let f = new formule_wl in
-  let prop_init = f#init n cnf pure_prop;  (* fait des assignations, contrairement à DPLL, mais ne trouve pas d'éventuels conflits *)
+  let prop_init = f#init n cnf in  (* fait des assignations, contrairement à DPLL, mais ne trouve pas d'éventuels conflits *)
   f#check_empty_clause; (* peut lever Unsat *)
   f#init_wl; (* pose les jumelles *)
   (f,prop_init)

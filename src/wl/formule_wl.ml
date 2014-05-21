@@ -75,7 +75,7 @@ object(self)
             (get_occurences supprimer v)#iter 
               (fun c -> c#hide_var (not b) v);
             prepare ((b,v)::acc) () in (***)
-    prepare [] () 
+    prepare [] () 
     
   (* Initialise les watched literals en en choisissant 2 par clauses. On s'assurera avant qu'aucune clause n'est singleton *)
   method init_wl =

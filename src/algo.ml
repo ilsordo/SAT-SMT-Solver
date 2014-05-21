@@ -4,6 +4,10 @@ open Debug
 open Answer
 open Interaction
 open Algo_base
+open Algo_parametric
+open Printf
+
+type t = Heuristic.t -> bool -> bool -> int -> (bool*int) list list -> Answer.t
 
 let print_valeur p v = function (* affichage d'une variable (int) et de sa valeur *)
   | true -> fprintf p "v %d\n" v

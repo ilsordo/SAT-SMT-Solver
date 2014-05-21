@@ -28,7 +28,7 @@ let config =
     problem_type = Cnf;
     print_cnf = None;
     input = None;
-    algo = Dpll.algo;
+    algo = ( module Algo_dpll : Algo_base );
     heuristic = Heuristic.(next polarite_next);
     nom_heuristic = "next_next";
     clause_learning = false;
@@ -42,8 +42,8 @@ let parse_args () =
   
   let parse_algo s =
     let algo = match s with
-      | "dpll" -> ( module Dpll : Algo_base )
-      | "wl" -> ( module Dpll : Algo_base )
+      | "dpll" -> ( module Algo_dpll : Algo_base )
+      | "wl" -> ( module Algo_wl : Algo_base )
       | _ -> raise (Arg.Bad ("Unknown algorithm : "^s)) in
     config.algo <- algo in
 
@@ -77,11 +77,11 @@ let parse_args () =
     ("-d",        Arg.Int debug#set_debug_level,                                              "k Debug depth k");
     ("-b",        Arg.Int debug#set_blocking_level,                                           "k Interaction depth k");
     ("-color",    Arg.Int (fun k -> config.problem_type <- (Color k)),                        "k Color solver");
-    ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- (Smt (module Tseitin))),           " Tseitin solver");
+    ("-tseitin",  Arg.Unit (fun () -> config.problem_type <- Smt (module Tseitin : Smt_base)),           " Tseitin solver");
     ("-print_cnf",Arg.String parse_output,                                                    "[f|-] Prints reduction to f (- = stdout)");
     ("-i",        Arg.Unit (fun () -> config.interaction <- true),                            " Interaction");
-    ("-p",        Arg.Int (fun n -> config.smt_period <- n )                                  "n Smt update period");
-    ("-diff",     Arg.Unit (fun () -> config.problem_type <- Smt (module Difference_logic)),  " Difference logic")
+    ("-p",        Arg.Int (fun n -> config.smt_period <- n ),                                  "n Smt update period")(*;
+    ("-diff",     Arg.Unit (fun () -> config.problem_type <- Smt (module Difference_logic : Smt_base)),  " Difference logic")*)
 
   ] in
   

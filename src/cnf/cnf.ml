@@ -1,3 +1,6 @@
+open Answer
+open Printf
+
 let parse input =
   try
     let lex = Lexing.from_channel input in

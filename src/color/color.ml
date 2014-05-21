@@ -25,7 +25,7 @@ let edge_constraint i j k cnf = (* produit une _formule_ (CNF) indiquant que les
     if l=0 then
       res
     else
-      aux (l-1) ([(false,Real ((string_of_int i)^"_"^(string_of_int l)));Real ((false,(string_of_int j)^"_"^(string_of_int l)))]::res)
+      aux (l-1) ([(false,Real ((string_of_int i)^"_"^(string_of_int l)));(false,Real((string_of_int j)^"_"^(string_of_int l)))]::res)
   in aux k cnf
 
   
@@ -68,7 +68,7 @@ let print_answer k (_,_,l) assoc p = function (***)
   | Unsolvable -> 
       eprintf "s UNSATISFIABLE\n";
       fprintf p "Pas de coloriage à %d couleurs\n" k
-  | Solvable values ->
+  | Solvable (values,_) ->
       eprintf "s SATISFIABLE\n";
       let couleurs = Array.make k "" in 
       for i=0 to k-1 do

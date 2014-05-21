@@ -51,7 +51,7 @@ let rec constraint_propagation pure_prop (formule:formule) _ etat acc =
      
 let init n cnf pure_prop = 
   let f = new formule_dpll in
-  let _ = f#init n cnf pure_prop in (* forcèment vide *)
+  let _ = f#init n cnf in (* forcèment vide *)
   f#check_empty_clause; (* lève Unsat si il y avait une clause vide dans la formule de départ *)
   try
     let prop = constraint_propagation pure_prop f (true,0) { tranches = []; level = 0 } [] in (* propagation initiale *)

@@ -1,11 +1,19 @@
+open Clause
 
 type atom = string
 
+
+
 let parse_atom s = Formula_tree.Atom s
+
+let print_atom p s = Printf.fprintf p "%s" s
 
 (* Théorie *)
 
 type etat = unit
+
+exception Conflit_smt of (literal list*etat)
+    
 
 let normalize formula = formula
   
