@@ -2,10 +2,6 @@ open Formula_tree
 open Union_find
 open Congruence_type
 
-(*type term = Var of string | Fun of string * (term list)*)
-
-(*type atom = Eq of term*term | Ineq of term*term*)
-
 type term = Congruence_type.t
 
 include Equality
@@ -14,17 +10,15 @@ module Fun_map = Map.Make(struct type t = string * (term list) let compare = com
 module Arg_map = Map.Make(struct type t = string let compare = compare end)
 module Arg_set = Set.Make(struct type t = term list let compare = compare end)
 
-
-(*
-type etat = 
-  { 
-    ack_assoc : string Fun_map.t; (* ancien nom -> nouveau nom *)
-    ack_arg : Arg_set.t Arg_map.t ; (* que des anciens noms *)
-    unions : UF.t;
-    differences : String_set.t
-  }
-
-
+(* la congruence closure s'appuie intégralement sur l'égalité.
+   Toute formule contenant des symboles des symboles de fonction est transformée en une formule sans symboles de fonctions grâce à la transformation d'Ackermann.
+   Le fichier actuel contient l'implémentation de la transformation d'Ackermann.
+   
+   Quelques références sur cette transformation : 
+    [1] Satisfiability Checking. Equalities and Uninterpreted Functions by Erika Abraham
+    [2] To Ackermann-ize or not to Ackermann_ize ? On Efficiently Handling Uninterpreted Function Symbols in SMT(EUF_UT) (2006) by Roberto Bruttomesso, Alessandro Cimatti, Anders Franzén, Alberto Griggio, Alessandro Santuari, Roberto Sebastiani.
+    
+*)
 
 (*
 
@@ -43,22 +37,6 @@ type etat =
             ajouter la clause
 *)
 
-(*
-let normalize formula = (* idem à equality *)
-  let rec normalize_atom (Atom a) = match a with
-    | Eq (t1,t2) -> if t1 < t2 then Atom a else Atom (Eq (t2,t1))
-    | Ineq (t1,t2) -> Not(normalize (Atome (Eq (t1,t2)))) in
-  match formula with
-    | And (t1,t2) -> And (normalize t1,normalize t2)
-    | Or (t1,t2) -> Or (normalize t1,normalize t2)
-    | Imp (t1,t2) -> Imp (normalize t1,normalize t2)
-    | Equ (t1,t2) -> Equ (normalize t1,normalize t2)
-    | Not f -> Not (normalize f)
-    | Atom a -> normalize_atom (Atom a) 
-*)
-
-(* point de non retour *)
-*)
 
 (** Transformation 1 : remplacer les termes et sous termes par des variables fraiches (inutile de le faire pour les variables) *)
 
@@ -89,11 +67,11 @@ let rec ackerize1_term t free ack_assoc ack_arg = (* transformer un terme *)
           (Fun_map.find (f,l) ack_assoc, free, ack_assoc, ack_arg)
         with
           | Not_found -> 
-              let s = (term_to_string t) in (****** avec free : (string_of_int free), possibilité d'enlever free, possibilité d'enlever _ack*)
+              let s = (term_to_string t) in
               let ack_assoc = Fun_map.add (f,l) s ack_assoc in
               let ack_arg = add_set f l ack_arg in
               let (l_ack,free,ack_assoc,ack_arg) = ackerize1_list l (free+1) ack_assoc ack_arg [] in
-                (s(**Fun (s,l_ack)*), free, ack_assoc, ack_arg)
+                (s, free, ack_assoc, ack_arg)
 
 
 and ackerize1_list l free ack_assoc ack_arg acc = (* transformer une liste de termes *)
@@ -144,8 +122,8 @@ let ackerize1 (formula : (term*term) formula_tree) = (* transformer une formule,
 
 let get_var t ack_assoc = 
   match t with
-    | Var s -> s (** avant c'était t ici *)
-    | Fun (f,l) -> (**Var*) Fun_map.find (f,l) ack_assoc
+    | Var s -> s
+    | Fun (f,l) -> Fun_map.find (f,l) ack_assoc
 
 let rec flatten_ack l = (* transformer la liste d en conjonction d *)  
   match l with
@@ -166,12 +144,14 @@ let ackerize2_pair f l1 l2 ack_assoc ack_arg =
               aux q1 q2 ((Atom(s1, s2))::acc)
             else
               aux q1 q2 ((Atom (s2, s1))::acc)
-      | _ -> assert false in
+      | _ -> 
+         Printf.eprintf "Arity mismatch in function %s\n%!" f; 
+         exit 1 in
   let (s1,s2) = (get_var (Fun(f,l1)) ack_assoc,get_var (Fun(f,l2)) ack_assoc) in
   if s1 < s2 then
-    Or(Not(flatten_ack (aux l1 l2 [](**???*))),Atom (s1,s2))
+    Or(Not(flatten_ack (aux l1 l2 [])),Atom (s1,s2))
   else
-    Or(Not(flatten_ack (aux l1 l2 [](**???*))),Atom (s2,s1))
+    Or(Not(flatten_ack (aux l1 l2 [])),Atom (s2,s1))
     
 let ackerize2 ack_assoc ack_arg f_ack1 =
   match

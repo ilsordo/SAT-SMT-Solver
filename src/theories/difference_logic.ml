@@ -2,7 +2,7 @@ open Bellman_ford
 open Formula_tree
 open Clause
 
-type atom = string*string*int (* s1 - s2 <= n avec s1 < s2 (comparation sur string) *)
+type atom = string*string*int (* s1 - s2 <= n avec s1 < s2 (comparaison sur string) *)
 
 
 let parse lexbuf =
@@ -26,7 +26,7 @@ exception Conflit_smt of (literal list*etat)
 (** Initialisation *)
 
 let init reduc = 
-  reduc#fold (* Atom a avec a normalisé *)
+  reduc#fold
     (fun (s1,s2,n) _ etat ->
        Graph.add_node s2 (Graph.add_node s1 etat))
     Graph.empty

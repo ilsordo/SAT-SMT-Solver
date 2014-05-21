@@ -41,8 +41,8 @@ struct
             raise (Conflit (c,{etat with tranches = (first,(b,v),[])::etat.tranches } )) (* on prend soin d'empiler la dernière tranche *)
     end;
     try 
-      let propagation = Base.constraint_propagation pure_prop formule (b,v) etat [] in (* on propage *) (** ne pas mettre (b,v) dans [] *)
-      ({ etat with tranches = (first,(b,v),propagation)::etat.tranches }, propagation@[(b,v)]) (***) (* on renvoie l'état avec les dernières assignations effectuées *)
+      let propagation = Base.constraint_propagation pure_prop formule (b,v) etat [] in (* on propage *)
+      ({ etat with tranches = (first,(b,v),propagation)::etat.tranches }, propagation@[(b,v)]) (* on renvoie l'état avec les dernières assignations effectuées *)
     with
         Conflit_prop (c,acc) -> (* conflit dans la propagation *)
           raise (Conflit (c,{etat with tranches = (first,(b,v),acc)::etat.tranches } ))
@@ -53,23 +53,23 @@ struct
     if lvl=0 then (* niveau 0 : tout conflit indiquerait que la formule est non sat *)
       try
         formule#set_val b v lvl; (* peut lever Empty_clause *)
-        let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in (* peut lever Conflit_prop *) (** prq [(b,v)] >> pour continue_propagation *)
+        let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in (* peut lever Conflit_prop *)
         (etat, continue_propagation)
       with  
-        | Empty_clause _ | Conflit_prop _ -> raise Unsat (** Ici : le clause learning détecte que la formule est insatisfiable *)
+        | Empty_clause _ | Conflit_prop _ -> raise Unsat
     else    
       match etat.tranches with
         | [] -> assert false 
         | (first,pari,propagation)::q ->
             begin
               try
-                formule#set_val b v ?cl lvl (* Subtilité de syntaxe : si cl est None, l'argument est omis sinon il est passé *) (***)
+                formule#set_val b v ?cl lvl (* Subtilité de syntaxe : si cl est None, l'argument est omis sinon il est passé *)
               with 
                   Empty_clause c -> 
                     raise (Conflit (c,{ etat with tranches = (first,pari,(b,v)::propagation)::q } ))
             end;
             try 
-              let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in (** pas sur pour les 5 lignes suivantes *)
+              let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in
               let propagation = continue_propagation@propagation in (* on poursuit l'assignation sur la dernière tranche *)
               ({ etat with tranches = (first,pari,propagation)::q }, continue_propagation) 
             with
@@ -99,7 +99,7 @@ struct
               formule#reset_val v;
               aux seen ((b,v)::to_rem) q) in
     match etat.tranches with 
-      | [] -> raise Unsat (********* un des unsat du smt ??? **)
+      | [] -> raise Unsat (** un des unsat du smt *)
       | (first,(b,v),propagation)::q ->
            try
              begin
@@ -108,7 +108,7 @@ struct
                  | (Some l,to_rem,to_keep) ->
                      begin 
                        assert ((c#mem_all (not b) v) && to_keep = []);
-                       Base.set_wls formule c (b,v) l;  (************)
+                       Base.set_wls formule c (b,v) l;
                        (l,{etat with tranches = (first,(b,v),[])::q},to_rem)
                      end
              end
@@ -119,13 +119,12 @@ struct
                      | None -> assert false
                      | Some l -> 
                          begin
-                          Base.set_wls formule c (b,v) l;  (************)
+                          Base.set_wls formule c (b,v) l;
                           (l,{etat with tranches = (first,(b,v),to_keep)::q},to_rem)
                          end
                  end
                  
-  
-  
+ 
   let undo_tranche formule etat = 
     let undo_assignation formule (_,v) = formule#reset_val v in
       match etat.tranches with (* annule la dernière tranche et la fait sauter *)
@@ -133,7 +132,7 @@ struct
         | (first,pari,propagation)::q ->
             List.iter (undo_assignation formule) propagation;
             undo_assignation formule pari;
-            ({ level = etat.level - 1; tranches = q }, pari::(List.rev propagation)) (** plus récent en tête ?*)
+            ({ level = etat.level - 1; tranches = q }, pari::(List.rev propagation))
   
   (*
   undo : 
@@ -151,24 +150,24 @@ struct
         | First -> 
             begin
               match etat.tranches with (* annule la dernière tranche et la fait sauter *)
-                | [] -> raise Unsat (** Ici le non clause learning détecte formule insatisfiable *)
+                | [] -> raise Unsat (** unsat du clause learning *)
                 | (first,pari,propagation)::q ->
                     let (etat,prop) = undo_tranche formule etat in
                     if first then
-                      (neg pari,etat,concat [] (prop::acc)) (***)
+                      (neg pari,etat,concat [] (prop::acc)) 
                     else
-                      aux policy etat (prop::acc) (***)
+                      aux policy etat (prop::acc)
             end
         | Var_depth (k,l) -> 
             if k=0 then
-              (l,etat,concat [] acc) (** Est-ce correct? (j'ai enlevé un prop pas défini)*)
+              (l,etat,concat [] acc) 
             else
               let (etat,prop) = undo_tranche formule etat in
               aux (Var_depth(k-1,l)) etat (prop::acc) (* on n'oublie pas de diminuer le level à chaque fois *) 
         | Clause_depth (k,c) ->                
             if k=0 then
               let (l,etat,prop) = undo_clause formule etat c in
-                (l,etat,concat [] (prop::acc)) (***)
+                (l,etat,concat [] (prop::acc))
             else
               let (etat,prop) = undo_tranche formule etat in
               aux (Clause_depth(k-1,c)) etat (prop::acc) (* on n'oublie pas de diminuer le level à chaque fois *)                      
@@ -186,7 +185,6 @@ struct
     
     let rec process formule etat progress () = (* effectue un pari et propage le plus loin possible *)
       try
-        (*debug#p 2 "Setting %d to %B (level : %d)" v b (etat.level+1);*)
         let (etat,assignations) = progress formule etat in (* fait un pari et propage, lève une exception si conflit créé *) (* true = first *)
         Bet_done (assignations,bet formule etat,backtrack formule etat) (* on essaye de prolonger l'assignation courante avec d'autres paris *)
       with 
@@ -196,8 +194,8 @@ struct
             if interaction && repl#is_ready then
               repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* pas de clause learning *)
-              let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** ICI : Unsat du non cl *)
-              Conflit_dpll (undo_list, process formule etat (continue_bet l pure_prop)) (***) (* on essaye de retourner la plus haute pièce possible *) 
+              let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** Unsat du non cl *)
+              Conflit_dpll (undo_list, process formule etat (continue_bet l pure_prop)) (* on essaye de retourner la plus haute pièce possible *) 
             else (* clause learning *)
               begin
                 stats#start_timer "Clause learning (s)";
@@ -206,7 +204,7 @@ struct
                 stats#stop_timer "Clause learning (s)";
                 debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
                 let (l,etat,undo_list) = undo (Var_depth(etat.level-k,(b,v))) formule etat in (* backtrack non chronologique <--- ici clause learning backtrack *)
-                Conflit_dpll (undo_list,process formule etat (continue_bet l ~cl:c_learnt pure_prop)) (***) (* on poursuit *) (** ICI : Unsat du cl *)
+                Conflit_dpll (undo_list,process formule etat (continue_bet l ~cl:c_learnt pure_prop))(* on poursuit *) (** unsat du cl *)
               end
                 
     and bet formule etat () =
@@ -222,7 +220,7 @@ struct
             debug#p 2 "Next bet : %d %B" v b;
             process formule etat (make_bet lit true pure_prop) () (* on assigne (b,v) et on propage *)
               
-    and backtrack formule etat clause = (***)
+    and backtrack formule etat clause =
       let c = formule#new_clause clause in
       let (l,etat,undo_list) = undo (learn_clause Base.set_wls formule etat c) formule etat in
       (undo_list,process formule etat (continue_bet l ~cl:c pure_prop))
@@ -232,6 +230,6 @@ struct
       let (formule,prop_init) = Base.init n cnf pure_prop in
       let etat = { tranches = []; level = 0 } in
       (prop_init, bet formule etat)
-    with Unsat -> raise Unsat (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *) (***)
+    with Unsat -> raise Unsat (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *)
 
 end
