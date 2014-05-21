@@ -36,6 +36,8 @@ let rec normalize = function
 %left AND
 %nonassoc NOT
 
+%nonassoc UMINUS
+
 %start main             	
 %type <(string*string*int) Formula_tree.formula_tree> main
 
@@ -56,19 +58,23 @@ main:
 | NOT formule                             { Not($2) }			
   ;
   
+int :
+| INT                        { $1 }
+| DIFF INT %prec UMINUS      { - $2 }
+;
 atom:
-| VAR LEQ INT     { normalize (Leq($1,"_phantom",$3)) }
-| VAR GEQ INT     { normalize (Geq($1,"_phantom",$3)) }
-| VAR LT INT      { normalize (Lt($1,"_phantom",$3)) }
-| VAR GT INT      { normalize (Gt($1,"_phantom",$3)) }
-| VAR EQ INT      { normalize (Eq($1,"_phantom",$3)) }
-| VAR NEQ INT     { Not (normalize (Eq($1,"_phantom",$3))) }
+| VAR LEQ int     { normalize (Leq($1,"_phantom",$3)) }
+| VAR GEQ int     { normalize (Geq($1,"_phantom",$3)) }
+| VAR LT int      { normalize (Lt($1,"_phantom",$3)) }
+| VAR GT int      { normalize (Gt($1,"_phantom",$3)) }
+| VAR EQ int      { normalize (Eq($1,"_phantom",$3)) }
+| VAR NEQ int     { Not (normalize (Eq($1,"_phantom",$3))) }
 
-| VAR DIFF VAR LEQ INT     { normalize (Leq($1,$3,$5)) }
-| VAR DIFF VAR GEQ INT     { normalize (Geq($1,$3,$5)) }
-| VAR DIFF VAR LT INT      { normalize (Lt($1,$3,$5)) }
-| VAR DIFF VAR GT INT      { normalize (Gt($1,$3,$5)) }
-| VAR DIFF VAR EQ INT      { normalize (Eq($1,$3,$5)) }
-| VAR DIFF VAR NEQ INT     { Not (normalize (Eq($1,$3,$5))) }
+| VAR DIFF VAR LEQ int     { normalize (Leq($1,$3,$5)) }
+| VAR DIFF VAR GEQ int     { normalize (Geq($1,$3,$5)) }
+| VAR DIFF VAR LT int      { normalize (Lt($1,$3,$5)) }
+| VAR DIFF VAR GT int      { normalize (Gt($1,$3,$5)) }
+| VAR DIFF VAR EQ int      { normalize (Eq($1,$3,$5)) }
+| VAR DIFF VAR NEQ int     { Not (normalize (Eq($1,$3,$5))) }
 
 
