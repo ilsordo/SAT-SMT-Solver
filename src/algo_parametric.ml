@@ -30,7 +30,7 @@ struct
   (** Bet and set *)
 
   (* Parie sur (b,v) puis propage. Pose la dernière tranche qui en résulte, quoiqu'il arrive *)
-  let make_bet (formule:Base.formule) (b,v) first pure_prop etat =
+  let make_bet (b,v) first pure_prop (formule:Base.formule) etat =
     let etat = { etat with level = etat.level + 1 } in
     let lvl = etat.level in 
     begin
@@ -48,7 +48,7 @@ struct
           raise (Conflit (c,{etat with tranches = (first,(b,v),acc)::etat.tranches } ))
 
   (* Compléte la dernière tranche, assigne (b,v) (ce n'est pas un pari) puis propage. c_learnt : clause apprise ayant provoqué le backtrack qui a appelé continue_bet *)
-  let continue_bet (formule:Base.formule) (b,v) ?cl pure_prop etat = (* cl : on sait de quelle clause vient l'assignation de (b,v) *)
+  let continue_bet (b,v) ?cl pure_prop (formule:Base.formule) etat = (* cl : on sait de quelle clause vient l'assignation de (b,v) *)
     let lvl=etat.level in
     if lvl=0 then (* niveau 0 : tout conflit indiquerait que la formule est non sat *)
       try
@@ -168,15 +168,16 @@ struct
     stats#stop_timer "Backtrack (s)";
     res
    
+   
   (** Algo **)
 
   let run (next_pari : Heuristic.t) cl interaction pure_prop n cnf = (* cl : activation du clause learning *)
     let repl = new repl (Some 1) in
     
-    let rec process formule etat ((b,v) as lit) () = (* effectue un pari et propage le plus loin possible *)
+    let rec process progress formule etat () = (* effectue un pari et propage le plus loin possible *)
       try
-        debug#p 2 "Setting %d to %B (level : %d)" v b (etat.level+1);
-        let (etat,assignations) = make_bet formule lit true pure_prop etat in (* fait un pari et propage, lève une exception si conflit créé *) (* true = first *)
+        (*debug#p 2 "Setting %d to %B (level : %d)" v b (etat.level+1);*)
+        let (etat,assignations) = progress formule etat in (* fait un pari et propage, lève une exception si conflit créé *) (* true = first *)
         Bet_done (assignations,bet formule etat,backtrack formule etat) (* on essaye de prolonger l'assignation courante avec d'autres paris *)
       with 
         | Conflit (c,etat) ->
@@ -186,10 +187,7 @@ struct
               repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* pas de clause learning *)
               let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** ICI : Unsat du non cl *)
-              let next () =
-                let (etat,propagation) = continue_bet formule l pure_prop etat in
-                Bet_done (propagation,bet formule etat, backtrack formule etat) in
-              Conflit_dpll (undo_list,next) (***) (* on essaye de retourner la plus haute pièce possible *) 
+              Conflit_dpll (undo_list, process (continue_bet l pure_prop) formule etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
             else (* clause learning *)
               begin
                 stats#start_timer "Clause learning (s)";
@@ -198,10 +196,7 @@ struct
                 stats#stop_timer "Clause learning (s)";
                 debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
                 let (l,etat,undo_list) = undo (Var_depth(etat.level-k,(b,v))) formule etat in (* backtrack non chronologique <--- ici clause learning backtrack *)
-                let next () =
-                  let (etat,propagation) = continue_bet formule l ~cl:c_learnt pure_prop etat in
-                  Bet_done (propagation,bet formule etat, backtrack formule etat) in
-                Conflit_dpll (undo_list,next) (***) (* on poursuit *) (** ICI : Unsat du cl *)
+                Conflit_dpll (undo_list,process (continue_bet l ~cl:c_learnt pure_prop) formule etat) (***) (* on poursuit *) (** ICI : Unsat du cl *)
               end
                 
     and bet formule etat () =
@@ -215,15 +210,12 @@ struct
         | Some ((b,v) as lit) ->  
             stats#record "Paris";
             debug#p 2 "Next bet : %d %B" v b;
-            process formule etat lit ()(* on assigne (b,v) et on propage *)
+            process (make_bet lit true pure_prop) formule etat () (* on assigne (b,v) et on propage *)
               
     and backtrack formule etat clause = (***)
       let c = formule#new_clause clause in
       let (l,etat,undo_list) = undo (learn_clause Base.set_wls formule etat c) formule etat in
-      let next () =
-        let (etat,propagation) = continue_bet formule l ~cl:c pure_prop etat in
-        Bet_done (propagation,bet formule etat, backtrack formule etat) in
-      (undo_list,next)
+      (undo_list,process (continue_bet l ~cl:c pure_prop) formule etat)
         
     in 
     try
@@ -233,15 +225,3 @@ struct
     with Unsat -> raise Unsat (* Le prétraitement à détecté un conflit, _ou_ Clause learning a levé cette erreur car formule unsat *) (***)
 
 end
-
-
-
-
-
-
-
-
-
-
-
-
