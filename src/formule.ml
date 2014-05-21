@@ -40,9 +40,14 @@ object
     hid <- ClauseSet.add c hid 
 
   method remove c = 
-    if not (ClauseSet.mem c vis) then assert false; (** Zone a risque*)
+    (*if not (ClauseSet.mem c vis) then assert false; (** Zone a risque*)
     vis <- ClauseSet.remove c vis;
-    size <- size - 1
+    size <- size - 1*)
+    if (ClauseSet.mem c vis) then
+      begin
+        vis <- ClauseSet.remove c vis;
+        size <- size - 1
+      end
            
   method mem c = ClauseSet.mem c vis (* indique si c est une clause visible *)
 
