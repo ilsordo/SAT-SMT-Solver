@@ -36,7 +36,7 @@ let rec normalize = function
 %left AND
 %nonassoc NOT
 
-%nonassoc UMINUS
+
 
 %start main             	
 %type <(string*string*int) Formula_tree.formula_tree> main
@@ -60,7 +60,7 @@ main:
   
 int :
 | INT                        { $1 }
-| DIFF INT %prec UMINUS      { - $2 }
+| DIFF INT      { - $2 }
 ;
 atom:
 | VAR LEQ int     { normalize (Leq($1,"_phantom",$3)) }

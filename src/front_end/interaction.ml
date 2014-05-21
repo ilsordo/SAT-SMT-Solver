@@ -12,7 +12,7 @@ let print_values p (formule:formule) =
   formule#get_paris#iter (fun v b -> fprintf p "%d -> %B (%d)\n" v b (formule#get_level v)) 
 
 (** Graphe *)
-let print_graph (formule:formule) (first,(***)pari,assignations) level (clause:clause) p =
+let print_graph (formule:formule) (first,pari,assignations) level (clause:clause) p =
   (* Indique si une variable (le literal associé) a été vu et si sa cause a été élucidée ainsi que son nom*)
   let seen = new vartable 0 in
 
@@ -92,7 +92,7 @@ type split_clause = (literal list*literal list*literal)
 
 type proof = Tag of int | Base of split_clause*int | Resol of proof*split_clause*split_clause*int
 
-let print_resolution (formule:formule) (first,(***)pari,assignations) level clause p =
+let print_resolution (formule:formule) (first,pari,assignations) level clause p =
   
   let print_lit p (b,v) =
     if b then

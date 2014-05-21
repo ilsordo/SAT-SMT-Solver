@@ -12,7 +12,6 @@ type formule = formule_dpll
 (* propage en ajoutant à acc les littéraux assignés
    lit est un argument ignoré *)
 let rec constraint_propagation pure_prop (formule:formule) _ etat acc =
-  stats#start_timer "Propagation (s)"; (***)
   let lvl = etat.level in
   let rec propagate acc =
     match formule#find_singleton with 
@@ -42,20 +41,19 @@ let rec constraint_propagation pure_prop (formule:formule) _ etat acc =
             propagate ((b,v)::acc) (* on empile et on poursuit *)
           with
               Empty_clause c -> 
-                stats#stop_timer "Propagation (s)"; 
-                raise (Conflit_prop (c,(b,v)::acc))
-  in
-  let res = propagate acc in
-  stats#stop_timer "Propagation (s)";
-  res
+                raise (Conflit_prop (c,(b,v)::acc)) in
+  propagate acc
+  
      
 let init n cnf pure_prop = 
   let f = new formule_dpll in
   let _ = f#init n cnf in (* forcèment vide *)
-  f#check_empty_clause; (* lève Unsat si il y avait une clause vide dans la formule de départ *)
+  f#check_empty_clause; (* lève Clause_empty si il y avait une clause vide dans la formule de départ *)
   try
     let prop = constraint_propagation pure_prop f (true,0) { tranches = []; level = 0 } [] in (* propagation initiale *)
     (f,prop)
   with Conflit_prop _ -> raise Unsat
 
 let set_wls _ _ _ _ = ()
+
+
