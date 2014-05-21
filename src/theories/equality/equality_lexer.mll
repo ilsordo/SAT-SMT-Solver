@@ -18,7 +18,7 @@ rule token = parse
   | '='                                         { EQ }
   | "!="                                        { NEQ }
 
-  | (['a'-'z']['a'-'z' '1'-'9' '_']* as s)      { VAR s }
+  | (['a'-'z']['a'-'z' '0'-'9' '_']* as s)      { VAR s }
 
   
   | eof                                         { EOF }
