@@ -98,16 +98,10 @@ and ackerize1_list l free ack_assoc ack_arg acc = (* transformer une liste de te
         let (t_ack,free,ack_assoc,ack_arg) = ackerize1_term t free ack_assoc ack_arg in
           ackerize1_list q free ack_assoc ack_arg (t_ack::acc)
                   
-let ackerize1_atom a free ack_assoc ack_arg = (* transformer un atome *)  
-  match a with                
-    | (t1,t2) -> 
-        let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
-        let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
-          ((a_ack1,a_ack2),free,ack_assoc,ack_arg)
-    (*| Ineq (t1,t2) ->
-        let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
-        let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
-          (Eq(a_ack1,a_ack2),free,ack_assoc,ack_arg)*)
+let ackerize1_atom (t1,t2) free ack_assoc ack_arg = (* transformer un atome *)  
+  let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
+  let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
+    ((a_ack1,a_ack2),free,ack_assoc,ack_arg)
           
 let ackerize1 formula = (* transformer une formule, renvoyer aussi ack_assoc et ack_arg (mais pas forcèment nécessaire suivant ce qu'on souhaite print à la fin *)
   let rec aux f free ack_assoc ack_arg = match f with
