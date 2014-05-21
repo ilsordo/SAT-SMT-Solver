@@ -1,7 +1,7 @@
 open Bellman_ford
 open Formula_tree
 
-type atom = string*string*int (* s1 - s2 <= n avec s1 < s2 (comparation sur string) *)
+type atom = string*string*int (* s1 - s2 <= n avec s1 < s2 (comparaison sur string) *)
 
 
 let parse lexbuf =
@@ -20,35 +20,10 @@ module Graph = Bellman_ford.Make (struct type t = string let eq a b = (a = b) le
 
 type etat = Graph.t
 
-
-(** Normalisation *)
-(*
-let rec normalize formula = 
-  let rec normalize_atom = function
-    | Double (s1,s2,o,n) ->
-        begin
-          match o with
-            | Great -> normalize (Atom (Double(s2,s1,Leq,-n-1))) 
-            | Less -> normalize (Atom (Double(s1,s2,Leq,n-1))) 
-            | LEq -> if s2 > s1 then Not (Atom (Double(s2,s1,Leq,n-1))) else Atom (Double(s1,s2,Leq,n))
-            | GEq -> normalize (Atom (Double(s2,s1,Leq,-n)))  
-            | Eq -> And(normalize (Atom (Double(s1,s2,Leq,n))),normalize (Atom (Double(s2,s1,Leq,-n))))
-            | Ineq -> Not(normalize (Atom (Double(s1,s2,Eq,n))))
-        end
-    | Single(s,o,n) -> normalize (Atom (Double(s1,"_zero",o,n))) in (** bien gérer ce _zero après, ne pas l'afficher... *)
-  match formula with
-    | And (f1,f2) -> And (normalize f1,normalize f2)
-    | Or (f1,f2) -> Or (normalize f1,normalize f2)
-    | Imp (f1,f2) -> Imp (normalize f1,normalize f2)
-    | Equ (f1,f2) -> Equ (normalize f1,normalize f2)
-    | Not f -> Not (normalize f)
-    | Atom a -> normalize_atom a
-*)  
-  
 (** Initialisation *)
 
 let init reduc = 
-  reduc#fold (* Atom a avec a normalisé *)
+  reduc#fold
     (fun (s1,s2,n) _ etat ->
        Graph.add_node s2 (Graph.add_node s1 etat))
     Graph.empty
@@ -63,7 +38,7 @@ let propagate_unit (b,v) reduction etat =
         if b then
           Graph.relax_edge s1 s2 n (Graph.add_edge s1 s2 n)
         else
-          Graph.relax_edge s2 s1 (-n-1) (Graph.add_edge s2 s1 (-n-1)) (***)
+          Graph.relax_edge s2 s1 (-n-1) (Graph.add_edge s2 s1 (-n-1))
           
 
 let get_neg_cycle l reduction = 
@@ -103,7 +78,7 @@ let backtrack reduction undo_list etat =
 (** Affichage du résultat *)
 
 let print_answer _ etat _ p = 
-  etat.print_values p etat
+  etat.print_values "_phantom" p etat (* _phantom : variable de normalisation *)
 
   
 let pure_prop = false

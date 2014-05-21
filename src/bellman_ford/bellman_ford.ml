@@ -28,7 +28,7 @@ module Make(X: Equal) = struct
   type t = 
     {
       graph : (int*X.t) list Node.t ; (* voisins de chaque noeud *)
-      values : int Node.t ; (* pi <- notation de [1], pareil dans la suite *)
+      values : int Node.t ; (* pi : reprend la notation de [1], pareil dans la suite *)
       next_values : int Node.t ; (* pi' *)
       estimate : Heap.t ;  (* gamma *)
       estimate_static : int Node.t ; (* gamma avec lecture en O(1) *)
@@ -128,9 +128,9 @@ module Make(X: Equal) = struct
        aux s (insert (k,s,t) acc []) in
    aux u []
 
- let print_values p r =  (** ici : renvoyer les -pi *) 
+ let print_values phantom p r =  (* on renvoie les -pi, saus pour phantom (variable de normalisation utilisée en dehors du module) *) 
    Node.iter 
-     (fun s k -> Printf.fprintf p "%a %d\n" X.print s (-k))
+     (fun s k -> if s = phantom then Printf.fprintf p "%a %d\n" X.print s (-k))
      r.values  
     
 end

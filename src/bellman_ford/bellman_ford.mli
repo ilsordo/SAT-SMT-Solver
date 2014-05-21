@@ -23,6 +23,6 @@ module Make(X: Equal): sig
   
   val neg_cycle : X.t -> t -> (int * X.t * X.t) list
   
-  val print_values : out_channel -> t -> unit
+  val print_values : X.t -> out_channel -> t -> unit
   
 end
