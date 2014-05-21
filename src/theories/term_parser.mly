@@ -1,6 +1,3 @@
-
-%parameter<Base : Formula_tree.Term_base>
-
 %{
   open Formula_tree
 %}
@@ -18,7 +15,7 @@
 
 
 %start main             	
-%type <Base.atom Formula_tree.formula_tree> main
+%type <string Formula_tree.formula_tree> main
 
 %%
 
@@ -29,7 +26,7 @@ main:
 
   formule:	
 | LPAREN formule RPAREN                   { $2 }
-| ATOM                                    { Base.parse_atom $1 }
+| ATOM                                    { Atom $1 }
 | formule AND formule                     { And($1,$3) }	
 | formule OR formule                      { Or($1,$3) }													
 | formule IMP formule                     { Imp($1,$3) }
