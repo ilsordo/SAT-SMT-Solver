@@ -5,7 +5,6 @@ type term = Var of string | Fun of string * (term list)
 
 (*type atom = Eq of term*term | Ineq of term*term*)
 
-type atom = term*term
 
 
 let parse lexbuf =
@@ -94,7 +93,7 @@ let ackerize1_term t free ack_assoc ack_arg = (* transformer un terme *)
               let ack_assoc = Fun_map.add (f,l) s ack_assoc in
               let ack_arg = add_set f l ack_arg in
               let (l_ack,free,ack_assoc,ack_arg) = ackerize1_list l (free+1) ack_assoc ack_arg [] in
-                (Var s(**Fun (s,l_ack)*), free, ack_assoc, ack_arg)
+                (Fun (s,l_ack), free, ack_assoc, ack_arg)
 
 and ackerize1_list l free ack_assoc ack_arg acc = (* transformer une liste de termes *)
   match l with
@@ -103,12 +102,16 @@ and ackerize1_list l free ack_assoc ack_arg acc = (* transformer une liste de te
         let (t_ack,free,ack_assoc,ack_arg) = ackerize1_term t free ack_assoc ack_arg in
           ackerize1_list q free ack_assoc ack_arg (t_ack::acc)
                   
-let ackerize1_atom (t1,t2) free ack_assoc ack_arg = (* transformer un atome *)  
-  let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
-  let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
-  match (a_ack1,a_ack2) with
-    | (Var s1, Var s2) -> ((s1,s2),free,ack_assoc,ack_arg)
-    | _ -> assert false
+let ackerize1_atom a free ack_assoc ack_arg = (* transformer un atome *)  
+  match a with                
+    | (t1,t2) -> 
+        let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
+        let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
+          ((a_ack1,a_ack2),free,ack_assoc,ack_arg)
+    (*| Ineq (t1,t2) ->
+        let (a_ack1,free,ack_assoc,ack_arg) = ackerize1_term t1 free ack_assoc ack_arg in
+        let (a_ack2,free,ack_assoc,ack_arg) = ackerize1_term t2 free ack_assoc ack_arg in
+          (Eq(a_ack1,a_ack2),free,ack_assoc,ack_arg)*)
           
 let ackerize1 formula = (* transformer une formule, renvoyer aussi ack_assoc et ack_arg (mais pas forcèment nécessaire suivant ce qu'on souhaite print à la fin *)
   let rec aux f free ack_assoc ack_arg = match f with
@@ -141,8 +144,8 @@ let ackerize1 formula = (* transformer une formule, renvoyer aussi ack_assoc et 
 
 let get_var t ack_assoc = 
   match t with
-    | Var s -> s (** avant c'était t ici *)
-    | Fun (f,l) -> (**Var*) (Fun_map.find (f,l) ack_assoc)
+    | Var s -> t
+    | Fun (f,l) -> Var (Fun_map.find (f,l) ack_assoc)
 
 let rec flatten_ack l = (* transformer la liste d en conjonction d *)  
   match l with
