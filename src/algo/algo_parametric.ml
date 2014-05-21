@@ -40,11 +40,14 @@ struct
           Empty_clause c -> (* conflit suite à pari *)
             raise (Conflit (c,{etat with tranches = (first,(b,v),[])::etat.tranches } )) (* on prend soin d'empiler la dernière tranche *)
     end;
-    try 
+    try
+      stats#start_timer "Propagation (s)";
       let propagation = Base.constraint_propagation pure_prop formule (b,v) etat [] in (* on propage *)
+      stats#stop_timer "Propagation (s)";
       ({ etat with tranches = (first,(b,v),propagation)::etat.tranches }, propagation@[(b,v)]) (* on renvoie l'état avec les dernières assignations effectuées *)
     with
         Conflit_prop (c,acc) -> (* conflit dans la propagation *)
+          stats#stop_timer "Propagation (s)";
           raise (Conflit (c,{etat with tranches = (first,(b,v),acc)::etat.tranches } ))
 
   (* Compléte la dernière tranche, assigne (b,v) (ce n'est pas un pari) puis propage. c_learnt : clause apprise ayant provoqué le backtrack qui a appelé continue_bet *)
@@ -53,10 +56,14 @@ struct
     if lvl=0 then (* niveau 0 : tout conflit indiquerait que la formule est non sat *)
       try
         formule#set_val b v lvl; (* peut lever Empty_clause *)
+        stats#start_timer "Propagation (s)";
         let continue_propagation = Base.constraint_propagation pure_prop formule (b,v) etat [(b,v)] in (* peut lever Conflit_prop *)
+        stats#stop_timer "Propagation (s)";
         (etat, continue_propagation)
       with  
-        | Empty_clause _ | Conflit_prop _ -> raise Unsat
+        | Empty_clause _ | Conflit_prop _ -> 
+            stats#stop_timer "Propagation (s)";
+            raise Unsat
     else    
       match etat.tranches with
         | [] -> assert false 

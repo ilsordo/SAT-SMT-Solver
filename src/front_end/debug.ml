@@ -86,8 +86,7 @@ object (self)
         let t = (Hashtbl.find timers_temp s) in
           self#record_timer s Unix.(stop.tms_utime +. stop.tms_stime -. t) 
       with
-        | Not_found -> 
-            assert false         
+        | Not_found ->  ()
 end
 
 
