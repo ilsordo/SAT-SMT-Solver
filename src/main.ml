@@ -55,7 +55,7 @@ let main () =
             stats#start_timer "Reduction (s)";
             let (cnf,assoc) = Smt.reduce (Smt.parse input) in
             stats#stop_timer "Reduction (s)";
-            printf "%a %!" Smt.print_answer (run (Smt.algo config.smt_period assoc) (Some assoc) (assoc#max) cnf)
+            printf "%a\n%!" Smt.print_answer (run (Smt.algo config.smt_period assoc) (Some assoc) (assoc#max) cnf)
           with
             | Formula_tree.Illegal_variable_name s ->
                 eprintf "Illegal variable name : %s\n%!" s;
