@@ -94,7 +94,7 @@ Les Braun Trees ne permettent pas d'effectuer l'opération de la ligne 22 (dimin
 Complexité
 ----------
 
-D'après [1] et [2], chaque opération de relaxation se fait en temps O(m + n*log n) lorsque des tas de Fibonnaci sont utilisés. Nous pensons que les Braun Trees conduisent à une complexité en O(m*log m + n*log n).   
+D'après [1] et [2], chaque opération de relaxation se fait en temps O(m + n*log n) lorsque des tas de Fibonnaci sont utilisés. Nous pensons que les Braun Trees conduisent à une complexité en O(m*log m + n*log n).
     
 
 4. Incrémentalité

@@ -3,8 +3,9 @@
 #### Maxime LESOURD
 #### Yassine HAMOUDI
 
-http://nagaaym.github.io/projet2 (non à jour)
+http://nagaaym.github.io/projet2
 
+Dépendance : menhir
 
 ******************************************************************************
 
@@ -20,7 +21,8 @@ http://nagaaym.github.io/projet2 (non à jour)
 10. Heuristiques
 11. Clause learning
 12. Interaction
-13. Performances
+13. Satisfiability Modulo Theories
+14. Performances
 
 ******************************************************************************
 
@@ -50,6 +52,25 @@ Clause Learning
 Pour activer le clause learning, ajouter l'option : 
 
     -cl
+
+Théories
+--------
+
+Utiliser la théorie de la différence sur ex.txt : 
+
+    ./resol -diff ex.txt
+       
+Utiliser la théorie de l'égalité sur ex.txt : 
+
+    ./resol -eq ex.txt
+    
+Utiliser la théorie de la congruence sur ex.txt :
+
+    ./resol -cc ex.txt
+    
+Définir une période de propagation k dans la théorie (théorie de l'égalité par exemple) : 
+
+    ./resol -eq -p k ex.txt 
     
 Tseitin
 -------
@@ -140,17 +161,10 @@ Stocker les résultats d'un algorithme dans un fichier res.txt (n'enregistre ni 
 ================
 
 Principales améliorations depuis le rendu précédant : 
-  - Implémentation du clause learning pour DPLL et WL
-  - Amélioration de l'interaction, avec notamment la possibilité d'afficher le graphe des conflits et la preuve par résolution
-  - Unification des algorithmes DPLL et WL au sein de algo.ml (désormais, à quelques lignes près, seule la propagation de contrainte (cf algo_dpll.ml et algo_wl.ml) diffère entre WL et DPLL)
-  - Maintient en permanence de la taille des set manipulés (la fonction cardinal du module set ne s'exécutait pas en temps constant)
-  - Les parties 1, 11 et 12 du présent README ont été mises à jour. Un fichier EXPERIENCES_2.md a été ajouté dans le dossier performances
-  
-Améliorations futures :
-  - implémentation d'heuristiques de restart (des heuristiques avec période de restart constante, ou basée sur la suite de Luby, ont déjà était testées)
-  - implémentation d'heuristiques de vieillissement de clauses, et de minimisation des clauses apprises
-  - implémentation de l'heuristique de décision VSIDS
-  - implémentation d'une heuristique expérimentale sur WL
+  - Implémentation d'un solveur SMT paramétré DPLL(T)
+  - Implémentation de structures incrémentales d'union-find et de recherche de cycle négatifs dans un graphe (Bellman-Ford)
+  - Implémentation des théories de l'égalité, de la différence et de la congruence
+  - Transformation de Tseitin en SMT
 
 
   
@@ -240,7 +254,7 @@ Une table de hachage permet d'associer des entiers à des chaines de caractères
   
 Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'incrémenter l'entier associé à la chaine s. Si s ne figure pas dans la table de hachage, il y est ajouté et se voit associer la valeur 1.
 
-Quatre statistiques sont actuellement intégrées à notre code : 
+Plusieurs statistiques sont actuellement intégrées à notre code, notamment : 
   * nombre de conflits (provoquant un backtracking)
   * nombre de paris effectués
   * nombre de singletons appris lors du clause learning
@@ -258,12 +272,10 @@ Pour arrêter le timer défini ci-dessus :
 
     stats#stop_timer "Time (s)";
   
-Actuellement, six temps sont enregistrés par défaut : 
+Plusieurs temps d'exécutions sont enregistrés par défaut, notamment : 
   - "Total exécution (s)" : temps total nécessaire à la résolution de la cnf donnée
   - "Reduction (s)" : temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)
   - "Decisions (s)" : temps utilisé par les heuristiques pour décider sur quels littéraux parier
-  - "Propagation (s)" : temps passé à propager des paris
-  - "Backtrack (s)" : temps passé à annuler des paris et les assignations résultantes
   - "Clause learning (s)" : temps nécessaire au calcul des clauses à apprendre (uniquement lorsque clause learning activé)
 
 
@@ -594,7 +606,34 @@ On termine l'exécution sans reprendre la main, en entrant la commande t.
 
 
 
-13. Performances
+13. Satisfiability Modulo Theories
+==================================
+
+DPLL(T)
+-------
+
+L'implémentation du solveur SMT reproduit exactement le schéma DPLL(T). Il correspond à un solveur DPLL paramatré par une théorie T.
+
+L'algorithme peut être découpé en trois grandes parties : 
+
+  - la procédure DPLL : elle correspond à la partie DPLL de l'algorithme. Son implémentation figure dans le dossier algo. Un fichier README joint à ce dossier donne de plus amples informations sur son fonctionnement.
+  - la procédure SMT : elle gère la théorie choisie. Son implémentation figure dans le dossier smt. Un fichier README joint à ce dossier donne de plus amples informations sur son fonctionnement. 
+  - les structures de données propres à chaque théorie. Elles figurent dans le dossier theories.
+  
+Incrémentalité
+--------------
+
+Nous avons été particulièrement attentifs à l'incrémentalité des structures de données liées à chaque théorie. Ces structures sont décrites plus en détail dans des fichiers README figurant dans le dossier theories (sous-dossiers bellman_ford et union_find). Les remarques qui suivent sont communes à l'ensemble des théories implémentées.
+
+Les structures de données ont été conçues à partir de structures habituelles rendues pleinement incrémentales. Par exemple, l'algorithme de Bellman-Ford implémenté ne correspond pas à l'algorithme habituel en O(m*n) mais à un algorithme modifié en O(m*log m + n*log n) qui tire parti de l'incrémentalité.
+
+Aucune des structures de données ne nécessite de sauvegardes au cours du temps pour effectuer le backtrack (notamment la structure d'union-find).
+
+Les explications fournies par les théories ont été rendues aussi courtes que possible. Par exemple, l'algorithme de Bellman-Ford construit un cycle de poids négatif lorsqu'il en existe un. L'union-find fourni le plus petit ensemble d'unions qui ont conduit à une inconsistance.
+
+  
+
+14. Performances
 ================
 
 Une étude des performances des différents algorithmes et heuristiques figure dans le dossier "performances". Consulter le fichier README présent dans ce dossier pour de plus amples informations.
