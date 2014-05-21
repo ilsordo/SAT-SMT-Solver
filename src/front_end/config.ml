@@ -33,7 +33,7 @@ let config =
     nom_heuristic = "next_next";
     clause_learning = false;
     interaction = false;
-    smt_period = 1
+    smt_period = 0
   }
 
 (* Utilise le module Arg pour modifier l'environnement config *)

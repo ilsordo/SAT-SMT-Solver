@@ -1,18 +1,22 @@
 open Bellman_ford
 open Formula_tree
 
-(*
-type atom = Double of string*string*op*int | Single of string*op*int
-*)
-
 type atom = string*string*int (* s1 - s2 <= n avec s1 < s2 (comparation sur string) *)
+
+
+let parse lexbuf =
+  try
+    Difference_parser.main Difference_lexer.token lexbuf
+  with
+    | Failure _ | Difference_parser.Error ->
+        Printf.eprintf "Input error\n%!";
+        exit 1
 
 let parse_atom s =
   let lex = Lexing.from_string s in
   Diff_parser.main Diff_lexer.token lex
-  
 
-module Graph = Bellman_ford.Make(struct type t = string let eq a b = (a = b) let print p k = Printf.fprintf p "%s" k end)
+module Graph = Bellman_ford.Make (struct type t = string let eq a b = (a = b) let print p k = Printf.fprintf p "%s" k end)
 
 type etat = Graph.t
 
