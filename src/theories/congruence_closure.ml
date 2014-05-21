@@ -7,34 +7,17 @@ type term = Congruence_type.t
 include Equality
 
 module Fun_map = Map.Make(struct type t = string * (term list) let compare = compare end) (* associe le string f(x1,...,xn) à f(x1,...,xn) *)
-module Arg_map = Map.Make(struct type t = string let compare = compare end)
-module Arg_set = Set.Make(struct type t = term list let compare = compare end)
+module Arg_map = Map.Make(struct type t = string let compare = compare end) (* va associer à chaque symbole de fonction s l'ensemble des (x1,...xn) tq on ait f(x1,...xn) quelque part *)
+module Arg_set = Set.Make(struct type t = term list let compare = compare end) (* ensemble des (x1...xn) définit ci-dessus *)
 
-(* la congruence closure s'appuie intégralement sur l'égalité.
+(* La congruence closure s'appuie intégralement sur l'égalité.
    Toute formule contenant des symboles des symboles de fonction est transformée en une formule sans symboles de fonctions grâce à la transformation d'Ackermann.
    Le fichier actuel contient l'implémentation de la transformation d'Ackermann.
    
    Quelques références sur cette transformation : 
-    [1] Satisfiability Checking. Equalities and Uninterpreted Functions by Erika Abraham
-    [2] To Ackermann-ize or not to Ackermann_ize ? On Efficiently Handling Uninterpreted Function Symbols in SMT(EUF_UT) (2006) by Roberto Bruttomesso, Alessandro Cimatti, Anders Franzén, Alberto Griggio, Alessandro Santuari, Roberto Sebastiani.
+     [1] Satisfiability Checking. Equalities and Uninterpreted Functions by Erika Abraham
+     [2] To Ackermann-ize or not to Ackermann_ize ? On Efficiently Handling Uninterpreted Function Symbols in SMT(EUF_UT) (2006) by Roberto Bruttomesso, Alessandro Cimatti, Anders Franzén, Alberto Griggio, Alessandro Santuari, Roberto Sebastiani.
     
-*)
-
-(*
-
-                                            map
-    nom de f * arg  (string * (term list)) ----> renommage (string pour Var of string)   :   permet init sans ajout de clauses (1ère passe
-    
-                              map
-    nom de fonction (string) ----> set arguments (set of term list) : pour 2ème 
-    
-    2ème passe : maintenant on a la fonction ack, on va ajouter à la formule précédente (qui a été remplacée à la volée) la deuxième partie
-      sur la 2ème map : 
-        pour chaque nom de fonction f
-          pour chaque couple (l1,l2) de term list
-            produire la conjonction grâce à ack (préecrite pour propreté)
-            rechercher dans la première map le bind de f l1 et f l2
-            ajouter la clause
 *)
 
 
@@ -48,7 +31,7 @@ let add_set f l ack_arg = (* ajouter l dans le set associé à f *)
       | Not_found -> Arg_set.empty in
   Arg_map.add f (Arg_set.add l set) ack_arg
 
-let rec term_to_string t = match t with (************ A ENLEVER, ou pas *)
+let rec term_to_string t = match t with
   | Var s -> s
   | Fun(f,l) -> 
       begin

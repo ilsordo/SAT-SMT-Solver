@@ -64,14 +64,17 @@ module Make(X: Equal) = struct
     
   let init_relaxation u v d r = (* initialisation de gamma *)
     let update = (Node.find u r.values) + d - (Node.find v r.values) in
-      let next_values = r.values in
-      let explain = if update < 0 then Node.add v (d,u) Node.empty else (*r.explain*) Node.empty in
-      let estimate = if update < 0 then Heap.insert (update,v) Heap.empty else Heap.empty in
-      let estimate_static = 
-        Node.fold (* update sur autre que v, pas ajouté au heap car = 0 *)
-          (fun s _ estimate_static -> if s <> v then (Node.add s 0 estimate_static) else estimate_static)
-          r.values (Node.add v update Node.empty) in
-    { r with estimate = estimate ; estimate_static = estimate_static ; explain = explain ; next_values = next_values }
+      if u = v && update < 0 then (* arête u u avec poids négatif *)
+        raise (Neg_cycle (u,{r with explain = Node.add v (d,u) Node.empty}))
+      else
+        let next_values = r.values in
+        let explain = if update < 0 then Node.add v (d,u) Node.empty else (*r.explain*) Node.empty in
+        let estimate = if update < 0 then Heap.insert (update,v) Heap.empty else Heap.empty in
+        let estimate_static = 
+          Node.fold (* update sur autre que v, pas ajouté au heap car = 0 *)
+            (fun s _ estimate_static -> if s <> v then (Node.add s 0 estimate_static) else estimate_static)
+            r.values (Node.add v update Node.empty) in
+        { r with estimate = estimate ; estimate_static = estimate_static ; explain = explain ; next_values = next_values }
     
     
   let relax_adjacent s u r = (* relaxer les arêtes partant de s, suite à extraction de u du heap *)   
@@ -103,7 +106,8 @@ module Make(X: Equal) = struct
         let ((k,s),estimate) = Heap.extract_min r.estimate in (* raise si heap vide *) 
         if k = Node.find s r.estimate_static then (* c'est ici qu'on nettoie le heap des doublons non maj *)
           begin
-            assert (k < 0 && s <> u); (* on n'insert pas >=0, on détecte u direct, on ne fait que diminuer heap *)
+            assert (k < 0); (* on n'insert pas >=0, on détecte u direct, on ne fait que diminuer heap *)
+            assert (s <> u);
             let next_values = Node.add s ((Node.find s r.values) + k) r.next_values in
             let estimate_static = Node.add s 0 r.estimate_static in
             let r = relax_adjacent s u { r with next_values = next_values; estimate = estimate; estimate_static = estimate_static} in
@@ -129,8 +133,9 @@ module Make(X: Equal) = struct
    aux u []
 
  let print_values phantom p r =  (* on renvoie les -pi, saus pour phantom (variable de normalisation utilisée en dehors du module) *) 
+  let offset = Node.find phantom r.values in
    Node.iter 
-     (fun s k -> if s <> phantom then Printf.fprintf p "%a %d\n" X.print s (-k))
+     (fun s k -> if s <> phantom then Printf.fprintf p "%a %d\n" X.print s (-k+offset))
      r.values  
     
 end
