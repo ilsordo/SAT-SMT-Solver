@@ -1,7 +1,6 @@
 {
-  open Term_parser
+  open Equality_parser
 }
-
 
 
 rule token = parse
@@ -16,7 +15,11 @@ rule token = parse
   | "<=>"				        { EQU }
   | "/\\"					{ AND }
 
-  | ['a'-'z'] atom_sym* as s 	                { Printf.printf "%s parsed\n%!" s;ATOM s }
+  | '='                                         { EQ }
+  | "!="                                        { NEQ }
+
+  | (['a'-'z']['a'-'z' '1'-'9' '_']* as s)      { VAR s }
+
   
   | eof                                         { EOF }
 
