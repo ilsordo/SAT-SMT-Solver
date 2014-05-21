@@ -103,6 +103,7 @@ struct
                  | (Some l,to_rem,to_keep) ->
                      begin 
                        assert ((c#mem_all (not b) v) && to_keep = []);
+                       Base.set_wls formule c (b,v) l;  (************)
                        (l,{etat with tranches = (first,(b,v),[])::q},to_rem)
                      end
              end
@@ -111,7 +112,11 @@ struct
                  begin
                    match seen with
                      | None -> assert false
-                     | Some l -> (l,{etat with tranches = (first,(b,v),to_keep)::q},to_rem)
+                     | Some l -> 
+                         begin
+                          Base.set_wls formule c (b,v) l;  (************)
+                          (l,{etat with tranches = (first,(b,v),to_keep)::q},to_rem)
+                         end
                  end
                  
   
@@ -174,7 +179,7 @@ struct
   let run (next_pari : Heuristic.t) cl interaction pure_prop n cnf = (* cl : activation du clause learning *)
     let repl = new repl (Some 1) in
     
-    let rec process progress formule etat () = (* effectue un pari et propage le plus loin possible *)
+    let rec process formule etat progress () = (* effectue un pari et propage le plus loin possible *)
       try
         (*debug#p 2 "Setting %d to %B (level : %d)" v b (etat.level+1);*)
         let (etat,assignations) = progress formule etat in (* fait un pari et propage, lève une exception si conflit créé *) (* true = first *)
@@ -187,7 +192,7 @@ struct
               repl#start (formule:>Formule.formule) etat c stdout;
             if (not cl) then (* pas de clause learning *)
               let (l, etat,undo_list) = undo First formule etat in (* on fait sauter la tranche, qui contient tous les derniers paris *) (** ICI : Unsat du non cl *)
-              Conflit_dpll (undo_list, process (continue_bet l pure_prop) formule etat) (***) (* on essaye de retourner la plus haute pièce possible *) 
+              Conflit_dpll (undo_list, process formule etat (continue_bet l pure_prop)) (***) (* on essaye de retourner la plus haute pièce possible *) 
             else (* clause learning *)
               begin
                 stats#start_timer "Clause learning (s)";
@@ -196,7 +201,7 @@ struct
                 stats#stop_timer "Clause learning (s)";
                 debug#p 2 "Reaching level %d to set %B %d (origin : learnt clause %d)" k b v c_learnt#get_id;
                 let (l,etat,undo_list) = undo (Var_depth(etat.level-k,(b,v))) formule etat in (* backtrack non chronologique <--- ici clause learning backtrack *)
-                Conflit_dpll (undo_list,process (continue_bet l ~cl:c_learnt pure_prop) formule etat) (***) (* on poursuit *) (** ICI : Unsat du cl *)
+                Conflit_dpll (undo_list,process formule etat (continue_bet l ~cl:c_learnt pure_prop)) (***) (* on poursuit *) (** ICI : Unsat du cl *)
               end
                 
     and bet formule etat () =
@@ -210,12 +215,12 @@ struct
         | Some ((b,v) as lit) ->  
             stats#record "Paris";
             debug#p 2 "Next bet : %d %B" v b;
-            process (make_bet lit true pure_prop) formule etat () (* on assigne (b,v) et on propage *)
+            process formule etat (make_bet lit true pure_prop) () (* on assigne (b,v) et on propage *)
               
     and backtrack formule etat clause = (***)
       let c = formule#new_clause clause in
       let (l,etat,undo_list) = undo (learn_clause Base.set_wls formule etat c) formule etat in
-      (undo_list,process (continue_bet l ~cl:c pure_prop) formule etat)
+      (undo_list,process formule etat (continue_bet l ~cl:c pure_prop))
         
     in 
     try
