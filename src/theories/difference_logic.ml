@@ -11,7 +11,7 @@ let print_atom p (s1,s2,n) = Printf.fprintf p "%s - %s <= %d" s1 s2 n
 let parse lexbuf =
   try
     let raw = Difference_parser.main Difference_lexer.token lexbuf in
-    print_formule print_atom stdout;
+    print_formule print_atom stdout raw;
     raw
   with
     | Failure _ | Difference_parser.Error ->
