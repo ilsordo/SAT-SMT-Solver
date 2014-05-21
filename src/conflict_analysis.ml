@@ -37,7 +37,6 @@ let learn_clause set_wls formule etat c =
     | Top_level_crowded (l1,l2,lvl_max) ->
         formule#add_clause c;
         debug#p 2 "crow : %b %d %b %d" (fst l1) (snd l1) (fst l2) (snd l2);
-        (*set_wls formule c l1 l2;*) (** est-ce correct ? maintenant on le fait dans undo_clause *)
         Clause_depth (etat.level-lvl_max,c) (* on bckt au niveau lvl_max, on analyse la clause pour défaire partiellement ce niveau *)
     | Top_level_singleton (l1,lvl_max,l2,lvl_next) -> 
         formule#add_clause c;
