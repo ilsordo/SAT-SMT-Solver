@@ -28,13 +28,6 @@ type etat =
 
 (*
 
-notes persos
-
-    pour l'instant : on oublie l'affichage final qu devra distinguer les termes des sous termes / égalités ajoutées
-    si travail avec type atom normalisé on peut déléguer fonctions à equality.ml avec etat = { redu... sub_etat}    
-
-    attention au rev sur les listes d'args
-
                                             map
     nom de f * arg  (string * (term list)) ----> renommage (string pour Var of string)   :   permet init sans ajout de clauses (1ère passe
     
@@ -180,8 +173,8 @@ let ackerize2_pair f l1 l2 ack_assoc ack_arg =
   else
     Or(Not(flatten_ack (aux l1 l2 [](**???*))),Atom (s2,s1))
     
-let ackerize2 ack_assoc ack_arg =
-  flatten_ack 
+let ackerize2 ack_assoc ack_arg f_ack1 =
+  match
     (Arg_map.fold
        (fun f list_set l ->
           Arg_set.fold
@@ -195,14 +188,15 @@ let ackerize2 ack_assoc ack_arg =
                  list_set l)
             list_set l)
        ack_arg [])
-
+  with
+    | [] -> f_ack1
+    | l -> And(f_ack1,flatten_ack l)
 
 (** Transformation de Ackermann (ouf !) *)
 
 let ackerize (formula : (t*t) formula_tree) = 
   let (f_ack1,ack_assoc,ack_arg) = ackerize1 formula in
-  let f_ack2 = ackerize2 ack_assoc ack_arg in (* une formule sans aucun Fun !!! *)
-    (*( *)And(f_ack1,f_ack2)(*,ack_assoc,ack_arg)*)
+  ackerize2 ack_assoc ack_arg f_ack1 (* une formule sans aucun Fun !!! *)
     
     
 let parse lexbuf =
