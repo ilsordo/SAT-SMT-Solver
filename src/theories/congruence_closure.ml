@@ -6,7 +6,7 @@ type term = Congruence_type.t
 
 include Equality
 
-module Fun_map = Map.Make(struct type t = string * (term list) let compare = compare end)
+module Fun_map = Map.Make(struct type t = string * (term list) let compare = compare end) (* associe le string f(x1,...,xn) à f(x1,...,xn) *)
 module Arg_map = Map.Make(struct type t = string let compare = compare end)
 module Arg_set = Set.Make(struct type t = term list let compare = compare end)
 

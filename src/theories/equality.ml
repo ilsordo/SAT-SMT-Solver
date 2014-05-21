@@ -3,10 +3,6 @@ open Formula_tree
 open Clause
 open Debug
 
-(*
-type atom = Eq of string*string | Ineq of string*string
-*)
-
 type atom = string*string
   
 module UF = Union_find.Make(struct type t = string let eq a b = (a = b) end)
@@ -20,21 +16,6 @@ type etat =
   }
 
 exception Conflit_smt of (literal list*etat)
-
-(** Normalisation *)
-(*
-let rec normalize formula = 
-  let rec normalize_atom (Atom a) = match a with
-    | Eq (s1,s2) -> if s1 < s2 then Atom a else Atom (Eq (s2,s1))
-    | Ineq (s1,s2) -> Not(normalize (Atome (Eq (s1,s2)))) in
-  match formula with
-    | And (f1,f2) -> And (normalize f1,normalize f2)
-    | Or (f1,f2) -> Or (normalize f1,normalize f2)
-    | Imp (f1,f2) -> Imp (normalize f1,normalize f2)
-    | Equ (f1,f2) -> Equ (normalize f1,normalize f2)
-    | Not f -> Not (normalize f)
-    | Atom a -> normalize_atom (Atom a) 
-*)  
 
 let parse lexbuf =
   try
