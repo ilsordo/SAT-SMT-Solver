@@ -39,8 +39,8 @@ object
     if (ClauseSet.mem c vis) || (ClauseSet.mem c hid) then assert false; (** Zone a risque*)
     hid <- ClauseSet.add c hid 
 
-  method remove c = 
-    (*if not (ClauseSet.mem c vis) then assert false; (** Zone a risque*)
+  method remove c =  (** Zone a risque*)
+    (*if not (ClauseSet.mem c vis) then assert false; 
     vis <- ClauseSet.remove c vis;
     size <- size - 1*)
     if (ClauseSet.mem c vis) then
