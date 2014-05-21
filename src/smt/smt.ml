@@ -5,6 +5,7 @@ open Smt_base
 open Algo_base
 open Reduction
 open Answer
+open Formule
 
 module Make_smt = functor(Dpll : Algo_parametric) -> functor (Smt : Smt_base) ->
 struct
@@ -64,7 +65,7 @@ struct
       aux reduction etat_smt next_bet period 1 []
     with
       | Smt.Conflit_smt _ 
-      | Unsat -> Unsolvable
+      | Unsat | Empty_clause _-> Unsolvable
 
   let print_answer p = function
     | Unsolvable -> Printf.fprintf p "s UNSATISFIABLE\n"
