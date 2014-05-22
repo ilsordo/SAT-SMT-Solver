@@ -160,7 +160,7 @@ Stocker les résultats d'un algorithme dans un fichier res.txt (n'enregistre ni 
 2. Améliorations
 ================
 
-Principales améliorations depuis le rendu précédant : 
+Principales améliorations depuis le rendu précédent : 
   - Implémentation d'un solveur SMT paramétré DPLL(T)
   - Implémentation de structures incrémentales d'union-find et de recherche de cycle négatifs dans un graphe (Bellman-Ford)
   - Implémentation des théories de l'égalité, de la différence et de la congruence
