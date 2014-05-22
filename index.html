@@ -1,47 +1,52 @@
 <!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <title>Projet2 by nagaaym</title>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Projet2 : " />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Projet2</title>
   </head>
 
   <body>
-    <div id="container">
-      <div class="inner">
 
-        <header>
-          <h1>Projet2</h1>
-          <h2></h2>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/nagaaym/projet2">View on GitHub</a>
+
+          <h1 id="project_title">Projet2</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/nagaaym/projet2/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/nagaaym/projet2/tarball/master">Download this project as a tar.gz file</a>
+            </section>
         </header>
+    </div>
 
-        <section id="downloads" class="clearfix">
-          <a href="https://github.com/nagaaym/projet2/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/nagaaym/projet2/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-          <a href="https://github.com/nagaaym/projet2" id="view-on-github" class="button"><span>View on GitHub</span></a>
-        </section>
-
-        <hr>
-
-        <section id="main_content">
-          <h1>
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
 <a name="projet-2--rendu-2" class="anchor" href="#projet-2--rendu-2"><span class="octicon octicon-link"></span></a>PROJET 2 : Rendu 2</h1>
 
 <h4>
-<a name="maxime-lesourd" class="anchor" href="#maxime-lesourd"><span class="octicon octicon-link"></span></a> Maxime LESOURD</h4>
+<a name="maxime-lesourd" class="anchor" href="#maxime-lesourd"><span class="octicon octicon-link"></span></a>Maxime LESOURD</h4>
 
 <h4>
-<a name="yassine-hamoudi" class="anchor" href="#yassine-hamoudi"><span class="octicon octicon-link"></span></a> Yassine HAMOUDI</h4>
+<a name="yassine-hamoudi" class="anchor" href="#yassine-hamoudi"><span class="octicon octicon-link"></span></a>Yassine HAMOUDI</h4>
+
+<p><a href="http://nagaaym.github.io/projet2">http://nagaaym.github.io/projet2</a></p>
+
+<p>Dépendance : menhir</p>
 
 <hr><ol>
 <li>Compilation et exécution</li>
+<li>Améliorations</li>
 <li>Suivi de l'algorithme et debuggage</li>
 <li>Générateur</li>
 <li>Structures de données</li>
@@ -50,6 +55,9 @@
 <li>Algorithme Tseitin</li>
 <li>Algorithme Colorie</li>
 <li>Heuristiques</li>
+<li>Clause learning</li>
+<li>Interaction</li>
+<li>Satisfiability Modulo Theories</li>
 <li>Performances</li>
 </ol><hr><h1>
 <a name="1-compilation-et-ex%C3%A9cution" class="anchor" href="#1-compilation-et-ex%C3%A9cution"><span class="octicon octicon-link"></span></a>1. Compilation et exécution</h1>
@@ -73,6 +81,37 @@
 </code></pre>
 
 <h2>
+<a name="clause-learning" class="anchor" href="#clause-learning"><span class="octicon octicon-link"></span></a>Clause Learning</h2>
+
+<p>Pour activer le clause learning, ajouter l'option : </p>
+
+<pre><code>-cl
+</code></pre>
+
+<h2>
+<a name="th%C3%A9ories" class="anchor" href="#th%C3%A9ories"><span class="octicon octicon-link"></span></a>Théories</h2>
+
+<p>Utiliser la théorie de la différence sur ex.txt : </p>
+
+<pre><code>./resol -diff ex.txt
+</code></pre>
+
+<p>Utiliser la théorie de l'égalité sur ex.txt : </p>
+
+<pre><code>./resol -eq ex.txt
+</code></pre>
+
+<p>Utiliser la théorie de la congruence sur ex.txt :</p>
+
+<pre><code>./resol -cc ex.txt
+</code></pre>
+
+<p>Définir une période de propagation k dans la théorie (théorie de l'égalité par exemple) : </p>
+
+<pre><code>./resol -eq -p k ex.txt 
+</code></pre>
+
+<h2>
 <a name="tseitin" class="anchor" href="#tseitin"><span class="octicon octicon-link"></span></a>Tseitin</h2>
 
 <p>Résoudre la formule propositionnelle contenue dans le fichier ex.txt : </p>
@@ -87,6 +126,16 @@
 
 <pre><code>./colorie k ex.col 
 </code></pre>
+
+<h2>
+<a name="interaction" class="anchor" href="#interaction"><span class="octicon octicon-link"></span></a>Interaction</h2>
+
+<p>Pour activer le mode interactif, ajouter l'option : </p>
+
+<pre><code>-i
+</code></pre>
+
+<p>Se référer à la partie 12 pour une documentation plus détaillée du mode interactif</p>
 
 <h2>
 <a name="g%C3%A9n%C3%A9rateur" class="anchor" href="#g%C3%A9n%C3%A9rateur"><span class="octicon octicon-link"></span></a>Générateur</h2>
@@ -113,7 +162,7 @@
 
 <p>Résoudre l'entrée générée à la volée : </p>
 
-<pre><code>./gen -color n p |./colorie k
+<pre><code>./gen -color n p | ./colorie k
 </code></pre>
 
 <h2>
@@ -162,7 +211,17 @@
 </code></pre>
 
 <h1>
-<a name="2-g%C3%A9n%C3%A9rateur" class="anchor" href="#2-g%C3%A9n%C3%A9rateur"><span class="octicon octicon-link"></span></a>2. Générateur</h1>
+<a name="2-am%C3%A9liorations" class="anchor" href="#2-am%C3%A9liorations"><span class="octicon octicon-link"></span></a>2. Améliorations</h1>
+
+<p>Principales améliorations depuis le rendu précédant : </p>
+
+<ul>
+<li>Implémentation d'un solveur SMT paramétré DPLL(T)</li>
+<li>Implémentation de structures incrémentales d'union-find et de recherche de cycle négatifs dans un graphe (Bellman-Ford)</li>
+<li>Implémentation des théories de l'égalité, de la différence et de la congruence</li>
+<li>Transformation de Tseitin en SMT</li>
+</ul><h1>
+<a name="3-g%C3%A9n%C3%A9rateur" class="anchor" href="#3-g%C3%A9n%C3%A9rateur"><span class="octicon octicon-link"></span></a>3. Générateur</h1>
 
 <p>Le générateur permet d'obtenir des cnf, des formules propositionnelles et des graphes. Les méthodes de génération aléatoire utilisées sont décrites ci-dessous : </p>
 
@@ -200,7 +259,7 @@ Il produit un graphe à n sommets pour lequel chaque arête a une probabilité d
 <p><em>Remarque</em> : le graphe généré ne respecte pas pleinement le format DIMACS. En effet, la ligne "p edge v e" contient systématiquement la valeur 1 pour e (nombre d'arêtes du graphe). En effet, il n'est pas possible de connaitre le nombre d'arêtes que comportera un graphe généré avant d'avoir choisi (aléatoirement) l'ensemble de ses arêtes. Or, il n'est pas judicieux de stocker au cours de la génération l'ensemble des arêtes (afin de les compter à posteriori) puisque ceci ralentirait le temps d'exécution et occuperait trop d'espace mémoire. Les algorithmes que nous utilisons n'utilisent pas la valeur e figurant dans la ligne "p edge v e", nous avons donc fait le choix d'indiquer systématiquement e=1.</p>
 
 <h1>
-<a name="3-suivi-de-lalgorithme-et-debuggage" class="anchor" href="#3-suivi-de-lalgorithme-et-debuggage"><span class="octicon octicon-link"></span></a>3. Suivi de l'algorithme et debuggage</h1>
+<a name="4-suivi-de-lalgorithme-et-debuggage" class="anchor" href="#4-suivi-de-lalgorithme-et-debuggage"><span class="octicon octicon-link"></span></a>4. Suivi de l'algorithme et debuggage</h1>
 
 <p>L'ensemble des outils de debuggage et de suivi des exécutions figure dans le fichier debug.ml. Une brève description est fournie ci-dessous.</p>
 
@@ -248,13 +307,15 @@ L'entier 2 indique la profondeur de debuggage. Plus la profondeur est élevée, 
 <pre><code>stats#record s;
 </code></pre>
 
-<p>Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'incrémenter l'entier associé au à la chaine s. Si s ne figure pas dans la table de hachage, il y est ajouté et se voit associer la valeur 1.</p>
+<p>Cette ligne a pour conséquence, chaque fois qu'elle est rencontrée, d'incrémenter l'entier associé à la chaine s. Si s ne figure pas dans la table de hachage, il y est ajouté et se voit associer la valeur 1.</p>
 
-<p>Deux statistiques sont actuellement intégrées à notre code : </p>
+<p>Plusieurs statistiques sont actuellement intégrées à notre code, notamment : </p>
 
 <ul>
 <li>nombre de conflits (provoquant un backtracking)</li>
 <li>nombre de paris effectués</li>
+<li>nombre de singletons appris lors du clause learning</li>
+<li>nombre de clauses (non singletons) apprises lors du clause learning</li>
 </ul><h2>
 <a name="timers" class="anchor" href="#timers"><span class="octicon octicon-link"></span></a>Timers</h2>
 
@@ -269,14 +330,15 @@ Un nouveau timer peut être défini et démarré de la façon suivante (au sein 
 <pre><code>stats#stop_timer "Time (s)";
 </code></pre>
 
-<p>Actuellement, trois temps sont enregistrés par défaut : </p>
+<p>Plusieurs temps d'exécutions sont enregistrés par défaut, notamment : </p>
 
 <ul>
-<li>"Time (s)" : le temps utilisé pour résoudre la cnf donnée</li>
-<li>"Reduction (s)" : le temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)</li>
-<li>"Decision (heuristic) (s)" : le temps utilisé par les heuristiques pour décider sur quels littéraux parier</li>
+<li>"Total exécution (s)" : temps total nécessaire à la résolution de la cnf donnée</li>
+<li>"Reduction (s)" : temps utilisé pour convertir le problème donné en entrée en une cnf (uniquement pour tseitin et colorie)</li>
+<li>"Decisions (s)" : temps utilisé par les heuristiques pour décider sur quels littéraux parier</li>
+<li>"Clause learning (s)" : temps nécessaire au calcul des clauses à apprendre (uniquement lorsque clause learning activé)</li>
 </ul><h1>
-<a name="4-structures-de-donn%C3%A9es" class="anchor" href="#4-structures-de-donn%C3%A9es"><span class="octicon octicon-link"></span></a>4. Structures de données</h1>
+<a name="5-structures-de-donn%C3%A9es" class="anchor" href="#5-structures-de-donn%C3%A9es"><span class="octicon octicon-link"></span></a>5. Structures de données</h1>
 
 <p>Les structures suivantes sont utilisées par l'algorithme :</p>
 
@@ -312,8 +374,9 @@ Un nouveau timer peut être défini et démarré de la façon suivante (au sein 
 <li>occurences : 2 vartable de clauseset permettant de savoir où apparait chaque variable selon sa positivité.
            Si aucun pari n'est fait sur la variable ils contiennent la liste des clauses visibles où elle apparait.
            Si un pari a été fait ils contiennent la liste de clauses cachées qu'il faudra restaurer en cas de backtrack.</li>
-</ul><p>Les assignations de valeur dans la formule se traduisent en un passage des clauses validées par le littéral dans la partie cachée
-des clauses, une modification des listes d'occurences pour garantir la propriété citée précédemment et une assignation dans les clauses. </p>
+<li>level : une vartable d'entiers indiquant pour chaque variable le niveau auquel elle été assignée</li>
+<li>origin : une vartable de clauses indiquant la clause ayant provoqué l'assignation de la variable, lorsque c'est possible</li>
+</ul><p>Les assignations de valeur dans la formule se traduisent en un passage des clauses validées par le littéral dans la partie cachée des clauses, une modification des listes d'occurences pour garantir la propriété citée précédemment et une assignation dans les clauses. </p>
 
 <h2>
 <a name="formule_wlml" class="anchor" href="#formule_wlml"><span class="octicon octicon-link"></span></a>formule_wl.ml:</h2>
@@ -321,7 +384,7 @@ des clauses, une modification des listes d'occurences pour garantir la propriét
 <ul>
 <li><p>wl_pos et wl_neg : 2 vartable de clauseset permettant de savoir pour chaque littéral dans quelles clauses il apparait.</p></li>
 </ul><h1>
-<a name="5-algorithme-dpll" class="anchor" href="#5-algorithme-dpll"><span class="octicon octicon-link"></span></a>5. Algorithme DPLL</h1>
+<a name="6-algorithme-dpll" class="anchor" href="#6-algorithme-dpll"><span class="octicon octicon-link"></span></a>6. Algorithme DPLL</h1>
 
 <p>L'algorithme DPLL est implémenté comme une alternance de phases de propagation de contraintes et de paris sur des variables libres.</p>
 
@@ -337,7 +400,7 @@ On évite ainsi de parcourir toutes les clauses. </p>
 La première étape de propagation des contraintes n'est jamais annulée (sauf si on ne trouve pas d'assignation) et joue donc le rôle du prétraitement.</p>
 
 <h1>
-<a name="6-algorithme-watched-literals" class="anchor" href="#6-algorithme-watched-literals"><span class="octicon octicon-link"></span></a>6. Algorithme Watched Literals</h1>
+<a name="7-algorithme-watched-literals" class="anchor" href="#7-algorithme-watched-literals"><span class="octicon octicon-link"></span></a>7. Algorithme Watched Literals</h1>
 
 <h2>
 <a name="pr%C3%A9traitement--1" class="anchor" href="#pr%C3%A9traitement--1"><span class="octicon octicon-link"></span></a>Prétraitement :</h2>
@@ -369,7 +432,7 @@ Lorsqu'une paire (v1,v2) est surveillée dans une clause c et que l'on vient d'a
 <li>A tout instant, chaque clause connait les 2 littéraux qui la surveillent (accès en temps constant à cette information)</li>
 <li>A tout instant, chaque littéral connait les clauses qu'il surveille</li>
 </ul><h1>
-<a name="7-algorithme-tseitin" class="anchor" href="#7-algorithme-tseitin"><span class="octicon octicon-link"></span></a>7. Algorithme Tseitin</h1>
+<a name="8-algorithme-tseitin" class="anchor" href="#8-algorithme-tseitin"><span class="octicon octicon-link"></span></a>8. Algorithme Tseitin</h1>
 
 <p>L'algorithme Tseitin permet de convertir une formule propositionnelle en une cnf.</p>
 
@@ -388,7 +451,7 @@ Lorsqu'une paire (v1,v2) est surveillée dans une clause c et que l'on vient d'a
 <p>Etant donné une formule propositionnelle p, l'algorithme Tseitin produit une cnf [p] telle que p et [p] sont équisatisfiables. La taille de [p], ainsi que le temps d'exécution de l'algorithme, sont linéaires en la taille de p.</p>
 
 <h1>
-<a name="8-algorithme-colorie" class="anchor" href="#8-algorithme-colorie"><span class="octicon octicon-link"></span></a>8. Algorithme Colorie</h1>
+<a name="9-algorithme-colorie" class="anchor" href="#9-algorithme-colorie"><span class="octicon octicon-link"></span></a>9. Algorithme Colorie</h1>
 
 <p>Etant donné un entier k et un graphe G, l'algorithme Colorie indique si G peut-être colorié à l'aide de k couleurs distincts.
 Le dossier src/color contient l'ensemble des outils mis en place à cette fin.</p>
@@ -402,7 +465,7 @@ Le dossier src/color contient l'ensemble des outils mis en place à cette fin.</
 Le temps nécessaire à la production de la cnf est linéaire en la taille de la cnf produite.</p>
 
 <h1>
-<a name="9-heuristiques" class="anchor" href="#9-heuristiques"><span class="octicon octicon-link"></span></a>9. Heuristiques</h1>
+<a name="10-heuristiques" class="anchor" href="#10-heuristiques"><span class="octicon octicon-link"></span></a>10. Heuristiques</h1>
 
 <p>Les heuristiques permettent de déterminer le littéral sur lequel effectuer le prochain pari. Les différentes heuristiques implémentées sont décrites ci-dessous.</p>
 
@@ -411,7 +474,11 @@ Le temps nécessaire à la production de la cnf est linéaire en la taille de la
 
 <p>Etant donnée une variables, ces heuristiques déterminent la polarité à lui joindre (pour obtenir un littéral).</p>
 
-<p>POLARITE_RAND :</p>
+<p>POLARITE_NEXT :</p>
+
+<ul>
+<li>renvoie la polarité true</li>
+</ul><p>POLARITE_RAND :</p>
 
 <ul>
 <li>renvoie une polarité aléatoire (true ou false)</li>
@@ -441,9 +508,10 @@ Le temps nécessaire à la production de la cnf est linéaire en la taille de la
 
 <p>On indique pour chaque heuristique l'argument permettant de l'appeler.</p>
 
-<p>Les 2 catégories d'heuristiques décrites ci-dessus peuvent être combinées pour donner lieu à 6 heuristiques de choix de littéral : </p>
+<p>Les 2 catégories d'heuristiques décrites ci-dessus peuvent être combinées pour donner lieu à 7 heuristiques de choix de littéral : </p>
 
 <ul>
+<li>NEXT + POLARITE_NEXT          (-h next_next)</li>
 <li>NEXT + POLARITE_RAND          (-h next_rand)</li>
 <li>NEXT + POLARITE_MOST_FREQUENT (-h next_mf)</li>
 <li>RAND + POLARITE_RAND          (-h rand_rand)</li>
@@ -467,18 +535,177 @@ Le temps nécessaire à la production de la cnf est linéaire en la taille de la
 <li>attribue à chaque littéral l un score : somme (pour les clauses C contenant l) de (2**-|C|)</li>
 <li>renvoie le littéral avec le plus grand score</li>
 </ul><h1>
-<a name="10-performances" class="anchor" href="#10-performances"><span class="octicon octicon-link"></span></a>10. Performances</h1>
+<a name="11-clause-learning" class="anchor" href="#11-clause-learning"><span class="octicon octicon-link"></span></a>11. Clause learning</h1>
+
+<p>L'implémentation du clause learning a nécessité l'ajout de 4 informations :</p>
+
+<h2>
+<a name="le-niveau-dassignation-de-chaque-variable" class="anchor" href="#le-niveau-dassignation-de-chaque-variable"><span class="octicon octicon-link"></span></a>Le niveau d'assignation de chaque variable</h2>
+
+<p>A chaque variable assignée est associé le niveau auquel a eu lieu l'assignation. Le niveau 0 correspond aux assignations inévitables (propagation initiale, apprentissage de clauses singletons...). Chaque pari, et les assignations qui en découlent, constituent un nouveau niveau. Voir le champ "level" dans l'objet formule (formule.ml).</p>
+
+<h2>
+<a name="les-clauses-%C3%A0-lorigine-des-assignations" class="anchor" href="#les-clauses-%C3%A0-lorigine-des-assignations"><span class="octicon octicon-link"></span></a>Les clauses à l'origine des assignations</h2>
+
+<p>Lorsqu'une clause c contient un seul littéral l non faux (et non assigné), on assigne l et on enregistre c comme étant la clause à l'origine de l'assignation de l. Les littéraux assignés du fait d'un pari ou d'une polarité simple n'ont pas de clause d'origine. Voir le champ "origin" dans l'objet formule (formule.ml).</p>
+
+<h2>
+<a name="la-pile-des-assignations" class="anchor" href="#la-pile-des-assignations"><span class="octicon octicon-link"></span></a>La pile des assignations</h2>
+
+<p>On appelle "tranche" un littéral parié et l'ensemble des littéraux assignés en conséquence. La pile des tranches constitue un historique complet de l'ensemble des assignations effectuées. Elle permet d'effectuer le backtracking. Voir les types "tranche" et "etat" (dans algo_base.ml).</p>
+
+<h2>
+<a name="l%C3%A9tat" class="anchor" href="#l%C3%A9tat"><span class="octicon octicon-link"></span></a>L'état</h2>
+
+<p>L'état regroupe le niveau d'assignation courant et la pile des assignations. Voir le type "etat" (dans algo_base.ml).</p>
+
+<hr><p>L'implémentation de l'algorithme de clause learning prend appui sur les fonctions suivantes (cf algo.ml) : </p>
+
+<ul>
+<li>conflict_analysis : produit la clause à apprendre en cas de conflit et fournit les informations nécessaires au backtrack</li>
+<li>undo : permet de défaire plusieurs niveaux d'assignations</li>
+<li>continue_bet : permet de poursuivre un tranche d'assignations suite à un backtrack non chronologique</li>
+</ul><p>L'ajout de clauses en cours d'exécution n'a pas posé de problèmes particuliers. Nous avons utilisé la méthode add_clause présente dans formule_dpll.ml et formule_wl.ml (héritée de formule.ml) qui était déjà utilisée pour construire la formule de départ. Deux remarques peuvent être faites sur l'ajout de clauses : </p>
+
+<ul>
+<li>lorsqu'un clause singleton doit être apprise, on backtrack jusqu'au niveau 0 afin d'effectuer l'assignation dictée par cette clause puis propager. La clause n'est pas ajoutée.</li>
+<li>dans l'algorithme WL, lorsque l'on doit apprendre un clause c comportant au moins 2 littéraux, on pose les jumelles sur 2 littéraux dont les niveaux d'assignation sont les plus élevés (à noter qu'il existe un unique littéral de plus haut niveau, mais qu'il peut y en avoir plusieurs au 2ème niveau le plus élevé).</li>
+</ul><p>La distinction principale entre DPLL et WL réside dans les fonctions de propagations qui leurs sont propres (voir algo_dpll.ml et algo_wl.ml). Nous sommes parvenus à produire un algorithme générale commun à DPLL et WL, avec ou sans clause learning. Voir la fonction algo figurant dans algo.ml.</p>
+
+<h1>
+<a name="12-interaction" class="anchor" href="#12-interaction"><span class="octicon octicon-link"></span></a>12. Interaction</h1>
+
+<p>Le mode interactif permet de stopper l'algorithme au cours de son exécution et d'obtenir différentes informations sur l'état courant.</p>
+
+<p>Pour activer le mode interactif, ajouter l'option : </p>
+
+<pre><code>-i
+</code></pre>
+
+<h2>
+<a name="options-1" class="anchor" href="#options-1"><span class="octicon octicon-link"></span></a>Options</h2>
+
+<p>L'interaction stoppe l'algorithme à chaque conflit rencontré. Différentes options sont alors proposées à l'utilisateur :</p>
+
+<p>Reprendre l'exécution jusqu'au prochain conflit : </p>
+
+<pre><code>c
+</code></pre>
+
+<p>Reprendre l'exécution et stopper k conflits plus loin : </p>
+
+<pre><code>s k
+</code></pre>
+
+<p>Terminer l'exécution : </p>
+
+<pre><code>t
+</code></pre>
+
+<p>Afficher l'assignation courante des variables (assignation conflictuelle) et les niveaux auquels elles ont été assignées :</p>
+
+<pre><code>v
+</code></pre>
+
+<p>Enregistrer dans le fichier res.dot le graphe des conflits : </p>
+
+<pre><code>g res
+</code></pre>
+
+<p>Enregistrer dans le fichier res.tex la preuve par résolution de la clause à apprendre (clause learning) : </p>
+
+<pre><code>r res
+</code></pre>
+
+<h2>
+<a name="graphe-de-conflits" class="anchor" href="#graphe-de-conflits"><span class="octicon octicon-link"></span></a>Graphe de conflits</h2>
+
+<p>La commande g res permet d'enregistrer dans le fichier res.dot le graphe des conflits. Pour afficher le graphe, entrer la commande : </p>
+
+<pre><code>./print_graph res
+</code></pre>
+
+<p>Légende : </p>
+
+<ul>
+<li>noeuds en gris : littéraux assignés à des niveaux antérieurs au niveau de décision courant</li>
+<li>noeuds en vert : littéral parié au niveau de décision courant</li>
+<li>noeuds en bleu : littéraux assignés au niveau de décision courant</li>
+<li>noeuds en orange : unique littéral de la clause apprise assigné au niveau de décision courant</li>
+<li>noeud vert entouré en orange : littéral parié au niveau de décision courant et unique littéral de la clause apprise assigné au niveau de décision courant</li>
+<li>zone entourée par des pointillées : ensemble des littéraux de la clause à apprendre</li>
+</ul><h2>
+<a name="preuve-par-r%C3%A9solution" class="anchor" href="#preuve-par-r%C3%A9solution"><span class="octicon octicon-link"></span></a>Preuve par résolution</h2>
+
+<p>La commande r res permet d'enregistrer dans le fichier res.tex la preuve par résolution qui détermine la clause à ajouter. Pour afficher la preuve, entrer la commande : </p>
+
+<pre><code>./print_resol res 
+</code></pre>
+
+<h2>
+<a name="exemple" class="anchor" href="#exemple"><span class="octicon octicon-link"></span></a>Exemple</h2>
+
+<p>Nous donnons ci-dessous un exemple d'utilisation du mode interactif. Nous allons utiliser le fichier ex4.cnf présent dans le dossier tests/cnf avec l'algorithme DPLL (heuristique NEXT_NEXT par défaut : parier true sur le littéral de numéro le plus élevé).</p>
+
+<p>On lance l'exécution avec activation du mode interactif : </p>
+
+<p>./resol tests/cnf/ex4.cnf -i</p>
+
+<p>L'exécution se stoppe avec un conflit détecté dans la clause 41 (-7 8 3).</p>
+
+<p>On entre la commande v pour afficher l'assignation courante des variables. On constate que la clause 41 est bien fausse, et que les 3 variables qui la composent ont été assignées au niveau de décision courant (niveau 4).</p>
+
+<p>On enregistre le graphe des conflits correspondants dans le fichier conf.dot en entrant : g conf. On affiche ensuite ce graphe en entrant la commande : ./print_graph conf (dans un terminal à part). On constate que la clause à ajouter est la clause -8 20 2. Le littéral -8 est l'unique littéral de cette clause assigné au niveau de décision courant. Les littéraux 2 et 20 ont été assignés à des niveaux antérieurs. L'option v nous indique que 2 a été assigné au niveau 0 (assignation nécessaire) et 20 au niveau 1.</p>
+
+<p>On reprend l'exécution de l'algorithme en entrant la commande s 4 afin de reprendre la main 4 conflits plus tard.</p>
+
+<p>Un conflit est détecté dans la clause 34 (-20 7 -10).</p>
+
+<p>On enregistre les graphes des conflits dans conf.dot : g conf. Puis on l'affiche : ./print_graph conf. On constate que la clause à ajouter est 20 19 -17. Par ailleurs, cette clause intègre le littéral assigné au niveau courant (-17).</p>
+
+<p>On termine l'exécution sans reprendre la main, en entrant la commande t.</p>
+
+<h1>
+<a name="13-satisfiability-modulo-theories" class="anchor" href="#13-satisfiability-modulo-theories"><span class="octicon octicon-link"></span></a>13. Satisfiability Modulo Theories</h1>
+
+<h2>
+<a name="dpllt" class="anchor" href="#dpllt"><span class="octicon octicon-link"></span></a>DPLL(T)</h2>
+
+<p>L'implémentation du solveur SMT reproduit exactement le schéma DPLL(T). Il correspond à un solveur DPLL paramatré par une théorie T.</p>
+
+<p>L'algorithme peut être découpé en trois grandes parties : </p>
+
+<ul>
+<li>la procédure DPLL : elle correspond à la partie DPLL de l'algorithme. Son implémentation figure dans le dossier algo. Un fichier README joint à ce dossier donne de plus amples informations sur son fonctionnement.</li>
+<li>la procédure SMT : elle gère la théorie choisie. Son implémentation figure dans le dossier smt. Un fichier README joint à ce dossier donne de plus amples informations sur son fonctionnement. </li>
+<li>les structures de données propres à chaque théorie. Elles figurent dans le dossier theories.</li>
+</ul><h2>
+<a name="incr%C3%A9mentalit%C3%A9" class="anchor" href="#incr%C3%A9mentalit%C3%A9"><span class="octicon octicon-link"></span></a>Incrémentalité</h2>
+
+<p>Nous avons été particulièrement attentifs à l'incrémentalité des structures de données liées à chaque théorie. Ces structures sont décrites plus en détail dans des fichiers README figurant dans le dossier theories (sous-dossiers bellman_ford et union_find). Les remarques qui suivent sont communes à l'ensemble des théories implémentées.</p>
+
+<p>Les structures de données ont été conçues à partir de structures habituelles rendues pleinement incrémentales. Par exemple, l'algorithme de Bellman-Ford implémenté ne correspond pas à l'algorithme habituel en O(m*n) mais à un algorithme modifié en O(m*log m + n*log n) qui tire parti de l'incrémentalité.</p>
+
+<p>Aucune des structures de données ne nécessite de sauvegardes au cours du temps pour effectuer le backtrack (notamment la structure d'union-find).</p>
+
+<p>Les explications fournies par les théories ont été rendues aussi courtes que possible. Par exemple, l'algorithme de Bellman-Ford construit un cycle de poids négatif lorsqu'il en existe un. L'union-find fourni le plus petit ensemble d'unions qui ont conduit à une inconsistance.</p>
+
+<h1>
+<a name="14-performances" class="anchor" href="#14-performances"><span class="octicon octicon-link"></span></a>14. Performances</h1>
 
 <p>Une étude des performances des différents algorithmes et heuristiques figure dans le dossier "performances". Consulter le fichier README présent dans ce dossier pour de plus amples informations.</p>
-        </section>
-
-        <footer>
-          Projet2 is maintained by <a href="https://github.com/nagaaym">nagaaym</a><br>
-          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
-        </footer>
-
-        
-      </div>
+      </section>
     </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Projet2 maintained by <a href="https://github.com/nagaaym">nagaaym</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
   </body>
 </html>
