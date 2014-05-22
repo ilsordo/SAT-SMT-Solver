@@ -40,7 +40,7 @@ let learn_clause set_wls formule etat c =
         Clause_depth (etat.level-lvl_max,c) (* on bckt au niveau lvl_max, on analyse la clause pour défaire partiellement ce niveau *)
     | Top_level_singleton (l1,lvl_max,l2,lvl_next) -> 
         formule#add_clause c;
-        set_wls formule c l1 l2; 
+        set_wls formule c l1 l2; (* on pose les jumelles. Pour Top_level_crowded on le fait plus tard, dans algo_parametric, car il faut une analyse plus fine des littéraux *) 
         Var_depth (etat.level-lvl_next,l1) (* on bckt au niveau lvl_next, on assigne l1 *)
     
 (* conflit déclenché en pariant le littéral de haut de tranche, dans la clause c

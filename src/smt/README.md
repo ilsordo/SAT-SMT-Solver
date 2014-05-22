@@ -6,7 +6,7 @@ Un module de type Base_smt décrit une théorie. Il fournit des fonctions pour i
 Smt:
 ====
 
-Le module Smt fournit un foncteur qui étant donné un algorithme construit par Algo_parametric et une théorie les articule en un solveur pour la théorie. Après avoir initialisé le SAT-solveur et les structures de la théorie, il les fait communiquer :
+Le module Smt fournit un foncteur qui, étant donné un algorithme construit par Algo_parametric et une théorie, les articule en un solveur pour la théorie. Après avoir initialisé le SAT-solveur et les structures de la théorie, il les fait communiquer :
 
 - Le SAT-solveur tente de parier sur un litéral selon son heuristique :
   
@@ -16,7 +16,7 @@ Le module Smt fournit un foncteur qui étant donné un algorithme construit par 
 
   - Si un pari est possible il est effectué et DPLL effectue une propagation. Ces assignations sont
     alors enregistrées par la théorie. Périodiquement la théorie vérifie la consistance de l'état courant
-    et peut demander à DPLL d'apprendre une clause et de backtracker. Sinon DPLL peut continuer son 
+    et peut demander à DPLL d'apprendre une clause et de backtracker. Sinon, DPLL peut continuer son 
     exécution.
 
   - Si DPLL rencontre un conflit la théorie enregistre les assignations annulées et l'exécution de DPLL

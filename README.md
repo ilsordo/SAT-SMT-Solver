@@ -612,7 +612,7 @@ On termine l'exécution sans reprendre la main, en entrant la commande t.
 DPLL(T)
 -------
 
-L'implémentation du solveur SMT reproduit exactement le schéma DPLL(T). Il correspond à un solveur DPLL paramatré par une théorie T.
+L'implémentation du solveur SMT reproduit exactement le schéma DPLL(T). Il correspond à un solveur DPLL paramétré par une théorie T.
 
 L'algorithme peut être découpé en trois grandes parties : 
 
