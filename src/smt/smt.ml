@@ -87,7 +87,6 @@ struct
       let (prop_init, next_bet) = Dpll.run heuristic cl interaction Smt.pure_prop reduction#max cnf in (* prop init dans dpll *)
       stats#start_timer "SMT propagate (s)";
       let etat_smt = Smt.propagate reduction prop_init etat_smt in (* propagation dans la théorie *)
-      print_int 77777777777;
       stats#stop_timer "SMT propagate (s)";
       aux reduction etat_smt next_bet period 1 []
     with
