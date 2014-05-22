@@ -84,8 +84,7 @@ struct
       aux reduction etat_smt next_bet period 1 []
     with
       | Smt.Conflit_smt _ 
-      | Unsat | Empty_clause _-> 
-        stats#record "SMT conflicts";
+      (*| Unsat | Empty_clause _*)-> (*************) 
         Unsolvable
 
   let print_answer p = function
