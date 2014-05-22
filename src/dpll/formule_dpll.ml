@@ -74,6 +74,18 @@ object(self)
   method private register_clause c = (* Met c dans les occurences de ses variables *)
     c#get_vpos#iter_all (self#add_occurence c true);
     c#get_vneg#iter_all (self#add_occurence c false);
+    let hide_pos = c#get_vpos#fold_all 
+      (fun v acc -> 
+        match paris#find v with
+          | Some b when not b -> (self#get_occurences occurences_pos v)#hide c ; v::acc
+          | _ -> acc) [] in
+    List.iter (c#hide_var true) hide_pos; 
+    let hide_neg = c#get_vneg#fold_all 
+      (fun v acc -> 
+        match paris#find v with
+          | Some b when b -> (self#get_occurences occurences_neg v)#hide c ; v::acc
+          | _ -> acc) [] in
+    List.iter (c#hide_var false) hide_neg; 
     if c#size = 1 then
       singletons#add c
 
