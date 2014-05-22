@@ -31,3 +31,10 @@ Le module Algo est l'exemple le plus simple de l'utilisation de DPLL(T), il ne f
 relancer DPLL à chaque fois que ce dernier cède le contrôle. Il permet la résolution de SAT ainsi que
 de COLOR après réduction.
 
+Conflict_analysis:
+------------------
+
+Le fichier conflict_analysis contient les fonctions nécessaires au backtrack : 
+  - backtrack_analysis : analyse la structure d'un clause (clause singleton, clause contenant un unique littéral assigné au niveau maximum...)
+  - learn_clause : enregistre la clause donnée en argument et renvoie le type de backtrack à appliquer
+  - conflict_analysis : analyse un conflit (provenant de DPLL) et renvoie  : la clause à ajouter, le littéral de plus niveau et le niveau auquel backtracker
