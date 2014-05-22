@@ -63,15 +63,22 @@ struct
                       stats#start_timer "SMT backtrack (s)";
                       let etat_smt = Smt.backtrack reduction undo_list etat_smt in (* backtrack dans la théorie *)
                       stats#stop_timer "SMT backtrack (s)";
-                      aux reduction etat_smt next_bet period 0 []      
+                      aux reduction etat_smt next_bet period 0 []
               end        
             else
               aux reduction etat_smt next_bet period (date+1) acc
         | Conflit_dpll (undo_list,next_bet) -> (* on suppose ici que dpll a déjà backtracké dans son coin *)
+            let rec update_acc started = function (* Extrait la tête de undo_list (qui n'a pas été enregistrée dans acc) puis la partie de undo_list qui est en tête de acc *)
+              | [], acc -> ([], acc)
+              | undo_list, [] -> (undo_list, [])
+              | (t::undo_list), (t'::acc) when t = t' -> update_acc true (undo_list, acc)
+              | undo_list, acc when started -> (undo_list, acc)
+              | (_::undo_list), acc -> update_acc false (undo_list, acc) in
             stats#start_timer "SMT backtrack (s)";
+            let (undo_list, acc) = update_acc false (undo_list, acc) in
             let etat_smt = Smt.backtrack reduction undo_list etat_smt in (* backtrack dans la théorie *)
             stats#stop_timer "SMT backtrack (s)";
-            aux reduction etat_smt next_bet period 0 []  
+            aux reduction etat_smt next_bet period 0 acc
     in
     
     
