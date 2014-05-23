@@ -88,7 +88,7 @@ struct
       stats#start_timer "SMT propagate (s)";
       let etat_smt = Smt.propagate reduction prop_init etat_smt in (* propagation dans la théorie *)
       stats#stop_timer "SMT propagate (s)";
-      aux reduction etat_smt next_bet period 1 []
+      aux reduction etat_smt next_bet period 0 []
     with
       | Smt.Conflit_smt _ 
       | Empty_clause _-> 
