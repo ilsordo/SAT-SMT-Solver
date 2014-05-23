@@ -1,4 +1,4 @@
-#   PROJET 2 : Rendu 2
+#   PROJET 2
 
 #### Maxime LESOURD
 #### Yassine HAMOUDI
@@ -26,6 +26,11 @@ Dépendance : menhir
 
 ******************************************************************************
 
+
+- [ ] test
+  - [ ] rr
+  - [ ] rr
+- [ ] rr
 
 
 1. Compilation et exécution
